@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote Sensing with Google Earth Engine</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="images/remote-sensing-banner.png" alt="Remote Sensing Course Banner" style="max-width: 100%; height: auto;">
+            
+            <h1 class="course-title">Remote Sensing with Google Earth Engine</h1>
+            
+    
+            
+            <p class="course-description">
+                Remote Sensing is the art of digital image processing. It is not merely a technological endeavor. 
+                It's a harmonious blend of cutting-edge technology and human wisdom, aiming to unravel the 
+                intricate layers of our planet. It promotes a deeper understanding of the Earth's system and 
+                fosters an innovative approach to geographic studies. The confluence of sensors, artificial 
+                intelligence, big data, and human intellect offers a dynamic and flexible framework, making 
+                remote sensing an indispensable tool in modern geography and related fields. This approach 
+                embodies the spirit of integration, innovation, and human-centered discovery, paving the way 
+                for a more informed and sustainable future.
+            </p>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="#schedule">Course Schedule</a></li>
+                <li><a href="#labs">Labs</a></li>
+                <li><a href="modules/index.html">Modules</a></li>
+                <li><a href="#submission">Submission</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <section id="schedule">
+                <h2>Course Schedule</h2>
+                
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Week</th>
+                            <th>Topic</th>
+                            <th>Readings</th>
+                            <th>Labs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Week 0 -->
+                        <tr>
+                            <td><em>0</em></td>
+                            <td>
+                                <p><strong>Welcome to Remote Sensing</strong></p>
+                            </td>
+                            <td>
+                                <p><a href="modules/week-00-welcome/welcome-to-remote-sensing.html">Welcome to Remote Sensing</a></p>
+                                <p><a href="modules/week-00-welcome/earth-engine-api.html">The Earth Engine API</a></p>
+                                <p><a href="modules/week-00-welcome/why-javascript.html">Why JavaScript</a></p>
+                            </td>
+                            <td>
+                                <p><a href="labs/lab-01-getting-started-with-gee.html">Lab 1 - Getting Started with GEE</a></p>
+                                <p><a href="labs/lab-02-hello-landsat.html">Lab 2 - Hello LandSat!</a></p>
+                            </td>
+                        </tr>
+
+                        <!-- Week 1 -->
+                        <tr>
+                            <td><em>1</em></td>
+                            <td>
+                                <p><strong>JavaScript Basics</strong></p>
+                                <p><strong>Additive Color System</strong></p>
+                            </td>
+                            <td>
+                                <p><a href="modules/week-01-javascript/introduction-to-javascript.html">Introduction to JavaScript</a></p>
+                                <p><a href="modules/week-01-javascript/variables.html">Variables</a></p>
+                                <p><a href="modules/week-01-javascript/lists.html">Lists</a></p>
+                                <p><a href="modules/week-01-javascript/objects.html">Objects</a></p>
+                                <p><a href="modules/week-01-javascript/functions.html">Functions</a></p>
+                                <p><a href="modules/week-01-javascript/additive-color-system.html">Introduction to Additive Color System</a></p>
+                            </td>
+                            <td>
+                                <p><a href="labs/lab-03-js-basics.html">Lab 3 - JS Basics</a></p>
+                                <p><a href="labs/lab-04-night-time-lights.html">Lab 4 - Night time Lights</a></p>
+                                <p><a href="labs/lab-05-challenge-refreshers.html">Lab 5 - Challenge Refreshers</a></p>
+                            </td>
+                        </tr>
+
+                        <!-- Week 2 -->
+                        <tr>
+                            <td><em>2</em></td>
+                            <td>
+                                <p><strong>Image Collections</strong></p>
+                                <p><strong>Image Manipulation: Band Arithmetic and Thresholds</strong></p>
+                            </td>
+                            <td>
+                                <p><a href="modules/week-02-images/image-collections.html">Image Collections</a></p>
+                                <p><a href="modules/week-02-images/gee-data-catalogs.html">Google Earth Engine Data Catalogs</a></p>
+                                <p><a href="modules/week-02-images/band-arithmetic.html">Image Manipulation: Band Arithmetic and Thresholds</a></p>
+                                <p><a href="modules/week-02-images/spectral-indices.html">Spectral Indices</a></p>
+                                <p><a href="modules/week-02-images/ndvi.html">NDVI</a></p>
+                            </td>
+                            <td>
+                                <p><a href="labs/lab-06-image-collections.html">Lab 6 - Image Collections / Filtering / Sorting</a></p>
+                                <p><a href="labs/lab-07-challenge-finding-dataset.html">Lab 7 - Challenge - Finding a dataset for your Site</a></p>
+                                <p><a href="labs/lab-08-band-arithmetic-ndvi.html">Lab 8 - Band Arithmetic - NDVI</a></p>
+                                <p><a href="labs/lab-09-thresholds.html">Lab 9 - Thresholds</a></p>
+                                <p><a href="labs/lab-10-challenge-mapping-urban.html">Lab 10 - Challenge - Mapping the Urban Areas</a></p>
+                            </td>
+                        </tr>
+
+                        <!-- Week 3 -->
+                        <tr>
+                            <td><em>3</em></td>
+                            <td>
+                                <p><strong>Land Cover Classes and Supervised Classification</strong></p>
+                                <p><strong>Unsupervised Classification</strong></p>
+                            </td>
+                            <td>
+                                <p><a href="modules/week-03-classification/introduction-to-image-classification.html">Introduction to Image Classification</a></p>
+                                <p><a href="modules/week-03-classification/unsupervised-vs-supervised.html">Unsupervised vs Supervised vs Object Based</a></p>
+                                <p><a href="modules/week-03-classification/land-use-vs-land-cover.html">Land Use Versus Land Cover</a></p>
+                                <p><a href="modules/week-03-classification/history-of-classification.html">History of Image Classification</a></p>
+                                <p><a href="modules/week-03-classification/unsupervised-classification.html">Unsupervised Classification</a></p>
+                            </td>
+                            <td>
+                                <p><a href="labs/lab-11-supervised-classification.html">Lab 11 - Supervised classification</a></p>
+                                <p><a href="labs/lab-12-unsupervised-classification.html">Lab 12 - Unsupervised Classification</a></p>
+                                <p><a href="labs/lab-13-improving-classifications.html">Lab 13 - Improving your Classifications</a></p>
+                            </td>
+                        </tr>
+
+                        <!-- Week 4 -->
+                        <tr>
+                            <td><em>4</em></td>
+                            <td>
+                                <p><strong>Interoperability, Elevation Modeling, Visualizations, and Reducers</strong></p>
+                            </td>
+                            <td>
+                                
+                            </td>
+                            <td>
+                                <p><a href="labs/lab-14-exporting-to-arcgis-pro.html">Lab 14 - Interoperability with GEE - Exporting to ArcGIS Pro</a></p>
+                                <p><a href="labs/lab-15-visualizing-srtm-data.html">Lab 15 - Visualizing SRTM Data</a></p>
+                                <p><a href="labs/lab-16-zonal-stats.html">Lab 16 - Zonal Stats</a></p>
+                            </td>
+                        </tr>
+
+                        <!-- Week 5 -->
+                        <tr>
+                            <td><em>5</em></td>
+                            <td>
+                                <p><strong>Remote Sensing Applications Case Studies</strong></p>
+                            </td>
+                            <td>
+                                <p><a href="modules/week-05-applications/case-studies.html">Remote Sensing Applications Case Studies</a></p>
+                            </td>
+                            <td>
+                                <p><a href="labs/lab-17-health-applications-part-1.html">Lab 17 - Health Applications Part 1 - Preparing Data for Analysis</a></p>
+                                <p><a href="labs/lab-18-health-applications-part-2.html">Lab 18 - Health Applications Part 2</a></p>
+                            </td>
+                        </tr>
+
+                        <!-- Week 6 -->
+                        <tr>
+                            <td><em>6</em></td>
+                            <td>
+                                <p><strong>Engaging with the Public</strong></p>
+                            </td>
+                            <td>
+                                <p><a href="modules/week-06-public-engagement/engaging-public.html">Engaging with the Public</a></p>
+                            </td>
+                            <td>
+                                <p><a href="labs/lab-19-making-gifs-and-videos.html">Lab 19 - Making Gifs and Videos of Environmental Change</a></p>
+                                <p><a href="labs/lab-20-deploying-gee-apps.html">Lab 20 - Design UI/UX and Deploying Google Earth Engine Apps</a></p>
+                            </td>
+                        </tr>
+
+                        <!-- Week 7 -->
+                        <tr>
+                            <td><em>7</em></td>
+                            <td>
+                                <p><strong>RS Application 1 - River Morphology</strong></p>
+                            </td>
+                            <td>
+                                <p><a href="modules/week-11-river-morphology/theory.html">Theory</a></p>
+                                <p><a href="https://github.com/seanyx/RivWidthCloudPaper/blob/master/README.md" target="_blank">RivWidthCloud</a></p>
+                            </td>
+                            <td>
+                                
+                            </td>
+                        </tr>
+
+                        <!-- Week 8 -->
+                        <tr>
+                            <td><em>8</em></td>
+                            <td>
+                                <p><strong>RS Application 2 - Global Snow Observatory</strong></p>
+                            </td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <!-- Week 9 -->
+                        <tr>
+                            <td><em>9</em></td>
+                            <td>
+                                <p><strong>RS Application 3 - Heat Islands</strong></p>
+                            </td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <!-- Week 10 -->
+                        <tr>
+                            <td><em>10</em></td>
+                            <td>
+                                <p><strong>RS Application 4 - Fire</strong></p>
+                            </td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <!-- Week 11 -->
+                        <tr>
+                            <td><em>11</em></td>
+                            <td>
+                                <p><strong>Future Directions in Remote Sensing</strong></p>
+                            </td>
+                            <td>
+                                <p><a href="modules/future-directions/bibliography.html">Bibliography for Future Directions</a></p>
+                            </td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="labs">
+                <h2>All Labs</h2>
+                
+                <div class="module-grid">
+                    <div class="card">
+                        <h3>Getting Started</h3>
+                        <ul>
+                            <li><a href="labs/lab-01-getting-started-with-gee.html">Lab 1 - Getting Started with GEE - Hello World</a></li>
+                            <li><a href="labs/lab-02-hello-landsat.html">Lab 2 - Hello LandSat!</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>JavaScript & Visualization</h3>
+                        <ul>
+                            <li><a href="labs/lab-03-js-basics.html">Lab 3 - JS Basics</a></li>
+                            <li><a href="labs/lab-04-night-time-lights.html">Lab 4 - Night time Lights</a></li>
+                            <li><a href="labs/lab-05-challenge-refreshers.html">Lab 5 - Challenge Refreshers</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>Image Analysis</h3>
+                        <ul>
+                            <li><a href="labs/lab-06-image-collections.html">Lab 6 - Image Collections / Filtering / Sorting</a></li>
+                            <li><a href="labs/lab-07-challenge-finding-dataset.html">Lab 7 - Challenge - Finding a dataset</a></li>
+                            <li><a href="labs/lab-08-band-arithmetic-ndvi.html">Lab 8 - Band Arithmetic - NDVI</a></li>
+                            <li><a href="labs/lab-09-thresholds.html">Lab 9 - Thresholds</a></li>
+                            <li><a href="labs/lab-10-challenge-mapping-urban.html">Lab 10 - Challenge - Mapping Urban Areas</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>Classification</h3>
+                        <ul>
+                            <li><a href="labs/lab-11-supervised-classification.html">Lab 11 - Supervised classification</a></li>
+                            <li><a href="labs/lab-12-unsupervised-classification.html">Lab 12 - Unsupervised Classification</a></li>
+                            <li><a href="labs/lab-13-improving-classifications.html">Lab 13 - Improving your Classifications</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>Advanced Analysis</h3>
+                        <ul>
+                            <li><a href="labs/lab-14-exporting-to-arcgis-pro.html">Lab 14 - Exporting to ArcGIS Pro</a></li>
+                            <li><a href="labs/lab-15-visualizing-srtm-data.html">Lab 15 - Visualizing SRTM Data</a></li>
+                            <li><a href="labs/lab-16-zonal-stats.html">Lab 16 - Zonal Stats</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>Applications & Deployment</h3>
+                        <ul>
+                            <li><a href="labs/lab-17-health-applications-part-1.html">Lab 17 - Health Applications Part 1</a></li>
+                            <li><a href="labs/lab-18-health-applications-part-2.html">Lab 18 - Health Applications Part 2</a></li>
+                            <li><a href="labs/lab-19-making-gifs-and-videos.html">Lab 19 - Making Gifs and Videos</a></li>
+                            <li><a href="labs/lab-20-deploying-gee-apps.html">Lab 20 - Deploying GEE Apps</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="submission">
+                <h2>Assignment Submission</h2>
+                
+                <div class="submission-box">
+                    <h3>How to Submit Your Work</h3>
+                    <p>All lab assignments and projects should be submitted via email to your instructor:</p>
+                    <p class="email-link">
+                        <strong>Email:</strong> <a href="mailto:instructor@university.edu">instructor@university.edu</a>
+                    </p>
+                    <p><strong>Submission Guidelines:</strong></p>
+                    <ul>
+                        <li>Subject line should include: <code>Lab [Number] - [Your Name]</code></li>
+                        <li>For Google Earth Engine scripts, include the shareable link from GEE Code Editor</li>
+                        <li>For written assignments, attach as PDF</li>
+                        <li>Include screenshots demonstrating your work where applicable</li>
+                        <li>Submit before the deadline specified in the course schedule</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+            <p>Digital Image Processing - Environmental Remote Sensing</p>
+            <p>&copy; 2025 | This is a standalone version of the course, free from Learning Management Systems</p>
+        </footer>
+    </div>
+</body>
+</html>

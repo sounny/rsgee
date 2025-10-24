@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1: JavaScript Basics | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#modules">Modules</a> &gt; Week 1
+        </nav>
+
+        <header class="lab-header">
+            <h1>Week 1: JavaScript Basics</h1>
+            <p><em><strong>Learn the fundamental JavaScript concepts needed for Google Earth Engine programming</strong></em></p>
+        </header>
+
+        <main class="lab-content">
+            <section>
+                <h2>Introduction</h2>
+                <p>This module introduces the basic JavaScript concepts you'll need to work effectively in Google Earth Engine. 
+                Don't worry if you've never programmed before - we'll start from the very beginning and build up your skills 
+                gradually.</p>
+            </section>
+
+            <section id="variables">
+                <h2>Variables</h2>
+                <p>In a programming language, variables are used to store data values. In JavaScript, a variable is defined using 
+                the <strong>var</strong> keyword followed by the name of the variable. The code below assigns the text 
+                "Gainesville" to the variable named city.</p>
+
+                <pre><code>var city = 'Gainesville';</code></pre>
+
+                <div class="note">
+                    <p><strong>Note:</strong> Text strings in the code should be surrounded by quotes. You are free to use either 
+                    ' (single quotes) or " (double quotes), and they must match at the beginning and end of each string. In your 
+                    programs, it is advisable to be consistent—use either single quotes or double quotes throughout a given script 
+                    (the code in this book generally uses single quotes for code). Each statement of your script should typically 
+                    end with a semicolon, although Earth Engine's code editor does not require it.</p>
+                </div>
+
+                <p>If you print the variable city, you will get the value stored in the variable (Gainesville) printed in the 
+                Console.</p>
+
+                <pre><code>print(city);</code></pre>
+
+                <p>When you assign a text value, the variable is automatically assigned the type <strong>string</strong>. You can 
+                also assign numbers to variables and create variables of type <strong>number</strong>. The following code creates 
+                a new variable called population and assigns a number as its value.</p>
+
+                <pre><code>var population = 140398;
+print(population);</code></pre>
+
+                <p><strong>Learn more:</strong> <a href="https://www.w3schools.com/js/js_variables.asp" target="_blank">
+                W3Schools JavaScript Variables Tutorial</a></p>
+            </section>
+
+            <section id="lists">
+                <h2>Lists (Arrays)</h2>
+                <p>It is helpful to store multiple values in a single variable. JavaScript provides a data structure called a 
+                list (also known as an array) that can hold multiple values. We can create a new list using the square brackets 
+                [ ] and add multiple values separated by a comma. Try putting this code into your console and running it.</p>
+
+                <pre><code>var cities = ['Gainesville', 'Tampa Bay', 'Orlando', 'Miami'];
+print(cities);</code></pre>
+
+                <p>If you look at the output in the Console, you will see "List" with an expander arrow (▹) next to it. Clicking 
+                on the arrow will expand the list and show you its content. You will notice that along with the four items in the 
+                list, there is a number next to each value. This is the <strong>index</strong> of each item. It allows you to 
+                refer to each item in the list using a numeric value that indicates its position in the list.</p>
+
+                <figure>
+                    <img src="../images/screenshots/Screenshot 2023-02-02 at 9.50.49 AM.png" 
+                         alt="Output from Google Earth Engine after running the script" loading="lazy">
+                    <figcaption>Console output showing a list with index numbers</figcaption>
+                </figure>
+
+                <div class="note">
+                    <p><strong>Important:</strong> In JavaScript (and most programming languages), lists are zero-indexed. This 
+                    means the first item has an index of 0, the second item has an index of 1, and so on.</p>
+                </div>
+            </section>
+
+            <section id="objects">
+                <h2>Objects (Dictionaries)</h2>
+                <p>Objects are another useful data structure in JavaScript. While lists store ordered collections of values, 
+                objects store key-value pairs. This makes them perfect for storing related data with descriptive names.</p>
+
+                <pre><code>var cityInfo = {
+  name: 'Gainesville',
+  population: 140398,
+  state: 'Florida',
+  coordinates: [-82.3248, 29.6516]
+};
+
+print(cityInfo);</code></pre>
+
+                <p>You can access individual properties of an object using dot notation:</p>
+
+                <pre><code>print('City name:', cityInfo.name);
+print('Population:', cityInfo.population);</code></pre>
+
+                <p>Or using bracket notation:</p>
+
+                <pre><code>print('State:', cityInfo['state']);</code></pre>
+
+                <div class="note">
+                    <p><strong>When to use lists vs. objects:</strong></p>
+                    <ul>
+                        <li>Use <strong>lists</strong> when you have an ordered collection of similar items (e.g., a list of 
+                        cities, dates, or numbers)</li>
+                        <li>Use <strong>objects</strong> when you want to store related properties with descriptive names 
+                        (e.g., information about a single city)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="functions">
+                <h2>Functions</h2>
+                <p>Functions are reusable blocks of code that perform specific tasks. They help you organize your code and avoid 
+                repetition. In JavaScript, you can define a function using the <strong>function</strong> keyword:</p>
+
+                <pre><code>function greet(name) {
+  var message = 'Hello, ' + name + '!';
+  return message;
+}
+
+print(greet('Alice'));  // Output: Hello, Alice!
+print(greet('Bob'));    // Output: Hello, Bob!</code></pre>
+
+                <p>Functions can take <strong>parameters</strong> (inputs) and <strong>return</strong> values (outputs). This 
+                makes them incredibly powerful for processing data.</p>
+
+                <h3>Functions in Earth Engine</h3>
+                <p>In Google Earth Engine, you'll often use functions to process images and image collections. For example:</p>
+
+                <pre><code>// Function to calculate NDVI
+function calculateNDVI(image) {
+  var ndvi = image.normalizedDifference(['B8', 'B4']);
+  return ndvi;
+}
+
+// Apply the function to an image
+var ndviImage = calculateNDVI(myImage);</code></pre>
+            </section>
+
+            <section id="comments">
+                <h2>Comments</h2>
+                <p>Comments are essential for making your code readable and maintainable. They allow you to explain what your 
+                code does without affecting how it runs.</p>
+
+                <pre><code>// This is a single-line comment
+
+/*
+  This is a multi-line comment.
+  You can use it to explain more complex code.
+  Everything between the opening and closing markers is a comment.
+*/
+
+var city = 'Gainesville';  // You can also add comments at the end of lines</code></pre>
+
+                <div class="warning">
+                    <p><strong>Best Practice:</strong> Comment your code liberally! Your future self (and your collaborators) 
+                    will thank you. Good comments explain <em>why</em> you're doing something, not just <em>what</em> you're 
+                    doing.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Practice Exercises</h2>
+                <ol>
+                    <li>Create variables for your name, age, and hometown. Print them to the console.</li>
+                    <li>Create a list of your five favorite cities. Print the list and then print just the third city.</li>
+                    <li>Create an object that stores information about yourself (name, major, year, favorite remote sensing 
+                    application).</li>
+                    <li>Write a function that takes two numbers as parameters and returns their sum.</li>
+                    <li>Add comments to explain each section of your code.</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>This Week's Labs</h2>
+                <div class="note">
+                    <ul>
+                        <li><a href="../labs/lab-03-js-basics.html">Lab 3 - JavaScript Basics</a></li>
+                        <li><a href="../labs/lab-04-night-time-lights.html">Lab 4 - Night Time Lights</a></li>
+                        <li><a href="../labs/lab-05-challenge-refreshers.html">Lab 5 - Challenge: Refreshers</a></li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>Additional Resources</h2>
+                <ul>
+                    <li><a href="https://www.w3schools.com/js/" target="_blank">W3Schools JavaScript Tutorial</a></li>
+                    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide" target="_blank">
+                    MDN JavaScript Guide</a></li>
+                    <li><a href="https://developers.google.com/earth-engine/guides/getstarted" target="_blank">
+                    Google Earth Engine JavaScript Guide</a></li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="week00-welcome.html">← Previous Module: Week 0 - Welcome</a> | 
+               <a href="week02-images-and-visualization.html">Next Module: Week 2 - Images and Visualization →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 4 - Night Time Lights | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 4
+        </nav>
+
+        <header class="lab-header">
+            <h1>Lab 4 - Night Time Lights</h1>
+            <p><em><strong>Objective: Use the additive color system with non-optical data to analyze nighttime lights change over time.</strong></em></p>
+        </header>
+
+        <main class="lab-content">
+            <section>
+                <h2>Introduction</h2>
+                <p>
+                    In this lab, we will work towards applying the additive color system to bands that store non-optical 
+                    and more abstract <em>attributes.</em> This is unlike previous labs where the colors on the screen 
+                    represented slices of the electromagnetic spectrum. For this lab, we will look at nighttime lights.
+                </p>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Part 1: Loading Nighttime Lights Data</h2>
+                <p>To begin, add this code to your script and run it:</p>
+                <pre><code>var lights93 = ee.Image('NOAA/DMSP-OLS/NIGHTTIME_LIGHTS/F101993');
+
+print('Nighttime lights', lights93);
+
+Map.addLayer(
+    lights93,
+    {
+        bands: ['stable_lights'],
+        min: 0,
+        max: 63
+    },
+    'Lights');</code></pre>
+
+                <p>The first line of the code calls the NOAA Nighttime Lights Time Series. You can learn more about it here: 
+                <a href="https://developers.google.com/earth-engine/datasets/catalog/NOAA_DMSP-OLS_NIGHTTIME_LIGHTS" target="_blank">
+                https://developers.google.com/earth-engine/datasets/catalog/NOAA_DMSP-OLS_NIGHTTIME_LIGHTS</a></p>
+
+                <p>The second line takes the data and prints it to the console, and this allows you to explore the different 
+                bands available to you. We are interested in Band 1, the stable lights.</p>
+
+                <p>The third section of the code adds the data to the Map and defines the range for the grayscale representation. 
+                The range of values for display (0–63) represents the minimum and maximum pixel values in this image.</p>
+
+                <figure>
+                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.44.42 AM-1.png" alt="Results of nighttime lights code" loading="lazy">
+                    <figcaption>Nighttime lights displayed in the code editor</figcaption>
+                </figure>
+
+                <p>The global nighttime lights image represents the average brightness of nighttime lights at each pixel for a 
+                calendar year. For those of us who have sat by a window in an airplane as it descends to a destination at night, 
+                the scene may look vaguely familiar. But the image is very much an abstraction. It provides us with a view of the 
+                planet that we would never be able to see from an airplane or even from space. Night blankets the entire planet in 
+                darkness. There are no clouds. In the "stable lights" band, there are no ephemeral sources of light. Lightning 
+                strikes, wildfires, and other transient lights have been removed. It is a layer that aims to answer one question 
+                about our planet at one point in time: In 1993, how bright were Earth's stable, artificial sources of light?</p>
+
+                <figure>
+                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.48.43 AM.png" alt="Asia nighttime lights" loading="lazy">
+                    <figcaption>Nighttime lights showing East Asia</figcaption>
+                </figure>
+
+                <p>With the zoom controls on the map, you can zoom out to see the bright spot of Shanghai, the large blob of 
+                Seoul to the north and east, the darkness of North Korea except for the small dot of Pyongyang, and the dense 
+                strips of lights of Japan and the west coast of Taiwan.</p>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Part 2: Creating a Temporal Composite</h2>
+                <p>Now we can use the additive color system to make an RGB composite that compares stable nighttime lights at 
+                three different slices of time. Add the code below to your script and run it.</p>
+
+                <pre><code><strong>var</strong> lights03 = ee.Image('NOAA/DMSP-OLS/NIGHTTIME_LIGHTS/F152003')
+    .select('stable_lights').rename('2003');
+
+<strong>var</strong> lights13 = ee.Image('NOAA/DMSP-OLS/NIGHTTIME_LIGHTS/F182013')
+    .select('stable_lights').rename('2013');
+
+<strong>var</strong> changeImage = lights13.addBands(lights03)
+    .addBands(lights93.select('stable_lights').rename('1993'));
+
+print('change image', changeImage);
+
+Map.addLayer(
+    changeImage,
+    {
+        min: 0,
+        max: 63
+    },
+    'Change composite');</code></pre>
+
+                <p>The code does a few things. First, it creates two new images, each representing a different slice of time. 
+                For both, we use the <code>select</code> method to select a band ("stable_lights") and the <code>rename</code> 
+                method to change the band name to indicate the year it represents.</p>
+
+                <p>Next, the code uses the <code>addBands</code> method to create a new, three-band image that we name 
+                "changeImage". It does this by taking one image (lights13) as the first band, using another image (lights03) 
+                as the second band, and the lights93 image seen earlier as the third band. The third band is given the name 
+                "1993" as it is placed into the image.</p>
+
+                <p>Finally, the code prints metadata to the <strong>Console</strong> and adds the layer to the map as an RGB 
+                composite using <code>Map.addLayer</code>. If you look at the printed metadata, you should see under the label 
+                "change image" that our image is composed of three bands, with each band named after a year. You should also 
+                notice the order of the bands in the image: 2013, 2003, 1993. This order determines the color channels used to 
+                represent each slice of time in the composite: 2013 as red, 2003 as green, and 1993 as blue.</p>
+
+                <figure>
+                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.53.37 AM.png" alt="Change composite results" loading="lazy">
+                    <figcaption>RGB composite showing change over time</figcaption>
+                </figure>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Part 3: Interpreting the Composite</h2>
+                <p>We can now read the colors displayed on the layer to interpret different kinds of changes in nighttime lights 
+                across the planet over two decades. Pixels that appear white have high brightness in all three years. You can use 
+                the <strong>Inspector</strong> panel to confirm this. Click on the <strong>Inspector</strong> panel to change the 
+                cursor to a crosshair, and then click on a pixel that appears white. Look under the <em>Pixel</em> category of 
+                the <strong>Inspector</strong> panel for the "Change composite" layer. The pixel value for each band should be 
+                high (at or near 63).</p>
+
+                <p>Many clumps of white pixels represent urban cores. If you zoom into Shanghai, you will notice that the 
+                periphery of the white-colored core appears yellowish, and the terminal edges appear reddish. Yellow represents 
+                locations that were bright in 2013 and 2003 but dark in 1993. Red represents locations that appear bright in 2013 
+                but dark in 2003 and 1993. If you zoom out, you will see this gradient of white core to yellow periphery to red 
+                edge occurs around many cities across the planet and shows the global pattern of urban sprawl over the 20-year 
+                period.</p>
+
+                <figure>
+                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.55.49 AM.png" alt="Shanghai at night" loading="lazy">
+                    <figcaption>Shanghai showing urban growth patterns</figcaption>
+                </figure>
+
+                <p>When you zoom out from Shanghai, you will likely notice that each map layer redraws every time you change the 
+                zoom level. In order to explore the change composite layer more efficiently, use the <strong>Layer</strong> 
+                manager panel to not show (uncheck) all of the layers except for "Change composite." Now the map will respond 
+                faster when you zoom and pan because it will only refresh the single displayed shown layer.</p>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Part 4: Patterns Beyond Cities</h2>
+                <p>In addition to urban change, the layer also shows changes in resource extraction activities that produce bright 
+                lights. Often, these activities produce lights that are stable over the span of a year (and therefore included in 
+                the "stable lights" band) but are not sustained over the span of a decade or more.</p>
+                
+                <p>For example, in the Korean Strait (between South Korea and Japan), you can see geographic shifts in fishing 
+                fleets that use bright halogen lights to attract squid and other sea creatures toward the water surface and into 
+                their nets. Bluish pixels were likely fished more heavily in 1993 and became used less frequently by 2003, while 
+                greenish pixels were likely fished more heavily in 2003 and less frequently by 2013.</p>
+
+                <figure>
+                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.58.14 AM.png" alt="Korean Strait fishing lights" loading="lazy">
+                    <figcaption>Fishing fleet patterns in the Korean Strait</figcaption>
+                </figure>
+
+                <p>Similarly, fossil fuel extraction produces nighttime lights through gas flaring. If you pan to North America, 
+                red blobs in Alberta and North Dakota and a red swath in southeastern Texas all represent places where oil and 
+                gas extraction were absent in 1993 and 2003 but booming by 2013.</p>
+
+                <figure>
+                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.59.49 AM.png" alt="North American gas flaring" loading="lazy">
+                    <figcaption>Gas flaring in North American oil fields</figcaption>
+                </figure>
+
+                <p>As you explore this image, remember to check your interpretations with the <strong>Inspector</strong> panel by 
+                clicking on a pixel and reading the pixel value for each band. Refer back to the additive color figure to remember 
+                how the color system works. If you practice this, you should be able to read any RGB composite by knowing how 
+                colors relate to the relative pixel value of each band.</p>
+            </section>
+
+            <section id="submission">
+                <div class="submission-box">
+                    <h3>📧 Lab Submission</h3>
+                    <p><strong>Email to:</strong> <a href="mailto:instructor@university.edu">instructor@university.edu</a></p>
+                    <p><strong>Subject:</strong> <code>Lab 4 - Night Time Lights - [Your Name]</code></p>
+                    
+                    <h4>Submit the following in a Word document:</h4>
+                    <ol>
+                        <li><strong>URL of your Code</strong> (10 points)</li>
+                        <li><strong>Damascus vs. Amman:</strong> Compare and contrast the changes in nighttime lights around 
+                        Damascus, Syria, versus Amman, Jordan. How are the colors for the two cities similar and different? 
+                        How do you interpret the differences? Include screenshot. (10 Points)</li>
+                        <li><strong>Port Harcourt, Nigeria:</strong> Look at the changes in nighttime lights in the region of 
+                        Port Harcourt, Nigeria. What kinds of changes do you think these colors signify? What clues in the 
+                        satellite basemap can you see to confirm your interpretation? Include screenshot. (10 Points)</li>
+                        <li><strong>Band Order:</strong> In the nighttime lights change composite, we did not specify the three 
+                        bands to use for our RGB composite. How do you think Earth Engine chose the three bands to display? How 
+                        do you think Earth Engine determined which band should be shown with the red, green, and blue channels? 
+                        (10 Points)</li>
+                        <li><strong>Your Discovery:</strong> Find an area of the world with an interesting nighttime lights story. 
+                        Explore the data and see what you can find. Showcase it with a screenshot and explanation of why we are 
+                        seeing what we see in the composite. (10 Points)</li>
+                    </ol>
+                    <p><strong>Total: 50 Points</strong></p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="lab-03-js-basics.html">← Previous Lab</a> | <a href="lab-05-challenge-refreshers.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
+        </footer>
+    </div>
+</body>
+</html>

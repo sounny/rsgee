@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 10 - Challenge: Mapping Urban Areas | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 10
+        </nav>
+        <header class="lab-header">
+            <h1>Lab 10 - Challenge: Mapping Urban Areas</h1>
+            <p><em><strong>Objective: Use the Normalized Difference Built-Up Index (NDBI) to map urban areas.</strong></em></p>
+        </header>
+        <main class="lab-content">
+            <section>
+                <h2>Introduction</h2>
+                <p>Combine your knowledge of spectral indices, thresholds, and image filtering to identify and map urban areas. 
+                In this challenge, you'll calculate the Normalized Difference Built-Up Index (NDBI) and apply thresholds to create 
+                a Boolean map of urban areas.</p>
+
+                <p>The NDBI was developed by Zha et al. (2003) to aid in differentiating urban areas (e.g., densely clustered 
+                buildings and roads) from other land cover types. The index exploits the fact that urban areas generally have a 
+                great deal of impervious surface cover, reflecting SWIR very strongly.</p>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Reading</h2>
+                <p><a href="https://www.tandfonline.com/doi/pdf/10.1080/01431160304987" target="_blank">
+                Read: Zha, Y., Gao, J., & Ni, S. (2003). Use of normalized difference built-up index in automatically mapping 
+                urban areas from TM imagery. <em>International journal of remote sensing</em>, <em>24</em>(3), 583-594.</a></p>
+            </section>
+
+            <section class="lab-steps">
+                <h2>The NDBI Formula</h2>
+                <p>The formula is:</p>
+                <pre><code>NDBI = (SWIR - NIR) / (SWIR + NIR)</code></pre>
+
+                <p>For Sentinel-2, the appropriate bands are:</p>
+                <ul>
+                    <li><strong>SWIR:</strong> Band 11 (B11)</li>
+                    <li><strong>NIR:</strong> Band 8 (B8)</li>
+                </ul>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Challenge Tasks</h2>
+                <div class="note">
+                    <h3>Task 1: Calculate NDBI (40 points)</h3>
+                    <p>Calculate the Normalized Difference Built-Up Index (NDBI) for the <code>sfoImage</code> used in 
+                    Lab 8 - Band Arithmetic - NDVI.</p>
+                    
+                    <p><strong>Reminder:</strong> The San Francisco image was from Sentinel-2, filtered to a specific date and location.</p>
+                    
+                    <p>You can use either:</p>
+                    <ul>
+                        <li>Manual calculation: <code>(SWIR - NIR) / (SWIR + NIR)</code></li>
+                        <li>Or the <code>normalizedDifference()</code> method</li>
+                    </ul>
+                    
+                    <p>Display it with an appropriate color palette.</p>
+                </div>
+
+                <div class="note">
+                    <h3>Task 2: Create a Boolean Urban Map (10 points)</h3>
+                    <p>Calculate a threshold that maps out the urban area as a Boolean (binary) classification.</p>
+                    
+                    <p><strong>Steps:</strong></p>
+                    <ol>
+                        <li>Use the Inspector tool to examine NDBI values in urban vs. non-urban areas</li>
+                        <li>Determine an appropriate threshold value (typically NDBI > 0 indicates built-up areas)</li>
+                        <li>Apply the threshold using <code>.gt()</code> method</li>
+                        <li>Display the result with two colors (e.g., white for non-urban, red for urban)</li>
+                    </ol>
+                </div>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Hints</h2>
+                <ul>
+                    <li>Start with the code from Lab 8 that loaded the San Francisco image</li>
+                    <li>Remember to use the correct band names for Sentinel-2 (B11 for SWIR, B8 for NIR)</li>
+                    <li>NDBI values range from -1 to 1, with higher values indicating more built-up areas</li>
+                    <li>Use the Inspector to explore NDBI values before setting your threshold</li>
+                    <li>Common threshold values for NDBI range from 0.0 to 0.2 depending on the area</li>
+                </ul>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Sample Code Structure</h2>
+                <pre><code>// Load San Francisco area image (from Lab 8)
+var sfoPoint = ee.Geometry.Point([-122.4194, 37.7749]);
+var sfoImage = ee.ImageCollection('COPERNICUS/S2')
+    .filterBounds(sfoPoint)
+    .filterDate('2020-01-01', '2020-12-31')
+    .sort('CLOUDY_PIXEL_PERCENTAGE')
+    .first();
+
+// Calculate NDBI
+// YOUR CODE HERE
+
+// Map NDBI with color palette
+// YOUR CODE HERE
+
+// Apply threshold to create Boolean urban map
+// YOUR CODE HERE
+
+// Display Boolean map
+// YOUR CODE HERE</code></pre>
+            </section>
+
+            <section id="submission">
+                <div class="submission-box">
+                    <h3>📧 Lab Submission</h3>
+                    <p><strong>Email to:</strong> <a href="mailto:instructor@university.edu">instructor@university.edu</a></p>
+                    <p><strong>Subject:</strong> <code>Lab 10 - Mapping Urban Areas - [Your Name]</code></p>
+                    
+                    <h4>Submit:</h4>
+                    <p>A URL to your code with comments that includes:</p>
+                    <ol>
+                        <li><strong>NDBI Calculation</strong> - Code to calculate and display NDBI (40 points)</li>
+                        <li><strong>Boolean Urban Map</strong> - Code to threshold NDBI and create binary classification (10 points)</li>
+                        <li><strong>Comments</strong> - Well-commented code explaining your threshold choice (10 points)</li>
+                    </ol>
+                    <p><strong>Total: 60 Points</strong></p>
+                </div>
+            </section>
+        </main>
+        <footer>
+            <p><a href="lab-09-thresholds.html">← Previous Lab</a> | <a href="lab-11-supervised-classification.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
+        </footer>
+    </div>
+</body>
+</html>

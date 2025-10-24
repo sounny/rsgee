@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 10-12: Advanced Remote Sensing Applications | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt;
+            <a href="../index.html#schedule">Schedule</a> &gt;
+            <span>Week 10-12: Advanced Applications</span>
+        </nav>
+
+        <header class="lab-header">
+            <h1>Weeks 10-12: Advanced Remote Sensing Applications</h1>
+            <p><em><strong>Learning objectives:</strong> Apply advanced remote sensing techniques to real-world problems including river morphology, snow cover monitoring, urban heat islands, and wildfire analysis.</em></p>
+        </header>
+
+        <main class="lab-content">
+            <section id="introduction">
+                <h2>Deep Dive into Remote Sensing Applications</h2>
+                
+                <p>These weeks represent the <strong>culmination of your Earth Engine training</strong>, where you'll tackle complex, multi-faceted remote sensing problems. Each application case study demonstrates how researchers use Earth Engine to address real-world challenges across different domains.</p>
+
+                <p>These applications integrate all the skills you've learned:</p>
+                <ul>
+                    <li>JavaScript programming and Earth Engine API</li>
+                    <li>Image collection filtering and processing</li>
+                    <li>Spectral indices and band arithmetic</li>
+                    <li>Classification techniques</li>
+                    <li>Time series analysis</li>
+                    <li>Visualization and export</li>
+                </ul>
+
+                <p><strong>You're no longer just learning—you're doing science.</strong></p>
+            </section>
+
+            <section id="river-morphology">
+                <h2>Case Study 1: River Morphology</h2>
+                
+                <h3>The Power of Planview Geometry</h3>
+                <p>When you look at a river from above—what we call its <strong>"planview geometry"</strong>—you're essentially peering into a wealth of information about that river system. It's like a fingerprint, unique to each river, revealing intricate details about its life story.</p>
+
+                <h3>Scientific Foundation</h3>
+                <p>One well-established theory in fluvial geomorphology is that of <strong>hydraulic geometry</strong>. It suggests a power-law relation, known as a "rating curve," between a river's width and discharge. This insight has profound modern applications:</p>
+
+                <ul>
+                    <li><strong>Remote Discharge Monitoring:</strong> Measure river width from satellites → estimate discharge</li>
+                    <li><strong>Ungauged Basins:</strong> Monitor rivers where in-situ measurements are impossible</li>
+                    <li><strong>Historical Analysis:</strong> Track river changes over decades using imagery archives</li>
+                    <li><strong>Flood Prediction:</strong> Understand channel capacity and overflow risk</li>
+                </ul>
+
+                <h3>River Meandering and Change</h3>
+                <p>Rivers are not static; they are living organisms that evolve. As water moves from higher elevations to lower ones, rivers adjust their courses through <strong>meandering</strong>—lateral shifts driven by erosion and accretion of sediment along banks.</p>
+
+                <h3>Technological Evolution</h3>
+                <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-left: 4px solid #4a90a4;">
+                    <h4>Early Days: Manual Interpretation (1960s-1990s)</h4>
+                    <p>Scientists relied on aerial imagery, manually interpreted to deduce river characteristics—labor-intensive and time-consuming.</p>
+
+                    <h4>Digital Revolution: Automated Processing (2000s-2010s)</h4>
+                    <p><strong>RivWidth software</strong> (Pavelsky and Smith 2008) first presented automated methods for river width extraction using spectral signatures to identify water boundaries.</p>
+
+                    <h4>Cloud Computing Era: Large-Scale Analysis (2010s-present)</h4>
+                    <p><strong>RivWidthCloud (RWC)</strong> (Yang et al. 2019) applied and expanded these methods to Earth Engine, enabling:</p>
+                    <ul>
+                        <li>Basin-scale analysis (entire Amazon, Mississippi systems)</li>
+                        <li>Multi-decadal time series</li>
+                        <li>Automated change detection</li>
+                        <li>Real-time monitoring capabilities</li>
+                    </ul>
+                </div>
+
+                <h3>Key Analysis Steps</h3>
+                <ol>
+                    <li><strong>Water Masking:</strong> Identify water pixels using spectral indices (NDWI, MNDWI)</li>
+                    <li><strong>Centerline Extraction:</strong> Find river centerline using skeleton algorithms</li>
+                    <li><strong>Width Calculation:</strong> Measure perpendicular distances across river at regular intervals</li>
+                    <li><strong>Temporal Analysis:</strong> Compare widths across time to detect changes</li>
+                    <li><strong>Bank Erosion:</strong> Identify areas of lateral migration and erosion</li>
+                </ol>
+
+                <p><strong>Lab Focus:</strong> You'll use Landsat archive to measure river width changes, identify meandering patterns, and quantify bank erosion rates.</p>
+            </section>
+
+            <section id="snow-observatory">
+                <h2>Case Study 2: Global Snow Observatory</h2>
+                
+                <h3>Why Snow Cover Matters</h3>
+                <p>Snow is a critical component of the Earth's water cycle and climate system:</p>
+                <ul>
+                    <li><strong>Water Resources:</strong> Snowmelt provides ~75% of freshwater in western US</li>
+                    <li><strong>Climate Indicator:</strong> Snow cover extent tracks global warming</li>
+                    <li><strong>Albedo Effect:</strong> White snow reflects sunlight, cooling the planet</li>
+                    <li><strong>Drought Prediction:</strong> Low snow years often precede severe droughts</li>
+                </ul>
+
+                <h3>About MODIS</h3>
+                <p>The <strong>Moderate Resolution Imaging Spectroradiometer (MODIS)</strong> aboard Terra and Aqua satellites provides ideal data for snow monitoring:</p>
+                <ul>
+                    <li><strong>Daily Coverage:</strong> Global observations every 1-2 days</li>
+                    <li><strong>Long Record:</strong> 2000-present (20+ years)</li>
+                    <li><strong>Spatial Resolution:</strong> 500m (good for regional analysis)</li>
+                    <li><strong>Snow Products:</strong> Pre-processed snow cover datasets</li>
+                </ul>
+
+                <h3>Analysis Workflow</h3>
+                <ol>
+                    <li><strong>Load MODIS Snow Cover:</strong> Access MOD10A1 (Terra) or MYD10A1 (Aqua) collections</li>
+                    <li><strong>Cloud Masking:</strong> Remove cloudy observations to reduce noise</li>
+                    <li><strong>Binary Classification:</strong> Convert to snow/no-snow (threshold NDSI > 0.4)</li>
+                    <li><strong>Temporal Compositing:</strong> Create 8-day or monthly composites</li>
+                    <li><strong>Snow Frequency Calculation:</strong> Percentage of time each pixel is snow-covered</li>
+                    <li><strong>Trend Analysis:</strong> Identify areas with declining snow cover over time</li>
+                </ol>
+
+                <div class="code-example">
+                    <pre><code>// Example: Calculate annual snow frequency
+var modisSnow = ee.ImageCollection('MODIS/006/MOD10A1')
+    .filterDate('2020-01-01', '2020-12-31')
+    .select('NDSI_Snow_Cover');
+
+// Classify as snow (1) or no snow (0)
+var binarySnow = modisSnow.map(function(img) {
+    return img.gt(50).rename('snow');  // >50% snow cover
+});
+
+// Calculate snow frequency (days with snow / total days)
+var snowFrequency = binarySnow.sum()
+    .divide(binarySnow.count())
+    .multiply(100);
+
+Map.addLayer(snowFrequency, {
+    min: 0, max: 100,
+    palette: ['brown', 'white', 'blue']
+}, 'Snow Frequency %');</code></pre>
+                </div>
+
+                <p><strong>Lab Focus:</strong> Monitor seasonal snow cover patterns, calculate snow-free date trends, and assess climate change impacts on mountain snowpack.</p>
+            </section>
+
+            <section id="urban-heat-islands">
+                <h2>Case Study 3: Urban Heat Islands</h2>
+                
+                <h3>The Urban Heat Island Effect</h3>
+                <p><strong>Urban Heat Islands (UHI)</strong> occur when cities experience significantly higher temperatures than surrounding rural areas. This phenomenon has serious implications for:</p>
+                <ul>
+                    <li><strong>Public Health:</strong> Heat-related illness and mortality</li>
+                    <li><strong>Energy Consumption:</strong> Increased cooling demands</li>
+                    <li><strong>Air Quality:</strong> Accelerated smog formation</li>
+                    <li><strong>Environmental Justice:</strong> Low-income areas often experience higher temperatures</li>
+                </ul>
+
+                <h3>Causes of Urban Heat Islands</h3>
+                <ul>
+                    <li><strong>Impervious Surfaces:</strong> Asphalt and concrete absorb and retain heat</li>
+                    <li><strong>Reduced Vegetation:</strong> Less evaporative cooling from plants</li>
+                    <li><strong>Building Geometry:</strong> Tall buildings trap heat in "urban canyons"</li>
+                    <li><strong>Waste Heat:</strong> Air conditioning, vehicles, industry</li>
+                    <li><strong>Reduced Sky View:</strong> Less radiation to space at night</li>
+                </ul>
+
+                <h3>Remote Sensing of Land Surface Temperature</h3>
+                
+                <h4>Deriving LST from Landsat</h4>
+                <p>Landsat thermal bands (Band 10, 11) measure thermal infrared radiation:</p>
+                <ol>
+                    <li><strong>Load Thermal Bands:</strong> Access Landsat 8 Collection 2 Level 2</li>
+                    <li><strong>Convert to Brightness Temperature:</strong> Apply scaling factors and thermal constants</li>
+                    <li><strong>Calculate Emissivity:</strong> Estimate from NDVI (vegetation has high emissivity)</li>
+                    <li><strong>Atmospheric Correction:</strong> Account for atmospheric absorption</li>
+                    <li><strong>Calculate LST:</strong> Final temperature in Celsius or Kelvin</li>
+                </ol>
+
+                <h4>Defining Urban and Rural References</h4>
+                <p>To quantify UHI intensity, you need reference temperatures:</p>
+                <ul>
+                    <li><strong>Urban Reference:</strong> Mean temperature in city center (high density, low vegetation)</li>
+                    <li><strong>Rural Reference:</strong> Mean temperature in surrounding countryside (low density, high vegetation)</li>
+                    <li><strong>UHI Intensity:</strong> Difference between urban and rural temperatures</li>
+                </ul>
+
+                <h3>Analysis Techniques</h3>
+                <ul>
+                    <li><strong>Regression Analysis:</strong> Relationship between LST and NDVI, imperviousness</li>
+                    <li><strong>Spatial Autocorrelation:</strong> Hot spot identification</li>
+                    <li><strong>Time Series:</strong> Seasonal and diurnal patterns</li>
+                    <li><strong>Scenario Modeling:</strong> Impact of green infrastructure on cooling</li>
+                </ul>
+
+                <p><strong>Lab Focus:</strong> Derive land surface temperature from Landsat and MODIS, calculate UHI intensity, analyze cooling effects of urban vegetation.</p>
+            </section>
+
+            <section id="wildfire-analysis">
+                <h2>Case Study 4: Wildfire Monitoring and Analysis</h2>
+                
+                <h3>The Growing Wildfire Challenge</h3>
+                <p>Wildfires have become more frequent and severe due to climate change, drought, and human activities. Remote sensing provides critical capabilities for:</p>
+                <ul>
+                    <li><strong>Active Fire Detection:</strong> Near real-time monitoring of burning areas</li>
+                    <li><strong>Burn Severity Assessment:</strong> Quantifying ecological damage</li>
+                    <li><strong>Smoke Detection:</strong> Air quality and health impacts</li>
+                    <li><strong>Recovery Monitoring:</strong> Vegetation regrowth after fire</li>
+                    <li><strong>Risk Mapping:</strong> Identifying high-risk areas</li>
+                </ul>
+
+                <h3>Fire Datasets in Earth Engine</h3>
+
+                <h4>MODIS Active Fire Product</h4>
+                <ul>
+                    <li><strong>Dataset:</strong> MODIS/006/MOD14A1 and MYD14A1</li>
+                    <li><strong>Temporal Resolution:</strong> Daily</li>
+                    <li><strong>Detection:</strong> Thermal anomalies indicating active fires</li>
+                    <li><strong>Use Case:</strong> Near real-time fire monitoring</li>
+                </ul>
+
+                <h4>VIIRS Active Fire</h4>
+                <ul>
+                    <li><strong>Dataset:</strong> FIRMS (Fire Information for Resource Management System)</li>
+                    <li><strong>Resolution:</strong> 375m (higher than MODIS)</li>
+                    <li><strong>Detection:</strong> Both flaming and smoldering fires</li>
+                    <li><strong>Use Case:</strong> More detailed active fire location</li>
+                </ul>
+
+                <h4>Burned Area Products</h4>
+                <ul>
+                    <li><strong>Dataset:</strong> MODIS/006/MCD64A1 (monthly burned area)</li>
+                    <li><strong>Use Case:</strong> Historical fire perimeter mapping</li>
+                </ul>
+
+                <h3>Burn Severity Analysis</h3>
+                <p>The <strong>Normalized Burn Ratio (NBR)</strong> quantifies fire severity:</p>
+
+                <div class="code-example">
+                    <pre><code>// Calculate NBR
+var nbr = image.normalizedDifference(['B5', 'B7']);  // (NIR - SWIR) / (NIR + SWIR)
+
+// Calculate dNBR (difference NBR: pre-fire minus post-fire)
+var preFire = preFireImage.normalizedDifference(['B5', 'B7']);
+var postFire = postFireImage.normalizedDifference(['B5', 'B7']);
+var dNBR = preFire.subtract(postFire);
+
+// Classify burn severity
+var burnSeverity = dNBR.where(dNBR.lt(0.1), 1)      // Unburned
+    .where(dNBR.gte(0.1).and(dNBR.lt(0.27)), 2)   // Low
+    .where(dNBR.gte(0.27).and(dNBR.lt(0.44)), 3)  // Moderate-low
+    .where(dNBR.gte(0.44).and(dNBR.lt(0.66)), 4)  // Moderate-high
+    .where(dNBR.gte(0.66), 5);                     // High</code></pre>
+                </div>
+
+                <h3>Building a Fire Monitoring UI</h3>
+                <p>The fire case study includes creating an interactive web application with:</p>
+                <ul>
+                    <li>Date selectors for fire event</li>
+                    <li>Drawing tools to define area of interest</li>
+                    <li>Real-time fire detection overlay</li>
+                    <li>Burn severity classification display</li>
+                    <li>Time series charts of NDVI recovery</li>
+                    <li>Export functionality for results</li>
+                </ul>
+
+                <p><strong>Lab Focus:</strong> Detect active fires, map burn perimeters, assess ecological damage using dNBR, and build an interactive fire monitoring dashboard.</p>
+            </section>
+
+            <section id="integration">
+                <h2>Integrating Multiple Techniques</h2>
+                
+                <p>These advanced case studies demonstrate how real research integrates multiple concepts:</p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0;">
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 5px;">
+                        <h4>Data Management</h4>
+                        <ul style="margin: 10px 0; font-size: 0.9em;">
+                            <li>Multi-sensor integration</li>
+                            <li>Long time series</li>
+                            <li>Cloud masking</li>
+                            <li>Compositing strategies</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 5px;">
+                        <h4>Analysis Methods</h4>
+                        <ul style="margin: 10px 0; font-size: 0.9em;">
+                            <li>Spectral indices</li>
+                            <li>Change detection</li>
+                            <li>Classification</li>
+                            <li>Statistical analysis</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 5px;">
+                        <h4>Communication</h4>
+                        <ul style="margin: 10px 0; font-size: 0.9em;">
+                            <li>Interactive visualizations</li>
+                            <li>Web applications</li>
+                            <li>Exports and reports</li>
+                            <li>Scientific writing</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 5px;">
+                        <h4>Domain Knowledge</h4>
+                        <ul style="margin: 10px 0; font-size: 0.9em;">
+                            <li>Geomorphology</li>
+                            <li>Hydrology</li>
+                            <li>Urban planning</li>
+                            <li>Ecology</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="this-week">
+                <h2>Labs for Weeks 10-12</h2>
+                <div class="lab-links">
+                    <a href="../labs/lab-17-river-morphology.html" class="lab-link-button">River Morphology (Week 11)</a>
+                    <a href="../labs/lab-18-snow-observatory.html" class="lab-link-button">Global Snow Observatory (Week 12)</a>
+                    <a href="../labs/lab-19-urban-heat-island.html" class="lab-link-button">Urban Heat Islands (Week 13)</a>
+                    <a href="../labs/lab-20-wildfire-analysis.html" class="lab-link-button">Wildfire Analysis (Week 13)</a>
+                </div>
+            </section>
+
+            <section id="resources">
+                <h2>Additional Resources</h2>
+                
+                <h3>River Morphology</h3>
+                <ul>
+                    <li>Pavelsky, T.M. & Smith, L.C. (2008). "RivWidth: A software tool for the calculation of river widths"</li>
+                    <li>Yang, X. et al. (2019). "RivWidthCloud: An automated Google Earth Engine algorithm"</li>
+                    <li><a href="https://github.com/seanyx/RivWidthCloudPaper" target="_blank">RivWidthCloud GitHub Repository</a></li>
+                </ul>
+
+                <h3>Snow Monitoring</h3>
+                <ul>
+                    <li><a href="https://nsidc.org/data/mod10a1" target="_blank">MODIS Snow Cover Product Documentation</a></li>
+                    <li>Hall, D.K. & Riggs, G.A. (2016). "MODIS/Terra Snow Cover Daily L3 Global 500m Grid"</li>
+                </ul>
+
+                <h3>Urban Heat Islands</h3>
+                <ul>
+                    <li>Weng, Q. (2009). "Thermal infrared remote sensing for urban climate and environmental studies"</li>
+                    <li><a href="https://www.usgs.gov/landsat-missions/landsat-collection-2-level-2-science-products" target="_blank">Landsat Surface Temperature Products</a></li>
+                </ul>
+
+                <h3>Wildfire Analysis</h3>
+                <ul>
+                    <li><a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank">FIRMS - Fire Information for Resource Management System</a></li>
+                    <li>Key, C.H. & Benson, N.C. (2006). "Landscape assessment: Ground measure of severity, the Composite Burn Index"</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer class="lab-footer">
+            <a href="week09-research-projects.html" class="nav-button">← Previous: Week 9</a>
+            <a href="../index.html" class="nav-button">Back to Home</a>
+            <a href="week13-future-directions.html" class="nav-button">Next: Week 13 →</a>
+        </footer>
+    </div>
+</body>
+</html>

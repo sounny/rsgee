@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 8 - Band Arithmetic: NDVI | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 8
+        </nav>
+
+        <header class="lab-header">
+            <h1>Lab 8 - Band Arithmetic: NDVI</h1>
+            <p><em><strong>Objective: Learn to compute vegetation indices using band arithmetic and the normalizedDifference method.</strong></em></p>
+        </header>
+
+        <main class="lab-content">
+            <section>
+                <h2>Introduction</h2>
+                <p>
+                    Earth Engine is capable of computing a variety of indices with the use of band arithmetic. This involves 
+                    the combination of two or more bands from an image, which can be done by adding, subtracting, multiplying, 
+                    or dividing. In this Lab, we will demonstrate the manual process and then provide faster methods to carry 
+                    out band arithmetic in Earth Engine.
+                </p>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Lab Instructions</h2>
+
+                <ol>
+                    <li>
+                        <h3>Manual Method for NDVI</h3>
+                        <p>As you remember, NDVI is calculated by doing arithmetic on bands using the following formula:</p>
+                        <figure>
+                            <img src="../images/diagrams/ndvi-formula.png" alt="NDVI Formula">
+                            <figcaption>NDVI = (NIR - RED) / (NIR + RED)</figcaption>
+                        </figure>
+                        <p>
+                            To compute the NDVI, we will introduce Earth Engine's implementation of band arithmetic. Cloud-based 
+                            band arithmetic is one of the most powerful aspects of Earth Engine because the platform's computers 
+                            are optimized for this type of heavy processing. Earth Engine automatically partitions calculations 
+                            across many computers as needed.
+                        </p>
+                        <p>Copy and paste the following code into Earth Engine:</p>
+                        <pre><code>/////
+// Band Arithmetic
+/////
+
+// Calculate NDVI using Sentinel 2
+
+// Import and filter imagery by location and date.
+var sfoPoint = ee.Geometry.Point(-122.3774, 37.6194); // long lat of San Francisco
+var sfoImage = ee.ImageCollection('COPERNICUS/S2')
+    .filterBounds(sfoPoint)
+    .filterDate('2020-02-01', '2020-04-01')
+    .first();
+
+// Display the image as a false color composite.
+Map.centerObject(sfoImage, 11);
+Map.addLayer(sfoImage, {
+    bands: ['B8', 'B4', 'B3'],
+    min: 0,
+    max: 2000
+}, 'False color');</code></pre>
+                        <p>
+                            The above code creates a false color image, as we have done in previous labs. Now we will look at 
+                            using band arithmetic to create the NDVI.
+                        </p>
+                        <p>
+                            The simplest mathematical operations in Earth Engine are the <code>add</code>, <code>subtract</code>, 
+                            <code>multiply</code>, and <code>divide</code> methods. Let's select the near-infrared and red bands 
+                            and use these operations to calculate NDVI:
+                        </p>
+                        <pre><code>// Extract the near infrared and red bands.
+var nir = sfoImage.select('B8');
+var red = sfoImage.select('B4');
+
+// Calculate the numerator and denominator using subtraction and addition.
+var numerator = nir.subtract(red);
+var denominator = nir.add(red);
+
+// Now calculate NDVI.
+var ndvi = numerator.divide(denominator);
+
+// Add the layer to our map with a palette.
+var vegPalette = ['red', 'white', 'green'];
+Map.addLayer(ndvi, {
+    min: -1,
+    max: 1,
+    palette: vegPalette
+}, 'NDVI Manual');</code></pre>
+                        <p>
+                            Examine the resulting index using the <strong>Inspector</strong> to pick out pixel values in areas 
+                            of vegetation and non-vegetation. NDVI outputs vary between −1 and 1. High amounts of green vegetation 
+                            have values around 0.8–0.9. Absence of green leaves gives values near 0, and water gives values near −1.
+                        </p>
+                        <div class="warning">
+                            <p><strong>Question 1 (10 Points):</strong></p>
+                            <p>
+                                Explore the image. Find a location that contrasts healthy vegetation and non-vegetation. Screenshot 
+                                that area and write a caption explaining the differences in NDVI values.
+                            </p>
+                        </div>
+                    </li>
+
+                    <li>
+                        <h3>Single-Operation Computation: normalizedDifference</h3>
+                        <p>
+                            Normalized differences like NDVI are so common in remote sensing that Earth Engine provides the ability 
+                            to do that particular sequence of subtraction, addition, and division in a single step, using the 
+                            <code>normalizedDifference</code> method.
+                        </p>
+                        <p>The NDVI computation can be replaced with one line of code:</p>
+                        <pre><code>// Use the built-in normalizedDifference function.
+var ndviND = sfoImage.normalizedDifference(['B8', 'B4']);
+Map.addLayer(ndviND, {
+    min: -1,
+    max: 1,
+    palette: vegPalette
+}, 'NDVI normalizedDiff');</code></pre>
+                        <p>
+                            <strong>Important:</strong> Note that the order in which you provide the two bands to normalizedDifference 
+                            is important. We use B8 (near-infrared) as the first parameter, and B4 (red) as the second. If your two 
+                            computations of NDVI do not look identical, check the order of your bands.
+                        </p>
+                    </li>
+
+                    <li>
+                        <h3>Using Normalized Difference for NDWI</h3>
+                        <p>
+                            The normalized difference approach is used for many different indices. Let's apply the same method to 
+                            another index.
+                        </p>
+                        <p>
+                            The <strong>Normalized Difference Water Index (NDWI)</strong> was developed by Gao (1996) as an index 
+                            of vegetation water content. The index is sensitive to changes in the liquid content of vegetation canopies. 
+                            This means it can be used to detect vegetation experiencing drought conditions or differentiate crop 
+                            irrigation levels. It is also sometimes called the Normalized Difference Moisture Index (NDMI).
+                        </p>
+                        <figure>
+                            <img src="../images/screenshots/Screenshot 2023-02-24 at 3.30.08 AM.png" alt="NDWI formula">
+                            <figcaption>NDWI = (NIR - SWIR) / (NIR + SWIR)</figcaption>
+                        </figure>
+                        <pre><code>// Use normalizedDifference to calculate NDWI
+var ndwi = sfoImage.normalizedDifference(['B8', 'B11']);
+var waterPalette = ['white', 'blue'];
+Map.addLayer(ndwi, {
+    min: -0.5,
+    max: 1,
+    palette: waterPalette
+}, 'NDWI');</code></pre>
+                        <p><em>Troubleshooting help: <a href="https://code.earthengine.google.com/7671c73b0eab8a2cf87be949236667ee" target="_blank">Full code link</a></em></p>
+                        <div class="warning">
+                            <p><strong>Question 2 (10 Points):</strong></p>
+                            <p>
+                                Look at the same area that you looked at in Question 1. Look at it now with NDWI. What does this 
+                                index tell you about the previous interpretation you had? Include a screenshot.
+                            </p>
+                        </div>
+                    </li>
+
+                    <li>
+                        <h3>Additional Resources</h3>
+                        <p>Read the following articles to learn about more spectral indices:</p>
+                        <ul>
+                            <li><a href="https://medium.com/regen-network/remote-sensing-indices-389153e3d947" target="_blank">Remote Sensing Indices (Medium)</a></li>
+                            <li><a href="https://medium.com/spatial-data-science/4-useful-remote-sensing-indices-like-ndvi-2504383c6e54" target="_blank">4 Useful Remote Sensing Indices (Medium)</a></li>
+                        </ul>
+                        <div class="warning">
+                            <p><strong>Question 3 (20 Points):</strong></p>
+                            <p>
+                                Select a different index from the articles in Medium or another source. Using either the 
+                                <code>normalizedDifference</code> method or the manual method, write code that:
+                            </p>
+                            <ul>
+                                <li>Calculates the index</li>
+                                <li>Adds the layer to Earth Engine with a good palette for visualization</li>
+                                <li>Interprets what this new index tells you about your site</li>
+                            </ul>
+                            <p>Turn in a screenshot of your AOI from Questions 1 and 2 with the new index. Include screenshots.</p>
+                        </div>
+                        <div class="warning">
+                            <p><strong>Question 4 (10 Points):</strong></p>
+                            <p>Add your URL for your code to your document with your screenshots and submit.</p>
+                        </div>
+                    </li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Key Concepts</h2>
+                <div class="card">
+                    <h3>NDVI (Normalized Difference Vegetation Index)</h3>
+                    <p>Measures vegetation health and density</p>
+                    <p><strong>Range:</strong> -1 to +1</p>
+                    <p><strong>Interpretation:</strong></p>
+                    <ul>
+                        <li>0.8-0.9: Dense healthy vegetation</li>
+                        <li>~0: No vegetation/bare soil</li>
+                        <li>Negative: Water bodies</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>NDWI (Normalized Difference Water Index)</h3>
+                    <p>Measures vegetation water content and moisture stress</p>
+                    <p><strong>Applications:</strong></p>
+                    <ul>
+                        <li>Drought detection</li>
+                        <li>Irrigation monitoring</li>
+                        <li>Crop health assessment</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="submission">
+                <div class="submission-box">
+                    <h3>📧 Lab Submission</h3>
+                    <p><strong>Email to:</strong> <a href="mailto:instructor@university.edu">instructor@university.edu</a></p>
+                    <p><strong>Subject:</strong> <code>Lab 8 - Band Arithmetic NDVI - [Your Name]</code></p>
+                    <p><strong>Include:</strong></p>
+                    <ul>
+                        <li>Shareable link to your GEE script</li>
+                        <li>Screenshots for Question 1 (NDVI comparison)</li>
+                        <li>Screenshots for Question 2 (NDWI interpretation)</li>
+                        <li>Screenshots for Question 3 (new index with interpretation)</li>
+                        <li>Written document answering all questions</li>
+                    </ul>
+                    <p><strong>Grading:</strong> 50 points total (10 + 10 + 20 + 10)</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="lab-07-challenge-finding-dataset.html">← Previous Lab</a> | <a href="lab-09-thresholds.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
+        </footer>
+    </div>
+</body>
+</html>

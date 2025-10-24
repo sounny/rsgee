@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 1 - Getting Started with GEE - Hello World | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 1
+        </nav>
+
+        <header class="lab-header">
+            <h1>Lab 1 - Getting Started with GEE - Hello World</h1>
+            <p><em><strong>Objective: Get setup with GEE and learn how to submit future labs.</strong></em></p>
+        </header>
+
+        <main class="lab-content">
+          
+            <section>
+                <h2>Introduction</h2>
+                <p>
+                    In this course, we will use Earth Engine, and you will need to develop skills in both remote sensing 
+                    and programming. The language of this course is JavaScript.
+                </p>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Lab Instructions</h2>
+
+                <ol>
+                    <li>
+                        <h3>Step 1 - Sign up for an Earth Engine account</h3>
+                        <p>Go to <a href="https://earthengine.google.com/" target="_blank">https://earthengine.google.com/</a></p>
+                        <p>You can visit the website and get familiar with the information Google presents about Earth Engine.</p>
+                        <p>Click the Sign-Up page and fill out the form: <a href="https://signup.earthengine.google.com/" target="_blank">https://signup.earthengine.google.com/</a></p>
+                        <p>Normally signup is very quick after request.</p>
+                    </li>
+
+                    <li>
+                        <h3>Step 2 - Access the Earth Engine Code Editor</h3>
+                        <p>Once your account is opened and approved by Google, go to <a href="https://code.earthengine.google.com/" target="_blank">https://code.earthengine.google.com/</a></p>
+                        <p>The Code Editor is an integrated Earth Engine JavaScript API development environment. It offers an easy way to type, debug, run, and manage code.</p>
+                        <figure>
+                            <img src="../images/screenshots/code-editor-interface.png" alt="Screenshot of the GEE Code Editor interface">
+                            <figcaption>The Google Earth Engine Code Editor Interface</figcaption>
+                        </figure>
+                    </li>
+
+                    <li>
+                        <h3>Part 3 - Coding</h3>
+                        <p>
+                            When first learning a new language and getting used to a new programming environment, it is customary 
+                            to make a program to display the words "Hello World." This is a fun way to start coding that shows you 
+                            how to give input to the program and how to execute it. It also shows where the program displays the output. 
+                            Doing this in JavaScript is quite simple.
+                        </p>
+                        <p>Type the following code into line one of your script:</p>
+                        <pre><code>print('Hello World');</code></pre>
+                        <p>
+                            The line of code above uses the JavaScript print function to print the text "Hello World" to the screen. 
+                            Once you enter the code, click the <strong>Run</strong> button. The output will be displayed on the upper 
+                            right-hand panel under the <strong>Console</strong> tab.
+                        </p>
+                        <figure>
+                            <img src="../images/screenshots/hello-world-console.png" alt="Screenshot showing the Hello World console result">
+                            <figcaption>Hello World output in the Console</figcaption>
+                        </figure>
+                    </li>
+
+                    <li>
+                        <h3>Part 4 - Save your Code</h3>
+                        <p>You just wrote your first Earth Engine script and may want to save it. Click the <strong>Save</strong> button.</p>
+                        <figure>
+                            <img src="../images/screenshots/save-button.png" alt="Save Button location in the Code Editor">
+                            <figcaption>The Save button in the Code Editor</figcaption>
+                        </figure>
+                        <p>
+                            If this is your first time using the Code Editor, you will be prompted to create a <em>home folder</em>. 
+                            This is a folder in the cloud where all your code will be saved. You can pick a name of your choice, but 
+                            remember that it cannot be changed and will forever be associated with your account. A good choice for the 
+                            name would be your Google Account username.
+                        </p>
+                        <p>
+                            Once your home folder is created, you will be prompted to enter a new <em>repository</em>. A repository 
+                            can help you organize and share code. Your account can have multiple repositories and each repository can 
+                            have multiple scripts inside it. To get started, you can create a repository named "default".
+                        </p>
+                        <p>
+                            Finally, you can save your script inside the newly created repository. Enter the name "hello_world" and 
+                            click <strong>OK</strong>.
+                        </p>
+                        <figure>
+                            <img src="../images/screenshots/save-dialog.png" alt="Save script dialog">
+                            <figcaption>Saving your first script</figcaption>
+                        </figure>
+                        <p>
+                            Once the script is saved, it will appear in the script manager panel. The scripts are saved in the cloud 
+                            and will always be available to you when you open the Code Editor.
+                        </p>
+                    </li>
+
+                    <li>
+                        <h3>Part 5 - Share your Code</h3>
+                        <p>Click on the <strong>Get link</strong> button. This will generate a URL for your code.</p>
+                        <figure>
+                            <img src="../images/screenshots/get-link-button.png" alt="Get link button location">
+                            <figcaption>The Get Link button allows you to share your code</figcaption>
+                        </figure>
+                    </li>
+                </ol>
+            </section>
+
+            <section id="submission">
+                <div class="submission-box">
+                    <h3>📧 Lab Submission</h3>
+                    <p><strong>Submit the URL of your GEE script via email.</strong></p>
+                    <p><strong>Email to:</strong> <a href="mailto:instructor@university.edu">instructor@university.edu</a></p>
+                    <p><strong>Subject:</strong> <code>Lab 1 - Getting Started - [Your Name]</code></p>
+                    <p><strong>Include in your email:</strong></p>
+                    <ul>
+                        <li>The shareable link to your "Hello World" script in Google Earth Engine</li>
+                        <li>A screenshot of your Console output showing "Hello World"</li>
+                        <li>Any questions or challenges you encountered</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>Next Steps</h2>
+                <p>
+                    Congratulations on completing your first Earth Engine lab! In the next lab, we'll explore how to load 
+                    and visualize Landsat satellite imagery.
+                </p>
+                <p>
+                    <a href="lab-02-hello-landsat.html" class="button">Continue to Lab 2 →</a>
+                </p>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../index.html">← Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+</html>

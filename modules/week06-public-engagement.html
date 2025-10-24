@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 6: Engaging with the Public | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt;
+            <a href="../index.html#schedule">Schedule</a> &gt;
+            <span>Week 6: Engaging with the Public</span>
+        </nav>
+
+        <header class="lab-header">
+            <h1>Week 6: Engaging with the Public</h1>
+            <p><em><strong>Learning objectives:</strong> Learn to create animations and videos of environmental change, build web applications with Google Earth Engine, and effectively communicate remote sensing science to public audiences.</em></p>
+        </header>
+
+        <main class="lab-content">
+            <section id="introduction">
+                <h2>Translating Science to the Public</h2>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <img src="../images/animations/ImageCollection_video_hurricanes.gif" alt="Animation showing a three-day progression of Atlantic hurricanes in September 2017" style="max-width: 600px; width: 100%;">
+                    <p><em>Figure: Animation showing a three-day progression of Atlantic hurricanes in September 2017.</em></p>
+                </div>
+
+                <p>Welcome to the <strong>Engaging with the Public</strong> module of your remote sensing course, where you will learn how to translate your work to the public and engage with the community. Throughout the course, you have made excellent progress, learning about different aspects of remote sensing and working with Google Earth Engine. You have explored creating indices, working with elevation models, performing classifications, and honing your skills in JavaScript programming.</p>
+
+                <p>In this module, we will explore how to showcase your scientific products to the public in a manner that is <strong>engaging and easy to understand</strong>. The general public may not understand spectral indices or machine learning classifiers, but they can immediately grasp the power of satellite imagery when presented effectively.</p>
+            </section>
+
+            <section id="why-public-engagement">
+                <h2>Why Public Engagement Matters</h2>
+                
+                <p>Remote sensing provides a unique perspective on our planet, but its value increases exponentially when shared with broader audiences. Here's why public engagement is crucial:</p>
+
+                <ul>
+                    <li><strong>Decision-Making:</strong> Policymakers and stakeholders need accessible visualizations to make informed decisions</li>
+                    <li><strong>Education:</strong> Students and educators benefit from interactive tools that bring Earth science to life</li>
+                    <li><strong>Awareness:</strong> The public gains awareness of environmental changes affecting their communities</li>
+                    <li><strong>Collaboration:</strong> Citizen scientists can contribute to data collection and validation</li>
+                    <li><strong>Funding:</strong> Clear communication of research impacts helps secure continued support</li>
+                </ul>
+
+                <p><strong>Earth Engine provides powerful tools</strong> to bridge the gap between complex geospatial analysis and public understanding. Two of the most effective methods are:</p>
+                <ol>
+                    <li><strong>Animations:</strong> Time-series visualizations showing environmental change over time</li>
+                    <li><strong>Web Applications:</strong> Interactive tools that allow non-technical users to explore data</li>
+                </ol>
+            </section>
+
+            <section id="animations">
+                <h2>Creating Animations and Videos</h2>
+                
+                <p>Animations created by Google Earth Engine are <strong>incredibly popular on social media</strong> and provide an excellent opportunity to highlight environmental changes. A well-crafted animation can communicate years of environmental data in seconds.</p>
+
+                <h3>What Makes a Good Animation?</h3>
+                <ul>
+                    <li><strong>Clear Time Period:</strong> Display dates prominently so viewers understand the temporal context</li>
+                    <li><strong>Consistent Scale:</strong> Maintain the same spatial extent and zoom level throughout</li>
+                    <li><strong>Appropriate Frame Rate:</strong> Not too fast (viewers miss details) or too slow (viewers lose interest)</li>
+                    <li><strong>Context:</strong> Include geographic references (labels, boundaries) to orient viewers</li>
+                    <li><strong>Meaningful Change:</strong> Choose phenomena that show dramatic or important changes</li>
+                </ul>
+
+                <h3>Popular Animation Themes</h3>
+                <ul>
+                    <li><strong>Seasonal Changes:</strong> Agricultural cycles, snow cover, vegetation phenology</li>
+                    <li><strong>Disaster Events:</strong> Hurricanes, floods, wildfires, volcanic eruptions</li>
+                    <li><strong>Urban Growth:</strong> City expansion over decades</li>
+                    <li><strong>Water Bodies:</strong> Lake level changes, glacier retreat, coastal erosion</li>
+                    <li><strong>Vegetation:</strong> Deforestation, reforestation, drought impacts</li>
+                </ul>
+
+                <div class="code-example">
+                    <pre><code>// Example: Creating an animation
+var collection = ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA')
+    .filterDate('2020-01-01', '2020-12-31')
+    .filterBounds(geometry)
+    .select(['B4', 'B3', 'B2']);
+
+// Create animation parameters
+var videoArgs = {
+    dimensions: 768,
+    region: geometry,
+    framesPerSecond: 12,
+    crs: 'EPSG:3857'
+};
+
+// Export as video
+Export.video.toDrive({
+    collection: collection,
+    description: 'seasonal_change_animation',
+    folder: 'EarthEngineAnimations',
+    fileNamePrefix: 'seasonal_change',
+    framesPerSecond: 12,
+    dimensions: 720,
+    region: geometry
+});</code></pre>
+                </div>
+            </section>
+
+            <section id="web-apps">
+                <h2>Building Web Applications</h2>
+                
+                <p>Web applications provide <strong>non-technical users with easy-to-use interfaces</strong> that allow them to interact with the scientific products created through remote sensing. Instead of requiring users to write code, you create intuitive tools with buttons, sliders, and dropdown menus.</p>
+
+                <h3>Benefits of Earth Engine Apps</h3>
+                <ul>
+                    <li><strong>No Installation Required:</strong> Users access apps through a web browser</li>
+                    <li><strong>No Coding Required:</strong> Users interact through graphical interfaces</li>
+                    <li><strong>Powered by Cloud Computing:</strong> Earth Engine handles all the processing</li>
+                    <li><strong>Shareable:</strong> Send a simple URL to anyone</li>
+                    <li><strong>Interactive:</strong> Users can explore their own areas of interest</li>
+                </ul>
+
+                <h3>Key UI Components</h3>
+                <ul>
+                    <li><strong>ui.Panel:</strong> Container for organizing other UI elements</li>
+                    <li><strong>ui.Button:</strong> Triggers actions when clicked</li>
+                    <li><strong>ui.Slider:</strong> Allows users to select values from a range</li>
+                    <li><strong>ui.Select:</strong> Dropdown menu for choosing options</li>
+                    <li><strong>ui.DateSlider:</strong> Interactive date selection</li>
+                    <li><strong>ui.Map:</strong> Embedded interactive map</li>
+                    <li><strong>ui.Chart:</strong> Display graphs and plots</li>
+                </ul>
+
+                <div class="code-example">
+                    <pre><code>// Example: Simple web app structure
+// Create a panel for controls
+var panel = ui.Panel({style: {width: '300px'}});
+
+// Add a title
+var title = ui.Label('My Remote Sensing App', 
+    {fontSize: '24px', fontWeight: 'bold'});
+panel.add(title);
+
+// Add a button
+var button = ui.Button({
+    label: 'Calculate NDVI',
+    onClick: function() {
+        var ndvi = image.normalizedDifference(['B5', 'B4']);
+        Map.addLayer(ndvi, {min: 0, max: 1, palette: ['brown', 'green']}, 'NDVI');
+    }
+});
+panel.add(button);
+
+// Add panel to the map
+ui.root.insert(0, panel);</code></pre>
+                </div>
+
+                <h3>Design Principles for Effective Apps</h3>
+                <ol>
+                    <li><strong>Simplicity:</strong> Don't overwhelm users with too many options</li>
+                    <li><strong>Clear Instructions:</strong> Provide guidance on how to use the app</li>
+                    <li><strong>Visual Feedback:</strong> Show users when processing is happening</li>
+                    <li><strong>Meaningful Defaults:</strong> Pre-set reasonable values so the app works immediately</li>
+                    <li><strong>Error Handling:</strong> Gracefully handle user errors with helpful messages</li>
+                </ol>
+            </section>
+
+            <section id="best-practices">
+                <h2>Best Practices for Public Engagement</h2>
+
+                <h3>Communication Strategies</h3>
+                <ul>
+                    <li><strong>Tell a Story:</strong> Frame data within narratives that resonate with audiences</li>
+                    <li><strong>Use Analogies:</strong> Compare abstract concepts to familiar experiences</li>
+                    <li><strong>Show Scale:</strong> Help people understand the magnitude of changes</li>
+                    <li><strong>Avoid Jargon:</strong> Use plain language instead of technical terminology</li>
+                    <li><strong>Cite Sources:</strong> Build trust by showing data provenance</li>
+                </ul>
+
+                <h3>Visual Design Tips</h3>
+                <ul>
+                    <li><strong>Color Choices:</strong> Use intuitive color schemes (blue = water, green = vegetation)</li>
+                    <li><strong>Contrast:</strong> Ensure visualizations are readable on different screens</li>
+                    <li><strong>Labels:</strong> Clearly label all elements, axes, and legends</li>
+                    <li><strong>Consistency:</strong> Maintain consistent styling across related visualizations</li>
+                </ul>
+
+                <h3>Accessibility Considerations</h3>
+                <ul>
+                    <li>Use colorblind-friendly palettes</li>
+                    <li>Provide text descriptions of visual content</li>
+                    <li>Ensure apps work on mobile devices</li>
+                    <li>Keep file sizes reasonable for slower internet connections</li>
+                </ul>
+            </section>
+
+            <section id="impact">
+                <h2>Measuring Impact</h2>
+                <p>Once you've created animations or apps, consider how to measure their effectiveness:</p>
+                <ul>
+                    <li><strong>Usage Metrics:</strong> Track app visits, animation views, shares</li>
+                    <li><strong>User Feedback:</strong> Collect comments and suggestions</li>
+                    <li><strong>Educational Outcomes:</strong> Assess whether users gained understanding</li>
+                    <li><strong>Decision Influence:</strong> Document cases where your work informed decisions</li>
+                    <li><strong>Media Coverage:</strong> Track mentions in news, blogs, or social media</li>
+                </ul>
+            </section>
+
+            <section id="this-week">
+                <h2>This Week's Labs</h2>
+                <p>This module consists of two labs that will teach you how to create compelling visual products:</p>
+                <div class="lab-links">
+                    <a href="../labs/lab-19-making-gifs-videos.html" class="lab-link-button">Lab 19: Making GIFs and Videos of Environmental Change</a>
+                    <a href="../labs/lab-20-deploying-apps.html" class="lab-link-button">Lab 20: Design UI/UX and Deploying Google Earth Engine Apps</a>
+                </div>
+                <p><em>Note: In the first lab, you will learn how to create animations. In the second lab, you will build web applications with user interfaces.</em></p>
+            </section>
+
+            <section id="resources">
+                <h2>Additional Resources</h2>
+                <ul>
+                    <li><a href="https://developers.google.com/earth-engine/guides/apps" target="_blank">GEE Apps Guide</a></li>
+                    <li><a href="https://developers.google.com/earth-engine/guides/ui" target="_blank">Earth Engine UI Widgets</a></li>
+                    <li><a href="https://developers.google.com/earth-engine/guides/videos" target="_blank">Creating Animations in Earth Engine</a></li>
+                    <li><a href="https://github.com/giswqs/earthengine-py-notebooks" target="_blank">Earth Engine App Examples</a></li>
+                    <li>Tufte, E.R. (2001). <em>The Visual Display of Quantitative Information</em> - Data visualization principles</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer class="lab-footer">
+            <a href="week05-unsupervised-classification.html" class="nav-button">← Previous: Week 5</a>
+            <a href="../index.html" class="nav-button">Back to Home</a>
+            <a href="week07-applications-case-studies.html" class="nav-button">Next: Week 7 →</a>
+        </footer>
+    </div>
+</body>
+</html>

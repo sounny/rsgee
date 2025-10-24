@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 5 - Challenge Refreshers | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 5
+        </nav>
+
+        <header class="lab-header">
+            <h1>Lab 5 - Challenge: Refreshers</h1>
+            <p><em><strong>Objective: Practice creating natural color and false color composites independently.</strong></em></p>
+        </header>
+
+        <main class="lab-content">
+            <section>
+                <h2>Introduction</h2>
+                <p>
+                    This challenge lab gives you the opportunity to practice the skills you've learned in the previous labs. 
+                    You'll work with a specific Landsat image to create both natural color and near-infrared false color 
+                    composites, then analyze what each reveals about an environmental event.
+                </p>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Challenge Task</h2>
+                <p>Create a new script to make <strong>two composites</strong> - natural color and near-infrared false color 
+                for this image:</p>
+
+                <div class="note">
+                    <p><strong>Image ID:</strong></p>
+                    <code>'LANDSAT/LT05/C02/T1_L2/LT05_022039_20050907'</code>
+                </div>
+
+                <p>In your script, make comments with the following information:</p>
+                <ul>
+                    <li>Where is this image?</li>
+                    <li>What environmental event do you think the images show?</li>
+                    <li>Compare and contrast the natural and false-color composites.</li>
+                    <li>What do the false-color composite help you see that is more difficult to decipher in the natural 
+                    color composite?</li>
+                </ul>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Hints</h2>
+                <div class="note">
+                    <p><strong>Remember:</strong></p>
+                    <ul>
+                        <li>Landsat 5 uses Collection 2 Level 2 data</li>
+                        <li>Natural color composite: Use bands SR_B3 (Red), SR_B2 (Green), SR_B1 (Blue)</li>
+                        <li>False color (NIR) composite: Use bands SR_B4 (NIR), SR_B3 (Red), SR_B2 (Green)</li>
+                        <li>You may need to adjust min/max values for optimal visualization</li>
+                        <li>Use <code>Map.centerObject()</code> to center on the image</li>
+                        <li>Scale factors for Landsat Collection 2 Level 2: multiply by 0.0000275 and add -0.2</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Sample Code Structure</h2>
+                <pre><code>// Load the image
+var image = ee.Image('LANDSAT/LT05/C02/T1_L2/LT05_022039_20050907');
+
+// Apply scaling factors
+function applyScaleFactors(image) {
+  var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2);
+  return image.addBands(opticalBands, null, true);
+}
+
+var scaledImage = applyScaleFactors(image);
+
+// Center the map
+Map.centerObject(image, 8);
+
+// Create natural color composite
+// YOUR CODE HERE
+
+// Create false color composite
+// YOUR CODE HERE</code></pre>
+            </section>
+
+            <section>
+                <h2>Analysis Questions</h2>
+                <p>After creating your composites, explore the image and answer these questions in your script comments:</p>
+                <ol>
+                    <li><strong>Location:</strong> Where is this image located? (Hint: Look at the path/row and use 
+                    geographic features)</li>
+                    <li><strong>Environmental Event:</strong> What type of environmental event or phenomenon do you observe? 
+                    Look for clues in both the natural and false color composites.</li>
+                    <li><strong>Comparison:</strong> How do the natural color and false color composites differ in what 
+                    they reveal? Which features are more prominent in each?</li>
+                    <li><strong>False Color Advantage:</strong> What specific information does the false color composite 
+                    reveal that is harder to see in the natural color composite?</li>
+                </ol>
+            </section>
+
+            <section id="submission">
+                <div class="submission-box">
+                    <h3>📧 Lab Submission</h3>
+                    <p><strong>Email to:</strong> <a href="mailto:instructor@university.edu">instructor@university.edu</a></p>
+                    <p><strong>Subject:</strong> <code>Lab 5 - Challenge Refreshers - [Your Name]</code></p>
+                    
+                    <h4>Submit:</h4>
+                    <p>A <strong>shareable URL</strong> to your Google Earth Engine script that includes:</p>
+                    <ul>
+                        <li>Code to create both natural color and false color composites</li>
+                        <li>Comments answering all four questions above</li>
+                        <li>Proper visualization parameters for both layers</li>
+                        <li>Descriptive layer names</li>
+                    </ul>
+                    <p><strong>Total: 50 Points</strong></p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="lab-04-night-time-lights.html">← Previous Lab</a> | <a href="lab-06-image-collections.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 7 - Challenge: Finding a Dataset | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 7
+        </nav>
+
+        <header class="lab-header">
+            <h1>Lab 7 - Challenge: Finding a Dataset for Your Site</h1>
+            <p><em><strong>Objective: Learn to explore the GEE Data Catalog and select appropriate datasets for your research area.</strong></em></p>
+        </header>
+
+        <main class="lab-content">
+            <section>
+                <h2>Introduction</h2>
+                <p>
+                    Google Earth Engine provides access to a vast catalog of geospatial datasets. In this challenge lab, 
+                    you will learn to navigate the GEE Data Catalog, understand dataset characteristics, and select 
+                    appropriate imagery for your area of interest. This is an essential skill for any remote sensing project.
+                </p>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Challenge Instructions</h2>
+                <div class="warning">
+                    <p><strong>Your Task:</strong></p>
+                    <ol>
+                        <li>Choose a location of interest (your hometown, study site, etc.)</li>
+                        <li>Browse the <a href="https://developers.google.com/earth-engine/datasets" target="_blank">GEE Data Catalog</a></li>
+                        <li>Find at least 3 different datasets suitable for your location</li>
+                        <li>Load and visualize each dataset in GEE</li>
+                        <li>Document the characteristics of each dataset</li>
+                        <li>Compare and contrast the datasets</li>
+                    </ol>
+                </div>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Dataset Characteristics to Document</h2>
+                <p>For each of the three datasets you choose, document the following:</p>
+                <ul>
+                    <li><strong>Spatial Resolution:</strong> What is the pixel size? (e.g., 10m, 30m, 500m)</li>
+                    <li><strong>Temporal Coverage:</strong> What time period does the data cover?</li>
+                    <li><strong>Temporal Resolution:</strong> How frequently is new data collected? (daily, weekly, 16-day, etc.)</li>
+                    <li><strong>Spectral Bands:</strong> What bands are available? (RGB, NIR, SWIR, thermal, etc.)</li>
+                    <li><strong>Data Provider:</strong> Who provides the data? (NASA, ESA, USGS, etc.)</li>
+                    <li><strong>Best Use Cases:</strong> What is this dataset best suited for?</li>
+                </ul>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Suggested Dataset Categories</h2>
+                <p>Consider choosing datasets from different categories to see the variety available:</p>
+                <div class="note">
+                    <ul>
+                        <li><strong>Optical Imagery:</strong> Landsat, Sentinel-2, MODIS</li>
+                        <li><strong>Radar Imagery:</strong> Sentinel-1</li>
+                        <li><strong>Climate Data:</strong> Temperature, precipitation</li>
+                        <li><strong>Elevation Data:</strong> SRTM, ASTER DEM</li>
+                        <li><strong>Land Cover:</strong> MODIS Land Cover, ESA WorldCover</li>
+                        <li><strong>Specialized:</strong> Nighttime lights, population density, fire data</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Code Template</h2>
+                <pre><code>// Define your area of interest
+var aoi = ee.Geometry.Point([longitude, latitude]);
+
+// Center the map on your location
+Map.centerObject(aoi, 10);
+
+// Dataset 1: [Name of dataset]
+// Characteristics: [Spatial resolution, temporal coverage, etc.]
+var dataset1 = ee.ImageCollection('DATASET_ID_HERE')
+    .filterBounds(aoi)
+    .filterDate('START_DATE', 'END_DATE')
+    .first();
+
+Map.addLayer(dataset1, {bands: ['B4', 'B3', 'B2'], min: 0, max: 3000}, 'Dataset 1');
+
+// Repeat for Dataset 2 and Dataset 3
+// ...</code></pre>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Comparison Questions</h2>
+                <p>After loading all three datasets, answer these questions in your script comments:</p>
+                <ol>
+                    <li>Which dataset has the highest spatial resolution? What are the trade-offs?</li>
+                    <li>Which dataset provides the most frequent updates?</li>
+                    <li>Which dataset has the most spectral bands? How might this be useful?</li>
+                    <li>For your chosen location and research question, which dataset would you recommend? Why?</li>
+                </ol>
+            </section>
+
+            <section id="submission">
+                <div class="submission-box">
+                    <h3>📧 Lab Submission</h3>
+                    <p><strong>Email to:</strong> <a href="mailto:instructor@university.edu">instructor@university.edu</a></p>
+                    <p><strong>Subject:</strong> <code>Lab 7 - Challenge Finding Dataset - [Your Name]</code></p>
+                    
+                    <h4>Submit:</h4>
+                    <p>A document containing:</p>
+                    <ol>
+                        <li><strong>URL to your GEE script</strong> with all three datasets loaded and visualized</li>
+                        <li><strong>Screenshots</strong> of all three datasets showing your area of interest</li>
+                        <li><strong>Dataset comparison table</strong> with characteristics (resolution, coverage, bands, etc.)</li>
+                        <li><strong>Recommendation paragraph</strong> explaining which dataset is best for your site and why</li>
+                        <li><strong>Answers to comparison questions</strong> above</li>
+                    </ol>
+                    <p><strong>Total: 50 Points</strong></p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="lab-06-image-collections.html">← Previous Lab</a> | <a href="lab-08-band-arithmetic-ndvi.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
+        </footer>
+    </div>
+</body>
+</html>

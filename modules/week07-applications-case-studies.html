@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 7: Applications and Case Studies | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt;
+            <a href="../index.html#schedule">Schedule</a> &gt;
+            <span>Week 7: Applications and Case Studies</span>
+        </nav>
+
+        <header class="lab-header">
+            <h1>Week 7: Applications and Case Studies</h1>
+            <p><em><strong>Learning objectives:</strong> Apply Earth Engine skills to real-world research projects, explore advanced remote sensing applications in health, environment, and fluvial geomorphology, and understand the research workflow from concept to implementation.</em></p>
+        </header>
+
+        <main class="lab-content">
+            <section id="introduction">
+                <h2>Walking in the Footsteps of Remote Sensing Scientists</h2>
+                
+                <p>In this module, you will be <strong>walking in the footsteps of remote sensing scientists</strong> conducting lengthy research projects with Earth Engine! This is supposed to give you the feel of what working on your final projects could be like.</p>
+
+                <p>In this course, you have gained hands-on experience working with one of the most powerful geospatial analysis platforms available today. You have learned how to use Earth Engine to analyze large datasets, visualize geospatial information, and apply advanced analysis techniques to solve real-world problems. <strong>Today you will test the limit of those skills with these case studies.</strong></p>
+
+                <p style="text-align: center; font-size: 1.2em; margin: 30px 0;">Best of luck and happy mapping. 🌍</p>
+            </section>
+
+            <section id="research-workflow">
+                <h2>The Research Workflow</h2>
+                
+                <p>Real-world remote sensing research projects typically follow a structured workflow. Understanding this process will help you approach your own projects systematically:</p>
+
+                <h3>1. Define the Research Question</h3>
+                <ul>
+                    <li>What specific problem are you trying to solve?</li>
+                    <li>Why is this problem important?</li>
+                    <li>What are the existing gaps in knowledge?</li>
+                    <li>What outcomes do you expect?</li>
+                </ul>
+
+                <h3>2. Literature Review</h3>
+                <ul>
+                    <li>What methods have others used for similar questions?</li>
+                    <li>What data sources are appropriate?</li>
+                    <li>What are the known challenges and limitations?</li>
+                    <li>How will your work build on or differ from existing research?</li>
+                </ul>
+
+                <h3>3. Data Acquisition and Preparation</h3>
+                <ul>
+                    <li>Identify appropriate sensors and datasets</li>
+                    <li>Determine temporal and spatial requirements</li>
+                    <li>Apply necessary preprocessing (cloud masking, atmospheric correction)</li>
+                    <li>Validate data quality and completeness</li>
+                </ul>
+
+                <h3>4. Method Development</h3>
+                <ul>
+                    <li>Design analysis workflow</li>
+                    <li>Develop or adapt algorithms</li>
+                    <li>Create validation strategies</li>
+                    <li>Plan for iteration and refinement</li>
+                </ul>
+
+                <h3>5. Analysis and Results</h3>
+                <ul>
+                    <li>Execute the analysis</li>
+                    <li>Assess accuracy and uncertainty</li>
+                    <li>Interpret results in context of research question</li>
+                    <li>Identify patterns, trends, and anomalies</li>
+                </ul>
+
+                <h3>6. Communication</h3>
+                <ul>
+                    <li>Create effective visualizations</li>
+                    <li>Write clear documentation</li>
+                    <li>Present findings to relevant audiences</li>
+                    <li>Publish results (papers, apps, or reports)</li>
+                </ul>
+            </section>
+
+            <section id="case-study-domains">
+                <h2>Remote Sensing Application Domains</h2>
+
+                <p>Remote sensing addresses challenges across numerous disciplines. Here are some of the major application domains you'll explore through case studies:</p>
+
+                <h3>Environmental Monitoring</h3>
+                <ul>
+                    <li><strong>Forest Change Detection:</strong> Tracking deforestation, degradation, and reforestation</li>
+                    <li><strong>Water Quality:</strong> Monitoring turbidity, algal blooms, and pollution</li>
+                    <li><strong>Land Degradation:</strong> Identifying desertification and soil erosion</li>
+                    <li><strong>Biodiversity:</strong> Habitat mapping and species distribution modeling</li>
+                </ul>
+
+                <h3>Climate and Weather</h3>
+                <ul>
+                    <li><strong>Surface Temperature:</strong> Urban heat islands and land surface temperature trends</li>
+                    <li><strong>Snow and Ice:</strong> Glacier retreat, snow cover extent, permafrost thaw</li>
+                    <li><strong>Precipitation:</strong> Rainfall estimation and drought monitoring</li>
+                    <li><strong>Extreme Events:</strong> Hurricane tracking, flood mapping, wildfire detection</li>
+                </ul>
+
+                <h3>Agriculture and Food Security</h3>
+                <ul>
+                    <li><strong>Crop Monitoring:</strong> Phenology, health, and yield prediction</li>
+                    <li><strong>Irrigation Management:</strong> Water use efficiency and soil moisture</li>
+                    <li><strong>Pest Detection:</strong> Early warning systems for crop diseases</li>
+                    <li><strong>Food Security:</strong> Regional crop production estimates</li>
+                </ul>
+
+                <h3>Public Health</h3>
+                <ul>
+                    <li><strong>Disease Vector Habitat:</strong> Mapping mosquito breeding sites for malaria/dengue</li>
+                    <li><strong>Air Quality:</strong> PM2.5 and aerosol optical depth monitoring</li>
+                    <li><strong>Urban Planning:</strong> Access to green space and health outcomes</li>
+                    <li><strong>Disaster Response:</strong> Infrastructure damage assessment and evacuation planning</li>
+                </ul>
+
+                <h3>Water Resources</h3>
+                <ul>
+                    <li><strong>River Morphology:</strong> Channel width, meandering, and bank erosion</li>
+                    <li><strong>Lake and Reservoir Levels:</strong> Surface water extent dynamics</li>
+                    <li><strong>Groundwater:</strong> Indirect indicators through vegetation stress</li>
+                    <li><strong>Wetlands:</strong> Extent, health, and seasonal dynamics</li>
+                </ul>
+            </section>
+
+            <section id="fluvial-geomorphology">
+                <h2>Case Study: Fluvial Geomorphology</h2>
+                
+                <p>One of the case studies you'll explore examines river systems from space—a field called <strong>fluvial geomorphology</strong>. This application demonstrates how Earth Engine enables large-scale analysis of dynamic natural systems.</p>
+
+                <h3>River Planview Geometry</h3>
+                <p>When you look at a river from above—what we call its "planview geometry"—you're essentially peering into a wealth of information about that river system. It's like a fingerprint, unique to each river, revealing intricate details about its life story. This overhead view can tell us about the river's morphological evolution, how water and sediment move through its channel, and much more.</p>
+
+                <h3>Hydraulic Geometry and Rating Curves</h3>
+                <p>One well-established theory in fluvial geomorphology is that of <strong>hydraulic geometry</strong>. It suggests a power-law relation, known as a "rating curve," between a river's width and discharge. So, if you know the width of a river at a certain point, you can make educated guesses about its discharge level.</p>
+
+                <p>This is a powerful insight that has modern applications. For instance, <strong>remote sensing images can measure a river's width and, consequently, monitor its discharge</strong>. This is particularly useful in regions where in-situ measurements are difficult to obtain.</p>
+
+                <h3>Meandering and Morphological Changes</h3>
+                <p>Rivers are not static; they are more like living organisms that evolve. As water moves from higher elevations to lower ones, rivers adjust their courses through a process known as <strong>meandering</strong>. This leads to lateral shifts in the river's course, driven by the erosion and accretion of sediment along the banks.</p>
+
+                <p>Understanding these changes is essential for various applications, from flood management to environmental conservation.</p>
+
+                <h3>The Technological Evolution</h3>
+
+                <h4>Early Days: Manual Interpretation</h4>
+                <p>Scientists relied heavily on aerial imagery in the early stages of studying rivers. These images were manually interpreted to deduce the characteristics of river systems—a labor-intensive and time-consuming process. But it was a start, giving us invaluable insights into river morphology.</p>
+
+                <h4>The Digital Revolution: Automated Processing</h4>
+                <p>Fast forward to the 21st century, and we've seen exponential growth in computing power and data availability:</p>
+                <ul>
+                    <li><strong>RivWidth software</strong> (Pavelsky and Smith 2008) first presented an automated method for river width extraction</li>
+                    <li><strong>RivWidthCloud (RWC)</strong> (Yang et al. 2019) later applied and expanded these methods to Earth Engine</li>
+                    <li>Methods for detecting changes in river form evolved from simple tools tracking hand-drawn centerlines (Shields et al. 2000) to automated methods processing entire basins (Constantine et al. 2014, Rowland et al. 2016)</li>
+                </ul>
+
+                <h4>Modern Capabilities: Large-Scale, Cloud-Based Analyses</h4>
+                <p>The capabilities of Earth Engine have dovetailed nicely with the needs of modern fluvial geomorphology. This platform allows for <strong>large-scale, high-speed data analysis</strong> that would have been unthinkable just a few years ago. With Earth Engine, researchers and policymakers now have a powerful tool for understanding and managing one of the planet's most vital natural resources: its rivers.</p>
+            </section>
+
+            <section id="skills-required">
+                <h2>Skills You'll Apply</h2>
+                
+                <p>These case studies will draw upon all the skills you've developed throughout the course:</p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0;">
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 5px;">
+                        <h4>JavaScript Programming</h4>
+                        <ul style="margin: 10px 0;">
+                            <li>Variables and data types</li>
+                            <li>Functions and loops</li>
+                            <li>Lists and objects</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 5px;">
+                        <h4>Data Management</h4>
+                        <ul style="margin: 10px 0;">
+                            <li>ImageCollections</li>
+                            <li>Filtering and mapping</li>
+                            <li>Reducing and aggregating</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 5px;">
+                        <h4>Image Analysis</h4>
+                        <ul style="margin: 10px 0;">
+                            <li>Band arithmetic</li>
+                            <li>Spectral indices (NDVI, NDBI, NDWI)</li>
+                            <li>Thresholding and masking</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 5px;">
+                        <h4>Classification</h4>
+                        <ul style="margin: 10px 0;">
+                            <li>Training data collection</li>
+                            <li>Supervised classifiers</li>
+                            <li>Accuracy assessment</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="project-tips">
+                <h2>Tips for Successful Projects</h2>
+
+                <ol>
+                    <li><strong>Start Simple:</strong> Get a basic version working before adding complexity</li>
+                    <li><strong>Iterate:</strong> Refine your methods based on preliminary results</li>
+                    <li><strong>Document:</strong> Comment your code and keep notes on decisions and findings</li>
+                    <li><strong>Validate:</strong> Always check results against known information or ground truth</li>
+                    <li><strong>Visualize Often:</strong> Use intermediate visualizations to catch errors early</li>
+                    <li><strong>Ask for Help:</strong> Consult documentation, forums, and peers when stuck</li>
+                    <li><strong>Manage Scope:</strong> Be realistic about what can be accomplished in the time available</li>
+                    <li><strong>Tell the Story:</strong> Focus on what your results mean, not just what you did</li>
+                </ol>
+            </section>
+
+            <section id="this-week">
+                <h2>This Week's Labs</h2>
+                <p>This week you'll work through detailed case studies that demonstrate real research applications:</p>
+                <div class="lab-links">
+                    <a href="../labs/lab-14-health-applications.html" class="lab-link-button">Lab 14: Health Applications</a>
+                    <a href="../labs/lab-15-urban-heat-island.html" class="lab-link-button">Lab 15: Urban Heat Island Analysis</a>
+                    <a href="../labs/lab-16-wildfire-analysis.html" class="lab-link-button">Lab 16: Wildfire Analysis</a>
+                    <a href="../labs/lab-17-river-morphology.html" class="lab-link-button">Lab 17: River Morphology</a>
+                    <a href="../labs/lab-18-final-project.html" class="lab-link-button">Lab 18: Final Project Planning</a>
+                </div>
+                <p><em>Note: These labs represent advanced applications that integrate multiple concepts and techniques.</em></p>
+            </section>
+
+            <section id="resources">
+                <h2>Additional Resources</h2>
+                <ul>
+                    <li><a href="https://earthengine.google.com/case_studies/" target="_blank">Earth Engine Case Studies</a></li>
+                    <li><a href="https://github.com/google/earthengine-community" target="_blank">Earth Engine Community Tutorials</a></li>
+                    <li>Gorelick, N. et al. (2017). "Google Earth Engine: Planetary-scale geospatial analysis for everyone"</li>
+                    <li>Pavelsky, T.M. & Smith, L.C. (2008). "RivWidth: A software tool for the calculation of river widths from remotely sensed imagery"</li>
+                    <li>Yang, X. et al. (2019). "RivWidthCloud: An automated Google Earth Engine algorithm for river width extraction from remotely sensed imagery"</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer class="lab-footer">
+            <a href="week06-public-engagement.html" class="nav-button">← Previous: Week 6</a>
+            <a href="../index.html" class="nav-button">Back to Home</a>
+            <span class="nav-button" style="opacity: 0.5;">End of Module Pages</span>
+        </footer>
+    </div>
+</body>
+</html>

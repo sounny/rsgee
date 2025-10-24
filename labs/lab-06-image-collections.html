@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 6 - Image Collections, Filtering & Sorting | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 6
+        </nav>
+
+        <header class="lab-header">
+            <h1>Lab 6 - Image Collections, Filtering & Sorting</h1>
+            <p><em><strong>Objective: Learn to work with large image collections and filter them by date, location, and properties.</strong></em></p>
+        </header>
+
+        <main class="lab-content">
+            <div class="note">
+                <p><strong>Lab Lecture:</strong> <a href="https://ufl.zoom.us/rec/share/uYl15vuKhf8pZrt_TRN08maw4i7SltbJczhhWoVrt-sSFhhELirmGtI1OiV6avez.xqUjNFUT3OMPnm42?startTime=1693931924000" target="_blank">Fall 2023 Recording</a></p>
+            </div>
+
+            <section>
+                <h2>Introduction: The Landsat Program</h2>
+                
+                <figure>
+                    <img src="../images/diagrams/5262-Landsat-timeline-FNL-2.jpg" alt="Timeline of Landsat missions">
+                    <figcaption>Timeline of the longest continuous remote sensing mission, Landsat</figcaption>
+                </figure>
+
+                <p>
+                    The Landsat program from NASA and the United States Geological Survey (USGS) has launched a sequence 
+                    of Earth observation satellites named Landsat 1, 2, etc. Landsats have been returning images since 1972, 
+                    making that collection of images the longest continuous satellite-based observation of the Earth's surface.
+                </p>
+
+                <p>
+                    The Landsat program has revolutionized remote sensing and land observation. The program was initially 
+                    developed to improve the understanding of the Earth's terrestrial and aquatic ecosystems, but its use 
+                    quickly grew to encompass a wide range of fields, such as natural resource exploration, disaster 
+                    preparedness, urban planning, and agricultural monitoring.
+                </p>
+
+                <figure>
+                    <img src="../images/diagrams/landsat8_channels.png" alt="Landsat 8 spectral bands">
+                    <figcaption>Electromagnetic Spectrum and the Windows in the Atmosphere with the Bands for Landsat 8</figcaption>
+                </figure>
+
+                <p>
+                    The Landsat satellites are designed to capture detailed images of the Earth's surface on a regular basis 
+                    with a spatial resolution of 30 meters per pixel in visible and near-infrared light bands, with additional 
+                    infrared and thermal band capabilities. Additionally, Landsat data is freely available to the public, 
+                    making it a valuable tool for both professional and amateur users.
+                </p>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Lab Instructions</h2>
+
+                <ol>
+                    <li>
+                        <h3>Viewing an Image Collection</h3>
+                        <p>Open up Google Earth Engine Code: <a href="https://code.earthengine.google.com/" target="_blank">https://code.earthengine.google.com/</a></p>
+                        <p>Copy and paste the following code into the center panel and click Run:</p>
+                        <pre><code>/////
+// View an Image Collection
+/////
+
+// Import the Landsat 8 Raw Collection.
+var landsat8 = ee.ImageCollection('LANDSAT/LC08/C02/T1');
+
+// Print the size of the Landsat 8 dataset.
+print('The size of the Landsat 8 image collection is:', landsat8.size());
+
+// Try to print the image collection.
+// WARNING! Running the print code immediately below produces an error because 
+// the Console cannot print more than 5000 elements.
+print(landsat8);
+
+// Add the Landsat 8 dataset to the map as a mosaic.
+Map.addLayer(landsat8,
+    {
+        bands: ['B4', 'B3', 'B2'],
+        min: 5000,
+        max: 15000
+    },
+    'Landsat 8 Image Collection');</code></pre>
+                        <p>
+                            While the enormous image catalog is accessed, it could take a couple of minutes to see the result. 
+                            You may note individual "scenes" being drawn, which equate to the way that the Landsat program 
+                            partitions Earth into "paths" and "rows."
+                        </p>
+                        <figure>
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 2.06.31 AM.png" alt="Landsat imagery being drawn">
+                            <figcaption>Screenshot of Landsat being drawn on Google Earth Engine</figcaption>
+                        </figure>
+                        <p>
+                            <strong>Note about Rows and Paths:</strong> Images from Landsat are placed in a grid pattern. 
+                            A row is a sequence of images taken at the same latitude, while a path is a series of images taken 
+                            at the same longitude. Paths are numbered from west to east starting at the 180-degree longitude line. 
+                            Rows are numbered from south to north starting at the equator.
+                        </p>
+                        <p>
+                            Notice the high amount of cloud cover and the "layered" look. This is because Earth Engine is drawing 
+                            each of the images one on top of the other.
+                        </p>
+                        <figure>
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 2.51.00 AM.png" alt="Size of Landsat collection">
+                            <figcaption>The number of Landsat images in the collection (over 1 million!)</figcaption>
+                        </figure>
+                        <figure>
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 5.59.46 AM.png" alt="Error message">
+                            <figcaption>Error from trying to print too many elements</figcaption>
+                        </figure>
+                    </li>
+
+                    <li>
+                        <h3>Comment Out Code</h3>
+                        <p>
+                            Edit your code to "comment out" the last two code commands using <code>//</code> at the beginning 
+                            of each line. This will speed up your code in subsequent sections.
+                        </p>
+                        <figure>
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.03.07 AM.png" alt="Commented out code">
+                            <figcaption>Commented out code</figcaption>
+                        </figure>
+                    </li>
+
+                    <li>
+                        <h3>Filter by Date</h3>
+                        <p>
+                            Now we will look at finding "the needle in the haystack." The basic approach to GEE is to add an 
+                            image collection that brings in every image, then to filter the collection until you find the exact 
+                            image you're interested in.
+                        </p>
+                        <p>
+                            <code>filterDate</code> allows us to narrow down the date range of the ImageCollection. Copy and paste:
+                        </p>
+                        <pre><code>/////
+// Filter an Image Collection
+/////
+
+// Filter the collection by date.
+var landsatWinter = landsat8.filterDate('2020-12-01', '2021-03-01');
+
+Map.addLayer(landsatWinter,
+    {
+        bands: ['B4', 'B3', 'B2'],
+        min: 5000,
+        max: 15000
+    },
+    'Winter Landsat 8');
+
+print('The size of the Winter Landsat 8 image collection is:', landsatWinter.size());</code></pre>
+                        <p>
+                            The result will load much faster because we filtered by date. Notice that before we had over a 
+                            million images; after filtering, we have thousands.
+                        </p>
+                        <figure>
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.07.39 AM.png" alt="Filtered by date results">
+                            <figcaption>Results from filtering by date</figcaption>
+                        </figure>
+                        <p>Comment out the Map.addLayer for winter imagery before moving on.</p>
+                        <figure>
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.15.34 AM.png" alt="Commented winter code">
+                            <figcaption>Commented out winter imagery code</figcaption>
+                        </figure>
+                    </li>
+
+                    <li>
+                        <h3>Filter by Location</h3>
+                        <p>
+                            The filtering tool <code>filterBounds</code> is based on a location—for example, a point, 
+                            polygon, or other geometry. Copy and paste:
+                        </p>
+                        <pre><code>/////
+// Filter by location    
+/////
+
+// Create an Earth Engine Point object.
+var pointFL = ee.Geometry.Point([-82.32, 29.65]);
+
+// Filter the collection by location using the point.
+var landsatFL = landsatWinter.filterBounds(pointFL);
+Map.addLayer(landsatFL,
+    {
+        bands: ['B4', 'B3', 'B2'],
+        min: 5000,
+        max: 15000
+    },
+    'FL Landsat 8');
+
+// Add the point to the map to see where it is.
+Map.addLayer(pointFL, {}, 'Point FL');
+
+print('The size of the Gainesville Winter Landsat 8 image collection is: ', landsatFL.size());</code></pre>
+                        <p>
+                            Note that we add the pointFL to the map with an empty dictionary <code>{}</code> for the visParams 
+                            argument—we are not specifying visualization parameters, using defaults instead.
+                        </p>
+                        <p>Run the code. Now only images that intersect our point have been selected. Note we only have 12 images.</p>
+                        <figure>
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.21.57 AM.png" alt="Filtered by location">
+                            <figcaption>Filtered by location results</figcaption>
+                        </figure>
+                    </li>
+
+                    <li>
+                        <h3>Select First Image</h3>
+                        <p>
+                            The <code>first</code> function selects the first image in an ImageCollection. This allows us to 
+                            place a single image on the screen. Because images are stored in time order, it will select the 
+                            earliest image.
+                        </p>
+                        <figure>
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.24.50 AM.png" alt="First image selected">
+                            <figcaption>Filtered to a single image</figcaption>
+                        </figure>
+                        <p>
+                            Notice the image is very cloudy. Normally this is a problem for analysis—we prefer images without 
+                            clouds. Each image in Landsat's collection has a cloud cover rating we can use.
+                        </p>
+                    </li>
+
+                    <li>
+                        <h3>Sort by Cloud Cover</h3>
+                        <p>The basic approach is to sort the ImageCollection by cloud cover, then add the first image:</p>
+                        <pre><code>// Sort the image collection by cloud cover
+var landsatSort = landsatFL.sort('CLOUD_COVER');
+
+// Select the first image in the sorted collection.
+var landsatFirstSort = landsatSort.first();
+
+// Display the first image in the sorted collection.
+Map.centerObject(landsatFirstSort, 7);
+Map.addLayer(landsatFirstSort,
+    {
+        bands: ['B4', 'B3', 'B2'],
+        min: 5000,
+        max: 15000
+    },
+    'Sort Landsat 8');</code></pre>
+                        <p>
+                            Now you have a single Landsat image with no cloud cover, filtered for Gainesville during the 
+                            winter of 2020-2021!
+                        </p>
+                        <figure>
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.32.41 AM.png" alt="Cloud-free result">
+                            <figcaption>Cloud-free sorted image result</figcaption>
+                        </figure>
+                        <p><em>Full code link: <a href="https://code.earthengine.google.com/63a62bb95d997e06fda0f38141ca4aa4" target="_blank">GEE Code</a></em></p>
+                    </li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Challenge</h2>
+                <div class="warning">
+                    <p><strong>Challenge Task:</strong></p>
+                    <p>
+                        Using the filtering method, create code that displays a single cloud-free image of the 
+                        <strong>Champs De Mars in Paris, France</strong>, in the <strong>summer of 2022</strong> (June-August). 
+                        Display the image in both Natural Color and Color Infrared.
+                    </p>
+                    <p><strong>Requirements:</strong></p>
+                    <ul>
+                        <li>Filter by date (summer 2022)</li>
+                        <li>Filter by location (Paris coordinates)</li>
+                        <li>Sort by cloud cover</li>
+                        <li>Display in two band combinations</li>
+                        <li>Follow good coding practices with detailed comments</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="submission">
+                <div class="submission-box">
+                    <h3>📧 Lab Submission</h3>
+                    <p><strong>Email to:</strong> <a href="mailto:instructor@university.edu">instructor@university.edu</a></p>
+                    <p><strong>Subject:</strong> <code>Lab 6 - Image Collections - [Your Name]</code></p>
+                    <p><strong>Include:</strong></p>
+                    <ul>
+                        <li>Shareable link to your GEE script</li>
+                        <li>Screenshots of Paris in both natural color and false color</li>
+                        <li>Well-commented code explaining your approach</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="lab-05-challenge-refreshers.html">← Previous Lab</a> | <a href="lab-07-challenge-finding-dataset.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
+        </footer>
+    </div>
+</body>
+</html>

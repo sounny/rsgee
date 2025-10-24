@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 8: Elevation Modeling and Zonal Statistics | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt;
+            <a href="../index.html#schedule">Schedule</a> &gt;
+            <span>Week 8: Elevation Modeling and Zonal Statistics</span>
+        </nav>
+
+        <header class="lab-header">
+            <h1>Week 8: Elevation Modeling and Zonal Statistics</h1>
+            <p><em><strong>Learning objectives:</strong> Work with Digital Elevation Models (DEMs), visualize terrain features, understand interoperability between Earth Engine and other GIS platforms, and apply reducers for zonal statistics.</em></p>
+        </header>
+
+        <main class="lab-content">
+            <section id="introduction">
+                <h2>Beyond Optical Imagery: Elevation Data</h2>
+                
+                <p>So far in this course, we've focused primarily on optical remote sensing—analyzing spectral reflectance from satellite images. But remote sensing encompasses much more than just optical data. <strong>Digital Elevation Models (DEMs)</strong> represent the Earth's topography and provide critical information for understanding landscapes, hydrology, and environmental processes.</p>
+
+                <p>This week introduces you to:</p>
+                <ul>
+                    <li><strong>Digital Elevation Models (DEMs):</strong> Working with terrain data in Earth Engine</li>
+                    <li><strong>Terrain Visualization:</strong> Creating hillshades, slope, and aspect maps</li>
+                    <li><strong>Interoperability:</strong> Exporting data from Earth Engine to desktop GIS software</li>
+                    <li><strong>Reducers:</strong> Computing zonal statistics to summarize data across regions</li>
+                </ul>
+            </section>
+
+            <section id="digital-elevation-models">
+                <h2>Digital Elevation Models (DEMs)</h2>
+                
+                <p>A <strong>Digital Elevation Model (DEM)</strong> is a 3D representation of terrain surface, where each pixel stores an elevation value. DEMs are fundamental for terrain analysis, hydrological modeling, viewshed analysis, and countless other applications.</p>
+
+                <h3>Common Global DEMs in Earth Engine</h3>
+
+                <h4>SRTM (Shuttle Radar Topography Mission)</h4>
+                <ul>
+                    <li><strong>Spatial Resolution:</strong> 30 meters (1 arc-second)</li>
+                    <li><strong>Coverage:</strong> 60°N to 56°S (most populated areas)</li>
+                    <li><strong>Collection Date:</strong> February 2000 (single mission)</li>
+                    <li><strong>Method:</strong> Radar interferometry from Space Shuttle</li>
+                    <li><strong>Dataset ID:</strong> <code>USGS/SRTMGL1_003</code></li>
+                </ul>
+
+                <h4>ASTER GDEM (Advanced Spaceborne Thermal Emission and Reflection Radiometer)</h4>
+                <ul>
+                    <li><strong>Spatial Resolution:</strong> 30 meters</li>
+                    <li><strong>Coverage:</strong> 83°N to 83°S (near-global)</li>
+                    <li><strong>Collection:</strong> Compiled from multiple images (2000-2013)</li>
+                    <li><strong>Method:</strong> Stereoscopic optical imagery</li>
+                </ul>
+
+                <h4>ALOS World 3D</h4>
+                <ul>
+                    <li><strong>Spatial Resolution:</strong> 30 meters</li>
+                    <li><strong>Coverage:</strong> Global land areas</li>
+                    <li><strong>Collection:</strong> 2006-2011</li>
+                    <li><strong>Method:</strong> Synthetic Aperture Radar (SAR)</li>
+                </ul>
+
+                <div class="code-example">
+                    <pre><code>// Loading SRTM elevation data
+var srtm = ee.Image('USGS/SRTMGL1_003');
+var elevation = srtm.select('elevation');
+
+// Visualize elevation
+Map.addLayer(elevation, {
+    min: 0,
+    max: 4000,
+    palette: ['blue', 'green', 'yellow', 'orange', 'red', 'white']
+}, 'Elevation');
+
+// Print elevation statistics
+print('Elevation stats:', elevation.reduceRegion({
+    reducer: ee.Reducer.minMax(),
+    geometry: geometry,
+    scale: 30
+}));</code></pre>
+                </div>
+            </section>
+
+            <section id="terrain-analysis">
+                <h2>Terrain Analysis and Visualization</h2>
+                
+                <p>DEMs unlock numerous derivative products that reveal landscape characteristics:</p>
+
+                <h3>Slope</h3>
+                <p>Slope measures the rate of elevation change—how steep the terrain is. Calculated as the maximum rate of change in elevation, expressed in degrees (0-90°) or percent.</p>
+
+                <div class="code-example">
+                    <pre><code>// Calculate slope in degrees
+var slope = ee.Terrain.slope(elevation);
+
+Map.addLayer(slope, {
+    min: 0,
+    max: 60,
+    palette: ['green', 'yellow', 'red']
+}, 'Slope');</code></pre>
+                </div>
+
+                <p><strong>Applications:</strong> Landslide susceptibility, erosion modeling, trail planning, agriculture suitability</p>
+
+                <h3>Aspect</h3>
+                <p>Aspect indicates the compass direction a slope faces. Measured in degrees (0-360°), where 0° = North, 90° = East, 180° = South, 270° = West.</p>
+
+                <div class="code-example">
+                    <pre><code>// Calculate aspect
+var aspect = ee.Terrain.aspect(elevation);
+
+Map.addLayer(aspect, {
+    min: 0,
+    max: 360,
+    palette: ['blue', 'green', 'yellow', 'red']
+}, 'Aspect');</code></pre>
+                </div>
+
+                <p><strong>Applications:</strong> Solar radiation modeling, microclimate analysis, vegetation patterns, snow accumulation</p>
+
+                <h3>Hillshade</h3>
+                <p>Hillshade simulates shadows cast by terrain when illuminated from a specific direction. Creates intuitive 3D visualization of topography.</p>
+
+                <div class="code-example">
+                    <pre><code>// Create hillshade (azimuth: 315°, zenith: 45°)
+var hillshade = ee.Terrain.hillshade(elevation, 315, 45);
+
+Map.addLayer(hillshade, {
+    min: 0,
+    max: 255
+}, 'Hillshade');</code></pre>
+                </div>
+
+                <p><strong>Parameters:</strong></p>
+                <ul>
+                    <li><strong>Azimuth:</strong> Sun direction (0-360°, where 0° = North)</li>
+                    <li><strong>Zenith:</strong> Sun elevation angle above horizon (0-90°)</li>
+                </ul>
+            </section>
+
+            <section id="interoperability">
+                <h2>Interoperability: Earth Engine and Desktop GIS</h2>
+                
+                <p>While Earth Engine excels at large-scale analysis, you often need to export results to desktop GIS software like ArcGIS Pro or QGIS for further analysis, cartography, or integration with other datasets.</p>
+
+                <h3>Exporting Images</h3>
+                <div class="code-example">
+                    <pre><code>// Export image to Google Drive
+Export.image.toDrive({
+    image: elevation.clip(geometry),
+    description: 'SRTM_Elevation',
+    folder: 'EarthEngineExports',
+    fileNamePrefix: 'elevation',
+    region: geometry,
+    scale: 30,
+    crs: 'EPSG:4326',
+    maxPixels: 1e9
+});
+
+// Export to Google Cloud Storage
+Export.image.toCloudStorage({
+    image: elevation.clip(geometry),
+    description: 'SRTM_to_GCS',
+    bucket: 'your-bucket-name',
+    fileNamePrefix: 'elevation',
+    region: geometry,
+    scale: 30
+});</code></pre>
+                </div>
+
+                <h3>Exporting Feature Collections</h3>
+                <div class="code-example">
+                    <pre><code>// Export vector data (polygons, points, lines)
+Export.table.toDrive({
+    collection: watersheds,
+    description: 'Watershed_Boundaries',
+    folder: 'EarthEngineExports',
+    fileNamePrefix: 'watersheds',
+    fileFormat: 'SHP'  // or 'GeoJSON', 'KML', 'CSV'
+});</code></pre>
+                </div>
+
+                <h3>Best Practices for Exporting</h3>
+                <ul>
+                    <li><strong>Clip to Region:</strong> Use <code>.clip(geometry)</code> to reduce file size</li>
+                    <li><strong>Choose Appropriate Scale:</strong> Match your analysis resolution (don't export at finer resolution than needed)</li>
+                    <li><strong>Set CRS:</strong> Specify coordinate reference system for consistency</li>
+                    <li><strong>Manage Size:</strong> Large exports may need to be split into tiles</li>
+                    <li><strong>Monitor Tasks:</strong> Check the Tasks tab to monitor export progress</li>
+                </ul>
+            </section>
+
+            <section id="reducers">
+                <h2>Reducers: Zonal Statistics</h2>
+                
+                <p><strong>Reducers</strong> are Earth Engine's method for aggregating data. They compute statistics (mean, sum, min, max, etc.) over spatial regions, time periods, or image bands. This is equivalent to "zonal statistics" in traditional GIS.</p>
+
+                <h3>Common Reducers</h3>
+                <ul>
+                    <li><code>ee.Reducer.mean()</code> - Calculate mean/average</li>
+                    <li><code>ee.Reducer.sum()</code> - Calculate sum</li>
+                    <li><code>ee.Reducer.min()</code> and <code>ee.Reducer.max()</code> - Find minimum/maximum</li>
+                    <li><code>ee.Reducer.median()</code> - Calculate median</li>
+                    <li><code>ee.Reducer.stdDev()</code> - Calculate standard deviation</li>
+                    <li><code>ee.Reducer.count()</code> - Count pixels</li>
+                    <li><code>ee.Reducer.minMax()</code> - Get both min and max</li>
+                </ul>
+
+                <h3>Zonal Statistics Example</h3>
+                <div class="code-example">
+                    <pre><code>// Calculate mean elevation for each county
+var countyStats = elevation.reduceRegions({
+    collection: counties,
+    reducer: ee.Reducer.mean().combine({
+        reducer2: ee.Reducer.stdDev(),
+        sharedInputs: true
+    }),
+    scale: 30
+});
+
+print('County elevation statistics:', countyStats);
+
+// Multiple statistics at once
+var stats = elevation.reduceRegion({
+    reducer: ee.Reducer.mean()
+        .combine(ee.Reducer.min(), '', true)
+        .combine(ee.Reducer.max(), '', true)
+        .combine(ee.Reducer.stdDev(), '', true),
+    geometry: studyArea,
+    scale: 30,
+    maxPixels: 1e9
+});
+
+print('Study area elevation:', stats);</code></pre>
+                </div>
+
+                <h3>Applications of Zonal Statistics</h3>
+                <ul>
+                    <li><strong>Administrative Summaries:</strong> Average NDVI per county or province</li>
+                    <li><strong>Watershed Analysis:</strong> Mean elevation or precipitation per watershed</li>
+                    <li><strong>Protected Areas:</strong> Forest cover percentage in national parks</li>
+                    <li><strong>Agricultural Fields:</strong> Crop health metrics per field boundary</li>
+                    <li><strong>Urban Analysis:</strong> Land surface temperature per neighborhood</li>
+                </ul>
+            </section>
+
+            <section id="workflow-integration">
+                <h2>Integrated Workflow Example</h2>
+                
+                <p>Here's a complete workflow combining elevation analysis, visualization, and zonal statistics:</p>
+
+                <div class="code-example">
+                    <pre><code>// 1. Load elevation data
+var srtm = ee.Image('USGS/SRTMGL1_003');
+var elevation = srtm.select('elevation');
+
+// 2. Calculate terrain derivatives
+var slope = ee.Terrain.slope(elevation);
+var aspect = ee.Terrain.aspect(elevation);
+var hillshade = ee.Terrain.hillshade(elevation);
+
+// 3. Create terrain products composite
+var terrain = ee.Image.cat([
+    elevation.rename('elevation'),
+    slope.rename('slope'),
+    aspect.rename('aspect')
+]);
+
+// 4. Calculate zonal statistics for watersheds
+var watershedStats = terrain.reduceRegions({
+    collection: watersheds,
+    reducer: ee.Reducer.mean().combine({
+        reducer2: ee.Reducer.stdDev(),
+        sharedInputs: true
+    }),
+    scale: 30
+});
+
+// 5. Export results
+Export.table.toDrive({
+    collection: watershedStats,
+    description: 'Watershed_Terrain_Stats',
+    fileFormat: 'CSV'
+});
+
+// 6. Visualize
+Map.addLayer(hillshade, {}, 'Hillshade', false);
+Map.addLayer(elevation, {
+    min: 0, max: 3000,
+    palette: ['blue', 'green', 'yellow', 'brown', 'white']
+}, 'Elevation');
+Map.addLayer(watersheds, {color: 'red'}, 'Watersheds', false);</code></pre>
+                </div>
+            </section>
+
+            <section id="this-week">
+                <h2>This Week's Labs</h2>
+                <div class="lab-links">
+                    <a href="../labs/lab-14-interoperability-arcgis.html" class="lab-link-button">Lab 14: Interoperability with ArcGIS Pro</a>
+                    <a href="../labs/lab-15-visualizing-srtm.html" class="lab-link-button">Lab 15: Visualizing SRTM Data</a>
+                    <a href="../labs/lab-16-zonal-statistics.html" class="lab-link-button">Lab 16: Zonal Statistics</a>
+                </div>
+            </section>
+
+            <section id="resources">
+                <h2>Additional Resources</h2>
+                <ul>
+                    <li><a href="https://developers.google.com/earth-engine/guides/reducers_intro" target="_blank">Earth Engine Reducers Guide</a></li>
+                    <li><a href="https://developers.google.com/earth-engine/guides/exporting" target="_blank">Exporting Data from Earth Engine</a></li>
+                    <li><a href="https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003" target="_blank">SRTM Data Catalog</a></li>
+                    <li><a href="https://developers.google.com/earth-engine/apidocs/ee-terrain" target="_blank">Terrain Functions Documentation</a></li>
+                    <li>Farr, T.G. et al. (2007). "The Shuttle Radar Topography Mission" - Reviews of Geophysics</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer class="lab-footer">
+            <a href="week07-applications-case-studies.html" class="nav-button">← Previous: Week 7</a>
+            <a href="../index.html" class="nav-button">Back to Home</a>
+            <a href="week09-midterm-review.html" class="nav-button">Next: Week 9 →</a>
+        </footer>
+    </div>
+</body>
+</html>

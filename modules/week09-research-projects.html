@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 9: Research Project Planning | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt;
+            <a href="../index.html#schedule">Schedule</a> &gt;
+            <span>Week 9: Research Project Planning</span>
+        </nav>
+
+        <header class="lab-header">
+            <h1>Week 9: Research Project Planning</h1>
+            <p><em><strong>Learning objectives:</strong> Develop geographic research questions suited for remote sensing, formulate methodological approaches, state testable hypotheses, and understand the research process from question to publication.</em></p>
+        </header>
+
+        <main class="lab-content">
+            <section id="introduction">
+                <h2>Doing Research with Remote Sensing</h2>
+                
+                <p>Geography is the study of the earth's surface and features, including its physical and cultural landscapes. <strong>Remote sensing is a powerful tool</strong> that enables geographers to collect data about the earth's surface from a distance without visiting the site physically. This technology has revolutionized how geographers study the world, providing an efficient and effective way to answer research questions.</p>
+
+                <p>However, to make the most of remote sensing technology, it is essential to:</p>
+                <ul>
+                    <li>Develop <strong>research questions</strong> that are easily answered through remote sensing</li>
+                    <li>Formulate a <strong>methodological approach</strong> for collecting and analyzing data</li>
+                    <li>State <strong>expected hypotheses</strong> based on existing knowledge</li>
+                    <li>Consider <strong>broader impacts</strong> and real-world applications</li>
+                </ul>
+
+                <p>This week focuses on transforming your Earth Engine skills into meaningful research contributions.</p>
+            </section>
+
+            <section id="research-questions">
+                <h2>Developing Research Questions for Remote Sensing</h2>
+                
+                <p>The first step in developing research questions for remote sensing is to <strong>identify areas where remote sensing can be used effectively</strong>.</p>
+
+                <h3>Where Remote Sensing Excels</h3>
+                <ul>
+                    <li><strong>Land Use and Land Cover Changes:</strong> Deforestation, urbanization, agricultural expansion</li>
+                    <li><strong>Vegetation Dynamics:</strong> Phenology, drought stress, biomass estimation</li>
+                    <li><strong>Urbanization Patterns:</strong> City growth, sprawl, density changes</li>
+                    <li><strong>Water Resources:</strong> Lake levels, river width, wetland extent</li>
+                    <li><strong>Disaster Monitoring:</strong> Flood extent, wildfire severity, landslide detection</li>
+                    <li><strong>Climate Indicators:</strong> Snow cover, glacial retreat, temperature patterns</li>
+                    <li><strong>Coastal Changes:</strong> Erosion, sediment transport, mangrove health</li>
+                </ul>
+
+                <h3>Characteristics of Good Research Questions</h3>
+
+                <p>Once you've identified an area of study, develop research questions that are:</p>
+
+                <ol>
+                    <li><strong>Specific:</strong> Focused on a particular phenomenon, location, and time period</li>
+                    <li><strong>Measurable:</strong> Can be answered with quantitative or qualitative data</li>
+                    <li><strong>Relevant:</strong> Addresses a gap in knowledge or a real-world problem</li>
+                    <li><strong>Feasible:</strong> Answerable with available data and methods</li>
+                    <li><strong>Significant:</strong> Has implications beyond the immediate study area</li>
+                </ul>
+
+                <h3>Example Research Questions</h3>
+
+                <div style="background: #f9f9f9; padding: 15px; border-left: 4px solid #4a90a4; margin: 20px 0;">
+                    <h4>❌ Weak Question:</h4>
+                    <p>"How has land use changed?"</p>
+                    <p><em>Problem: Too vague—no location, time period, or specific type of change specified.</em></p>
+                    
+                    <h4 style="margin-top: 20px;">✓ Strong Question:</h4>
+                    <p>"How has land use and land cover changed in the Amazon Rainforest between 2010 and 2020, and what are the primary drivers of deforestation?"</p>
+                    <p><em>Strength: Specific location, defined time period, measurable change, and addresses causation.</em></p>
+                </div>
+
+                <div style="background: #f9f9f9; padding: 15px; border-left: 4px solid #4a90a4; margin: 20px 0;">
+                    <h4>✓ More Examples of Strong Questions:</h4>
+                    <ul style="margin-top: 10px;">
+                        <li>"What is the relationship between urban heat island intensity and vegetation cover in Phoenix, Arizona during summer months (2015-2024)?"</li>
+                        <li>"How has the width of the Mississippi River changed in response to major flood events over the past 30 years?"</li>
+                        <li>"Can NDVI time series predict crop yield in Iowa corn fields at a county level?"</li>
+                        <li>"What is the spatial extent of glacier retreat in the Himalayas between 1990 and 2023?"</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="methodology">
+                <h2>Formulating a Methodological Approach</h2>
+                
+                <p>Once you have developed research questions, the next step is formulating a methodological approach to answer those questions. This approach should include a <strong>detailed plan for collecting and analyzing remote sensing data</strong>.</p>
+
+                <h3>Step 1: Identify Data Requirements</h3>
+                
+                <h4>Type of Remote Sensing Data</h4>
+                <ul>
+                    <li><strong>Optical Imagery:</strong> Landsat, Sentinel-2, MODIS (for vegetation, land cover)</li>
+                    <li><strong>Radar:</strong> Sentinel-1, ALOS PALSAR (for water, structure, all-weather)</li>
+                    <li><strong>Thermal:</strong> Landsat thermal bands, MODIS LST (for temperature)</li>
+                    <li><strong>Elevation:</strong> SRTM, ASTER GDEM (for topography, hydrology)</li>
+                    <li><strong>Climate:</strong> CHIRPS, TerraClimate (for precipitation, evapotranspiration)</li>
+                </ul>
+
+                <h4>Spatial Resolution Considerations</h4>
+                <ul>
+                    <li><strong>High-resolution (< 10m):</strong> Sentinel-2, Planet, WorldView - For detailed local studies</li>
+                    <li><strong>Medium-resolution (10-100m):</strong> Landsat, Sentinel - For regional studies</li>
+                    <li><strong>Coarse-resolution (> 100m):</strong> MODIS - For global or continental studies</li>
+                </ul>
+
+                <h4>Temporal Resolution Considerations</h4>
+                <ul>
+                    <li><strong>High-frequency (daily):</strong> MODIS, Sentinel - For rapid change detection</li>
+                    <li><strong>Medium-frequency (weekly):</strong> Landsat composite - For seasonal patterns</li>
+                    <li><strong>Low-frequency (annual):</strong> Single-date imagery - For long-term trends</li>
+                </ul>
+
+                <h3>Step 2: Data Preprocessing</h3>
+                <p>Outline necessary preprocessing steps:</p>
+                <ul>
+                    <li><strong>Cloud Masking:</strong> Remove cloudy pixels</li>
+                    <li><strong>Atmospheric Correction:</strong> Convert to surface reflectance</li>
+                    <li><strong>Geometric Correction:</strong> Ensure spatial accuracy</li>
+                    <li><strong>Mosaicking:</strong> Combine multiple images</li>
+                    <li><strong>Temporal Compositing:</strong> Create cloud-free composites</li>
+                </ul>
+
+                <h3>Step 3: Analysis Methods</h3>
+                <p>Describe analytical techniques:</p>
+                <ul>
+                    <li><strong>Image Classification:</strong> Supervised, unsupervised, or object-based</li>
+                    <li><strong>Change Detection:</strong> Image differencing, post-classification comparison, time series analysis</li>
+                    <li><strong>Spectral Indices:</strong> NDVI, NDWI, NDBI calculation and interpretation</li>
+                    <li><strong>Spatial Analysis:</strong> Zonal statistics, distance calculations, neighborhood analysis</li>
+                    <li><strong>Statistical Analysis:</strong> Regression, correlation, trend analysis</li>
+                </ul>
+
+                <h3>Step 4: Validation Strategy</h3>
+                <p>Plan how you'll assess accuracy:</p>
+                <ul>
+                    <li><strong>Ground Truth Data:</strong> Field observations, GPS points, existing maps</li>
+                    <li><strong>Reference Data:</strong> High-resolution imagery, historical records</li>
+                    <li><strong>Accuracy Metrics:</strong> Overall accuracy, kappa coefficient, producer's/user's accuracy</li>
+                    <li><strong>Uncertainty Quantification:</strong> Error propagation, confidence intervals</li>
+                </ul>
+            </section>
+
+            <section id="hypotheses">
+                <h2>Stating Expected Hypotheses</h2>
+                
+                <p>In addition to research questions and methodology, it's important to state the <strong>expected hypotheses</strong> for your study. Hypotheses are statements that predict the outcome of your research based on existing knowledge and observations.</p>
+
+                <h3>What Makes a Good Hypothesis?</h3>
+                <ul>
+                    <li><strong>Testable:</strong> Can be supported or refuted with data</li>
+                    <li><strong>Specific:</strong> Makes clear predictions</li>
+                    <li><strong>Grounded:</strong> Based on theory or prior observations</li>
+                    <li><strong>Falsifiable:</strong> Can be proven wrong</li>
+                </ul>
+
+                <h3>Example Hypotheses</h3>
+
+                <div style="background: #f9f9f9; padding: 15px; margin: 20px 0;">
+                    <p><strong>Research Question:</strong> "How has land use and land cover changed in the Amazon Rainforest over the past decade?"</p>
+                    
+                    <p><strong>Hypothesis:</strong> "Land use in the Amazon Rainforest has increased over the past decade, leading to a decrease in forest cover (>20% loss) and an increase in agricultural land (>15% gain), primarily along road networks and in the Brazilian states of Pará and Mato Grosso."</p>
+                    
+                    <p><em>This hypothesis is based on existing knowledge of deforestation in the Amazon Rainforest and can be tested using remote sensing data.</em></p>
+                </div>
+
+                <div style="background: #f9f9f9; padding: 15px; margin: 20px 0;">
+                    <p><strong>Research Question:</strong> "What is the relationship between urban heat island intensity and vegetation cover?"</p>
+                    
+                    <p><strong>Hypothesis:</strong> "Urban areas with higher vegetation cover (NDVI > 0.5) will exhibit land surface temperatures 3-5°C lower than areas with low vegetation cover (NDVI < 0.2), with the strongest cooling effect observed in parks larger than 5 hectares."</p>
+                </div>
+            </section>
+
+            <section id="broader-impacts">
+                <h2>Incorporating Context and Broader Impacts</h2>
+                
+                <p>It is important to consider the <strong>broader impacts of research</strong> when writing research questions. This means thinking about how the research could be used to improve people's lives or protect the environment.</p>
+
+                <h3>Types of Broader Impacts</h3>
+
+                <h4>Societal Benefits</h4>
+                <ul>
+                    <li>Inform policy decisions on land use planning</li>
+                    <li>Support disaster preparedness and response</li>
+                    <li>Guide conservation priorities</li>
+                    <li>Improve agricultural practices and food security</li>
+                    <li>Enhance public health surveillance</li>
+                </ul>
+
+                <h4>Scientific Advancement</h4>
+                <ul>
+                    <li>Develop new methods or algorithms</li>
+                    <li>Validate existing theories</li>
+                    <li>Create reusable datasets</li>
+                    <li>Advance Earth Engine capabilities</li>
+                </ul>
+
+                <h4>Educational Value</h4>
+                <ul>
+                    <li>Training materials for students</li>
+                    <li>Public awareness campaigns</li>
+                    <li>Citizen science opportunities</li>
+                    <li>Visualization tools for education</li>
+                </ul>
+
+                <h3>Potential Negative Impacts</h3>
+                <p>Be aware of potential negative consequences:</p>
+                <ul>
+                    <li>Misinterpretation by non-experts</li>
+                    <li>Privacy concerns with high-resolution imagery</li>
+                    <li>Unintended policy consequences</li>
+                    <li>Resource extraction in sensitive areas</li>
+                </ul>
+
+                <p>By considering context, broader impacts, and hypotheses, researchers can write research questions that are well-suited to remote sensing and can lead to valuable insights.</p>
+            </section>
+
+            <section id="project-timeline">
+                <h2>Typical Research Project Timeline</h2>
+                
+                <div style="background: #f9f9f9; padding: 15px; margin: 20px 0;">
+                    <h3>Weeks 1-2: Planning Phase</h3>
+                    <ul>
+                        <li>Literature review</li>
+                        <li>Define research questions and hypotheses</li>
+                        <li>Identify data sources</li>
+                    </ul>
+
+                    <h3>Weeks 3-4: Data Acquisition and Preprocessing</h3>
+                    <ul>
+                        <li>Access and download/load datasets</li>
+                        <li>Apply preprocessing (cloud masking, correction)</li>
+                        <li>Create initial visualizations</li>
+                    </ul>
+
+                    <h3>Weeks 5-7: Analysis</h3>
+                    <ul>
+                        <li>Implement analysis methods</li>
+                        <li>Iterative refinement of approach</li>
+                        <li>Generate results and statistics</li>
+                    </ul>
+
+                    <h3>Weeks 8-9: Validation and Interpretation</h3>
+                    <ul>
+                        <li>Accuracy assessment</li>
+                        <li>Interpret results in context of research questions</li>
+                        <li>Identify limitations</li>
+                    </ul>
+
+                    <h3>Weeks 10-12: Communication</h3>
+                    <ul>
+                        <li>Create figures and visualizations</li>
+                        <li>Write report/paper</li>
+                        <li>Prepare presentation</li>
+                        <li>Share code and data</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="this-week">
+                <h2>This Week's Activities</h2>
+                <div class="lab-links">
+                    <p style="text-align: center; margin: 20px 0;">
+                        <strong>Research Questions Workshop</strong><br>
+                        Work with instructor and peers to refine your project ideas
+                    </p>
+                    <a href="../labs/lab-18-final-project.html" class="lab-link-button">Research Questions - First Draft</a>
+                </div>
+            </section>
+
+            <section id="resources">
+                <h2>Additional Resources</h2>
+                <ul>
+                    <li><a href="https://www.google.com/earth/outreach/learn/tutorial-writing-a-case-study/" target="_blank">Google Earth Outreach: Writing Case Studies</a></li>
+                    <li>Booth, W.C., Colomb, G.G., & Williams, J.M. (2016). <em>The Craft of Research</em> - Research design</li>
+                    <li>Creswell, J.W. & Creswell, J.D. (2017). <em>Research Design: Qualitative, Quantitative, and Mixed Methods Approaches</em></li>
+                    <li><a href="https://developers.google.com/earth-engine/tutorials" target="_blank">Earth Engine Tutorials</a> - Implementation examples</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer class="lab-footer">
+            <a href="week08-elevation-and-zonal-statistics.html" class="nav-button">← Previous: Week 8</a>
+            <a href="../index.html" class="nav-button">Back to Home</a>
+            <a href="week10-advanced-case-studies.html" class="nav-button">Next: Week 10 →</a>
+        </footer>
+    </div>
+</body>
+</html>

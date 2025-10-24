@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 3 - JavaScript Basics | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 3
+        </nav>
+
+        <header class="lab-header">
+            <h1>Lab 3 - JavaScript Basics</h1>
+            <p><em><strong>Objective: Practice JavaScript fundamentals with objects, properties, and functions in GEE.</strong></em></p>
+        </header>
+
+        <main class="lab-content">
+           
+
+            <section>
+                <h2>Introduction</h2>
+                <p>
+                    In this lab, you will continue off the lessons learned in this module and challenge yourself to extend 
+                    the base code and expand your JavaScript basic programming skills in Google Earth Engine. At the end of 
+                    the lab, you will submit a link to your Google Earth Engine Code. Be sure to comment your code and use 
+                    best practices.
+                </p>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Lab Instructions</h2>
+
+                <ol>
+                    <li>
+                        <h3>Getting Started</h3>
+                        <p>Go to <a href="https://code.earthengine.google.com/9c89c36a78f913cc7be1845e6c47ebb3" target="_blank">https://code.earthengine.google.com/9c89c36a78f913cc7be1845e6c47ebb3</a></p>
+                        <p>Save a copy of the Earth Engine Code in your Repositories.</p>
+                    </li>
+
+                    <li>
+                        <h3>Understanding Objects</h3>
+                        <p>
+                            In line 4 of this code, you defined an object with three properties. Objects are a fundamental 
+                            part of JavaScript. They represent real-world objects, such as user data, files, or information 
+                            about a list of items. Objects are composed of properties, which are key-value pairs containing data.
+                        </p>
+                        <p>
+                            In your Object <code>cityData</code> you stored three properties: the city, coordinates, and population. 
+                            This data is available for you to use in your code.
+                        </p>
+                    </li>
+
+                    <li>
+                        <h3>Accessing Object Properties</h3>
+                        <p>
+                            In JavaScript, you can access an object's properties in several ways. The most common method is 
+                            using the dot operator (<code>.</code>). To use it, type the object name followed by a dot (.) 
+                            and the property name.
+                        </p>
+                        <p>
+                            For example, to get the city property of the cityData object, you would type:
+                        </p>
+                        <pre><code>cityData.city</code></pre>
+                    </li>
+
+                    <li>
+                        <h3>Challenge 1: Print the City Name (10 Points)</h3>
+                        <div class="warning">
+                            <p><strong>Challenge:</strong></p>
+                            <p>
+                                Using the <code>greet</code> function, print to the console "Hello Gainesville", retrieving 
+                                "Gainesville" from the <code>cityData</code> object's city property.
+                            </p>
+                            <p>
+                                <strong>Hint:</strong> To do this, you will need to both call the function and pass through 
+                                the city property of cityData.
+                            </p>
+                        </div>
+                    </li>
+
+                    <li>
+                        <h3>Exploring Array Properties</h3>
+                        <p>
+                            Now explore the properties of cityData. In your code on line 9, you print cityData to the console 
+                            and see that there are three properties. The second property is called <code>coordinates</code> 
+                            and is an array.
+                        </p>
+                        <p>
+                            If you add brackets to the object's property, you can access individual parts of the array. 
+                            Try this line of code:
+                        </p>
+                        <pre><code>print(cityData.coordinates[0]);</code></pre>
+                        <p>
+                            This will output to the console the longitude of cityData. Try changing the 0 to a 1 and see 
+                            what happens.
+                        </p>
+                        <p>Now that you know how to access the long and lat of cityData, do the following challenge.</p>
+                    </li>
+
+                    <li>
+                        <h3>Challenge 2: Center the Map (10 Points)</h3>
+                        <div class="warning">
+                            <p><strong>Challenge:</strong></p>
+                            <p>
+                                Using the method <code>Map.setCenter(lon, lat, zoom)</code>, make a line of code that calls 
+                                the longitude and latitude from the cityData properties and zooms to Gainesville at a zoom 
+                                level of 12.
+                            </p>
+                            <p><strong>Example format:</strong></p>
+                            <pre><code>Map.setCenter(longitude, latitude, 12);</code></pre>
+                            <p>Replace <code>longitude</code> and <code>latitude</code> with the appropriate object property access.</p>
+                        </div>
+                    </li>
+
+                    <li>
+                        <h3>Challenge 3: Comment Your Code (10 Points)</h3>
+                        <div class="warning">
+                            <p><strong>Challenge:</strong></p>
+                            <p>
+                                Comment your code explaining what was done. Use both single-line (<code>//</code>) and 
+                                multi-line (<code>/* */</code>) comments to document:
+                            </p>
+                            <ul>
+                                <li>What each variable represents</li>
+                                <li>What each function does</li>
+                                <li>How you solved the challenges</li>
+                            </ul>
+                        </div>
+                    </li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Key Concepts</h2>
+                <div class="card">
+                    <h3>JavaScript Objects</h3>
+                    <p>Objects store related data and functions together:</p>
+                    <pre><code>var myObject = {
+    property1: 'value1',
+    property2: 'value2',
+    property3: [1, 2, 3]
+};</code></pre>
+                </div>
+
+                <div class="card">
+                    <h3>Accessing Properties</h3>
+                    <p>Use dot notation or bracket notation:</p>
+                    <pre><code>myObject.property1        // Dot notation
+myObject['property1']     // Bracket notation
+myObject.property3[0]     // Access array element</code></pre>
+                </div>
+
+                <div class="card">
+                    <h3>Functions</h3>
+                    <p>Functions are reusable blocks of code:</p>
+                    <pre><code>function myFunction(parameter) {
+    // Do something with parameter
+    return result;
+}
+
+// Call the function
+myFunction(value);</code></pre>
+                </div>
+            </section>
+
+            <section id="submission">
+                <div class="submission-box">
+                    <h3>📧 Lab Submission</h3>
+                    <p><strong>Save and submit your script as a URL.</strong></p>
+                    <p><strong>Email to:</strong> <a href="mailto:instructor@university.edu">instructor@university.edu</a></p>
+                    <p><strong>Subject:</strong> <code>Lab 3 - JS Basics - [Your Name]</code></p>
+                    <p><strong>Include in your email:</strong></p>
+                    <ul>
+                        <li>The shareable link to your GEE script</li>
+                        <li>Confirmation that all three challenges are completed</li>
+                        <li>Screenshot of your Console output showing "Hello Gainesville"</li>
+                        <li>Screenshot of the map centered on Gainesville</li>
+                    </ul>
+                    <p><strong>Grading:</strong></p>
+                    <ul>
+                        <li>Challenge 1 (10 points): Correctly use the greet function with cityData.city</li>
+                        <li>Challenge 2 (10 points): Map.setCenter uses coordinates array correctly</li>
+                        <li>Challenge 3 (10 points): Code is properly commented and documented</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="lab-02-hello-landsat.html">← Previous Lab</a> | <a href="lab-04-night-time-lights.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
+        </footer>
+    </div>
+</body>
+</html>
