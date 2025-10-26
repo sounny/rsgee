@@ -1,0 +1,19 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>GSO-3-Creating Image Collections</title>
+<meta name="identifier" content="gc541b5f8ce8190a963e99252b044cb77"/>
+<meta name="editing_roles" content="teachers"/>
+<meta name="workflow_state" content="active"/>
+</head>
+<body>
+<p><span dir="ltr"><span>One of the most basic operations you can perform is to call in imagery that Google hosts and updates. Let’s start by accessing the MOD10A1 dataset and examining its structure. You can search for datasets with the search bar above the playground interface and use the associated ID to access the data.</span><br></span></p>
+<p><span dir="ltr">Click on the following link of code: <a href="https://code.earthengine.google.com/30d59a0550bc0ef4181942f7eaaec45a" target="_blank">https://code.earthengine.google.com/30d59a0550bc0ef4181942f7eaaec45a </a>&nbsp;<a class="external" href="https://ee-api.appspot.com/ef0861ad16ccdc3c83406188aa6b7c7e" target="_blank"><span class="external_link_icon" role="presentation"><span class="screenreader-only">Links to an external site.</span></span></a></span></p>
+<p><span dir="ltr"><span>You may need&nbsp;to click the "show code"&nbsp;message&nbsp;that appears and then run the script with&nbsp;the run button. &nbsp; Don't worry, nothing should appear on the map; we want to direct our attention to the console panel.&nbsp;</span></span></p>
+<p><span dir="ltr"><span>Take a moment and think about what you just accomplished. Using just over 40 characters, we can download the entire MOD10A1 dataset in less than 20 seconds. To say that is impressive is a gross understatement.<br><br>All awe aside, let’s look at what we actually have. Add a line of code to the print() function:</span></span></p>
+<pre><span>var MOD10A1 = ee.ImageCollection('MOD10A1').filterDate('2005-10-01', '2006-09-30');<br>print(MOD10A1);</span></pre>
+<p><span>Click on the small arrows in the Console tab. We can see the format in the information panel on the right, as shown below.</span></p>
+<p><span><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/MOD10A1DataStructure.png" alt="MOD10A1DataStructure.png" data-api-endpoint="https://ufl.instructure.com/api/v1/courses/489224/files/82599590" data-api-returntype="File" loading="lazy"></span></p>
+<p><span>Thinking back to the data types, we can see that this is an Image Collection. If you recall, MOD10A1 data products are a daily global raster with 4 bands: a quality band, a snow cover tile description, a snow cover albedo measurement, and a fractional snow cover measurement. Thinking back to our goals, we want to filter the collection for a sensor zenith angle, but that information needs to be in MOD10A1, but can be found in the MOD09GA dataset. Therefore, our next goal is to join the two datasets together.</span></p>
+</body>
+</html>

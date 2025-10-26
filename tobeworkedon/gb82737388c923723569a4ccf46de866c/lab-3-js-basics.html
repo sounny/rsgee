@@ -1,0 +1,26 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Assignment: Lab 3 - JS Basics</title>
+</head>
+<body>
+<p>Lecture from Fall 2024 - <a href="https://ufl.zoom.us/rec/share/ZH6gO0J33_u5TomRIfFd6m3RIF8TK9H3gXyS5jmnkT4IjSaV2wkCEqDfaVuL5t7_.lltMdOw78oWA59GG?startTime=1726061047000" target="_blank">https://ufl.zoom.us/rec/share/ZH6gO0J33_u5TomRIfFd6m3RIF8TK9H3gXyS5jmnkT4IjSaV2wkCEqDfaVuL5t7_.lltMdOw78oWA59GG?startTime=1726061047000</a></p>
+<hr>
+<p>In this lab, you will continue off the lessons learned in this module and challenge yourself to extend the base code and expand you JS basic programming skills in Google Earth Engine.&nbsp; At the end of the lab, you will submit a link to your Google Earth Engine Code.&nbsp; Be sure to comment your code and use best practices.&nbsp;</p>
+<ol style="list-style-type: decimal;">
+<li>Go to <a href="https://code.earthengine.google.com/9c89c36a78f913cc7be1845e6c47ebb3" target="_blank">https://code.earthengine.google.com/9c89c36a78f913cc7be1845e6c47ebb3</a>
+</li>
+<li>Save a copy of the Earth Engine Code in your Repositories.</li>
+<li>In line 4 of this code, you defined an object with three properties. &nbsp;Objects are a fundamental part of JavaScript. They represent real-world objects, such as user data, files, or information about a list of items. Objects are composed of properties, which are key-value pairs containing data. In your Object cityData you stored three properties, the city, coordinates, and population.&nbsp; This data is available for you to use in your code.</li>
+<li>In JavaScript, you can access an object's properties in several ways. The most common method is using the dot operator (.). To use it, type the object name followed by a dot (.) and the property name. For example, to get the city property of the cityData object, you would type cityData.city.</li>
+<li><em><strong>Challenge 1:&nbsp; Using the greet function, print to the console Hello Gainesville, retrieving Gainesville from the cityData object's city property.&nbsp; Hint to do this, you will need to both call the function and passthrough the city property of cityData (10 Points).</strong></em></li>
+<li>Now explore the properties of cityData. In your code on line 9, you print cityData to the console and see that there are three properties.&nbsp; The second property is called coordinates and is an array.&nbsp; If you add brackets to the object's property, you can access individual parts of the array.&nbsp; Try this line of code.&nbsp;</li>
+<li>print(cityData.coordinates[0]);</li>
+<li>This will output to the console the longitude of cityData.&nbsp; &nbsp;Try changing the 0 to a 1 and see what happens.&nbsp;</li>
+<li>Now that you know how to access the long and lat of cityData, now do the following challenge.</li>
+<li><em><strong>Challenge 2: using the method Map.setCenter(lon,&nbsp;lat,&nbsp;zoom), make a line of code that calls the long and lat from the cityData properties and zooms to Gainesville at a zoom of 12.&nbsp; (10 Points)</strong></em></li>
+<li><em><strong>Challenge 3: Comment your code explain what was done (10 Points)</strong></em></li>
+<li><em><strong>Save and Submit your scripts as a URL</strong></em></li>
+</ol>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Assignment: Lab 18 - Health Applications Part 2</title>
+</head>
+<body>
+<p><a href="https://youtu.be/w_BmOZnBTro" target="_blank">Fall 2023 Lab Lecture - https://youtu.be/w_BmOZnBTro</a></p>
+<hr>
+<p>This lab pickups where you left off in <a title="Lab 17 - Health Applications Part 1 - Preparing Data for Analysis" href="$CANVAS_OBJECT_REFERENCE$/assignments/g8b69574c3631ed2978f1e66c185820ee?wrap=1">Lab 17 - Health Applications Part 1 - Preparing Data for Analysis</a></p>
+<p><em>If you want to refere to the Lab 17 code you can look here for a completed version of it: <a href="https://code.earthengine.google.com/9f6a14b29868b9e4f989a2be61ada2a4" target="_blank">https://code.earthengine.google.com/9f6a14b29868b9e4f989a2be61ada2a4</a></em></p>
+<p>In the previous lab<span> the environmental data obtained from Earth Engine and submitted as CSV files can be used for infectious disease modeling and forecasting. The Earth Engine code was written in support of EPIDEMIA, a software system based in the R language and computing environment for forecasting malaria, and was actively used in certain study pilot </span><i><span>woredas</span></i><span> in the Amhara region of Ethiopia. The R system consists of an R package—</span><i><span>epidemiar</span></i><span>—for generic functions and a companion R project for handling all the location-specific data and settings.&nbsp;</span></p>
+<p><span>One of the main outputs of EPIDEMIA is the forecasted incidence of malaria in each </span><i><span>woreda</span></i><span> by week from one to eight (or more) weeks in advance. Using our publicly available demo project that uses synthetic data (not for use in epidemiological study), we created forecasts for week 32 of 2018 made eight weeks prior (“knowing” data up to week 24), and also added the observed incidence for comparison. (Note: dates and weeks follow International Organization for Standardization [ISO] standard 8601). These new data can be re-uploaded to Earth Engine for further analyses or exploration.&nbsp; That's were you are picking up at now, post anlaysis in R and ready to keep exploring in GEE.</span></p>
+<p><strong>Objective</strong>: The objective of this lab protocol is to create a map visualization of synthetic malaria incidence data for the Amhara region in Ethiopia. The map will show the incidence levels of malaria in different woredas (administrative divisions) within the region, using different colors to represent different incidence levels. The protocol consists of the following steps:</p>
+<p><strong>Lab</strong>:</p>
+<ol>
+<li>
+<p><span>Start off a new Script.&nbsp; Go to <a href="https://code.earthengine.google.com/" target="_blank">https://code.earthengine.google.com/</a> signin and start off with a blank script.&nbsp;</span></p>
+</li>
+<li>
+<p>Import the synthetic malaria data as a Feature Collection using the "ee.FeatureCollection" function and assign it to a variable called "epidemiaResults".</p>
+</li>
+<li>
+<pre>// This code displays an interactive map of a region in Ethiopia, and overlays different layers<br>// to display results of an analysis of synthetic malaria data.&nbsp;<br><br>// First, we import a FeatureCollection of synthetic malaria data for the Amhara region of Ethiopia.&nbsp;<br>var epidemiaResults = ee.FeatureCollection("<span>users/sounny/amhara_pilot_synthetic_2018W32</span>");</pre>
+</li>
+<li>
+<p>Filter the Feature Collection to separate the "pilot" woredas (with forecasted incidence data) from the "non-pilot" woredas (without forecasted incidence data) using the "ee.Filter.neq" and "ee.Filter.eq" functions. Assign each group to a new variable called "pilot" and "nonpilot", respectively.</p>
+</li>
+<li>
+<pre>// Filter the FeatureCollection to only keep woredas with forecasted values.<br>var pilot = epidemiaResults.filter(ee.Filter.neq('inc_n_fc', null));<br><br>// Filter the FeatureCollection to only keep woredas without forecasted values.<br>var nonpilot = epidemiaResults.filter(ee.Filter.eq('inc_n_fc', null));</pre>
+</li>
+<li>
+<p>Create a new layer for the "pilot" woredas and assign different colors to them based on their forecasted incidence levels using the "ee.Image().byte().paint()" function. Use a color palette that ranges from light to dark shades of red, with each color representing a different incidence level. The incidence levels are defined in incidence per 1000 people and are divided into 5 categories: 1 to 5, where 1 is the lowest incidence level and 5 is the highest. Assign the resulting image to a variable called "fill_fc".</p>
+</li>
+<li>
+<pre>// Define an empty image to use for painting color onto each woreda based on forecasted incidence.&nbsp;<br>var empty = ee.Image().byte();<br><br>// Paint the woredas with different colors for forecasted incidence.<br>// The 'inc_n_fc' property is the forecasted incidence (cut into factors) made on (historical) 2018W24&nbsp;<br>// (i.e. 8 weeks in advance), and the color for each woreda is based on the range the incidence falls into.&nbsp;<br>// Incidence per 1000<br>// 1 : [0 - 0.25)<br>// 2 : [0.25 - 0.5)<br>// 3 : [0.5 - 0.75)<br>// 4 : [0.75 - 1)<br>// 5 : &gt; 1<br>var fill_fc = empty.paint({<br>&nbsp; &nbsp; featureCollection: pilot,<br>&nbsp; &nbsp; color: 'inc_n_fc',<br>});<br><br>// Define a color palette for the different ranges of incidence.<br>var palette = ['fee5d9', 'fcae91', 'fb6a4a', 'de2d26', 'a50f15'];</pre>
+</li>
+<li>
+<p>Add the "fill_fc" layer to the map using the "Map.addLayer()" function. Set the palette, minimum, and maximum values using the "palette", "min", and "max" arguments, respectively. Also, set the name of the layer to "Forecasted Incidence".</p>
+</li>
+<li>
+<pre>// Set the map center and zoom level.<br>Map.setCenter(38, 11.5, 7);<br><br>// Add the layer of forecasted incidence to the map, using the color palette defined above.<br>Map.addLayer(<br>&nbsp; &nbsp; fill_fc, {<br>&nbsp; &nbsp; &nbsp; &nbsp; palette: palette,<br>&nbsp; &nbsp; &nbsp; &nbsp; min: 1,<br>&nbsp; &nbsp; &nbsp; &nbsp; max: 5<br>&nbsp; &nbsp; },<br>&nbsp; &nbsp; 'Forecasted Incidence'<br>);</pre>
+</li>
+<li>
+<p>Create a new layer for the observed incidence data of the "pilot" woredas using the same color palette as before. Use the "ee.Image().byte().paint()" function to create the layer and assign it to a variable called "fill_obs".</p>
+</li>
+<li>
+<pre>// Paint the woredas with different colors for observed incidence.<br>// The 'inc_n_obs' property is the observed incidence, and the color for each woreda is based on the range the incidence falls into.<br>// This layer is turned off by default, but can be toggled on and off by the user in the map viewer.<br>var fill_obs = empty.paint({<br>&nbsp; &nbsp; featureCollection: pilot,<br>&nbsp; &nbsp; color: 'inc_n_obs',<br>});<br><br>// Define the same color palette for the observed incidence as for the forecasted incidence.<br>var palette = ['fee5d9', 'fcae91', 'fb6a4a', 'de2d26', 'a50f15'];</pre>
+</li>
+<li>
+<p>Add the "fill_obs" layer to the map using the "Map.addLayer()" function. Set the palette, minimum, and maximum values using the "palette", "min", and "max" arguments, respectively. Also, set the name of the layer to "Observed Incidence" and set the default visibility to "false".</p>
+</li>
+<li>
+<pre>// Add the layer of observed incidence to the map, using the same color palette as for the forecasted incidence<br>Map.addLayer(<br>  &nbsp; fill_obs, {<br>  &nbsp; &nbsp; &nbsp; palette: palette,<br>  &nbsp; &nbsp; &nbsp; min: 1,<br>  &nbsp; &nbsp; &nbsp; max: 5<br>  &nbsp; },<br>  &nbsp; 'Observed Incidence',<br>  &nbsp; false<br>);</pre>
+</li>
+<li>
+<p>Create a gray layer for the "non-pilot" woredas using the "ee.Image().byte().paint()" function and assign it to a variable called "fill_na".</p>
+</li>
+<li>
+<pre>// Paint non-study woredas with gray.<br><br>var fill_na = empty.paint({<br>  &nbsp; featureCollection: nonpilot<br>});</pre>
+</li>
+<li>
+<p>Add the "fill_na" layer to the map using the "Map.addLayer()" function. Set the palette to "a1a9a8" and set the name of the layer to "Non-study woredas".</p>
+</li>
+<li>
+<pre>// Add the layer of non-study woredas to the map, using gray as the fill color.<br><br>Map.addLayer(<br>  &nbsp; fill_na, {<br>  &nbsp; &nbsp; &nbsp; palette: 'a1a9a8'<br>  &nbsp; },<br>'Non-study woredas'<br>);</pre>
+</li>
+<li>
+<p>Draw the borders of all the woredas in the Amhara region using the "ee.Image().byte().paint()" function and assign it to a variable called "outline".</p>
+</li>
+<li>
+<pre>// Draw borders for ALL Amhara region woredas.<br>var outline = empty.paint({<br>  &nbsp; featureCollection: epidemiaResults,<br>  &nbsp; color: 1,<br>  &nbsp; width: 1<br>});</pre>
+</li>
+<li>
+<p>Add the "outline" layer to the map using the "Map.addLayer()" function. Set the palette to "000000" and set the name of the layer to "Woredas".</p>
+</li>
+<li>
+<pre>// Add woreda boundaries to map.<br><br>Map.addLayer(<br>  &nbsp; outline, {<br>  &nbsp; &nbsp; &nbsp; palette: '000000'<br>  &nbsp; },<br>  &nbsp; 'Woredas'<br>);</pre>
+</li>
+<li>
+<p>Results: The resulting map will show the incidence levels of malaria in different woredas within the Amhara region in Ethiopia. The "pilot" woredas will be colored based on their forecasted incidence levels, while the "non-pilot" woredas will be gray.</p>
+</li>
+<li><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/Screenshot%202023-04-14%20at%207.05.23%20AM.png" alt="results" data-api-endpoint="https://ufl.instructure.com/api/v1/courses/489224/files/79934772" data-api-returntype="File" loading="lazy"></li>
+<li>
+<p>Share it as a link using the appropriate functions in Google Earth Engine and submit it to canvas.</p>
+</li>
+</ol>
+</body>
+</html>

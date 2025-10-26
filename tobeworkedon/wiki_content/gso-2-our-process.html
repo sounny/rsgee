@@ -1,0 +1,13 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>GSO-2-Our Process</title>
+<meta name="identifier" content="g31ecdb4d391115d0c19c0959cb0d8438"/>
+<meta name="editing_roles" content="teachers"/>
+<meta name="workflow_state" content="active"/>
+</head>
+<body>
+<p><span>To create the dataset necessary for this study, we will need to modify the standard MODIS dataset somewhat. &nbsp;We will first need to join the two datasets (MOD10A1 and MOD09GA, to create a combined MODIS dataset. &nbsp;We then need to mask out those&nbsp;</span><span>pixels with a high sensor zenith angle.</span><span>&nbsp;</span><span>After we have that complete dataset, we will want to reclassify it to a simple snow/no snow/missing dataset, which will make future calculations easier. &nbsp;After reclassifying the data, we want to count, at each pixel, the number of days that have a snow observation and the number of days that have a valid observation. &nbsp;We will then need to add an X band to the data (time), and finally hand it to the LinearFit reducer&nbsp;</span><span>before</span><span>&nbsp;finally exporting our map. &nbsp;We will wrap much of that data up into functions, as outlined below, in the larger ovals. &nbsp;The general process will look like this.</span></p>
+<p><span><img role="presentation" src="$IMS-CC-FILEBASE$/Uploaded%20Media/Capture.png" alt="" loading="lazy"></span></p>
+</body>
+</html>

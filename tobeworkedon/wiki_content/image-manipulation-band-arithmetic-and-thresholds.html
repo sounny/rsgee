@@ -1,0 +1,52 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title> Image Manipulation: Band Arithmetic and Thresholds</title>
+<meta name="identifier" content="geefe8a656c63a026268d65a23770a873"/>
+<meta name="editing_roles" content="teachers"/>
+<meta name="workflow_state" content="active"/>
+</head>
+<body>
+<p>Remote sensing is a dynamic field that allows researchers and professionals to collect and analyze data from a distance, often from satellites or aircraft. One of the most challenging aspects of remote sensing lies in manipulating and interpreting acquired images. This module explores two fundamental image manipulation techniques: band arithmetic and thresholds.&nbsp;</p>
+<h2>Band Arithmetic: The Math Behind the Pixels</h2>
+<h3>What is Band Arithmetic?</h3>
+<p>Band arithmetic is a pixel-based operation that manipulates the spectral values in individual bands of a multiband image. It involves mathematical operations such as addition, subtraction, multiplication, and division. The purpose is to highlight specific features or differences that are otherwise not easily visible in a single band or in a composite RGB image.</p>
+<h3>Why Use Band Arithmetic?</h3>
+<ol>
+<li><strong>Feature Enhancement</strong>: Highlight certain features such as water bodies, vegetation, or urban areas.</li>
+<li><strong>Change Detection</strong>: Compare images from different times to detect changes in land use, vegetation, etc.</li>
+<li><strong>Noise Reduction</strong>: Suppressing random noise in the image by balancing the spectral values.</li>
+</ol>
+<h3>Common Formulas</h3>
+<p>Here are some commonly used band arithmetic formulas:</p>
+<ul>
+<li>Normalized Difference Vegetation Index (NDVI) = <img class="equation_image" title="\frac{(NIR-RED)}{(NIR+RED)}" src="https://ufl.instructure.com/equation_images/%255Cfrac%257B(NIR-RED)%257D%257B(NIR%252BRED)%257D?scale=1" alt="LaTeX: \frac{(NIR-RED)}{(NIR+RED)}" data-equation-content="\frac{(NIR-RED)}{(NIR+RED)}" data-ignore-a11y-check="" loading="lazy"><span class="math math-inline"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="mord"><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist-s">​</span></span></span></span></span></span></span></span></span></li>
+<li>Soil Adjusted Vegetation Index (SAVI) <span style="font-family: math;">= <img class="equation_image" title="\frac{(NIR−RED)}{(NIR+RED+L)}×(1+L)" src="https://ufl.instructure.com/equation_images/%255Cfrac%257B(NIR%25E2%2588%2592RED)%257D%257B(NIR%252BRED%252BL)%257D%25C3%2597(1%252BL)?scale=1" alt="LaTeX: \frac{(NIR−RED)}{(NIR+RED+L)}×(1+L)" data-equation-content="\frac{(NIR−RED)}{(NIR+RED+L)}×(1+L)" data-ignore-a11y-check="" loading="lazy"></span><span class="math math-inline"><span class="katex"><br></span></span></li>
+<li>Water Index <span style="font-family: math;">= <img class="equation_image" title="\frac{(GREEN−NIR)}{(GREEN+NIR)}" src="https://ufl.instructure.com/equation_images/%255Cfrac%257B(GREEN%25E2%2588%2592NIR)%257D%257B(GREEN%252BNIR)%257D?scale=1" alt="LaTeX: \frac{(GREEN−NIR)}{(GREEN+NIR)}" data-equation-content="\frac{(GREEN−NIR)}{(GREEN+NIR)}" data-ignore-a11y-check="" loading="lazy"></span><span class="math math-inline"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="mord"><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist-s">​</span></span></span></span></span></span></span></span></span></li>
+</ul>
+<h3>Practical Applications</h3>
+<p>Band arithmetic finds diverse applications:</p>
+<ul>
+<li>Agriculture: Monitoring crop health and soil quality.</li>
+<li>Environmental Science: Studying deforestation and water quality.</li>
+<li>Urban Planning: Assessing land use and infrastructure development.</li>
+</ul>
+<h2>Thresholds: Making Sense of Spectral Values</h2>
+<h3>What are Thresholds?</h3>
+<p>Thresholding is the process of classifying pixels based on their spectral values. It involves setting a specific value or range of values as a "cut-off," and classifying the pixels that fall above or below this range.</p>
+<h3>Types of Thresholding</h3>
+<ol>
+<li><strong>Global Thresholding</strong>: A single value is used for the entire image.</li>
+<li><strong>Local Thresholding</strong>: Different threshold values for different regions of the image.</li>
+<li><strong>Dynamic Thresholding</strong>: Thresholds are set based on statistical or machine learning methods.</li>
+</ol>
+<h3>Practical Applications of Thresholding</h3>
+<ul>
+<li><strong>Vegetation Mapping</strong>: Identifying areas of dense vegetation based on specific spectral values.</li>
+<li><strong>Water Body Detection</strong>: Classifying water bodies based on their reflectance properties.</li>
+<li><strong>Urban Area Identification</strong>: Isolating built-up areas from the natural landscape.</li>
+</ul>
+<h2>Combining Band Arithmetic and Thresholding</h2>
+<p>Often, band arithmetic and thresholding are used in tandem for more accurate image analysis. For instance, you could first calculate the NDVI of an area and then apply a threshold to separate vegetation from non-vegetation areas. This approach has benefited various sectors, including wildlife conservation, disaster management, and climate change studies.</p>
+</body>
+</html>

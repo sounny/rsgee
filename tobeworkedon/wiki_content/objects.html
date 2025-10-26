@@ -1,0 +1,18 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Objects</title>
+<meta name="identifier" content="g3d3861ebb08a439751bce4a991e88864"/>
+<meta name="editing_roles" content="teachers"/>
+<meta name="workflow_state" content="active"/>
+</head>
+<body>
+<p>Lecture - Fall 2024 - <a href="https://ufl.zoom.us/rec/share/ZH6gO0J33_u5TomRIfFd6m3RIF8TK9H3gXyS5jmnkT4IjSaV2wkCEqDfaVuL5t7_.lltMdOw78oWA59GG?startTime=1726060242000" target="_blank">https://ufl.zoom.us/rec/share/ZH6gO0J33_u5TomRIfFd6m3RIF8TK9H3gXyS5jmnkT4IjSaV2wkCEqDfaVuL5t7_.lltMdOw78oWA59GG?startTime=1726060242000</a></p>
+<hr>
+<p>Lists allow you to store multiple values in a single container variable. While useful, it is not appropriate to store structured data. It is helpful to be able to refer to each item with its name rather than its position. Objects in JavaScript allow you to store key-value pairs, where each value can be referred to by its key. You can create a dictionary using the curly braces { }. The code below creates an object called cityData with some information about Gainesville.&nbsp;</p>
+<pre>var cityData = {<br>&nbsp; 'city': 'Gainesville',<br>&nbsp; 'coordinates': [-82.3248, 29.6516],<br>&nbsp; 'population': 140398<br>};<br>print(cityData);</pre>
+<p>I want to highlight some important things about the JavaScript syntax here. First, we can use multiple lines to define the object. The command is considered complete only when we put in the semicolon (;). This helps format the code to make it more readable. Also, note the choice of the variable name cityData. The variable contains two words. The first word is in lowercase, and the first letter of the second word is capitalized. This type of naming scheme of joining multiple words into a single variable name is called <em><strong>“camel case.”</strong></em> While it is not mandatory to name your variables using this scheme, it is considered a good practice. Functions and parameters in the Earth Engine API follow this convention, so your code will be much more readable if you follow it too.</p>
+<p>Take the code above and run it in Google Earth Engine. The object will be printed in the Console. You can see that each item has a label instead of a numeric index. This is known as the key and can be used to retrieve the value of an item.</p>
+<p><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/Screenshot%202023-02-02%20at%209.56.36%20AM.png" alt="outputting an object" data-api-endpoint="https://ufl.instructure.com/api/v1/courses/515674/files/89720795" data-api-returntype="File" loading="lazy"></p>
+</body>
+</html>

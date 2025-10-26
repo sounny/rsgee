@@ -1,0 +1,21 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>GSO-6-Reclassify</title>
+<meta name="identifier" content="g77ddb7e32530f1e582046744f44faf4e"/>
+<meta name="editing_roles" content="teachers"/>
+<meta name="workflow_state" content="active"/>
+</head>
+<body>
+<div><span>We now need to reclassify the dataset to snow, non-snow, or missing. &nbsp;</span><span>Luckily, GEE has a remap function, which&nbsp;</span><span>takes a list of inputs and changes the values to those you specify.</span><span>&nbsp;&nbsp;</span><span>If you search the documentation, remap methods exist for both images and image c</span><span>ollections.</span><span>&nbsp;&nbsp;</span><span>We want the images version because we want to keep the missing values, not drop them from the collection.</span><span>&nbsp;&nbsp;</span><span>This means we can use the handy .map() method again.</span></div>
+<div><span>&nbsp;</span></div>
+<div>
+<div><img role="presentation" src="$IMS-CC-FILEBASE$/Uploaded%20Media/LookupTable.png" alt="" loading="lazy"></div>
+</div>
+<p><span>Looking at the coded values from the MOD10A1 documentation above, we want to turn all the values that represent “snow” to a value of 1, and all the values that represent “No snow” to a value of 0.&nbsp; Anything that doesn’t fall within those parameters will result in a value of null, for 'missing'. &nbsp;The code should look something like this.</span></p>
+<p><span><img role="presentation" src="$IMS-CC-FILEBASE$/Uploaded%20Media/Reclass.png" alt="" loading="lazy"></span></p>
+<p><a href="https://code.earthengine.google.com/86f04d761be1a752e49df9252408be33" target="_blank">https://code.earthengine.google.com/86f04d761be1a752e49df9252408be33</a>&nbsp;</p>
+<p><span dir="ltr"><span>If you noticed, we are also at the end of our first processing chain, "</span><span>Prepare MODIS Snow cover." &nbsp;This means we can wrap up all of the previous steps into a single function that takes two dates, a StartDate and a StopDate.</span></span></p>
+<div><span>Now that we have that function done, it is time to calculate snow cover frequency.</span></div>
+</body>
+</html>

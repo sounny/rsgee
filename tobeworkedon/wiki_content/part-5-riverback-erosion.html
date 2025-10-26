@@ -1,0 +1,148 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Part 5 - Riverback Erosion</title>
+<meta name="identifier" content="g961eb94c2d4d92299a5f9d31cc39a916"/>
+<meta name="editing_roles" content="teachers"/>
+<meta name="workflow_state" content="active"/>
+</head>
+<body>
+<p><span>In this part, we will return to the&nbsp; Madre de Dios River as our study area. We will apply the methods we developed in Parts 1-3 to multiple images, calculate the amount of bank erosion, and summarize our results onto our centerline. Before doing so, we will create a new script that wraps the masking and morphology code in Parts 1 - 3 into a function called </span><span>makeChannelmask</span><span> with one argument for the year. We return an image with bands for all the masks and bank calculations, plus a property named 'year’ containing</span><span> the year argument. If you have time, you could create this function independently and compare it with our implementation.&nbsp; </span></p>
+<pre>//redefining the variables to prevent errors<br>var jrcYearly = ee.ImageCollection("JRC/GSW1_3/YearlyHistory"),<br>&nbsp; &nbsp; aoi =&nbsp;<br>&nbsp; &nbsp; /* color: #d63000 */<br>&nbsp; &nbsp; /* shown: false */<br>&nbsp; &nbsp; /* displayProperties: [<br>&nbsp; &nbsp; &nbsp; {<br>&nbsp; &nbsp; &nbsp; &nbsp; "type": "rectangle"<br>&nbsp; &nbsp; &nbsp; }<br>&nbsp; &nbsp; ] */<br>&nbsp; &nbsp; ee.Geometry.Polygon(<br>&nbsp; &nbsp; &nbsp; &nbsp; [[[-66.75498758257174, -11.090110301403685],<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; [-66.75498758257174, -11.258517279582335],<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; [-66.56650339067721, -11.258517279582335],<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; [-66.56650339067721, -11.090110301403685]]], null, false),<br>&nbsp; &nbsp; sword = ee.FeatureCollection("projects/gee-book/assets/A2-4/SWORD");<br><br><br>var getUTMProj = function(lon, lat) {<br>&nbsp; &nbsp; // Given longitude and latitude in decimal degrees,&nbsp;<br>&nbsp; &nbsp; // return EPSG string for the corresponding UTM projection. See:<br>&nbsp; &nbsp; // https://apollomapping.com/blog/gtm-finding-a-utm-zone-number-easily<br>&nbsp; &nbsp; // https://sis.apache.org/faq.html<br>&nbsp; &nbsp; var utmCode = ee.Number(lon).add(180).divide(6).ceil().int();<br>&nbsp; &nbsp; var output = ee.Algorithms.If({<br>&nbsp; &nbsp; &nbsp; &nbsp; condition: ee.Number(lat).gte(0),<br>&nbsp; &nbsp; &nbsp; &nbsp; trueCase: ee.String('EPSG:326').cat(utmCode<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; .format('%02d')),<br>&nbsp; &nbsp; &nbsp; &nbsp; falseCase: ee.String('EPSG:327').cat(utmCode<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; .format('%02d'))<br>&nbsp; &nbsp; });<br>&nbsp; &nbsp; return (output);<br>};<br><br>var coords = aoi.centroid(30).coordinates();<br>var lon = coords.get(0);<br>var lat = coords.get(1);<br>var crs = getUTMProj(lon, lat);<br>var scale = 30;<br><br>var rpj = function(image) {<br>&nbsp; &nbsp; return image.reproject({<br>&nbsp; &nbsp; &nbsp; &nbsp; crs: crs,<br>&nbsp; &nbsp; &nbsp; &nbsp; scale: scale<br>&nbsp; &nbsp; });<br>};<br><br>var distanceKernel = ee.Kernel.euclidean({<br>&nbsp; &nbsp; radius: 30,<br>&nbsp; &nbsp; units: 'meters',<br>&nbsp; &nbsp; magnitude: 0.5<br>});<br><br>var makeChannelmask = function(year) {<br>&nbsp; &nbsp; var watermask = jrcYearly.filter(ee.Filter.eq('year', year))<br>&nbsp; &nbsp; &nbsp; &nbsp; .first()<br>&nbsp; &nbsp; &nbsp; &nbsp; .gte(2).unmask()<br>&nbsp; &nbsp; &nbsp; &nbsp; .focal_max().focal_min()<br>&nbsp; &nbsp; &nbsp; &nbsp; .rename('watermask');<br><br>&nbsp; &nbsp; var barPolys = watermask.not().selfMask()<br>&nbsp; &nbsp; &nbsp; &nbsp; .reduceToVectors({<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; geometry: aoi,<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; scale: 30,<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; eightConnected: false<br>&nbsp; &nbsp; &nbsp; &nbsp; })<br>&nbsp; &nbsp; &nbsp; &nbsp; .filter(ee.Filter.lte('count', 1E4)); // Get small polys.<br><br>&nbsp; &nbsp; var filled = watermask.paint(barPolys, 1).rename('filled');<br><br>&nbsp; &nbsp; var costmap = filled.not().cumulativeCost({<br>&nbsp; &nbsp; &nbsp; &nbsp; source: watermask.and(ee.Image().toByte().paint(<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; sword, 1)),<br>&nbsp; &nbsp; &nbsp; &nbsp; maxDistance: 5E3,<br>&nbsp; &nbsp; &nbsp; &nbsp; geodeticDistance: false<br>&nbsp; &nbsp; }).rename('costmap');<br><br>&nbsp; &nbsp; var rivermask = costmap.eq(0).rename('rivermask');<br>&nbsp; &nbsp; var channelmask = rivermask.and(watermask).rename(<br>&nbsp; &nbsp; &nbsp; &nbsp; 'channelmask');<br><br>&nbsp; &nbsp; var bankMask = channelmask.focal_max(1).neq(channelmask)<br>&nbsp; &nbsp; &nbsp; &nbsp; .rename('bankMask');<br>&nbsp; &nbsp; var bankDistance = channelmask.not().cumulativeCost({<br>&nbsp; &nbsp; &nbsp; &nbsp; source: channelmask,<br>&nbsp; &nbsp; &nbsp; &nbsp; maxDistance: 1E2,<br>&nbsp; &nbsp; &nbsp; &nbsp; geodeticDistance: false<br>&nbsp; &nbsp; });<br>&nbsp; &nbsp; var bankAspect = ee.Terrain.aspect(bankDistance).mask(<br>&nbsp; &nbsp; &nbsp; &nbsp; bankMask).rename('bankAspect');<br><br>&nbsp; &nbsp; var bankLength = bankMask.convolve(distanceKernel)<br>&nbsp; &nbsp; &nbsp; &nbsp; .mask(bankMask).rename('bankLength');<br><br>&nbsp; &nbsp; return ee.Image.cat([<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; watermask, channelmask, rivermask, bankMask,<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bankAspect, bankLength<br>&nbsp; &nbsp; &nbsp; &nbsp; ]).set('year', year)<br>&nbsp; &nbsp; &nbsp; &nbsp; .clip(aoi);<br>};</pre>
+<p><strong>Change Detection</strong></p>
+<p><span>For this example, we will use a section of the Madre de Dios River as our study area because it migrates more quickly, more than 30 m per year in some locations. Our methods will work best if the two channel masks partially overlap everywhere along the length of the river; if there is a gap between the two masks, we will underestimate the amount of change and cannot calculate the change direction. As such, we will pick the years 2015 and 2020 for our example. However, in other locations, you may want to increase the time span to observe more change. We first create these two sets of channel masks and add them to the map (Fig. A2.4.4a).&nbsp;</span></p>
+<table>
+<tbody>
+<tr>
+<td>
+<pre><strong>var</strong><span> masks1 = makeChannelmask(</span><span>2015</span><span>);</span><span><br></span><strong>var</strong><span> masks2 = makeChannelmask(</span><span>2020</span><span>);</span><span><br></span><span>Map</span><span>.</span><span>centerObject</span><span>(</span><span>aoi</span><span>, </span><span>13</span><span>);</span><span><br></span><strong>var</strong><span> year1mask = rpj(masks1.</span><span>select</span><span>(</span><span>'channelmask'</span><span>).</span><span>selfMask</span><span>());</span><span><br></span><span>Map</span><span>.</span><span>addLayer</span><span>(year1mask, {</span><span><br></span><span>&nbsp; &nbsp; palette: [</span><span>'blue'</span><span>]</span><span><br></span><span>}, </span><span>'year 1'</span><span>);</span><span><br></span><strong>var</strong><span> year2mask = rpj(masks2.</span><span>select</span><span>(</span><span>'channelmask'</span><span>).</span><span>selfMask</span><span>());</span><span><br></span><span>Map</span><span>.</span><span>addLayer</span><span>(year2mask, {</span><span><br></span><span>&nbsp; &nbsp; palette: [</span><span>'red'</span><span>]</span><span><br></span><span>}, </span><span>'year 2'</span><span>, </span><strong>true</strong><span>, </span><span>0.5</span><span>);</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<table>
+<tbody>
+<tr>
+<td><img role="presentation" src="$IMS-CC-FILEBASE$/Uploaded%20Media/Screenshot%202023-10-26%20at%2011.29.43%E2%80%AFAM.png" alt="" data-api-endpoint="https://ufl.instructure.com/api/v1/courses/489224/files/82405568" data-api-returntype="File" loading="lazy"></td>
+</tr>
+<tr>
+<td>
+<p><strong>Fig. </strong><span>A single meander bend of the Madre de Dios River in Bolivia, showing areas of erosion and accretion: (a) channel mask from 2015 in blue and channel mask from 2020 in red at 50% transparency; (b) pixels that represent erosion between 2015 and 2020</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><span>Next, we create an image to represent the eroded area (Fig. A2.4.4b). We can quickly calculate this by comparing the channel mask in year 2 to the inverse water mask from year 1. In alluvial river systems, avulsions and meander cutoffs can leave fragments of old channels near the river. If the river meanders back into these water bodies, we want to be careful not to count these as entirely eroded, so we need to compare our river pixels in year 2 (channel mask) to the land pixels in year 1 (inverse water mask). If you were to compare only the channel masks from year to year, water in the floodplains that is captured by the channel migration would be falsely counted as erosion.</span></p>
+<table>
+<tbody>
+<tr>
+<td>
+<pre><span>// Pixels that are now the river channel but were previously land.</span><span><br></span><strong>var</strong><span> erosion = masks2.</span><span>select</span><span>(</span><span>'channelmask'</span><span>)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>and</span><span>(masks1.</span><span>select</span><span>(</span><span>'watermask'</span><span>).</span><span>not</span><span>()).</span><span>rename</span><span>(</span><span>'erosion'</span><span>);</span><span><br></span><span>Map</span><span>.</span><span>addLayer</span><span>(rpj(erosion).</span><span>selfMask</span><span>(), {}, </span><span>'erosion'</span><span>, </span><strong>false</strong><span>);</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><span>Now we are going to approximate the direction of erosion. We will define the direction of erosion by the shortest path through the eroded area from each bank pixel in year 1 to any of the bank pixels in year 2. In reality, meandering rivers often translate their shape downvalley, which breaks our definition of the shortest path between banks. However, the shortest path produces a reasonable approximation in most cases and is easy to calculate. We will again use </span><span>Image.cumulativeCost</span> <span>to measure the distance using the erosion image as our cost surface. The erosion image has to be dilated by 1 pixel to compensate for the missing edge pixels in the gradient calculations, and masked in order to limit the cost paths to within the eroded area.</span></p>
+<table>
+<tbody>
+<tr>
+<td>
+<pre><span>// Erosion distance assuming the shortest distance between banks.</span><span><br></span><strong>var</strong><span> erosionEndpoints = erosion.</span><span>focal_max</span><span>(</span><span>1</span><span>).</span><span>and</span><span>(masks2.</span><span>select</span><span>(</span><span><br></span><span>&nbsp; &nbsp; </span><span>'bankMask'</span><span>));</span><span><br></span><strong>var</strong><span> erosionDistance = erosion.</span><span>focal_max</span><span>(</span><span>1</span><span>).</span><span>selfMask</span><span>()</span><span><br></span><span>&nbsp; &nbsp; .</span><span>cumulativeCost</span><span>({</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; source: erosionEndpoints,</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; maxDistance: </span><span>1E3</span><span>,</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; geodeticDistance: </span><strong>true</strong><span><br></span><span>&nbsp; &nbsp; }).</span><span>rename</span><span>(</span><span>'erosionDistance'</span><span>);</span><span><br></span><span>Map</span><span>.</span><span>addLayer</span><span>(rpj(erosionDistance),</span><span><br></span><span>&nbsp; &nbsp; {</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; min: </span><span>0</span><span>,</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; max: </span><span>300</span><span><br></span><span>&nbsp; &nbsp; },</span><span><br></span><span>&nbsp; &nbsp; </span><span>'erosion distance'</span><span>,</span><span><br></span><span>&nbsp; &nbsp; </span><strong>false</strong><span>);</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><span>Now we can use the same </span><span>Terrain.aspect</span> <span>method that we used for the bank aspect to calculate the direction of the shortest path along our cost surface. You could also calculate this direction (and the bank aspect in Sect. 1.3) using the</span> <span>Image.gradient</span> <span>method and then calculating the tangent of the resulting </span><i><span>x </span></i><span>and </span><i><span>y</span></i><span> components.</span></p>
+<table>
+<tbody>
+<tr>
+<td>
+<pre><span>// Direction of the erosion following slope of distance.</span><span><br></span><strong>var</strong><span> erosionDirection = </span><span>ee</span><span>.</span><span>Terrain.aspect</span><span>(erosionDistance)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>multiply</span><span>(Math.PI).</span><span>divide</span><span>(</span><span>180</span><span>)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>clip</span><span>(</span><span>aoi</span><span>)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>rename</span><span>(</span><span>'erosionDirection'</span><span>);</span><span><br></span><span>erosionDistance = erosionDistance.</span><span>mask</span><span>(erosion);</span><span><br></span><span>Map</span><span>.</span><span>addLayer</span><span>(rpj(erosionDirection),</span><span><br></span><span>&nbsp; &nbsp; {</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; min: </span><span>0</span><span>,</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; max: Math.PI</span><span><br></span><span>&nbsp; &nbsp; },</span><span><br></span><span>&nbsp; &nbsp; </span><span>'erosion direction'</span><span>,</span><span><br></span><span>&nbsp; &nbsp; </span><strong>false</strong><span>);</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Connecting to the Centerline</strong></p>
+<p><span>We now have all our change metrics calculated as images in Earth Engine. We could export these and make maps and figures using these data. However, when analyzing a lot of river data, we often want to look at long profiles of river or tributary networks in a watershed. To do this, we will use reducers to summarize our raster data back onto our vector centerline. The first step is identifying which pixels should be assigned to which centerline points. We will start by calculating a single image representing the distance to any SWORD centerline point with the</span> <span>FeatureCollection</span><span>.</span><span>distance</span> <span>method. Next, we will use convolution with the Laplacian kernel as an edge detection method on our distance raster. By convolving the distance to the nearest SWORD node with the Laplacian kernel, we calculate the second derivative of distance. We can find the locations where the distance surface starts sloping towards another SWORD point.</span></p>
+<table>
+<tbody>
+<tr>
+<td>
+<pre><span>// Distance to nearest SWORD centerline point.</span><span><br></span><strong>var</strong><span> distance = sword.</span><span>distance</span><span>(</span><span>2E3</span><span>).</span><span>clip</span><span>(</span><span>aoi</span><span>);</span><span><br></span><span><br></span><span>// Second derivatives of distance.</span><span><br></span><span>// Finding the 0s identifies boundaries between centerline points.</span><span><br></span><strong>var</strong><span> concavityBounds = distance.</span><span>convolve</span><span>(</span><span>ee</span><span>.</span><span>Kernel.laplacian8</span><span>())</span><span><br></span><span>&nbsp; &nbsp; .</span><span>gte</span><span>(</span><span>0</span><span>).</span><span>rename</span><span>(</span><span>'bounds'</span><span>);</span><span><br></span><span><br></span><span>Map</span><span>.</span><span>addLayer</span><span>(rpj(distance), {</span><span><br></span><span>&nbsp; &nbsp; min: </span><span>0</span><span>,</span><span><br></span><span>&nbsp; &nbsp; max: </span><span>1E3</span><span><br></span><span>}, </span><span>'distance'</span><span>, </span><strong>false</strong><span>);</span><span><br></span><span>Map</span><span>.</span><span>addLayer</span><span>(rpj(concavityBounds), {}, </span><span>'bounds'</span><span>, </span><strong>false</strong><span>);</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><span>Next, we need to create an image where each pixel’s value is set to the unique node identifier of the nearest SWORD centerline point. We will create a two-band image, where the first band is the concavity boundaries found in the last step, and the second band has the unique node identifiers painted on their location. When we reduce this image using the </span><span>Image.reduceConnectedComponents</span> <span>method, we set all pixels in each region with the corresponding node ID. Last, we need to dilate these pixels to fill in the boundary gaps using a call to the</span> <span>Image</span><span>.</span><span>focalMode</span> <span>method.</span></p>
+<table>
+<tbody>
+<tr>
+<td>
+<pre><span>// Reduce the pixels according to the concavity boundaries, </span><span><br></span><span>// and set the value to SWORD node ID.&nbsp; Note that focalMode is used </span><span><br></span><span>// to fill in the empty pixels that were the boundaries.</span><span><br></span><strong>var</strong><span> swordImg = </span><span>ee</span><span>.</span><span>Image</span><span>(</span><span>0</span><span>).</span><span>paint</span><span>(sword, </span><span>'node_id'</span><span>).</span><span>rename</span><span>(</span><span>'node_id'</span><span>)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>clip</span><span>(</span><span>aoi</span><span>);</span><span><br></span><strong>var</strong><span> nodePixels = concavityBounds.</span><span>addBands</span><span>(swordImg)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>reduceConnectedComponents</span><span>({</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; reducer: </span><span>ee</span><span>.</span><span>Reducer.max</span><span>(),</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; labelBand: </span><span>'bounds'</span><span><br></span><span>&nbsp; &nbsp; }).</span><span>focalMode</span><span>({</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; radius: </span><span>3</span><span>,</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; iterations: </span><span>2</span><span><br></span><span>&nbsp; &nbsp; });</span><span><br></span><span>Map</span><span>.</span><span>addLayer</span><span>(rpj(nodePixels).</span><span>randomVisualizer</span><span>(),</span><span><br></span><span>&nbsp; &nbsp; {},</span><span><br></span><span>&nbsp; &nbsp; </span><span>'node assignments'</span><span>,</span><span><br></span><span>&nbsp; &nbsp; </span><strong>false</strong><span>);</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<table>
+<tbody>
+<tr>
+<td><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/Screenshot%202023-10-26%20at%2011.30.16%E2%80%AFAM.png" alt="Screenshot 2023-10-26 at 11.30.16 AM.png" data-api-endpoint="https://ufl.instructure.com/api/v1/courses/489224/files/82405585" data-api-returntype="File" loading="lazy"></td>
+</tr>
+<tr>
+<td>
+<p><strong>Fig.</strong><span>&nbsp;section of the Madre de Dios River where each pixel is assigned to its closest centerline node</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><br><br></p>
+<p><strong>Summarizing the Data</strong></p>
+<p><span>The final step in this section is to apply a reducer that uses our </span><span>nodePixels</span><span> image from the previous step to group our raster data. We will combine the</span> <span>reducer.forEach</span> <span>and</span> <span>reducer.group</span> <span>methods into our own custom function that we can use with different reducers to get our final results. The </span><span>reducer.forEach</span><span> method sets up a different reducer and output for each band in our image, which is necessary when we use the reducer.group method. The </span><span>reducer.group</span><span> method is conceptually similar to </span><span>reducer.reduceRegions</span><span>, except our regions are defined by an image band instead of by polygons. In some cases the group method is much faster than the </span><span>reducer.reduceRegions</span><span> method, particularly if you were to have to convert your regions to polygons in order to provide the input to </span><span>reducer.reduceRegions</span><span>. The grouped reducers in our function return a list of dictionaries. However, it is much easier to work with feature collections, so we will map over the list and create a </span><span>FeatureCollection</span><span> before returning from the function.</span></p>
+<table>
+<tbody>
+<tr>
+<td>
+<pre><span>// Set up a custom reducing function to summarize the data.</span><span><br></span><strong>var</strong><span> groupReduce = </span><strong>function</strong><span>(dataImg, nodeIds, reducer) {</span><span><br></span><span>&nbsp; &nbsp; </span><span>// Create a grouped reducer for each band in the data image.</span><span><br></span><span>&nbsp; &nbsp; </span><strong>var</strong><span> groupReducer = reducer.</span><span>forEach</span><span>(dataImg.</span><span>bandNames</span><span>())</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; .</span><span>group</span><span>({</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; groupField: dataImg.</span><span>bandNames</span><span>().</span><span>length</span><span>(),</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; groupName: </span><span>'node_id'</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; });</span><span><br></span><span><br></span><span>&nbsp; &nbsp; </span><span>// Apply the grouped reducer.</span><span><br></span><span>&nbsp; &nbsp; </span><strong>var</strong><span> statsList = dataImg.</span><span>addBands</span><span>(nodeIds).</span><span>clip</span><span>(</span><span>aoi</span><span>)</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; .</span><span>reduceRegion</span><span>({</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; reducer: groupReducer,</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; scale: </span><span>30</span><span>,</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; }).</span><span>get</span><span>(</span><span>'groups'</span><span>);</span><span><br></span><span><br></span><span>&nbsp; &nbsp; </span><span>// Convert list of dictionaries to FeatureCollection.</span><span><br></span><span>&nbsp; &nbsp; </span><strong>var</strong><span> statsOut = </span><span>ee</span><span>.</span><span>List</span><span>(statsList).</span><span>map</span><span>(</span><strong>function</strong><span>(dict) {</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span><strong>return</strong> <span>ee</span><span>.</span><span>Feature</span><span>(</span><strong>null</strong><span>, dict);</span><span><br></span><span>&nbsp; &nbsp; });</span><span><br></span><span>&nbsp; &nbsp; </span><strong>return</strong> <span>ee</span><span>.</span><span>FeatureCollection</span><span>(statsOut);</span><span><br></span><span>};</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><span>We want the total number of pixels or bank length for some variables—such as the erosion, the channel mask, or the bank length, so we will use the</span> <span>Reducer.sum</span> <span>method with our grouped reducer function. For our aspect and directional variables, we need to use the </span><span>Reducer.circularMean</span> <span>method to find the mean direction. The returned variables </span><span>sumStats</span><span> and </span><span>angleStats</span><span> are feature collections with properties for our reduced data and the corresponding node ID.</span></p>
+<table>
+<tbody>
+<tr>
+<td>
+<pre><strong>var</strong><span> dataMask = masks1.</span><span>addBands</span><span>(masks2).</span><span>reduce</span><span>(</span><span>ee</span><span>.</span><span>Reducer</span><span><br></span><span>&nbsp; &nbsp; .anyNonZero</span><span>());</span><span><br></span><span><br></span><strong>var</strong><span> sumBands = [</span><span>'watermask'</span><span>, </span><span>'channelmask'</span><span>, </span><span>'bankLength'</span><span>];</span><span><br></span><strong>var</strong><span> sumImg = erosion</span><span><br></span><span>&nbsp; &nbsp; .</span><span>addBands</span><span>(masks1, sumBands)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>addBands</span><span>(masks2, sumBands);</span><span><br></span><strong>var</strong><span> sumStats = groupReduce(sumImg, nodePixels, </span><span>ee</span><span>.</span><span>Reducer.sum</span><span>());</span><span><br></span><span><br></span><strong>var</strong><span> angleImg = erosionDirection</span><span><br></span><span>&nbsp; &nbsp; .</span><span>addBands</span><span>(masks1, [</span><span>'bankAspect'</span><span>])</span><span><br></span><span>&nbsp; &nbsp; .</span><span>addBands</span><span>(masks2, [</span><span>'bankAspect'</span><span>]);</span><span><br></span><strong>var</strong><span> angleStats = groupReduce(angleImg, nodePixels, </span><span>ee</span><span>.</span><span>Reducer</span><span><br></span><span>&nbsp; &nbsp; .circularMean</span><span>());</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><span>Finally, we will join these two new feature collections to our original centerline data and print the results (Fig. A2.4.6).&nbsp;</span></p>
+<table>
+<tbody>
+<tr>
+<td>
+<pre><strong>var</strong><span> vectorData = </span><span>sword</span><span>.</span><span>filterBounds</span><span>(</span><span>aoi</span><span>).</span><span>map</span><span>(</span><strong>function</strong><span>(feat) {</span><span><br></span><span>&nbsp; &nbsp; </span><strong>var</strong><span> nodeFilter = </span><span>ee</span><span>.</span><span>Filter.eq</span><span>(</span><span>'node_id'</span><span>, feat.</span><span>get</span><span>(</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span><span>'node_id'</span><span>));</span><span><br></span><span>&nbsp; &nbsp; </span><strong>var</strong><span> sumFeat = sumStats.</span><span>filter</span><span>(nodeFilter).</span><span>first</span><span>();</span><span><br></span><span>&nbsp; &nbsp; </span><strong>var</strong><span> angleFeat = angleStats.</span><span>filter</span><span>(nodeFilter).</span><span>first</span><span>();</span><span><br></span><span>&nbsp; &nbsp; </span><strong>return</strong><span> feat.</span><span>copyProperties</span><span>(sumFeat).</span><span>copyProperties</span><span>(</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; angleFeat);</span><span><br></span><span>});</span><span><br></span><span><br></span><span>print</span><span>(vectorData);</span><span><br></span><span>Map</span><span>.</span><span>addLayer</span><span>(vectorData, {}, </span><span>'final data'</span><span>);</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<table>
+<tbody>
+<tr>
+<td><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/Screenshot%202023-10-26%20at%2011.30.59%E2%80%AFAM.png" alt="Screenshot 2023-10-26 at 11.30.59 AM.png" width="770" height="965" data-api-endpoint="https://ufl.instructure.com/api/v1/courses/489224/files/82405630" data-api-returntype="File" loading="lazy"></td>
+</tr>
+<tr>
+<td>
+<p><strong>Fig. </strong><span>The updated list of properties in our centerline dataset; new properties are outlined in black. The erosion and mask fields are in units of pixels, but you could convert to area using the</span> <span>Image.pixelArea</span> <span>method on the masks.</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><span>Based on raster calculations, this workflow can add many new properties to the river centerlines. For example, we calculated the amount of erosion between these two years, but you could use a similar code to calculate the amount of accretion. Other interesting river properties, like the banks' slope from a DEM, could be calculated and added to our centerline dataset.</span></p>
+<p><span>Continue and submit your final code.&nbsp;</span></p>
+</body>
+</html>

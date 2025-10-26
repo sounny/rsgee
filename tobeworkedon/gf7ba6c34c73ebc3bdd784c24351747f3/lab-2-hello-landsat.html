@@ -1,0 +1,102 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Assignment: Lab 2 - Hello LandSat!</title>
+</head>
+<body>
+<p><span><iframe title="Lab 2 - Hello LandSat" src="https://mediasite.video.ufl.edu/Mediasite/Play/906f33d5c28e4cb59891a0187f9f29751d" width="900" height="600" allowfullscreen="allowfullscreen" allow="fullscreen" loading="lazy"></iframe></span></p>
+<p><span>Spring 2023 Recording</span></p>
+<p>&nbsp;</p>
+<p>Fall 2023 Recording - <a href="https://ufl.zoom.us/rec/share/6rmwj2RN2GuE-oxrW-3JVKJ-8yu6UmrmLwoRdUTjUG53E2IylaCLbJwPeeKqd0uO.LSYPu6HxnK5CURFU?startTime=1692896422000" target="_blank">https://ufl.zoom.us/rec/share/6rmwj2RN2GuE-oxrW-3JVKJ-8yu6UmrmLwoRdUTjUG53E2IylaCLbJwPeeKqd0uO.LSYPu6HxnK5CURFU?startTime=1692896422000</a></p>
+<p>&nbsp;</p>
+<p><span>Satellite images are at the heart of Google Earth Engine’s power. This lab teaches you how to inspect and visualize data stored in image bands. We first visualize individual bands as separate map layers and then explore a method to visualize three different bands in a single composite layer. We compare different kinds of composites for satellite bands that measure electromagnetic radiation in the visible and non-visible spectrum.&nbsp;</span></p>
+<ol style="list-style-type: decimal;">
+<li><strong>Part 1 - Accessing an Image</strong></li>
+<li><span>To begin, you will construct an image with the Code Editor.&nbsp; Open up <a href="https://code.earthengine.google.com/" target="_blank">https://code.earthengine.google.com/</a></span></li>
+<li>
+<pre><span><strong>var</strong> first_image = ee.Image('LANDSAT/LT05/C02/T1_L2/LT05_118038_20000606');</span></pre>
+</li>
+<li><span>Hit the run button, and you will not see anything happen, but you have just loaded the Landsat image into memory.&nbsp;</span></li>
+<li>
+<span>You can explore the image in several ways. To start, you can retrieve </span><i><span>metadata</span></i><strong> </strong><span>(descriptive data about the image) by printing the image to the Code Editor’s </span><strong>Console</strong><span> panel.&nbsp; Now in the next line of code, print to console first_image the way you did with Hello world.&nbsp;</span>
+</li>
+<li>
+<pre><span>print(first_image);</span></pre>
+</li>
+<li><span>You may need to click the expander arrows in the Console panel to show the information. You should be able to read that this image consists of 19 different <i>bands</i>. For each band, the metadata lists four properties, but for now, let’s simply note that the first property is a <i>name</i> or label for the band enclosed in quotation marks. For example, the name of the first band is “SR_B1”</span></li>
+<li><span><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/Screenshot%202023-01-13%20at%206.52.56%20AM.png" alt="output on the console" width="689" height="605" data-api-endpoint="https://ufl.instructure.com/api/v1/courses/489224/files/79934698" data-api-returntype="File" loading="lazy"></span></li>
+<li>
+<p><span>A satellite sensor like Landsat 5 measures the magnitude of radiation in different portions of the electromagnetic spectrum. The first six bands in our image ("SR_B1" through "SR_B7") contain measurements for six different portions of the spectrum. The first three bands measure visible portions of the spectrum or quantities of blue, green, and red light. The other three bands measure infrared portions of the spectrum that are not visible to the human eye.&nbsp;</span></p>
+</li>
+<li>
+<span><span>An image band is an example of a <i>raster data model</i>, storing geographic data in a two-dimensional grid of pixels&nbsp;or <i>picture elements</i>. In remote sensing, the </span></span>value stored by each pixel is often called a <i><span>Digital Number</span></i><span> or </span><i><span>DN</span></i><span>. Depending on the sensor, the pixel value or DN can represent a range of possible data values.&nbsp; </span>Some of this information, like the names of the bands and their dimensions (number of pixels wide by number of pixels tall), can see in the metadata. Other pieces of information, like the portions of the spectrum measured in each band and the range of possible data values, can be found through the Earth Engine Data Catalog (described in the next two chapters) or with other Earth Engine methods.</li>
+<li><em><strong>Step 2 - Visualizing single bands of Imagery</strong></em></li>
+<li>
+<p><span>Now let’s add one of the bands to the map as a </span><i><span>layer</span></i><strong> </strong><span>so that we can see it.&nbsp; We will use the Map.addLayer method <a href="https://developers.google.com/earth-engine/apidocs/map-addlayer" target="_blank">https://developers.google.com/earth-engine/apidocs/map-addlayer</a></span></p>
+</li>
+<li>
+<pre><span>Map.addLayer(first_image); // &nbsp;dataset to display</span></pre>
+</li>
+<li><span>Push the run button. Just adding the map doesn't center the map on the image.&nbsp; The image is added, but you may have to zoom out and zoom in to find it.&nbsp;&nbsp;</span></li>
+<li><span>A better way to center the map on the image is to use Map.setCenter.&nbsp; Add the following line of code to your script. <a href="https://developers.google.com/earth-engine/apidocs/map-setcenter" target="_blank">https://developers.google.com/earth-engine/apidocs/map-setcenter</a></span></li>
+<li>
+<pre><span>Map.setCenter(122, 32,7);</span></pre>
+</li>
+<li><span>Now when you hit the run button, the map will generate over the image.&nbsp;</span></li>
+<li><span>The image that is presented it not very useful yet as it is not visulzied.&nbsp; Read the following documentation to learn how you can change the parameters of this method to visualize the image. <a href="https://developers.google.com/earth-engine/apidocs/map-addlayer" target="_blank">https://developers.google.com/earth-engine/apidocs/map-addlayer</a></span></li>
+<li><span>Now we will play with the visualization parameters to make the image look better.&nbsp; If you look in the Layer panel on the map, you will see the layer you just added shown as Layer1.&nbsp; Hovering the mouse next to it you will see a gearbox.&nbsp; Click on the gearbox and put in the following settings.&nbsp;</span></li>
+<li><span><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/Screenshot%202023-01-13%20at%208.32.53%20AM.png" alt="Screenshot 2023-01-13 at 8.32.53 AM.png" data-api-endpoint="https://ufl.instructure.com/api/v1/courses/489224/files/79934699" data-api-returntype="File" loading="lazy"></span></li>
+<li>
+<span>When hitting the apply button, you will see the image looks much better.&nbsp; We did not code these into your setting, but you can with </span><span>the addLayer method and these four important components:</span>
+<ol>
+<li aria-level="1">
+<span>first_image</span><span>: This is the dataset to display on the map.</span>
+</li>
+<li aria-level="1">
+<span>bands</span><span>: These are the particular bands from the dataset to display on the map. In our example, we displayed a single band named "SR_B1".</span>
+</li>
+<li aria-level="1">
+<span>min</span><i><span>, </span></i><span>max</span><span>: These represent the lower and upper bounds of values from "SR_B1" to display on the screen. By default, the minimum value provided (8000) is mapped to black, and the maximum value provided (17000) is mapped to white. The values between the minimum and maximum are mapped linearly to grayscale between black and white. Values below 8000 are drawn as black. Values above 17000 are drawn as white. Together, the bands, min, and max parameters define </span><i><span>visualization parameters</span></i><span>, or instructions for data display.</span>
+</li>
+<li aria-level="1">
+<p>'Band 1': This is a label for the map layer to display in the Layer Manager. This label appears in the dropdown menu of layers in the upper right of the map.</p>
+</li>
+</ol>
+</li>
+<li>This translates to code like this.</li>
+<li>
+<pre>Map.addLayer(<br>  &nbsp; first_image,<br>  &nbsp; {<br>  &nbsp; &nbsp; &nbsp; bands: ['SR_B1'],<br>  &nbsp; &nbsp; &nbsp; min: 8000,<br>  &nbsp; &nbsp; &nbsp; max: 17000<br>&nbsp; &nbsp; },<br><br>  &nbsp; 'Band 1'<br>);</pre>
+</li>
+<li>Now we will repeat this and add three different bands to compare.&nbsp;</li>
+<li>
+<pre>Map.addLayer(<br>&nbsp; &nbsp; first_image,<br>&nbsp; &nbsp; {<br>&nbsp; &nbsp; &nbsp; &nbsp; bands: ['SR_B1'],<br>&nbsp; &nbsp; &nbsp; &nbsp; min: 8000,<br>&nbsp; &nbsp; &nbsp; &nbsp; max: 17000<br>&nbsp; &nbsp; },<br>  &nbsp; 'Band 1'<br>);<br><br>Map.addLayer(<br>&nbsp; &nbsp; first_image,<br>&nbsp; &nbsp; {<br>&nbsp; &nbsp; &nbsp; &nbsp; bands: ['SR_B2'],<br>&nbsp; &nbsp; &nbsp; &nbsp; min: 8000,<br>&nbsp; &nbsp; &nbsp; &nbsp; max: 17000<br>&nbsp; &nbsp; },<br>  &nbsp; 'Band 2'<br>);<br><br>Map.addLayer(<br>&nbsp; &nbsp; first_image,<br>&nbsp; &nbsp; {<br>&nbsp; &nbsp; &nbsp; &nbsp; bands: ['SR_B3'],<br>&nbsp; &nbsp; &nbsp; &nbsp; min: 8000,<br>&nbsp; &nbsp; &nbsp; &nbsp; max: 17000<br>&nbsp; &nbsp; },<br>  &nbsp; 'Band 3'<br>);</pre>
+</li>
+<li>Examine the three layers. Try out the inspector tool.&nbsp; Click on areas around the map and compare the band values.&nbsp; &nbsp;
+<p><span>Using the controls in the Layers manager, explore these layers and examine how the pixel values in each band differ. Does Layer 2 (displaying pixel values from the “SR_B2” band) appear generally brighter than Layer 1 (the “SR_B1” band)? Compared with Layer 2, do the ocean waters in Layer 3 (the “SR_B3” band) appear a little darker in the north, but a little lighter in the south?&nbsp;&nbsp;&nbsp;</span></p>
+Which do you think is blue, green, and red?</li>
+<li><em><strong>Step 3 - True-Color Composites</strong></em></li>
+<li>
+<p><span>We can use color to compare these visual differences in the pixel values of each band layer all at once as an </span><i><span>RGB composite</span></i><strong>. </strong><span>This method uses the three primary colors (red, green, and blue) to display each pixel’s values across three bands.&nbsp;</span></p>
+</li>
+<li>
+<pre><span>Map.addLayer(<br>&nbsp; &nbsp; first_image,<br>&nbsp; &nbsp; {<br>&nbsp; &nbsp; &nbsp; &nbsp; bands: ['SR_B3', 'SR_B2', 'SR_B1'],<br>&nbsp; &nbsp; &nbsp; &nbsp; min: 8000,<br>&nbsp; &nbsp; &nbsp; &nbsp; max: 17000<br>&nbsp; &nbsp; },<br>&nbsp; &nbsp; 'Natural Color');</span></pre>
+</li>
+<li><span>Run the script. The result looks like the world we see, and is referred to as a <i>natural-color composite</i><strong>,</strong> because it naturally pairs the spectral ranges of the image bands to display colors. Also called a <i>true-color composite</i>, this image shows the red spectral band with shades of red, the green band with shades of green, and the blue band with shades of blue. We specified the pairing simply through the order of the bands in the list: B3, B2, B1. Because bands 3, 2, and 1 of Landsat 5 correspond to the real-world colors of red, green, and blue, the image resembles the world that we would see outside the window of a plane or with a low-flying drone.</span></li>
+<li><span><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/Screenshot%202023-01-13%20at%208.43.38%20AM.png" alt="results of true color" data-api-endpoint="https://ufl.instructure.com/api/v1/courses/489224/files/79934700" data-api-returntype="File" loading="lazy"></span></li>
+<li><span>A Landsat image contains many more bands than just the three true-color bands. We can make RGB composites to show combinations of any bands—even those outside what the human eye can see. For example, band 4 represents the near-infrared band, just outside the range of human vision. Because of its value in distinguishing environmental conditions, this band was included on even the earliest 1970s Landsats. For example, it has different values in coniferous and deciduous forests and can indicate crop health. Add this code to your script and run it to see an example of this.&nbsp;</span></li>
+<li>
+<pre><span>Map.addLayer(<br>&nbsp; &nbsp; first_image,<br>&nbsp; &nbsp; {<br>&nbsp; &nbsp; &nbsp; &nbsp; bands: ['SR_B4', 'SR_B3', 'SR_B2'],<br>&nbsp; &nbsp; &nbsp; &nbsp; min: 8000,<br>&nbsp; &nbsp; &nbsp; &nbsp; max: 17000<br>&nbsp; &nbsp; },<br>&nbsp; &nbsp; 'False Color');</span></pre>
+</li>
+<li>
+<p><span>The display colors in this false-color composite no longer pair naturally with the bands. This particular example, more precisely referred to as a </span><i><span>color-infrared composite</span></i><strong>,</strong><span> is a scene we cannot observe with our eyes but learn to read and interpret. Its meaning can be deciphered logically by thinking through what is passed to the red, green, and blue color channels.</span></p>
+</li>
+<li><span><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/Screenshot%202023-01-13%20at%208.46.47%20AM.png" alt="Screenshot 2023-01-13 at 8.46.47 AM.png" data-api-endpoint="https://ufl.instructure.com/api/v1/courses/489224/files/79934701" data-api-returntype="File" loading="lazy"></span></li>
+<li>
+<p><span>Notice how the land on the northern peninsula appears bright red ( area A). This is because, for that area, the pixel value of the first band (which is drawing the near-infrared brightness) is much higher relative to the pixel value of the other two bands. You can check this by using the </span><strong>Inspector</strong><span> tool. Try zooming into a part of the image with a red patch (area B) and clicking on a red pixel. Then expand the “False Color” layer in the </span><strong>Inspector</strong><span> panel (rea A), click the blue icon next to the layer name ( area B), and read the pixel value for the three bands of the composite ( area C). The pixel value for B4 should be much greater than for B3 or B2.&nbsp;</span></p>
+</li>
+<li><span>In the bottom left corner of the image&nbsp; (area C), rivers and lakes appear very dark, which means that the pixel value in all three bands is low. However, sediment plumes from the river into the sea appear with blue and cyan tints (area D). If they look like primary blue, then the pixel value for the second band (B3) is likely higher than the first (B4) and third (B2) bands. If they appear more like cyan, an additive color, the pixel values of the second and third bands are greater than the first.&nbsp;</span></li>
+<li><span>In total, the false-color composite provides more contrast than the true-color image for understanding differences across the scene.</span></li>
+<li><span>Save your work and submit a URL of your Code.</span></li>
+</ol>
+</body>
+</html>

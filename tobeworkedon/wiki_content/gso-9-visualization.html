@@ -1,0 +1,23 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>GSO-9-Visualization</title>
+<meta name="identifier" content="g3575056dbfd202b340687e83dff1d590"/>
+<meta name="editing_roles" content="teachers"/>
+<meta name="workflow_state" content="active"/>
+</head>
+<body>
+<div>
+<div><span>Let's go ahead and add some parameters to the Map.addLayer() function to make this look better. &nbsp;If you remember back to cartography 101, one of the “rules” of cartography is that if someone looking at it for the first time can’t tell within the first 5 seconds what is being visualized, you haven't made a useful map. &nbsp;While this is a bit extreme, it’s an excellent goal to aim for. &nbsp;This is made all the harder because, at the moment, GEE doesn't support legend creation. &nbsp;There are of course, any number of different ways to visualize a map, but one of my personal favorites is a Blue to Brown color scheme. &nbsp;This is also a fairly common choice in water trends, with dark blue indicating large increases and dark brown indicating large decreases. &nbsp;Use the inspector to poke around the linear fit data and find good min and max values (I settled on -0.03 and 0.03). &nbsp;Because we did this at a yearly interval, the slope units are percent change. &nbsp;And because we have (theoretically) 365 days, a slope of ~0.03 equates to about 10 days/year (365*0.03) and about 90 days over the ten-year period (a quarter of a year increase or decrease!).&nbsp;</span></div>
+<div><span>&nbsp;</span></div>
+<div><span>Create a palette variable, and use a color gradient generator to build an evenly spaced color palette.&nbsp; GEE will automatically stretch this palette across the min and max values, so ensure the number of values is odd, so that 0 values have a color assigned to them (in this case, pure white). &nbsp;Our final map call will look something like this.&nbsp;&nbsp;</span></div>
+<div><span><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/FinalMapCall.png" alt="FinalMapCall.png" loading="lazy"></span></div>
+<div>Code snapshot: <a href="https://code.earthengine.google.com/b4e308ea5e7a037c7ac9b918d7d8e298" target="_blank">https://code.earthengine.google.com/b4e308ea5e7a037c7ac9b918d7d8e298</a>&nbsp;</div>
+</div>
+<div>
+<div>
+<div>Now that we have a good-looking map, it's time to export it to our Google Maps Engine to share it with the world.</div>
+</div>
+</div>
+</body>
+</html>

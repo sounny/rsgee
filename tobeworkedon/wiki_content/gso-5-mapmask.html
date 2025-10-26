@@ -1,0 +1,30 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>GSO-5-MapMask</title>
+<meta name="identifier" content="gad3859237e2c5b2e8f9326ed80402e9f"/>
+<meta name="editing_roles" content="teachers"/>
+<meta name="workflow_state" content="active"/>
+</head>
+<body>
+<div><span>Now that we have a function that joins the two collections, we need to mask out pixels that have a sensor zenith angle greater than 25<sup>o</sup></span></div>
+<h3 id="sites-page-title-header"><span id="sites-page-title" dir="ltr">.map and .mask</span></h3>
+<div><strong>.map</strong></div>
+<p><span dir="ltr"><span>You may have noticed that we used the .map() method on mergeBands. &nbsp;The .map method runs a function across every element in a collection, and returns a collection, and&nbsp;is one of the most useful tools in our arsenal.&nbsp;</span></span><span><br></span></p>
+<div>
+<p><span><strong>.mask()<br></strong>Masking is another one of the most widely used methods we use to process an image.&nbsp;&nbsp;It can be difficult to understand at first, so let’s look at the description of the mask method.</span></p>
+<p><span><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/Mask.png" alt="Mask.png" data-api-endpoint="https://ufl.instructure.com/api/v1/courses/489224/files/82600014" data-api-returntype="File" loading="lazy"></span></p>
+<p><span><i>“The output image retains the metadata and footprint of the input image” &nbsp;</i>That the important line from the description.&nbsp; So anything that is within the mask is kept as is, and anything outside the mask is converted to a "masked" value. &nbsp;A mask call looks like so.</span></p>
+<div><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/MaksForm.png" alt="MaksForm.png" data-api-endpoint="https://ufl.instructure.com/api/v1/courses/489224/files/82600043" data-api-returntype="File" loading="lazy"></div>
+<p><span>Using the .mask and .map functions, we will modify our code to mask out any pixels with a&nbsp;sensor zenith angle greater than 25 degrees. &nbsp;The function we wish to run over the entire ImageCollection should mask out any sensor angles that have a sensor zenith angle greater than 25 degrees. &nbsp;The function to do so will look like this.</span></p>
+<div><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/MaskSnesor.png" alt="MaskSnesor.png" data-api-endpoint="https://ufl.instructure.com/api/v1/courses/489224/files/82600062" data-api-returntype="File" loading="lazy"></div>
+<span><br></span>
+<p><span>Remember that we will want to do this to every image in the collection, so we will use the .map() method again, like so.</span></p>
+<div>
+<pre>//Masking collections<br><br>// A function to assign high sensor zenith angle cells to null<br>var MaskSensorPixels = function(anImage) {<br>&nbsp; var LessThan25 = anImage.select('SensorZenith').lte(2500); // Angle is stored as angle * 100 in MOD09<br>&nbsp; return anImage.mask(LessThan25);<br>};<br><br>// A function to merge the bands together after a join<br>// the bands are referred to as the 'primary' and 'secondary' properties<br>var MergeBands = function(aRow) {<br>&nbsp; var anImage = ee.Image.cat(aRow.get('primary'), aRow.get('secondary'));<br>&nbsp; return anImage;<br>};<br><br>// First, we define the two datasets, selecting the bands we are interested in<br>var MOD09GA = ee.ImageCollection('MOD09GA').select('SensorZenith')<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;.filterDate('2005-10-01', '2005-10-31');<br>var MOD10A1 = ee.ImageCollection('MOD10A1').select('Snow_Cover_Daily_Tile')<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;.filterDate('2005-10-01', '2005-10-31');<br><br>// Define the join and filter<br>var Join = ee.Join.inner();<br>var FilterOnStartTime = ee.Filter.equals({'leftField': 'system:time_start',&nbsp;<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 'rightField': 'system:time_start'<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;});<br><br>// Join the two collections, passing entries through the filter<br>var JoinedMODIS = Join.apply(MOD09GA, MOD10A1, FilterOnStartTime);<br><br>print(JoinedMODIS);<br><br>var MergedMODIS = JoinedMODIS.map(MergeBands);<br>var MakedMODIS = ee.ImageCollection(MergedMODIS).map(MaskSensorPixels);</pre>
+</div>
+<p><a href="https://code.earthengine.google.com/8fbdd3c290f80f03ac24357f72e8bee3" target="_blank">https://code.earthengine.google.com/8fbdd3c290f80f03ac24357f72e8bee3</a>&nbsp;</p>
+<p><span>The next step is to reclassify the snow cover into a snow/no snow/missing scheme.</span></p>
+</div>
+</body>
+</html>

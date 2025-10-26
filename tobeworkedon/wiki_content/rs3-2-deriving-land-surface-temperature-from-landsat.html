@@ -1,0 +1,85 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>RS3 - 2- Deriving Land Surface Temperature from LandSat</title>
+<meta name="identifier" content="g92b5615651ddfc01ddcfd0f07c5603ec"/>
+<meta name="editing_roles" content="teachers"/>
+<meta name="workflow_state" content="active"/>
+</head>
+<body>
+<p>Your code up to this point should look like this: <a href="https://code.earthengine.google.com/cc6b4c4bec86eefd37f2e50f683b5aa1" target="_blank">https://code.earthengine.google.com/cc6b4c4bec86eefd37f2e50f683b5aa1</a></p>
+<hr>
+<p><span>Working with MODIS LST is relatively simple because the NASA team already processes the data. You can also derive LST from Landsat, which has a much finer native resolution (between ~60 m and ~120 m depending on the satellite) than the ~1 km MODIS pixels. However, you need to derive LST yourself from the measurements in the thermal bands, which usually involves some surface emissivity estimate (Li et al. 2013). The surface emissivity (ε) of a material is the effectiveness with which it can emit thermal radiation compared to a black body at the same temperature and can range from 0 (for a perfect reflector) to 1 (for a perfect absorber and emitter). Since the thermal radiation captured by satellites is a function of both LST and ε, you need to accurately prescribe or estimate ε to get to the correct LST. Let’s consider one such simple method using Landsat 8 data.</span></p>
+<p><span>We will start by loading in the Landsat data, cloud screening, and filtering to a time and region of interest. Continuing in the same script from part 1, add the following code:</span></p>
+<table>
+<tbody>
+<tr>
+<td>
+<pre><span>// Function to filter out cloudy pixels.</span><span><br></span><strong>function</strong><span> cloudMask(cloudyScene) {</span><span><br></span><span>&nbsp; &nbsp; </span><span>// Add a cloud score band to the image.</span><span><br></span><span>&nbsp; &nbsp; </span><strong>var</strong><span> scored = </span><span>ee</span><span>.</span><span>Algorithms.Landsat.simpleCloudScore</span><span>(cloudyScene);</span><span><br></span><span><br></span><span>&nbsp; &nbsp; </span><span>// Create an image mask from the cloud score band and specify threshold.</span><span><br></span><span>&nbsp; &nbsp; </span><strong>var</strong><span> mask = scored.</span><span>select</span><span>([</span><span>'cloud'</span><span>]).</span><span>lte</span><span>(</span><span>10</span><span>);</span><span><br></span><span><br></span><span>&nbsp; &nbsp; </span><span>// Apply the mask to the original image and return the masked image.</span><span><br></span><span>&nbsp; &nbsp; </span><strong>return</strong><span> cloudyScene.</span><span>updateMask</span><span>(mask);</span><span><br></span><span>}</span><span><br></span><span><br></span><span>// Load the collection, apply cloud mask, and filter to date and region of interest.</span><span><br></span><strong>var</strong><span> col = </span><span>ee</span><span>.</span><span>ImageCollection</span><span>(</span><span>'LANDSAT/LC08/C02/T1_TOA'</span><span>)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>filterBounds</span><span>(regionInt)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>filterDate</span><span>(</span><span>'2014-01-01'</span><span>, </span><span>'2019-01-01'</span><span>)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>filter</span><span>(sumFilter)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>map</span><span>(cloudMask);</span><span><br></span><span><br></span><span>print</span><span>(</span><span>'Landsat collection'</span><span>, col);</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><span>After creating a median composite as a simple way to further reduce the influence of clouds, we mask out the water pixels and select the brightness temperature band.</span></p>
+<table>
+<tbody>
+<tr>
+<td>
+<pre><span>// Generate median composite.</span><span><br></span><strong>var</strong><span> image = col.</span><span>median</span><span>();</span><span><br></span><span><br></span><span>// Select thermal band 10 (with brightness temperature).</span><span><br></span><strong>var</strong><span> thermal = image.</span><span>select</span><span>(</span><span>'B10'</span><span>)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>clip</span><span>(regionInt)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>updateMask</span><span>(notWater);</span><span><br></span><span><br></span><span>Map</span><span>.</span><span>addLayer</span><span>(thermal, {</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; min: </span><span>295</span><span>,</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; max: </span><span>310</span><span>,</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; palette: [</span><span>'blue'</span><span>, </span><span>'white'</span><span>, </span><span>'red'</span><span>]</span><span><br></span><span>&nbsp; &nbsp; },</span><span><br></span><span>&nbsp; &nbsp; </span><span>'Landsat_BT'</span><span>);</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/Screenshot%202023-11-09%20at%2011.07.28%E2%80%AFAM.png" alt="Screenshot 2023-11-09 at 11.07.28 AM.png" loading="lazy"></p>
+<p><em><strong>Fig.</strong><span>&nbsp;Five-year summer median composite of Landsat brightness temperature over New Haven, Connecticut. Red pixels show higher values, and blue pixels have lower values.</span></em></p>
+<p><span>Brightness temperature (Figure) is the equivalent of the infrared radiation escaping the top of the atmosphere, assuming the Earth to be a black body. It is not the same as the LST, which requires accounting for atmospheric absorption and re-emission, as well as the emissivity of the land surface. One way to derive pixel-level emissivity is as a function of the vegetation fraction of the pixel (Malakar et al. 2018). We start by calculating the Normalized Difference Vegetation Index (NDVI) from the Landsat surface reflectance data.</span></p>
+<table>
+<tbody>
+<tr>
+<td>
+<pre><span>// Calculate Normalized Difference Vegetation Index (NDVI) </span><span><br></span><span>// from Landsat surface reflectance.</span><span><br></span><strong>var</strong><span> ndvi = </span><span>ee</span><span>.</span><span>ImageCollection</span><span>(</span><span>'LANDSAT/LC08/C02/T1_L2'</span><span>)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>filterBounds</span><span>(regionInt)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>filterDate</span><span>(</span><span>'2014-01-01'</span><span>, </span><span>'2019-01-01'</span><span>)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>filter</span><span>(sumFilter)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>median</span><span>()</span><span><br></span><span>&nbsp; &nbsp; .</span><span>normalizedDifference</span><span>([</span><span>'SR_B5'</span><span>, </span><span>'SR_B4'</span><span>]).</span><span>rename</span><span>(</span><span>'NDVI'</span><span>)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>clip</span><span>(regionInt)</span><span><br></span><span>&nbsp; &nbsp; .</span><span>updateMask</span><span>(notWater);</span><span><br></span><span><br></span><span>Map</span><span>.</span><span>addLayer</span><span>(ndvi, {</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; min: </span><span>0</span><span>,</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; max: </span><span>1</span><span>,</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; palette: [</span><span>'blue'</span><span>, </span><span>'white'</span><span>, </span><span>'green'</span><span>]</span><span><br></span><span>&nbsp; &nbsp; },</span><span><br></span><span>&nbsp; &nbsp; </span><span>'ndvi'</span><span>);</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><em><span><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/Screenshot%202023-11-09%20at%2011.09.07%E2%80%AFAM.png" alt="Screenshot 2023-11-09 at 11.09.07 AM.png" loading="lazy"></span><strong>Figure </strong><span>Five-year summer median composite of Landsat-derived NDVI over New Haven, Connecticut. White pixels show higher NDVI values, and blue pixels have lower values.</span></em></p>
+<p><span>To map NDVI for each pixel to the actual fraction of the pixel with vegetation (fractional vegetation cover), we next use a relationship based on the range of NDVI values for each pixel.</span></p>
+<table>
+<tbody>
+<tr>
+<td>
+<pre><span>// Find the minimum and maximum of NDVI.&nbsp; Combine the reducers</span><span><br></span><span>// for efficiency (single pass over the data).</span><span><br></span><strong>var</strong><span> minMax = ndvi.</span><span>reduceRegion</span><span>({</span><span><br></span><span>&nbsp; &nbsp; reducer: </span><span>ee</span><span>.</span><span>Reducer.min</span><span>().</span><span>combine</span><span>({</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; reducer2: </span><span>ee</span><span>.</span><span>Reducer.max</span><span>(),</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; sharedInputs: </span><strong>true</strong><span><br></span><span>&nbsp; &nbsp; }),</span><span><br></span><span>&nbsp; &nbsp; geometry: regionInt,</span><span><br></span><span>&nbsp; &nbsp; scale: </span><span>30</span><span>,</span><span><br></span><span>&nbsp; &nbsp; maxPixels: </span><span>1e9</span><span><br></span><span>});</span><span><br></span><span>print</span><span>(</span><span>'minMax'</span><span>, minMax);</span><span><br></span><span><br></span><strong>var</strong><span> min = </span><span>ee</span><span>.</span><span>Number</span><span>(minMax.</span><span>get</span><span>(</span><span>'NDVI_min'</span><span>));</span><span><br></span><strong>var</strong><span> max = </span><span>ee</span><span>.</span><span>Number</span><span>(minMax.</span><span>get</span><span>(</span><span>'NDVI_max'</span><span>));</span><span><br></span><span><br></span><span>// Calculate fractional vegetation.</span><span><br></span><strong>var</strong><span> fv = ndvi.</span><span>subtract</span><span>(min).</span><span>divide</span><span>(max.</span><span>subtract</span><span>(min)).</span><span>rename</span><span>(</span><span>'FV'</span><span>);</span><span><br></span><span>Map</span><span>.</span><span>addLayer</span><span>(fv, {</span><span><br></span><span>&nbsp; &nbsp; min: </span><span>0</span><span>,</span><span><br></span><span>&nbsp; &nbsp; max: </span><span>1</span><span>,</span><span><br></span><span>&nbsp; &nbsp; palette: [</span><span>'blue'</span><span>, </span><span>'white'</span><span>, </span><span>'green'</span><span>]</span><span><br></span><span>}, </span><span>'fv'</span><span>);</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><span><img src="$IMS-CC-FILEBASE$/Uploaded%20Media/Screenshot%202023-11-09%20at%2011.10.27%E2%80%AFAM.png" alt="Screenshot 2023-11-09 at 11.10.27 AM.png" loading="lazy"></span></p>
+<p><span>Now, we use an empirical emissivity model based on this fractional vegetation cover (</span><span>Sekertekin and Bonafoni 2020)</span><span>.</span></p>
+<table>
+<tbody>
+<tr>
+<td>
+<pre><span>// Emissivity calculations.</span><span><br></span><strong>var</strong><span> a = </span><span>ee</span><span>.</span><span>Number</span><span>(</span><span>0.004</span><span>);</span><span><br></span><strong>var</strong><span> b = </span><span>ee</span><span>.</span><span>Number</span><span>(</span><span>0.986</span><span>);</span><span><br></span><strong>var</strong><span> em = fv.</span><span>multiply</span><span>(a).</span><span>add</span><span>(b).</span><span>rename</span><span>(</span><span>'EMM'</span><span>).</span><span>updateMask</span><span>(notWater);</span><span><br></span><span><br></span><span>Map</span><span>.</span><span>addLayer</span><span>(em, {</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; min: </span><span>0.98</span><span>,</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; max: </span><span>0.99</span><span>,</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; palette: [</span><span>'blue'</span><span>, </span><span>'white'</span><span>, </span><span>'green'</span><span>]</span><span><br></span><span>&nbsp; &nbsp; },</span><span><br></span><span>&nbsp; &nbsp; </span><span>'EMM'</span><span>);</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><span>&nbsp; <img src="$IMS-CC-FILEBASE$/Uploaded%20Media/Screenshot%202023-11-09%20at%2011.13.45%E2%80%AFAM.png" alt="Screenshot 2023-11-09 at 11.13.45 AM.png" loading="lazy"></span></p>
+<p><em><strong>Figure </strong><span>Surface emissivity over New Haven, Connecticut, based on vegetation fraction. Green pixels show higher values, and white pixels have lower values.</span></em></p>
+<p><span>As seen in the Figure, emissivity is lower over the built-up structures than over vegetation, which is expected. Note that different models of estimating emissivity would lead to differences in LST values and the SUHI intensity (</span><span>Sekertekin and Bonafoni 2020, </span><span>Chakraborty et al. 2021a).&nbsp;</span></p>
+<p><span>Then, we combine this emissivity with the brightness temperature to calculate the LST for each pixel using a simple single-channel algorithm, which is a linearized approximation of the radiation transfer equation (Ermida et al. 2020).</span></p>
+<table>
+<tbody>
+<tr>
+<td>
+<pre><span>// Calculate LST from emissivity and brightness temperature.</span><span><br></span><strong>var</strong><span> lstLandsat = thermal.</span><span>expression</span><span>(</span><span><br></span><span>&nbsp; &nbsp; </span><span>'(Tb/(1 + (0.001145* (Tb / 1.438))*log(Ep)))-273.15'</span><span>, {</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span><span>'Tb'</span><span>: thermal.</span><span>select</span><span>(</span><span>'B10'</span><span>),</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; </span><span>'Ep'</span><span>: em.</span><span>select</span><span>(</span><span>'EMM'</span><span>)</span><span><br></span><span>&nbsp; &nbsp; }).</span><span>updateMask</span><span>(notWater);</span><span><br></span><span><br></span><span>Map</span><span>.</span><span>addLayer</span><span>(lstLandsat, {</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; min: </span><span>25</span><span>,</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; max: </span><span>35</span><span>,</span><span><br></span><span>&nbsp; &nbsp; &nbsp; &nbsp; palette: [</span><span>'blue'</span><span>, </span><span>'white'</span><span>, </span><span>'red'</span><span>],</span><span><br></span><span>&nbsp; &nbsp; },</span><span><br></span><span>&nbsp; &nbsp; </span><span>'LST_Landsat'</span><span>);</span></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p><span>&nbsp;<img src="$IMS-CC-FILEBASE$/Uploaded%20Media/Screenshot%202023-11-09%20at%2011.14.19%E2%80%AFAM.png" alt="Screenshot 2023-11-09 at 11.14.19 AM.png" loading="lazy"></span></p>
+<p><strong>Figure</strong><span> Five-year summer median composite of Landsat-derived LST over New Haven, Connecticut. Red pixels show higher LST values, and blue pixels have lower values.</span></p>
+<p><span>The Landsat-derived values correspond to those of the MODIS Terra daytime overpass. Overall, you do see similar patterns, but Landsat picks up a lot more heterogeneity than MODIS due to its finer resolution.</span></p>
+<div id="gtx-trans" style="position: absolute; left: 434px; top: 4776.46px;"></div>
+</body>
+</html>
