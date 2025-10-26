@@ -135,7 +135,7 @@ python -m http.server 8000
 
 All lab assignments should be submitted via email with the following format:
 
-**Email To:** instructor@university.edu  
+**Submission:** Submit lab via email.
 **Subject:** `Lab [Number] - [Assignment Name] - [Your Name]`
 
 **Include:**
