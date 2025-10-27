@@ -78,6 +78,7 @@ header {
     margin: 20px auto 0;
     font-style: italic;
     line-height: 1.6;
+    text-align: left; /* Override header centering for paragraph text */
 }
 
 /* ===== NAVIGATION ===== */
