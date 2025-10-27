@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 16 - Wildfire Analysis | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <meta name="description" content="Map burn severity with Landsat NBR/dNBR, classify severity, and summarize area by class within fire perimeters.">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#schedule">Labs</a> &gt; Lab 16
+        </nav>
+
+        <header class="lab-header">
+            <h1>Lab 16 - Wildfire Analysis</h1>
+            <p><em>Map burn severity using the Normalized Burn Ratio (NBR) and delta NBR (dNBR) from pre- and post-fire Landsat imagery, and summarize results by fire perimeter.</em></p>
+        </header>
+
+        <main class="lab-content">
+            <section id="objectives">
+                <h2>Objectives</h2>
+                <ul>
+                    <li>Compute NBR for pre- and post-fire dates and derive dNBR</li>
+                    <li>Classify burn severity using USGS thresholds</li>
+                    <li>Summarize area by severity class within a fire perimeter</li>
+                </ul>
+            </section>
+
+            <section id="method">
+                <h2>Method overview</h2>
+                <p>NBR = (NIR − SWIR2) / (NIR + SWIR2). Burn severity is estimated via dNBR = NBR<sub>pre</sub> − NBR<sub>post</sub>. Positive values generally indicate greater burn severity.</p>
+            </section>
+
+            <section id="starter-code">
+                <h2>Starter code</h2>
+                                <pre>// AOI and dates (adjust for your fire)
+var aoi = ee.Geometry.Rectangle([-118.2, 34.1, -117.5, 34.4]);
+Map.centerObject(aoi, 10);
+
+var preStart = '2020-07-01';
+var preEnd   = '2020-08-31';
+var postStart= '2020-10-01';
+var postEnd  = '2020-11-30';
+
+// Mask clouds and shadows using QA_PIXEL bits (bit3=cloud, bit4=cloud shadow)
+function maskL2(img) {
+    var qa = img.select('QA_PIXEL');
+    var cloud = qa.bitwiseAnd(1 << 3).neq(0);
+    var shadow = qa.bitwiseAnd(1 << 4).neq(0);
+    var mask = cloud.or(shadow).not();
+    return img.updateMask(mask);
+}
+
+function prep(img){
+    var sr = maskL2(img);
+    var nir = sr.select('SR_B5').multiply(0.0000275).add(-0.2);
+    var sw2 = sr.select('SR_B7').multiply(0.0000275).add(-0.2);
+    var nbr = nir.subtract(sw2).divide(nir.add(sw2)).rename('NBR');
+    return nbr.copyProperties(img, img.propertyNames());
+}
+
+var L = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterBounds(aoi);
+var pre  = L.filterDate(preStart, preEnd).map(prep).median().clip(aoi);
+var post = L.filterDate(postStart, postEnd).map(prep).median().clip(aoi);
+
+var dnbr = pre.subtract(post).rename('dNBR');
+Map.addLayer(pre, {min:-1, max:1, palette:['#1a9850','#ffffbf','#d73027']}, 'NBR pre');
+Map.addLayer(post,{min:-1, max:1, palette:['#1a9850','#ffffbf','#d73027']}, 'NBR post');
+Map.addLayer(dnbr,{min:-0.2, max:1, palette:['#2c7bb6','#ffff8c','#d7191c']}, 'dNBR');
+
+// Burn severity thresholds (USGS MTBS example)
+var sev = dnbr.expression(
+  'b(0) <= 0.1 ? 0 : \n' +
+  'b(0) <= 0.27 ? 1 : \n' +
+  'b(0) <= 0.44 ? 2 : \n' +
+  'b(0) <= 0.66 ? 3 : 4'
+).rename('severity');
+
+Map.addLayer(sev, {min:0, max:4, palette:['#1a9641','#ffffbf','#fdae61','#d7191c','#a50026']}, 'Severity classes');
+
+// Fire perimeter (replace with actual perimeter FC if available)
+var perimeter = ee.FeatureCollection('USDOS/LSIB_SIMPLE/2017').filterBounds(aoi).geometry().bounds(1000);
+
+// Area by class (hectares)
+var areaImg = ee.Image.pixelArea().divide(10000).addBands(sev);
+var byClass = areaImg.reduceRegion({
+  reducer: ee.Reducer.sum().group({groupField: 1, groupName: 'severity'}),
+  geometry: perimeter, scale: 30, maxPixels: 1e9
+});
+print('Area (ha) by severity class', byClass);
+</pre>
+            </section>
+
+                        <section id="exports">
+                                <h2>Exports</h2>
+                                <p>Export images and the severity area table to Google Drive.</p>
+                                <pre>// Convert grouped dictionary to a FeatureCollection for CSV export
+var groups = ee.List(byClass.get('groups'));
+var table = ee.FeatureCollection(groups.map(function(g){
+    g = ee.Dictionary(g);
+    return ee.Feature(null, {
+        severity: g.get('severity'),
+        area_ha: g.get('sum')
+    });
+}));
+
+// Export table as CSV
+Export.table.toDrive({
+    collection: table,
+    description: 'burn_severity_area_by_class',
+    fileFormat: 'CSV'
+});
+
+// Export dNBR and severity rasters as GeoTIFFs
+Export.image.toDrive({
+    image: dnbr.rename('dNBR'),
+    description: 'dnbr_geotiff',
+    region: aoi,
+    scale: 30,
+    maxPixels: 1e13
+});
+
+Export.image.toDrive({
+    image: sev.rename('severity'),
+    description: 'severity_classes_geotiff',
+    region: aoi,
+    scale: 30,
+    maxPixels: 1e13
+});
+</pre>
+                        </section>
+
+            <section id="deliverables">
+                <h2>Deliverables</h2>
+                <ul>
+                    <li>Map layers: NBR pre/post, dNBR, and severity classes</li>
+                    <li>Table: area (hectares) by severity class within the fire perimeter</li>
+                    <li>Short discussion: Note any unburned/low-severity islands and likely drivers</li>
+                    <li>EE script URL; export class areas as a CSV</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer class="lab-footer">
+            <p><a href="lab-15-urban-heat-island.html">&larr; Previous Lab</a> | <a href="lab-17-river-morphology.html">Next Lab &rarr;</a></p>
+            <p><a href="../index.html">&larr; Back to Course Home</a></p>
+        </footer>
+    </div>
+</body>
+</html>

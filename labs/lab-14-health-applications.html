@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 14 - Health Applications | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <meta name="description" content="Use Earth Engine to map LST exposure and access to green space, and summarize results by administrative units.">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#schedule">Labs</a> &gt; Lab 14
+        </nav>
+
+        <header class="lab-header">
+                        <h1>Lab 14 - Health Applications</h1>
+                        <p><em>In this lab you’ll use satellite data to create simple public health indicators, including land surface temperature exposure and access-to-green-space metrics.</em></p>
+        </header>
+
+        <main class="lab-content">
+                        <section id="objectives">
+                                <h2>Objectives</h2>
+                                <ul>
+                                        <li>Retrieve and visualize land surface temperature (LST) from satellite products</li>
+                                        <li>Compute population-weighted heat exposure at neighborhood scale</li>
+                                        <li>Map access to green space as a proxy for heat mitigation</li>
+                                        <li>Summarize results by administrative units with zonal statistics</li>
+                                </ul>
+                        </section>
+
+                        <section id="datasets">
+                                <h2>Datasets</h2>
+                                <ul>
+                                        <li>Landsat 8/9 Collection 2 Level-2 LST (thermal band derived) or MODIS LST as alternative</li>
+                                        <li>WorldPop or GHSL population grid (people per pixel)</li>
+                                        <li>Global Human Settlement Layers (GHSL) or OpenStreetMap green space polygons (optional)</li>
+                                        <li>Administrative boundaries (e.g., GADM, US Census tracts, or custom FeatureCollection)</li>
+                                </ul>
+                        </section>
+
+                        <section id="part-a">
+                                <h2>Part A: Land Surface Temperature and Exposure</h2>
+                                <ol>
+                                        <li>Pick a city of interest and define an area of interest (AOI).</li>
+                                        <li>Load Landsat 8/9 L2 imagery, filter by date and cloud cover, and compute LST.</li>
+                                        <li>Load a population raster and resample/algn for exposure analysis.</li>
+                                        <li>Compute population-weighted mean LST by administrative units.</li>
+                                </ol>
+                                <h3>Starter code</h3>
+                                <pre>// 1) Study area
+var city = ee.Geometry.Rectangle([-122.6, 37.6, -121.7, 37.95]); // SF Bay example
+Map.centerObject(city, 9);
+
+// 2) Landsat 8/9 L2 collection and LST
+var l2 = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+    .filterBounds(city)
+    .filterDate('2021-06-01', '2021-09-30')
+    .filter(ee.Filter.lt('CLOUD_COVER', 20));
+
+// Convert L2 thermal band (ST_B10) to Kelvin per USGS scale factor
+function toKelvin(img) {
+    var kelvin = img.select('ST_B10').multiply(0.00341802).add(149.0)
+        .updateMask(img.select('QA_PIXEL').bitwiseAnd(1).not()); // simple cloud mask
+    return kelvin.copyProperties(img, img.propertyNames());
+}
+
+var lst = l2.map(toKelvin).median().rename('LST_K').clip(city);
+Map.addLayer(lst.subtract(273.15), {min: 20, max: 45, palette: ['blue','cyan','yellow','red']}, 'LST (°C)');
+
+// 3) Population grid (WorldPop 2020, persons per pixel)
+var pop = ee.ImageCollection('WorldPop/GP/100m/pop')
+    .filterDate('2020-01-01', '2020-12-31').mean()
+    .clip(city).rename('pop');
+
+// 4) Administrative units (replace with your region's dataset)
+var admin = ee.FeatureCollection('FAO/GAUL/2015/level2')
+    .filterBounds(city).filter(ee.Filter.eq('ADM0_NAME','United States of America'));
+
+// 5) Population-weighted exposure = sum(pop * LST) / sum(pop)
+var lstC = lst.subtract(273.15).rename('LST_C');
+var popLst = pop.multiply(lstC).rename('pop_x_lst');
+
+var reducers = ee.Reducer.sum().repeat(2);
+var combined = popLst.addBands(pop);
+var stats = combined.reduceRegions({
+    collection: admin, reducer: reducers, scale: 100, tileScale: 4
+});
+
+// Compute weighted mean
+var results = stats.map(function(f){
+    var s = ee.Number(f.get('sum'));
+    var p = ee.Number(f.get('sum_1'));
+    return f.set({pw_mean_LST_C: s.divide(p)});
+});
+
+// Inspect
+print('Population-weighted LST (°C) by admin unit', results.limit(5));
+Map.addLayer(admin.style({color: 'white', width: 1}), {}, 'Admin');
+</pre>
+                        </section>
+
+                        <section id="part-b">
+                                <h2>Part B: Access to Green Space</h2>
+                                <ol>
+                                        <li>Load parks/green space polygons (e.g., OSM landuse=grass/park, leisure=park).</li>
+                                        <li>Create buffers around green spaces (e.g., 300 m) and rasterize.</li>
+                                        <li>Summarize percent of population within green buffers by admin unit.</li>
+                                </ol>
+                                <h3>Starter code</h3>
+                                <pre>// Example OSM green space (preprocessed dataset)
+var osm = ee.FeatureCollection('projects/sat-io/open-datasets/OSM/landuse')
+    .filterBounds(city)
+    .filter(ee.Filter.inList('fclass', ['park','recreation_ground','grass']));
+
+var greenBuf = osm.map(function(f){return f.buffer(300)});
+var greenImg = ee.Image(1).updateMask(ee.FeatureCollection(greenBuf).reduceToImage({
+    properties: [], reducer: ee.Reducer.count()
+}).gt(0)).rename('green');
+
+var popInGreen = pop.updateMask(greenImg);
+var red = ee.Reducer.sum().repeat(2);
+var s2 = ee.Image.cat(popInGreen.rename('pop_green'), pop.rename('pop_total'));
+var greenStats = s2.reduceRegions({collection: admin, reducer: red, scale: 100, tileScale: 4});
+var withPct = greenStats.map(function(f){
+    var pg = ee.Number(f.get('sum')); var pt = ee.Number(f.get('sum_1')); 
+    return f.set({pct_pop_within_300m_green: pg.divide(pt).multiply(100)});
+});
+print('Population within 300m of green space (%)', withPct.limit(5));
+</pre>
+                        </section>
+
+                        <section id="submission">
+                                <h2>Submission</h2>
+                                <ul>
+                                        <li>Map layers: LST (°C), administrative boundaries, and green buffers</li>
+                                        <li>Table: population-weighted LST (°C) and % population within 300 m of green space per unit</li>
+                                        <li>Short reflection (5–8 sentences): Where are the hotspots? Which neighborhoods have lower green access?</li>
+                                        <li>Include your Earth Engine script URL and export the summary as CSV</li>
+                                </ul>
+                        </section>
+        </main>
+
+    <footer class="lab-footer">
+        <p><a href="lab-13-improving-classifications.html">&larr; Previous Lab</a> | <a href="lab-15-urban-heat-island.html">Next Lab &rarr;</a></p>
+        <p><a href="../index.html">&larr; Back to Course Home</a></p>
+    </footer>
+</body>
+</html>

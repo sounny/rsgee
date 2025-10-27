@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 17 - River Morphology | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <meta name="description" content="Extract a river mask with MNDWI, generate transects, and estimate river widths along a reach in Earth Engine.">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#schedule">Labs</a> &gt; Lab 17
+        </nav>
+
+        <header class="lab-header">
+                        <h1>Lab 17 - River Morphology</h1>
+                        <p><em>Extract a river mask from optical imagery, generate transects, and estimate river width statistics along a reach.</em></p>
+        </header>
+
+        <main class="lab-content">
+                        <section id="objectives">
+                                <h2>Objectives</h2>
+                                <ul>
+                                        <li>Build a water mask using MNDWI thresholding</li>
+                                        <li>Create reach-normal transects and intersect with the mask</li>
+                                        <li>Compute river width statistics along the reach</li>
+                                </ul>
+                        </section>
+
+                        <section id="overview">
+                                <h2>Approach</h2>
+                                <p>We’ll compute <strong>MNDWI</strong> = (Green − SWIR1) / (Green + SWIR1) on cloud-free imagery. A threshold (e.g., &gt; 0.2) will produce a binary water mask. Then we’ll create perpendicular transects to a centerline and measure the span of water crossings.</p>
+                        </section>
+
+                        <section id="starter-code">
+                                <h2>Starter code</h2>
+                                <pre>// 1) Reach selection
+// Tip: In the Code Editor, draw/import a line and rename it to 'centerline'.
+// If none is provided, a simple fallback line is used within the AOI.
+var aoi = ee.Geometry.Rectangle([-91.45, 30.35, -91.05, 30.60]); // Lower Mississippi example
+Map.centerObject(aoi, 11);
+
+// Landsat 8 SR for MNDWI
+var L = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+    .filterBounds(aoi)
+    .filterDate('2021-07-01','2021-09-30')
+    .filter(ee.Filter.lt('CLOUD_COVER', 20));
+
+// Mask clouds and shadows using QA_PIXEL bits (bit3=cloud, bit4=shadow)
+function maskL2(img){
+  var qa = img.select('QA_PIXEL');
+  var cloud = qa.bitwiseAnd(1 << 3).neq(0);
+  var shadow = qa.bitwiseAnd(1 << 4).neq(0);
+  return img.updateMask(cloud.or(shadow).not());
+}
+
+function toSR(img){
+    var scale = 0.0000275; var offset = -0.2;
+    var sr = maskL2(img).select(['SR_B3','SR_B6']).multiply(scale).add(offset)
+        .rename(['green','swir1']);
+    return sr.copyProperties(img, img.propertyNames());
+}
+
+var med = L.map(toSR).median().clip(aoi);
+var mndwi = med.expression('(g - s) / (g + s)', {g: med.select('green'), s: med.select('swir1')}).rename('MNDWI');
+Map.addLayer(mndwi, {min:-0.5, max:0.5, palette:['#8c510a','#f6e8c3','#01665e']}, 'MNDWI');
+
+// 2) Water mask
+var water = mndwi.gt(0.2).selfMask();
+Map.addLayer(water, {palette:['#2b83ba']}, 'Water mask');
+
+// 3) Centerline and transects
+// Use a user-drawn 'centerline' if present; otherwise use a fallback line inside the AOI.
+var fallbackCenterline = ee.FeatureCollection([
+    ee.Feature(ee.Geometry.LineString([[-91.40, 30.38], [-91.10, 30.58]]))
+]);
+var centerlineFc = (typeof centerline !== 'undefined') ? centerline : fallbackCenterline;
+
+// Create points along the line every N meters
+var spacing = 200; // meters between transects
+var line = ee.Feature(centerlineFc.first()).geometry();
+var length = line.length();
+var pts = ee.FeatureCollection(ee.List.sequence(0, length, spacing).map(function(d){
+    d = ee.Number(d);
+    var p = line.coordinateAlong(d);
+    return ee.Feature(ee.Geometry.Point(p), {d: d});
+}));
+
+// Compute approximate normals using bearing differences (simple approach for short reaches)
+var bearings = pts.map(function(f){
+    var d = ee.Number(f.get('d'));
+    var a = line.coordinateAlong(d);
+    var b = line.coordinateAlong(d.add(10));
+    var dx = ee.Number(ee.List(b).get(0)).subtract(ee.Number(ee.List(a).get(0)));
+    var dy = ee.Number(ee.List(b).get(1)).subtract(ee.Number(ee.List(a).get(1)));
+    var angle = ee.Number.atan2(dy, dx); // radians
+    var normal = angle.add(Math.PI/2.0);
+    return f.set({normal: normal});
+});
+
+// Build transect lines of fixed length centered at each point
+var half = 400; // half-length in meters (total width 800 m)
+var transects = bearings.map(function(f){
+    f = ee.Feature(f);
+    var p = ee.Geometry.Point(f.geometry().coordinates());
+    var ang = ee.Number(f.get('normal'));
+    var dx = ee.Number(half).multiply(ee.Number(ang.cos()));
+    var dy = ee.Number(half).multiply(ee.Number(ang.sin()));
+    var p1 = p.translate(dx, dy, 'meters');
+    var p2 = p.translate(dx.multiply(-1), dy.multiply(-1), 'meters');
+    return ee.Feature(ee.Geometry.LineString([p1.coordinates(), p2.coordinates()]), f.toDictionary());
+});
+
+Map.addLayer(transects, {color: 'yellow'}, 'Transects');
+
+// 4) Width estimation: intersect transects with water mask
+var edge = water.fastDistanceTransform(30).sqrt(); // for visualization
+Map.addLayer(edge, {min:0, max:60, palette:['black','aqua','white']}, 'distance (m)', false);
+
+var widths = transects.map(function(t){
+    var geom = ee.Feature(t).geometry();
+    var profile = water.reduceRegion({reducer: ee.Reducer.anyNonZero(), geometry: geom.buffer(15), scale: 30, bestEffort: true});
+    // Approx width via fraction of water along transect length (coarse but illustrative)
+    var length = geom.length();
+    var sampled = water.reduceRegion({reducer: ee.Reducer.mean(), geometry: geom.buffer(15), scale: 30, bestEffort: true});
+    var frac = ee.Number(sampled.get('MNDWI')); // Note: after threshold, band name is constant 0/1 mask; mean ~ fraction
+    var w = ee.Algorithms.If(frac, ee.Number(frac).multiply(length), 0);
+    return ee.Feature(geom, {approx_width_m: w});
+});
+
+print('Approximate widths (m)', widths.limit(10));
+Map.addLayer(water, {palette:['#2b83ba']}, 'Water mask (ref)');
+</pre>
+                        </section>
+
+                                                <section id="exports">
+                                                                <h2>Exports</h2>
+                                                                <p>Export the derived products for use in GIS or reporting.</p>
+                                                                <pre>// Export transect widths as CSV
+Export.table.toDrive({
+    collection: widths,
+    description: 'river_widths_transects',
+    fileFormat: 'CSV'
+});
+
+// Export water mask as GeoTIFF
+Export.image.toDrive({
+    image: water.rename('water_mask'),
+    description: 'water_mask_mndwi',
+    region: aoi,
+    scale: 30,
+    maxPixels: 1e13
+});
+
+// Export transects as GeoJSON
+Export.table.toDrive({
+    collection: transects,
+    description: 'transects_geojson',
+    fileFormat: 'GeoJSON'
+});
+</pre>
+                                                </section>
+
+                        <section id="deliverables">
+                                <h2>Deliverables</h2>
+                                <ul>
+                                        <li>Map: MNDWI, water mask, centerline, and transects</li>
+                                        <li>Table: approximate width (m) along transects (export CSV)</li>
+                                        <li>Short note: Limitations of this approach and how you’d improve it (e.g., RivWidthCloud)</li>
+                                </ul>
+                        </section>
+        </main>
+
+                <footer class="lab-footer">
+                        <p><a href="lab-16-wildfire-analysis.html">&larr; Previous Lab</a> | <a href="lab-18-final-project.html">Next Lab &rarr;</a></p>
+                        <p><a href="../index.html">&larr; Back to Course Home</a></p>
+                </footer>
+    </div>
+</body>
+</html>

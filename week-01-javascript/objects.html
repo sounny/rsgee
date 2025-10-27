@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objects | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#schedule">Schedule</a> &gt; Week 1
+        </nav>
+
+        <header class="lab-header">
+            <h1>Objects</h1>
+        </header>
+
+        <main class="lab-content">
+<p>Lists allow you to store multiple values in a single container variable. While useful, it is not appropriate to store structured data. It is helpful to be able to refer to each item with its name rather than its position. Objects in JavaScript allow you to store key-value pairs, where each value can be referred to by its key. You can create a dictionary using the curly braces { }. The code below creates an object called cityData with some information about Gainesville.&nbsp;</p>
+<pre>var cityData = {<br>&nbsp; 'city': 'Gainesville',<br>&nbsp; 'coordinates': [-82.3248, 29.6516],<br>&nbsp; 'population': 140398<br>};<br>print(cityData);</pre>
+<p>I want to highlight some important things about the JavaScript syntax here. First, we can use multiple lines to define the object. The command is considered complete only when we put in the semicolon (;). This helps format the code to make it more readable. Also, note the choice of the variable name cityData. The variable contains two words. The first word is in lowercase, and the first letter of the second word is capitalized. This type of naming scheme of joining multiple words into a single variable name is called <em><strong>“camel case.”</strong></em> While it is not mandatory to name your variables using this scheme, it is considered a good practice. Functions and parameters in the Earth Engine API follow this convention, so your code will be much more readable if you follow it too.</p>
+<p>Take the code above and run it in Google Earth Engine. The object will be printed in the Console. You can see that each item has a label instead of a numeric index. This is known as the key and can be used to retrieve the value of an item.</p>
+<p><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-02-02%20at%209.56.36%20AM.png" alt="outputting an object"   loading="lazy"></p>
+        </main>
+
+        <footer>
+            <p><a href="../index.html">â† Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+</html>

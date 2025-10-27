@@ -1,37 +1,78 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 12 - Unsupervised Classification | Remote Sensing Course</title>
     <link rel="stylesheet" href="../css/style.css">
+    <meta name="robots" content="index, follow">
+    <meta name="description" content="Google Earth Engine lab 12: Lab 12 - Unsupervised Classification">
 </head>
 <body>
     <div class="container">
         <nav class="breadcrumb">
             <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 12
         </nav>
+
         <header class="lab-header">
             <h1>Lab 12 - Unsupervised Classification</h1>
-            <p><em><strong>Objective: Implement unsupervised clustering algorithms for land cover classification.</strong></em></p>
         </header>
+
         <main class="lab-content">
-            <section>
-                <h2>Introduction</h2>
-                <p>Unsupervised classification uses clustering algorithms to group similar pixels without prior training data. Learn to apply k-means clustering and interpret the results.</p>
-            </section>
+<p><em><strong><span style="font-size: 12pt;">Fall 2024 Lab Lecture -&nbsp;</span></strong></em></p>
+
+<p><em><strong><span style="font-size: 12pt;">Fall 2023 Lab Lecture -&nbsp;</span></strong></em></p>
+<p><span style="font-size: 12pt;"></span></p>
+<p><em><strong><span style="font-size: 12pt;">Spring 2023 Lab Lecture -&nbsp;</span></strong></em></p>
+<h2>
+<span style="font-size: 12pt;"><i class="zm-icon-edit" aria-hidden="true"></i></span><span style="font-size: 12pt;"><i class="zm-icon-edit" aria-hidden="true"><span class="dp-icon-content" style="display: none;">&nbsp;</span></i></span>
+</h2>
+
+<p>In this lab, we will build off work from Lab 11 - Supervised classification. &nbsp; You can use your Lab 11, or you are welcome to use this Code to start off with: <a href="https://code.earthengine.google.com/e5b89ac826e8e2ef8c08111e929b07e1" target="_blank">https://code.earthengine.google.com/e5b89ac826e8e2ef8c08111e929b07e1. </a>In Lab 11, we trained a supervised classification with a training sample and used it to create a landuse/landcover map in Northern Italy.&nbsp; We will build off that lab to classify the same image with an unsupervised classification. At the end of this assignment, we can compare supervised versus unsupervised classification results.</p>
+<p>Before we start, we should add a comment in the code to know where we started working on Unsupervised Classification. Write a comment code like this in the last line of your Lab 11 code.</p>
+<pre><span>//////////////// Unsupervised classification ////////////////</span><span><br></span></pre>
+<p><span>Then, save the code in a new file using the Save As menu.</span></p>
+<p><span><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-24%20at%204.49.26%20AM.png" alt="adding in the comment for where unsupervised classification starts"   loading="lazy"></span></p>
+<p>A reminder of the differences between supervised and unsupervised classification. In supervised classification, a training data set is used to teach the classifier how to classify new data. The training set contains already classified data, and the classifier learns to associate certain features with certain classes. Once the classifier is trained, it can classify new data. In unsupervised classification, the classifier is not given any labeled data. Instead, it is given a set of unlabeled data and tries to find patterns. The classifier then groups the data points based on these patterns.</p>
+<p><span>The unsupervised classification in Earth Engine has this workflow:</span></p>
+<ol>
+<li aria-level="1"><span>Assemble features with numeric properties to find clusters (training data).</span></li>
+<li aria-level="1"><span>Select and instantiate a clusterer.</span></li>
+<li aria-level="1"><span>Train the clusterer with the training data.</span></li>
+<li aria-level="1"><span>Apply the clusterer to the scene (classification).</span></li>
+<li aria-level="1"><span>Label the clusters.</span></li>
+</ol>
+<p><span>To generate training data, we will use the </span><em><span>sample</span></em><span> method, which randomly takes samples from a region (unlike </span><em>sampleRegions</em><span>, which takes samples from predefined locations). We will use the image’s footprint as the region by calling the </span><em><span>geometry</span></em><span> method. Additionally, we will define the number of pixels (</span><span>numPixels</span><span>) to sample—in this case, 1000 pixels—and define a </span><em>tileScale</em><span> of 8 to avoid computation errors due to the region's size. </span></p>
+<p><span>Copy and paste the code below to sample 1000 pixels from the Landsat image.&nbsp;</span></p>
+<pre><span>// Make the training dataset.<br>var training = landsat.sample({<br>&nbsp; &nbsp; region: landsat.geometry(),<br>&nbsp; &nbsp; scale: 30,<br>&nbsp; &nbsp; numPixels: 1000,<br>&nbsp; &nbsp; tileScale: 8<br>});<br></span></pre>
+<p><span>Now we can instantiate a clusterer and train it. As with the supervised algorithms, there are many unsupervised algorithms to choose from. We will use the </span><i><span>k</span></i><span>-means clustering algorithm, a commonly used approach in remote sensing. This algorithm uses an iterative regrouping strategy to identify groups of pixels near each other in the spectral space (image x bands). We define a number of clusters, </span><i><span>k, </span></i><span>and then the method randomly distributes that number of seed points into the spectral space. A large sample of pixels is then grouped into its closest seed, and the mean spectral value of this group is calculated. That mean value is akin to a center of mass of the points, known as the centroid. Each iteration recalculates the class means and reclassifies pixels with respect to the new means. This process is repeated until the centroids remain relatively stable, and only a few pixels change from class to class on subsequent iterations.</span></p>
+<p><span><img src="../images/canvas/Uploaded%20Media/image35.png" alt=" K-means visual concept 
+"   loading="lazy"></span></p>
+<p><span>Figure -&nbsp; </span><i><span>K</span></i><span>-means visual concept&nbsp;</span></p>
+<p><span>Copy and paste the code below to request four clusters, the same number as for the supervised classification, in order to directly compare them.</span></p>
+<pre><span>// Instantiate the clusterer and train it.<br>var clusterer = ee.Clusterer.wekaKMeans(4).train(training);</span></pre>
+<p><span>Now copy and paste the code below to apply the clusterer to the image and add the resulting classification to the </span><strong>Map.</strong><span> Note that we use a method called </span><span>randomVisualizer</span><span> to assign colors for the visualization. We are not associating the unsupervised classes with the color palette we defined earlier in the supervised classification. Instead, we assign random colors to the classes since we do not yet know which unsupervised classes best correspond to each named class (e.g., </span><span>forest</span><span>, </span><span>herbaceous</span><span>). Note that the colors in your map might not be the same as you see on the screenshots </span><strong>Map,</strong><span> since they are assigned randomly.</span></p>
+<pre>// Cluster the input using the trained clusterer.<br>var Kclassified = landsat.cluster(clusterer);<br><br>// Display the clusters with random colors.<br>Map.addLayer(Kclassified.randomVisualizer(), {},<br>&nbsp; &nbsp; 'K-means classified - random colors');</pre>
+<p><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-24%20at%204.59.54%20AM.png" alt="SCREENSHOT OF THE RESULT"   loading="lazy"></p>
+<p><em><strong>Challenge 1: Determine which pixel values are which land covers.&nbsp; Your image has four classes on the clustering band. Using the inspector tool, click the classes and document what cluster pixel value is which of the four landcover classes you have. Herbaceous, water, forest, and developed. Add a comment in your code documenting the pixel values and landcover classes.</strong></em></p>
+<p><em><strong>Challenge 2: Using the Map.addLayer method, Display the clusters with the same palette as supervised classification. Hint: Map.addLayer(Kclassified, {HERE GOES YOUR Visualization Parameters}, 'K-means classified').&nbsp; You want to map the palette color to pixel values for the Visualization Parameters.&nbsp; Verify your pixel values start with 0 and end with 3, and then order them based on the answer from challenge 1 with the palette values from Lab 11 {min: 0, max: 3, palette: ['d0741e','1a11ff','589400', 'ff0000']}</strong></em></p>
+<p><em><strong>Challenge 3: Inspect the results. How does this classification compare to the previous ones? Use the Inspector to check which classes were assigned to each pixel value (“cluster” band).&nbsp; Add a short paragraph comment in your code explaining the results' differences.&nbsp;</strong></em></p>
+<p><span style="font-size: 18pt;"><em><strong>TURN IN A SNAPSHOT URL OF YOUR CODE</strong></em></span></p>
             <section id="submission">
                 <div class="submission-box">
-                    <h3>📧 Lab Submission</h3>
+                    <h3>Lab Submission</h3>
                     <p>Submit lab via email.</p>
                     <p><strong>Subject:</strong> <code>Lab 12 - Unsupervised Classification - [Your Name]</code></p>
                 </div>
             </section>
         </main>
+
         <footer>
-            <p><a href="lab-11-supervised-classification.html">← Previous Lab</a> | <a href="lab-13-improving-classifications.html">Next Lab →</a></p>
-            <p><a href="../index.html">← Back to Course Home</a></p>
+            <p><a href='lab-11-supervised-classification.html'>&larr; Previous Lab</a> | <a href='lab-13-improving-classifications.html'>Next Lab &rarr;</a></p>
+            <p><a href="../index.html">&larr; Back to Course Home</a></p>
         </footer>
     </div>
+    
 </body>
 </html>
+

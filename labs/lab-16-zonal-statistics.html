@@ -1,37 +1,163 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 16 - Zonal Statistics | Remote Sensing Course</title>
     <link rel="stylesheet" href="../css/style.css">
+    <meta name="robots" content="index, follow">
+    <meta name="description" content="Google Earth Engine lab 16: Lab 16 - Zonal Statistics">
 </head>
 <body>
     <div class="container">
         <nav class="breadcrumb">
             <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 16
         </nav>
+
         <header class="lab-header">
             <h1>Lab 16 - Zonal Statistics</h1>
-            <p><em><strong>Objective: Calculate statistics for regions and perform aggregated analysis.</strong></em></p>
         </header>
+
         <main class="lab-content">
-            <section>
-                <h2>Introduction</h2>
-                <p>Zonal statistics allow you to summarize raster data within vector boundaries. Learn to calculate mean, median, standard deviation, and other statistics for regions of interest.</p>
-            </section>
+<p><em><strong>Spring 2023 - Lab Lecture&nbsp;</strong></em></p>
+
+<p><em><strong>Objective: </strong>The objective of this lab is to use Google Earth Engine to create an elevation model from SRTM and then use geometry to define an area of interest and run descriptive stats on the values there, including mean, median, max, min, and standard deviation with a histogram.</em></p>
+<p>The specific steps involved in this lab will be:</p>
+<ol>
+<li>Import the SRTM data into Google Earth Engine (Done in Lab 15).</li>
+<li>Create a geometry object to define the area of interest (AOI).</li>
+<li>Calculate the mean, median, max, min, and standard deviation elevation values in the area of interest.</li>
+<li>Plot a histogram of the elevation values in the area of interest.</li>
+</ol>
+<p><strong>1- Import the SRTM data</strong></p>
+<p>This lab builds off of Lab 15 - Visualizing SRTM Data .&nbsp; You are welcome to open you verions of Lab 15 or use this one. <a href="https://code.earthengine.google.com/edb63ec580005384c9b70400c5caf2bd" target="_blank">https://code.earthengine.google.com/edb63ec580005384c9b70400c5caf2bd</a></p>
+<p>Open Lab 15 and run it.&nbsp; This should show your the SRTM Data.&nbsp; We will use that data to run some stats on an Area of Interest.</p>
+<p><strong>2 - Define AOI</strong></p>
+<p>An area of interest (AOI) is a specific geographic area that is the focus of a remote sensing study. AOI can be defined by a variety of criteria, including location, size, shape, and land cover.</p>
+<p>AOIs are used in remote sensing for a variety of purposes, including:</p>
+<ul>
+<li>Data collection: AOI can be used to define the area of interest for data collection, such as satellite imagery or ground surveys.</li>
+<li>Data analysis: AOI can be used to define the area of interest for data analysis, such as image classification or change detection.</li>
+<li>Model development: AOI can be used to define the area of interest for model development, such as land use models or climate models.</li>
+</ul>
+<p>The geometry tools in Google Earth Engine can be used to draw an AOI in a variety of ways. One way is to use the rectangle tool. To do this, follow these steps:</p>
+<ol>
+<li>In the Google Earth Engine Code Editor, open the Geometry Tools panel.</li>
+<li>Click on the rectangle tool.</li>
+<li>On the map, click and drag to create a rectangle that defines the area of interest.</li>
+<li>Click on the "Apply" button.</li>
+<li><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%204.48.31%20PM.png" alt="Screenshot 2023-04-07 at 4.48.31 PM.png"   loading="lazy"></li>
+<li>Rename the polygon to 'aoi'</li>
+</ol>
+<p><span>Once you have drawn an AOI, you can use it in various ways in Google Earth Engine. For example, you will use it to run statistical analyses to make descriptive stats.</span></p>
+<p><strong>3 - Calculate Zonal Stats</strong></p>
+<p>To calculate the mean, median, max, min, and standard deviation of the elevation values in the AOI, you can use the following code:</p>
+<pre><code>var max = srtm.reduceRegion({
+  reducer: ee.Reducer.max(),
+  geometry: aoi,
+  scale: 90
+});
+var mean = srtm.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: aoi,
+  scale: 90
+});
+var min = srtm.reduceRegion({
+  reducer: ee.Reducer.min(),
+  geometry: aoi,
+  scale: 90
+});
+var stdd = srtm.reduceRegion({
+  reducer: ee.Reducer.stdDev(),
+  geometry: aoi,
+  scale: 90
+});
+print('max:',max,'min:',min, 'mean: ',mean,'standard dev:',stdd);
+</code></pre>
+<p>These lines of code calculate the mean, median, max, min, and standard deviation of the elevation values in the AOI. The <code>reduceRegion</code> function takes four arguments. Let's look at the first one on max() to understand.&nbsp;</p>
+<ul>
+<li>The first argument is the image to be reduced. In this case, the image is the SRTM elevation data.</li>
+<li>The second argument is the reducer to be used. The reducer is a function that takes two arguments: a value and a reference to the current pixel. The reducer function must return a single value. In this case, the reducer is the<span>&nbsp;</span><code>max()</code><span>&nbsp;</span>function which returns the maximum value in the neighborhood of the current pixel.</li>
+<li>The third argument is the geometry of the AOI. In this case, the geometry is a polygon.</li>
+<li>The fourth argument is the scale of the reduction. The scale is the number of pixels that will be averaged together to calculate the value at each pixel. In this case, the scale is 90, meaning each pixel will represent an area of 90 x 90 pixels.</li>
+</ul>
+
+<p><em><strong>Trouble Shooting Note - MaxPixels:</strong></em> If you encounter&nbsp;an error <span>about the maxpixels, it</span> is likely because the<span>&nbsp;</span><code>reduceRegion</code><span>&nbsp;</span>function is trying to process more pixels than the default limit. You can increase the<span>&nbsp;</span><code>maxPixels</code><span>&nbsp;</span>parameter to a larger value to process more pixels.</p>
+<p>Here's how you can modify your code:</p>
+<div data-code="id#348">
+<div class="interactive-result-code-block" data-keybinding-context="49">
+<div class="interactive-result-editor" data-keybinding-context="50" data-mode-id="javascript">
+<div class="monaco-editor no-user-select mac  showUnused showDeprecated vs-dark" role="code" data-uri="inmemory://model/11">
+<div class="overflow-guard" data-mprt="3">
+<div class="monaco-scrollable-element editor-scrollable vs-dark mac" role="presentation" data-mprt="5">
+<div class="lines-content monaco-editor-background">
+<div class="view-lines monaco-mouse-cursor-text" role="presentation" aria-hidden="true" data-mprt="7">
+<pre class="view-line"><span><span class="mtk6">var</span><span class="mtk1">&nbsp;</span><span class="mtk10">mean</span><span class="mtk1">&nbsp;</span><span class="mtk3">=</span><span class="mtk1">&nbsp;</span><span class="mtk19">SRTM</span><span class="mtk1">.</span><span class="mtk16">reduceRegion</span><span class="mtk1 bracket-highlighting-0">(</span><span class="mtk1 bracket-highlighting-1">{</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">reducer:</span><span class="mtk1">&nbsp;</span><span class="mtk10">ee</span><span class="mtk1">.</span><span class="mtk10">Reducer</span><span class="mtk1">.</span><span class="mtk16">mean</span><span class="mtk1 bracket-highlighting-2">(</span><span class="mtk1 bracket-highlighting-2">)</span><span class="mtk1">,</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">geometry:</span><span class="mtk1">&nbsp;</span><span class="mtk10">aoi</span><span class="mtk1">,</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">scale:</span><span class="mtk1">&nbsp;</span><span class="mtk7">90</span><span class="mtk1">,</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">maxPixels:</span><span class="mtk1">&nbsp;</span><span class="mtk7">1e13</span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk5">// Increase the maxPixels parameter</span></span><br><span><span class="mtk1 bracket-highlighting-1">}</span><span class="mtk1 bracket-highlighting-0">)</span><span class="mtk1">;</span></span><br><br><span><span class="mtk6">var</span><span class="mtk1">&nbsp;</span><span class="mtk10">max</span><span class="mtk1">&nbsp;</span><span class="mtk3">=</span><span class="mtk1">&nbsp;</span><span class="mtk19">SRTM</span><span class="mtk1">.</span><span class="mtk16">reduceRegion</span><span class="mtk1 bracket-highlighting-0">(</span><span class="mtk1 bracket-highlighting-1">{</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">reducer:</span><span class="mtk1">&nbsp;</span><span class="mtk10">ee</span><span class="mtk1">.</span><span class="mtk10">Reducer</span><span class="mtk1">.</span><span class="mtk16">max</span><span class="mtk1 bracket-highlighting-2">(</span><span class="mtk1 bracket-highlighting-2">)</span><span class="mtk1">,</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">geometry:</span><span class="mtk1">&nbsp;</span><span class="mtk10">aoi</span><span class="mtk1">,</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">scale:</span><span class="mtk1">&nbsp;</span><span class="mtk7">90</span><span class="mtk1">,</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">maxPixels:</span><span class="mtk1">&nbsp;</span><span class="mtk7">1e13</span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk5">// Increase the maxPixels parameter</span></span><br><span><span class="mtk1 bracket-highlighting-1">}</span><span class="mtk1 bracket-highlighting-0">)</span><span class="mtk1">;</span></span><br><br><span><span class="mtk6">var</span><span class="mtk1">&nbsp;</span><span class="mtk10">min</span><span class="mtk1">&nbsp;</span><span class="mtk3">=</span><span class="mtk1">&nbsp;</span><span class="mtk19">SRTM</span><span class="mtk1">.</span><span class="mtk16">reduceRegion</span><span class="mtk1 bracket-highlighting-0">(</span><span class="mtk1 bracket-highlighting-1">{</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">reducer:</span><span class="mtk1">&nbsp;</span><span class="mtk10">ee</span><span class="mtk1">.</span><span class="mtk10">Reducer</span><span class="mtk1">.</span><span class="mtk16">min</span><span class="mtk1 bracket-highlighting-2">(</span><span class="mtk1 bracket-highlighting-2">)</span><span class="mtk1">,</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">geometry:</span><span class="mtk1">&nbsp;</span><span class="mtk10">aoi</span><span class="mtk1">,</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">scale:</span><span class="mtk1">&nbsp;</span><span class="mtk7">90</span><span class="mtk1">,</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">maxPixels:</span><span class="mtk1">&nbsp;</span><span class="mtk7">1e13</span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk5">// Increase the maxPixels parameter</span></span><br><span><span class="mtk1 bracket-highlighting-1">}</span><span class="mtk1 bracket-highlighting-0">)</span><span class="mtk1">;</span></span><br><br><span><span class="mtk6">var</span><span class="mtk1">&nbsp;</span><span class="mtk10">stdd</span><span class="mtk1">&nbsp;</span><span class="mtk3">=</span><span class="mtk1">&nbsp;</span><span class="mtk19">SRTM</span><span class="mtk1">.</span><span class="mtk16">reduceRegion</span><span class="mtk1 bracket-highlighting-0">(</span><span class="mtk1 bracket-highlighting-1">{</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">reducer:</span><span class="mtk1">&nbsp;</span><span class="mtk10">ee</span><span class="mtk1">.</span><span class="mtk10">Reducer</span><span class="mtk1">.</span><span class="mtk16">stdDev</span><span class="mtk1 bracket-highlighting-2">(</span><span class="mtk1 bracket-highlighting-2">)</span><span class="mtk1">,</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">geometry:</span><span class="mtk1">&nbsp;</span><span class="mtk10">aoi</span><span class="mtk1">,</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">scale:</span><span class="mtk1">&nbsp;</span><span class="mtk7">90</span><span class="mtk1">,</span></span><br><span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk10">maxPixels:</span><span class="mtk1">&nbsp;</span><span class="mtk7">1e13</span><span class="mtk1">&nbsp;&nbsp;</span><span class="mtk5">// Increase the maxPixels parameter</span></span><br><span><span class="mtk1 bracket-highlighting-1">}</span><span class="mtk1 bracket-highlighting-0">)</span><span class="mtk1">;</span></span></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Please adjust the<span>&nbsp;</span><code>1e13</code><span>&nbsp;</span>value according to your needs. Be aware that increasing this value will allow more pixels to be processed, but it may also increase the time it takes for the operation to complete.</p>
+
+<p><strong>4 - Print the Stats</strong></p>
+<p>To print the results, you can use the following code:</p>
+<pre><code>print('max:',max,'min:',min, 'mean: ',mean,'standard dev:',stdd);</code></pre>
+<p>You can look at the console after hitting run to see the results.&nbsp;</p>
+<p><strong>5 - Plot a histogram</strong></p>
+<p>Now, we will look at creating a histogram of the AOI.&nbsp; Look at the following code and add it to your project.&nbsp;</p>
+<pre><code>var histogram = ui.Chart.image.histogram({
+&nbsp; image: srtm,
+&nbsp; region: aoi,&nbsp;
+&nbsp; scale: 90,
+&nbsp; minBucketWidth: 10
+});
+histogram.setOptions({
+&nbsp; title: 'Histogram of Elevation (meters)', &nbsp;
+&nbsp; vAxis: {title: 'frequency'},
+&nbsp; hAxis: {title: 'elevation in meters'},
+&nbsp; legend: {position: 'none'},
+&nbsp; colors: ['red'],
+});
+print(histogram);
+</code></pre>
+<p>This code creates a histogram of the elevation values in the AOI. A histogram is a graphical representation of the distribution of data. It is created by binning the data into a set of intervals and then counting the number of data points that fall into each interval. The intervals are called bins, and the height of each bar in the histogram represents the frequency of data points in that bin.</p>
+<p>The <code>ui.Chart.image.histogram</code> function takes four arguments:</p>
+<ul>
+<li>The first argument is the image to be used to create the histogram. In this case, the image is the SRTM elevation data.</li>
+<li>The second argument is the geometry of the AOI. In this case, the geometry is a polygon.</li>
+<li>The third argument is the scale of the image. The scale is the number of pixels that will be averaged together to calculate the value at each pixel. In this case, the scale is 90, meaning each pixel will represent an area of 90 x 90 pixels.</li>
+<li>The fourth argument is the minimum width of a bin. The minimum width of a bin is the smallest number of pixels that can be used to create a bin. In this case, the minimum width of a bin is 10 pixels.</li>
+</ul>
+<p>The <code>setOptions</code> function takes a set of options that control the appearance of the histogram. The options that are used in this code are:</p>
+<ul>
+<li>The<span>&nbsp;</span><code>title</code><span>&nbsp;</span>option specifies the title of the histogram. In this case, the title is "Histogram of Elevation (meters)".</li>
+<li>The<span>&nbsp;</span><code>vAxis</code><span>&nbsp;</span>option specifies the options for the vertical axis of the histogram. The<span>&nbsp;</span><code>title</code><span>&nbsp;</span>option specifies the title of the vertical axis. In this case, the title is "frequency".</li>
+<li>The<span>&nbsp;</span><code>hAxis</code><span>&nbsp;</span>option specifies the options for the horizontal axis of the histogram. The<span>&nbsp;</span><code>title</code><span>&nbsp;</span>option specifies the title of the horizontal axis. In this case, the title is "elevation in meters".</li>
+<li>The<span>&nbsp;</span><code>legend</code><span>&nbsp;</span>option specifies the options for the legend of the histogram. The<span>&nbsp;</span><code>position</code><span>&nbsp;</span>option specifies the position of the legend. In this case, the legend is not displayed.</li>
+<li>The<span>&nbsp;</span><code>colors</code><span>&nbsp;</span>option specifies the colors to fill the bars in the histogram. In this case, the only color used is red.</li>
+</ul>
+<p>The <code>print</code> function prints the histogram to the console.</p>
+<p><strong>6 - Create a URL of your code and submit it to Canvas</strong></p>
+<p>Be sure that your comment you code and that it runs.</p>
             <section id="submission">
                 <div class="submission-box">
-                    <h3>📧 Lab Submission</h3>
+                    <h3>Lab Submission</h3>
                     <p>Submit lab via email.</p>
                     <p><strong>Subject:</strong> <code>Lab 16 - Zonal Statistics - [Your Name]</code></p>
                 </div>
             </section>
         </main>
+
         <footer>
-            <p><a href="lab-15-visualizing-srtm-data.html">← Previous Lab</a> | <a href="lab-17-health-applications-part1.html">Next Lab →</a></p>
-            <p><a href="../index.html">← Back to Course Home</a></p>
+            <p><a href='lab-15-visualizing-srtm-data.html'>&larr; Previous Lab</a> | <a href='lab-17-health-applications-part1.html'>Next Lab &rarr;</a></p>
+            <p><a href="../index.html">&larr; Back to Course Home</a></p>
         </footer>
     </div>
+    
 </body>
 </html>
+

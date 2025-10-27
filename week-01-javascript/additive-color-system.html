@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction to Additive Color System | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#schedule">Schedule</a> &gt; Week 1
+        </nav>
+
+        <header class="lab-header">
+            <h1>Introduction to Additive Color System</h1>
+        </header>
+
+        <main class="lab-content">
+<p><span>Thus far, we have used RGB composites to make a true-color image Lab 2 - Hello LandSat! in which the colors on the screen match the colors in our everyday world. We also used the same principles to draw a false-color combination of optical bands collected by the satellite called a Color Infrared Image. In this module we will get a better understanding of the <i>additive color system in order t</i>o be able to read and interpret information from composite images.</span></p>
+<p>The additive color system is used to represent colors on digital devices, like computer monitors and televisions. The system works by adding varying levels of red, green, and blue light to produce a range of colors. By adjusting the levels of each of the colors, a vast array of colors can be created. The red, green, and blue channels are represented with a three-digit number, which is then used to create a pixel. The 3-digit number combines the levels of red, green, and blue into a single color.</p>
+<p>To create a range of colors, the levels of each of the red, green, and blue channels can be adjusted. For example, a value of 0, 0, 0 would be black (no light), a value of 255, 255, 255 would be white (all light), and a value of 255, 0, 0 would be red (only red light). Combining different levels of each of the colors creates a spectrum of colors. For example, a combination of red, green and blue at the levels of 250, 70, 22 would result in Florida Orange and 0, 33, 165 would result in Florida Blue.</p>
+<p><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-02-10%20at%205.24.50%20AM.png" alt="Florida Orange and Florida Blue RGB Values" loading="lazy"></p>
+<p><span>Views of data in Earth Engine, and indeed everything drawn on a computer screen, use three channels for display (red, green, and blue). The order of the bands in a composite layer determines the </span><i><span>color channel</span></i><span> used to display the DN of pixels. When the DN is higher in one band relative to the other two bands, the pixel will appear tinted with the color channel used to display that band. For example, when the first band is higher relative to the other two bands, the pixel will appear reddish. The intensity of the pixel color will express the magnitude of difference between the DN quantities.&nbsp;&nbsp;&nbsp;</span></p>
+<p><span><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-02-10%20at%205.27.09%20AM.png" alt="The Additive Color System" loading="lazy"></span></p>
+<p><span>The way that primary colors combine to make new colors in an additive color system can be confusing at first. When using an additive color system, red combined with green makes yellow, green combined with blue makes cyan, and red combined with blue makes magenta (see figure above). Combining all three primary colors makes white. The absence of all primary colors makes black. For RGB composites, this means that if the pixel value of two bands are greater than that of the third band, the pixel color will appear tinted as a combined color. For example, when the pixel value of the first and second bands of a composite are higher than that of the third band, the pixel will appear yellowish.&nbsp;</span></p>
+        </main>
+
+        <footer>
+            <p><a href="../index.html">â† Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+</html>

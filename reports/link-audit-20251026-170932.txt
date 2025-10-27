@@ -1,0 +1,9 @@
+Link Audit Report - 10/26/2025 5:09:32 PM
+Repository root: C:\Users\sounn\Git\rsgee
+
+Scanned HTML files: 62
+Total href/src links scanned: 584
+
+Missing files: 0
+
+Missing anchors: 0

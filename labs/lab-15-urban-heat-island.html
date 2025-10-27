@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 15 - Urban Heat Island | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <meta name="description" content="Compute Surface Urban Heat Island (SUHI) using Landsat L2 LST with urban/rural reference masks and summarize by admin units.">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#schedule">Labs</a> &gt; Lab 15
+        </nav>
+
+        <header class="lab-header">
+            <h1>Lab 15 - Urban Heat Island Analysis</h1>
+            <p><em>Measure Surface Urban Heat Island (SUHI) by contrasting urban and rural reference areas using Landsat L2 LST and summarize differences across your city.</em></p>
+        </header>
+
+        <main class="lab-content">
+            <section id="objectives">
+                <h2>Objectives</h2>
+                <ul>
+                    <li>Derive LST from Landsat 8/9 L2 and visualize summertime temperature patterns</li>
+                    <li>Define urban and rural reference masks to estimate SUHI intensity</li>
+                    <li>Compute SUHI per administrative unit and evaluate spatial equity</li>
+                </ul>
+            </section>
+
+            <section id="steps">
+                <h2>Steps</h2>
+                <ol>
+                    <li>Select an AOI and a summer date range with low cloud cover.</li>
+                    <li>Prepare an urban mask (e.g., GHSL built-up or NLCD developed classes) and a rural mask (vegetation or low built-up outside urban core).</li>
+                    <li>Compute median LST and SUHI = mean(LST urban) − mean(LST rural).</li>
+                    <li>Summarize SUHI by admin units (tracts/wards) and map the results.</li>
+                </ol>
+            </section>
+
+            <section id="starter-code">
+                <h2>Starter code</h2>
+                <pre>// 1) AOI and date window
+var aoi = ee.Geometry.Rectangle([-77.25, 38.70, -76.80, 39.00]); // DC metro example
+Map.centerObject(aoi, 10);
+
+var imgs = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterBounds(aoi)
+  .filterDate('2021-06-01', '2021-09-30')
+  .filter(ee.Filter.lt('CLOUD_COVER', 20));
+
+function toKelvin(img){
+  var kelvin = img.select('ST_B10').multiply(0.00341802).add(149.0);
+  var cloudFree = img.select('QA_PIXEL').bitwiseAnd(1).eq(0); // bit0 cloud
+  return kelvin.updateMask(cloudFree).copyProperties(img, img.propertyNames());
+}
+
+var lst = imgs.map(toKelvin).median().clip(aoi);
+var lstC = lst.subtract(273.15).rename('LST_C');
+Map.addLayer(lstC, {min: 20, max: 45, palette: ['blue','cyan','yellow','red']}, 'LST (°C)');
+
+// 2) Urban/Rural masks
+// GHSL built-up: 0-100 (percent built-up). Threshold > 20% as urban example
+var ghsl = ee.Image('JRC/GHSL/P2016/BUILT_LDSMT_GLOBE_V1')
+  .select('built');
+var urban = ghsl.gt(20).selfMask().clip(aoi);
+var rural = ghsl.lte(5).selfMask().clip(aoi);
+Map.addLayer(urban, {palette: 'white'}, 'Urban mask', false);
+Map.addLayer(rural, {palette: 'green'}, 'Rural mask', false);
+
+// 3) SUHI intensity
+var reducers = ee.Reducer.mean().repeat(2);
+var stacked = ee.Image.cat(lstC.updateMask(urban).rename('LST_urban'), lstC.updateMask(rural).rename('LST_rural'));
+var stats = stacked.reduceRegion({reducer: reducers, geometry: aoi, scale: 100, maxPixels: 1e9});
+var suhi = ee.Number(stats.get('LST_urban_mean')).subtract(ee.Number(stats.get('LST_rural_mean')));
+print('Citywide SUHI (°C) = urban_mean - rural_mean', suhi);
+
+// 4) SUHI by admin units (e.g., Census tracts)
+var tracts = ee.FeatureCollection('TIGER/2018/Tracts').filterBounds(aoi);
+var urbMean = lstC.updateMask(urban).rename('LST_u');
+var rurMean = lstC.updateMask(rural).rename('LST_r');
+var two = urbMean.addBands(rurMean);
+var tractStats = two.reduceRegions({collection: tracts, reducer: ee.Reducer.mean().repeat(2), scale: 100, tileScale: 4});
+var tractSuhi = tractStats.map(function(f){
+  return f.set('SUHI_C', ee.Number(f.get('LST_u_mean')).subtract(ee.Number(f.get('LST_r_mean'))));
+});
+print('SUHI by tract', tractSuhi.limit(5));
+// Choropleth visualization: convert property to image
+var suhiImage = tractSuhi.reduceToImage({properties: ['SUHI_C'], reducer: ee.Reducer.first()});
+Map.addLayer(suhiImage, {min: 0, max: 8, palette: ['#2c7bb6','#ffff8c','#d7191c']}, 'SUHI by tract');
+Map.addLayer(tracts.style({color: 'black', width: 1, fillColor: '00000000'}), {}, 'Tract boundaries', false);
+</pre>
+            </section>
+
+            <section id="deliverables">
+                <h2>Deliverables</h2>
+                <ul>
+                    <li>Map: LST (°C) with urban/rural overlays and SUHI choropleth</li>
+                    <li>Table: SUHI (°C) per admin unit with top/bottom 5 tracts</li>
+                    <li>Short write-up: Method choices (thresholds, date window) and equity insights</li>
+                    <li>EE script URL and CSV export of tract-level SUHI</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer class="lab-footer">
+            <p><a href="lab-14-health-applications.html">&larr; Previous Lab</a> | <a href="lab-16-wildfire-analysis.html">Next Lab &rarr;</a></p>
+            <p><a href="../index.html">&larr; Back to Course Home</a></p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,37 +1,109 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab 14 - Exporting to ArcGIS Pro | Remote Sensing Course</title>
+    <title>Lab 14 - Interoperability with GEE - Exporting to ArcGIS Pro | Remote Sensing Course</title>
     <link rel="stylesheet" href="../css/style.css">
+    <meta name="robots" content="index, follow">
+    <meta name="description" content="Google Earth Engine lab 14: Lab 14 - Interoperability with GEE - Exporting to ArcGIS Pro">
 </head>
 <body>
     <div class="container">
         <nav class="breadcrumb">
             <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 14
         </nav>
+
         <header class="lab-header">
-            <h1>Lab 14 - Interoperability: Exporting to ArcGIS Pro</h1>
-            <p><em><strong>Objective: Export GEE data for use in desktop GIS software.</strong></em></p>
+            <h1>Lab 14 - Interoperability with GEE - Exporting to ArcGIS Pro</h1>
         </header>
+
         <main class="lab-content">
-            <section>
-                <h2>Introduction</h2>
-                <p>Learn to export imagery, classifications, and analysis results from Google Earth Engine for use in ArcGIS Pro and other desktop GIS applications.</p>
-            </section>
+<p>This lab assignment aims to introduce students to using Google Earth Engine (GEE) and ArcGIS Pro for collecting and analyzing geospatial data. This lab will teach students how to access GEE and its tools to collect and process remote sensing data. They will also learn to export data from GEE and import it into ArcGIS Pro for further analysis and visualization. By the end of the lab, students should be able to:</p>
+<ol>
+<li>Access Google Earth Engine and navigate the user interface</li>
+<li>Collect remote sensing data using GEE and apply basic processing techniques</li>
+<li>Export data from GEE in a format compatible with ArcGIS Pro</li>
+<li>Import and visualize the exported data in ArcGIS Pro</li>
+<li>Conduct basic spatial analysis using ArcGIS Pro tools</li>
+</ol>
+<p>This lab assignment will give a hands-on experience in geospatial data and the skills necessary to collect, process, and analyze data using two powerful software tools. By the end of the lab, students should have a solid understanding of how to use GEE and ArcGIS Pro in conjunction with each other to answer important research questions related to geospatial analysis.</p>
+<ol style="list-style-type: decimal;">
+<li>Open your web browser and go to the Google Earth Engine website (<a href="https://earthengine.google.com/" target="_new">https://earthengine.google.com/</a>).</li>
+<li>Sign in and open the Code Editor.</li>
+<li><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-31%20at%207.23.29%20AM.png" alt="code editor"   loading="lazy"></li>
+<li><span>In this lab, we will be taking the Hansen et al. Global Forest dataset and exporting to import into ArcGIS Pro.&nbsp;</span></li>
+<li><span>The Hansen dataset is one of the most widely cited global forest datasets. It tracks changes in forest cover between 2000 and 2021, making it invaluable for studying deforestation, reforestation, and the impact of human activities on global ecosystems. This kind of longitudinal data is crucial for time-series analysis in remote sensing.</span></li>
+<li><span>The first step, we will use the Hansen et al. Global Forest Cover dataset, adding it to GEE via script commands and zooming into an area of interest.</span></li>
+<li><span>Load the Hansen et. al. Global Forest Cover dataset by searching for it via the search bar.&nbsp;</span></li>
+<li><span><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-31%20at%207.23.43%20AM.png" alt="search bar"   loading="lazy"></span></li>
+<li><span>Click on the Dataset: Hansen Global Forest Change v1.9 (2000-2021). This will open up the metadata.&nbsp; Explore the metadata familiarizing yourself with the bands available. &nbsp;Metadata is essential in remote sensing because it provides information about the dataset, such as how it was collected, what kind of sensors were used, and the meaning of the bands. The bands in this dataset include 'tree cover,' 'forest loss,' and 'forest gain,' which will be used in your analysis.</span></li>
+<li><span><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-31%20at%207.23.50%20AM.png" alt="the metadata"   loading="lazy"></span></li>
+<li><span>Click the import button. This will bring in the 2021 dataset. he import button brings the dataset into your workspace, making it available for manipulation. At this point, you’ll start working with geospatial data and applying techniques like visualization, filtering, and exporting.</span></li>
+<li><span><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-31%20at%207.24.57%20AM.png" alt="the import button"   loading="lazy"></span></li>
+<li><span>Now you will see that the data was loaded as an import in the top panel.</span></li>
+<li><span><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-31%20at%207.25.36%20AM.png" alt="the import code"   loading="lazy"></span></li>
+<li><span>This import corresponds to the following code:</span></li>
+<li>
+<div id="scrollable" class="scrollable">
+<div class="env-text">
+<pre class="env-text-box"><span class="ace_storage ace_type">var</span> <span class="ace_support ace_ee_static">image</span> <span class="ace_keyword ace_operator">=</span> <span class="ace_support ace_ee_static ace_ee_constructor">ee.Image</span><span class="ace_paren ace_lparen">(</span><span class="ace_string">"UMD/hansen/global_forest_change_2021_v1_9"</span><span class="ace_paren ace_rparen">)</span></pre>
+</div>
+</div>
+</li>
+<li>You can see this by clicking on the little blue icon that will show you the code.&nbsp;</li>
+<li><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-31%20at%207.26.32%20AM.png" alt="the import generated code window"   loading="lazy"></li>
+<li>Now go back to the import part of the code. Let's rename the variable from the image to 'forest' by clicking on the variable image and changing the name. Renaming variables makes your code more readable and easier to manage. When working with large datasets or multiple datasets, it’s important to keep your code organized.</li>
+<li><img src="../images/canvas/Uploaded%20Media/Capture.JPG" alt="renaming to forest"   loading="lazy"></li>
+<li>Now import in the imagery using the following code:</li>
+<li>
+<pre>Map.addLayer(forest, {}, 'Forest Cover');</pre>
+</li>
+<li>This step adds the dataset to the map, using the default visualization. The visualization process in remote sensing involves converting data values (like forest cover) into colors that represent different conditions. Visual interpretation is critical when analyzing satellite imagery, as it helps convey important patterns. This will bring in a default pallet. To change the pallet, use the UI in the layer control panel by clicking on the gearbox. Changing the color palette allows for better visual differentiation between different levels of forest cover or forest loss. Remote sensing often uses different color palettes to highlight specific data features, making patterns and changes more apparent.</li>
+<li><img src="../images/canvas/Uploaded%20Media/Capture-1.JPG" alt="default added"   loading="lazy"></li>
+<li>Now we will zoom into an area of interest, AOI, and define our study area so we can export out the information we are interested.&nbsp; I will do Gainesville, Florida. Defining an AOI is an essential part of remote sensing analysis. By selecting a specific geographic region, you narrow your focus to analyze detailed environmental changes. In this step, you learn how to target areas for analysis, a skill that is crucial for local and regional studies.</li>
+<li>Once zoomed in, create a geometry. Rename your geometry AOI. I am going to use a rectangle to draw an AOI box.&nbsp; This is the area that I will want to export. You will see the AOI now as an import feature at the top of the code. Exporting data is a critical step in geospatial workflows, allowing you to take data from cloud platforms like GEE and import it into other tools such as ArcGIS Pro for further analysis. The raster format you export in is key to preserving spatial information, which is vital for accurate mapping and analysis in GIS software.</li>
+<li><img src="../images/canvas/Uploaded%20Media/Capture-3.JPG" alt="AOI drawn"   loading="lazy"></li>
+<li>
+<span>To export a raster image from Google Earth Engine to Google Drive, you can use the </span><code>Export.image.toDrive()</code><span> function. Go to the docs are read up about this function. A GeoTIFF is a format that contains geographic metadata, allowing it to be used in GIS software like ArcGIS Pro. Understanding file formats and spatial metadata is a crucial aspect of working in geospatial technologies.</span>
+</li>
+<li><img src="../images/canvas/Uploaded%20Media/Capture-2.JPG" alt="the export to image to drive tool"   loading="lazy"></li>
+<li>We have loaded our image and defined our export geometry so we are ready to export to Google Drive.&nbsp; Be careful as this will take up space on your Google Drive.&nbsp; So you may have to use a lower resolution or smaller area if you do not have a lot of space on your google drive. use the following code to export.&nbsp;</li>
+<li>
+<pre>// Export the image to Google Drive.<br><br>Export.image.toDrive({<br>  image: forest,<br>  description: 'HansenGNV',<br>  folder: 'GEE',<br>  region: AOI,<br>  scale: 30<br>});</pre>
+</li>
+<li>When you hit run this will queue up a task for you.&nbsp; You will now see your task tab turn yellow.&nbsp;</li>
+<li><img src="../images/canvas/Uploaded%20Media/Capture-4.JPG" alt="Capture-4.JPG"   loading="lazy"></li>
+<li>Click on it and hit run.&nbsp; This will give you a dialog.&nbsp; Fix any errors and hit run.&nbsp;</li>
+<li><img src="../images/canvas/Uploaded%20Media/Capture-5.JPG" alt="image export"   loading="lazy"></li>
+<li>Monitor the status for it to complete.&nbsp;</li>
+<li>Then go to Google Drive <a href="https://drive.google.com/" target="_blank">https://drive.google.com/</a> sign in and look under your GEE folder</li>
+<li>You will find your GeoTiff.&nbsp;</li>
+<li><img src="../images/canvas/Uploaded%20Media/Capture-6.JPG" alt="your image"   loading="lazy"></li>
+<li>There you can download that to your computer to add to ArcGIS Pro.&nbsp;</li>
+<li>Open up ArcGIS Pro.</li>
+<li>Make a new project.&nbsp;</li>
+<li>Add the GeoTiff to ArcGIS Pro, Add the loss year.&nbsp;</li>
+<li>Create a map with a visualization of the loss year.&nbsp; Submit the Map as a PDF. <em>Note:&nbsp;Exporting the map ensures that the data is preserved in a format suitable for presentations and publications. Always review the PDF to ensure everything displays correctly.</em>
+</li>
+</ol>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
             <section id="submission">
                 <div class="submission-box">
-                    <h3>📧 Lab Submission</h3>
+                    <h3>Lab Submission</h3>
                     <p>Submit lab via email.</p>
-                    <p><strong>Subject:</strong> <code>Lab 14 - Exporting to ArcGIS - [Your Name]</code></p>
+                    <p><strong>Subject:</strong> <code>Lab 14 - Interoperability with GEE - Exporting to ArcGIS Pro - [Your Name]</code></p>
                 </div>
             </section>
         </main>
+
         <footer>
-            <p><a href="lab-13-improving-classifications.html">← Previous Lab</a> | <a href="lab-15-visualizing-srtm-data.html">Next Lab →</a></p>
-            <p><a href="../index.html">← Back to Course Home</a></p>
+            <p><a href='lab-13-improving-classifications.html'>&larr; Previous Lab</a> | <a href='lab-15-visualizing-srtm-data.html'>Next Lab &rarr;</a></p>
+            <p><a href="../index.html">&larr; Back to Course Home</a></p>
         </footer>
     </div>
+    
 </body>
 </html>
+

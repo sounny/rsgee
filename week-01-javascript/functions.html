@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Functions | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#schedule">Schedule</a> &gt; Week 1
+        </nav>
+
+        <header class="lab-header">
+            <h1>Functions</h1>
+        </header>
+
+        <main class="lab-content">
+<p>While using Earth Engine, you will need to define your own functions. Functions take user inputs, use them to perform some computation, and send output back. Functions allow you to group a set of operations and repeat the same operations with different parameters without having to rewrite them every time. Functions are defined using the function keyword.</p>
+<p>The code below defines a function called greet that takes an input called name and returns a greeting with Hello prefixed to it.&nbsp;</p>
+<pre>var greet = function(name) {<br>&nbsp; return 'Hello ' + name;<br>};<br><br>print(greet('Albert Gator'));<br>print(greet('Alberta Gator'));</pre>
+<p>Note that we can call the function with different inputs, and it generates different outputs with the same code. This is the power of functions: you can create blocks of codes that act as tools.&nbsp; Your output should look like this after running it in Earth Engine.&nbsp;</p>
+<p><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-02-02%20at%202.13.21%20PM.png" alt="output from google earth engine after writing a comment. "   loading="lazy"></p>
+<p>&nbsp;</p>
+        </main>
+
+        <footer>
+            <p><a href="../index.html">â† Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,37 +1,104 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 15 - Visualizing SRTM Data | Remote Sensing Course</title>
     <link rel="stylesheet" href="../css/style.css">
+    <meta name="robots" content="index, follow">
+    <meta name="description" content="Google Earth Engine lab 15: Lab 15 - Visualizing SRTM Data">
 </head>
 <body>
     <div class="container">
         <nav class="breadcrumb">
             <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 15
         </nav>
+
         <header class="lab-header">
             <h1>Lab 15 - Visualizing SRTM Data</h1>
-            <p><em><strong>Objective: Work with digital elevation models (DEMs) and terrain analysis.</strong></em></p>
         </header>
+
         <main class="lab-content">
-            <section>
-                <h2>Introduction</h2>
-                <p>The Shuttle Radar Topography Mission (SRTM) provides global elevation data. Learn to visualize terrain, calculate slope and aspect, and create hillshade visualizations.</p>
-            </section>
+<p><em><strong>Lab 15 Lecture - Spring 2023 - Visualizing SRTMs</strong></em></p>
+
+<p><em><strong>Objective:<span>&nbsp;</span></strong></em>In this lab, you will bring an SRTM into Google Earth Engine and apply a color ramp. You will turn in a URL of your final code from Earth Engine.</p>
+<p><strong>1 - Image Constructor</strong></p>
+<p>First, you will need to instantiate an image with the Image constructor. <span>&nbsp;The&nbsp;</span><a class="external" href="https://developers.google.com/earth-engine/api_docs#eeimage" target="_blank"><span>image constructor</span><span class="external_link_icon" role="presentation"><span class="screenreader-only">Links to an external site.</span></span></a><span>&nbsp;</span><code>ee.Image()</code><span> gives&nbsp;you access to the raster datasets stored on GEE, and is made using a string ID of an image in the Earth Engine data catalog.&nbsp;</span></p>
+<p>Search the Earth Engine data catalog using the search tool at the top of the Code Editor to discover an image ID.&nbsp;</p>
+<ul>
+<li>Type 'elevation' into the search field and note that a list of rasters is returned.</li>
+<li><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%208.50.44%20AM.png" alt="search results showing the version 4 of the SRTM" width="551" height="402"   loading="lazy"></li>
+<li>Click the 'SRTM Digital Elevation Data Version 4' entry for more information about that dataset.</li>
+<li>On the left side of the dataset description is an<span>&nbsp;</span><strong>Image ID</strong><span>&nbsp;</span>field.</li>
+<li><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%208.52.18%20AM.png" alt="where to find image id number and the import button
+" width="663" height="502"   loading="lazy"></li>
+<li>Click the<span>&nbsp;</span><strong>Import</strong><span>&nbsp;</span>button on the dataset description or the<span>&nbsp;</span><strong>import</strong><span>&nbsp;</span>link on the right side of the search results.</li>
+<li>When you click the import link or button, a variable is automatically created in a special section named<span>&nbsp;</span><a class="external" href="https://developers.google.com/earth-engine/playground#imports" target="_blank"><span>'Imports'</span><span class="external_link_icon" role="presentation"><span class="screenreader-only">Links to an external site.</span></span></a>, at the top of your script.</li>
+<li>Rename the variable by clicking on its name in the imports section, and change it from image to 'srtm'.&nbsp; It is good practice not to use default naming.&nbsp;</li>
+<li><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%208.54.00%20AM.png" alt="renaming the image"   loading="lazy"></li>
+</ul>
+<p><strong>2 -&nbsp;Configuring the Map</strong></p>
+<p>The <code>Map.setCenter()</code> method centers the map view at given coordinates with the given zoom level. It takes three arguments:</p>
+<ul>
+<li>The longitude of the center, in decimal degrees.</li>
+<li>The latitude of the center, in decimal degrees.</li>
+<li>The zoom level, from 0 to 24.</li>
+</ul>
+<p>For example, the following code centers the map on the Grand Canyon. Put this code in the code editor of GEE:</p>
+<pre><code><span class="com">// Zoom to a location.</span><span class="pln"><br></span><span class="typ">Map</span><span class="pun">.</span><span class="pln">setCenter</span><span class="pun">(-</span><span class="lit">112.8598</span><span class="pun">,</span> <span class="lit">36.2841</span><span class="pun">,</span> <span class="lit">9</span><span class="pun">);</span> <span class="com">// Center on the Grand Canyon.</span> </code></pre>
+<p><strong><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%208.55.19%20AM.png" alt="The Result of the center"   loading="lazy"></strong></p>
+<p><strong>3- Adding a layer to the Map</strong></p>
+<p>Now use the Mapobject's addLayer() method to add an image to the map display in the Code Editor.</p>
+<pre class="prettyprint"><span class="com">// Display the image on the map.</span><span class="pln"><br></span><span class="typ">Map</span><span class="pun">.</span><span class="pln">addLayer</span><span class="pun">(</span><span class="pln">srtm</span><span class="pun">); //SRTM is the name of my var for the image. </span></pre>
+<p><strong>4 - Push Run</strong></p>
+<p>Push run, and your screen should look like this:</p>
+<p><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%209.01.47%20AM.png" alt="results from the code"   loading="lazy"></p>
+<p>&nbsp;</p>
+<p><strong>5 - Customizing layer visualization</strong></p>
+<p>Notice that the image comes in with a default grayscale.&nbsp; It is not very easy to visualize the elevation through this. So we will customize the visualization.&nbsp;</p>
+<ul>
+<li>To change how the data are stretched, you can provide another parameter to the Map.addLayer() call. Specifically, the second parameter, visParams, lets you specify the minimum and maximum values to display. To discover what values to use, activate the Inspector tab and click around on the map to get an idea of the range of pixel values.</li>
+<li>
+<p>Suppose that through such experimentation, the data should be stretched to [0, 3000]. To display the image using this range, use:</p>
+<pre class="prettyprint"><span class="typ">Map</span><span class="pun">.</span><span class="pln">addLayer</span><span class="pun">(</span><span class="pln">srtm</span><span class="pun">,</span> <span class="pun">{</span><span class="pln">min</span><span class="pun">:</span> <span class="lit">0</span><span class="pun">,</span><span class="pln"> max</span><span class="pun">:</span> <span class="lit">3000</span><span class="pun">},</span> <span class="str">'custom visualization'</span><span class="pun">);</span></pre>
+<p>Note that the<span>&nbsp;</span><code>visParams</code><span>&nbsp;</span>parameter is an object, with properties specifying the<span>&nbsp;</span><code>min</code><span>&nbsp;</span>and the<span>&nbsp;</span><code>max</code>.<br>The third argument&nbsp;is the custom name of the image that will show up in the layer manager.&nbsp;</p>
+</li>
+<li>
+<p><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%209.03.27%20AM.png" alt="Screenshot 2023-04-07 at 9.03.27 AM.png"   loading="lazy"></p>
+</li>
+</ul>
+<p><strong>6 - Working with color</strong></p>
+<p>To display a single band using a color palette, add a<span>&nbsp;</span><code>palette</code><span>&nbsp;</span>property to the<span>&nbsp;</span><code>visParams</code><span>&nbsp;</span>object:</p>
+<pre class="prettyprint"><span class="typ">Map</span><span class="pun">.</span><span class="pln">addLayer</span><span class="pun">(srtm</span><span class="pun">,</span> <span class="pun">{</span><span class="pln">min</span><span class="pun">:</span> <span class="lit">0</span><span class="pun">,</span><span class="pln"> max</span><span class="pun">:</span> <span class="lit">3000</span><span class="pun">,</span><span class="pln"> palette</span><span class="pun">:</span> <span class="pun">[</span><span class="str">'blue'</span><span class="pun">,</span> <span class="str">'green'</span><span class="pun">,</span> <span class="str">'red'</span><span class="pun">]},</span><span class="pln"><br>&nbsp; &nbsp; </span><span class="str">'custom palette'</span><span class="pun">);<br></span></pre>
+<p class="prettyprint"><strong><span class="pun"><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%209.04.44%20AM.png" alt="results"   loading="lazy"></span></strong></p>
+<p class="prettyprint"><strong><span class="pun">7 - Making a Hillshade</span></strong></p>
+<p class="prettyprint"><span class="pun">To display a hillshade we will use some algorithms that are built into the GEE library. &nbsp;</span></p>
+<p>The <code>ee.Terrain.hillshade</code> function computes a simple hillshade from a digital elevation model (DEM). It takes four arguments:</p>
+<ul>
+<li>The elevation image, in meters.</li>
+<li>The illumination azimuth in degrees from north.</li>
+<li>The illumination elevation in degrees.</li>
+<li>The exaggeration factor, which controls the steepness of the shadows.</li>
+</ul>
+<pre class="prettyprint"><span class="pun">//add a hillshade<br>var hills = ee.Terrain.hillshade(srtm, 270, 45)<br><br>//add hillshade to map<br>Map.addLayer(hills, {min: 0, max: 500},'Hillshade')<br></span></pre>
+<p class="prettyprint"><strong><span class="pun"><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%209.07.32%20AM.png" alt="hillshade results"   loading="lazy"></span></strong></p>
+<p class="prettyprint"><strong><span class="pun">8 - Share the link</span></strong></p>
+<p>Push the Get Link button and submit the link to your code. Be sure to comment you code.&nbsp;</p>
             <section id="submission">
                 <div class="submission-box">
-                    <h3>📧 Lab Submission</h3>
+                    <h3>Lab Submission</h3>
                     <p>Submit lab via email.</p>
-                    <p><strong>Subject:</strong> <code>Lab 15 - SRTM Data - [Your Name]</code></p>
+                    <p><strong>Subject:</strong> <code>Lab 15 - Visualizing SRTM Data - [Your Name]</code></p>
                 </div>
             </section>
         </main>
+
         <footer>
-            <p><a href="lab-14-exporting-to-arcgis-pro.html">← Previous Lab</a> | <a href="lab-16-zonal-statistics.html">Next Lab →</a></p>
-            <p><a href="../index.html">← Back to Course Home</a></p>
+            <p><a href='lab-14-exporting-to-arcgis-pro.html'>&larr; Previous Lab</a> | <a href='lab-16-zonal-statistics.html'>Next Lab &rarr;</a></p>
+            <p><a href="../index.html">&larr; Back to Course Home</a></p>
         </footer>
     </div>
+    
 </body>
 </html>
+
