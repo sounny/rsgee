@@ -37,6 +37,76 @@ body {
     color: var(--text-primary);
     background-color: var(--bg-secondary);
     padding: 20px;
+    padding-top: 20px; /* Account for sticky nav */
+}
+
+/* ===== STICKY NAVIGATION ===== */
+.sticky-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 10px var(--shadow-medium);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-100%);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.sticky-nav.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.sticky-nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand a {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.nav-brand a:hover {
+    color: #3a7a8a;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 30px;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links li {
+    margin: 0;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+    padding: 5px 0;
+    border-bottom: 2px solid transparent;
+}
+
+.nav-links a:hover {
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+    text-decoration: none;
 }
 
 /* ===== LAYOUT CONTAINER ===== */
@@ -483,10 +553,27 @@ footer p {
 @media (max-width: 768px) {
     body {
         padding: 10px;
+        padding-top: 10px;
     }
     
     .container {
         padding: 20px;
+    }
+    
+    .sticky-nav-container {
+        padding: 12px 20px;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .nav-links {
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+    }
+    
+    .nav-links a {
+        font-size: 0.9rem;
     }
     
     .course-title {
