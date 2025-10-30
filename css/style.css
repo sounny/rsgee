@@ -81,6 +81,31 @@ header {
     text-align: left; /* Override header centering for paragraph text */
 }
 
+/* ===== BUTTONS ===== */
+.lets-go-button {
+    display: inline-block;
+    padding: 14px 40px;
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px var(--shadow-medium);
+}
+
+.lets-go-button:hover {
+    background-color: #3a7a8a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px var(--shadow-medium);
+    text-decoration: none;
+}
+
+.lets-go-button:active {
+    transform: translateY(0);
+}
+
 /* ===== NAVIGATION ===== */
 nav {
     background-color: var(--bg-secondary);
