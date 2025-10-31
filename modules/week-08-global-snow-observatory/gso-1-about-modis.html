@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Global Snow Observatory - About MODIS</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="../../index.html">Home</a> &gt; <a href="../week-08-global-snow-observatory/gso-0-global-snow-observatory-introduction.html">Global Snow Observatory</a> &gt; About MODIS
+    </nav>
+    <h1>About MODIS</h1>
+    <p>To perform this type of study, a global dataset with a relatively high spatial resolution must gather enough data points. Furthermore, because snow cover can be such an ephemeral event, a high temporal resolution is also required. Fortunately, NASA’s Moderate-Resolution Imaging Spectrometer, more commonly called MODIS, meets these requirements. This pair of twin satellites, MODIS Terra and Aqua, orbits the planet following what is known as a sun-synchronous, near-polar, circular orbit and crosses the equator approximately 3 hours apart, collecting 36 individual bands to measure surface conditions. This daily temporal coverage is far more appropriate to mapping ephemeral events such as snow cover than the higher spatial resolution Landsat family of satellites, which have a temporal resolution of ~16 days. MODIS has been continuously measuring the globe since its placement in orbit in 2000 and 2002 for Terra and Aqua, respectively.</p>
+    <p>MODIS can image the globe at such a high temporal resolution partially because of its orbital path, and partially because the sensor can scan at very wide angles. However, at high sensor zenith angles, observations can be thrown off by the change in reflectance and cause false readings. It is, therefore, standard practice in the literature to limit the valid observations to only those observations that have a sensor zenith angle of less than 25&deg;. This is done because, at 25&deg;, the imaged pixel is 110% of the nominal area at nidar (directly below the satellite).</p>
+    <img src="../../images/global-snow/angles.gif" alt="Angles of MODIS" loading="lazy">
+    <p>There are several MODIS data products, but the one of importance is known as MOD10A1. This dataset was processed from the raw data to create a daily snow cover dataset. There are 4 bands in the dataset, but the one of interest to us here is the <strong>Snow_Cover_Daily_Tile</strong> band that codes for the state of land cover with respect to snow. We will also need the <strong>MOD09GA</strong> sensor zenith band to remove the pixels with a high sensor zenith angle.</p>
+    <nav class="series-nav">
+      <a href="gso-0-global-snow-observatory-introduction.html">&#8592; Introduction</a> |
+      <a href="gso-2-our-process.html">Next: Our Process &#8594;</a>
+    </nav>
+  </div>
+  <footer>
+    <p>&copy; 2025 Global Snow Observatory Series</p>
+  </footer>
+</body>
+</html>

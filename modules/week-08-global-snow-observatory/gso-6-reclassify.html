@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Global Snow Observatory: Reclassifying</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Home</a> &gt; 
+    <a href="../week-08-global-snow-observatory/">Global Snow Observatory</a> &gt; 
+    Reclassifying
+  </nav>
+  <header>
+    <h1>Global Snow Observatory: Reclassifying</h1>
+  </header>
+  <main>
+    <section>
+      <p>We now need to reclassify the dataset to snow, non-snow, or missing. Luckily, GEE has a <code>remap</code> function, which takes a list of inputs and changes the values to those you specify. If you search the documentation, remap methods exist for both images and image collections. We want the images version because we want to keep the missing values, not drop them from the collection. This means we can use the handy <code>.map()</code> method again.</p>
+      <figure>
+        <img src="../../images/global-snow/LookupTable.png" alt="MOD10A1 Lookup Table" loading="lazy">
+      </figure>
+      <p>Looking at the coded values from the MOD10A1 documentation above, we want to turn all the values that represent “snow” to a value of 1, and all the values that represent “No snow” to a value of 0. Anything that doesn’t fall within those parameters will result in a value of null, for 'missing'. The code should look something like this:</p>
+      <figure>
+        <img src="../../images/global-snow/Reclass.png" alt="Reclassify code example" loading="lazy">
+      </figure>
+      <p>
+        <a href="https://code.earthengine.google.com/86f04d761be1a752e49df9252408be33" target="_blank">Earth Engine Code Example</a>
+      </p>
+      <p>If you noticed, we are also at the end of our first processing chain, "Prepare MODIS Snow cover." This means we can wrap up all of the previous steps into a single function that takes two dates, a StartDate and a StopDate.</p>
+      <p>Now that we have that function done, it is time to calculate snow cover frequency.</p>
+    </section>
+    <nav class="series-nav">
+      <a href="gso-5-mapmask.html">&laquo; Previous: Masking</a> |
+      <a href="gso-7-calculatesnowcoverfrequency.html">Next: Calculating Snow Cover Frequency &raquo;</a>
+    </nav>
+  </main>
+</body>
+</html>

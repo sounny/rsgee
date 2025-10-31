@@ -36,8 +36,64 @@ body {
     line-height: 1.7;
     color: var(--text-primary);
     background-color: var(--bg-secondary);
-    padding: 20px;
-    padding-top: 20px; /* Account for sticky nav */
+    padding: 0;
+    margin: 0;
+    padding-top: 0; /* No padding needed for hero */
+}
+
+/* ===== HERO SECTION ===== */
+.hero-section {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-banner {
+    width: 100%;
+    height: auto;
+    display: block;
+    z-index: 1;
+}
+
+.hero-overlay {
+    position: absolute;
+    z-index: 2;
+    text-align: center;
+    color: white;
+    padding: 40px;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 300;
+    letter-spacing: -0.5px;
+    margin-bottom: 30px;
+    color: white;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.hero-overlay .lets-go-button {
+    display: inline-block;
+    padding: 16px 50px;
+    background-color: rgba(74, 144, 164, 0.8);
+    color: white;
+    font-weight: 600;
+    font-size: 1.2rem;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.hero-overlay .lets-go-button:hover {
+    background-color: rgba(58, 122, 138, 0.9);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    text-decoration: none;
 }
 
 /* ===== STICKY NAVIGATION ===== */
@@ -109,6 +165,21 @@ body {
     text-decoration: none;
 }
 
+/* Mobile menu toggle */
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-primary);
+    padding: 5px;
+}
+
+.mobile-menu-toggle:hover {
+    color: var(--accent-color);
+}
+
 /* ===== LAYOUT CONTAINER ===== */
 .container {
     max-width: 1200px;
@@ -124,31 +195,24 @@ header {
     padding: 30px 0 40px;
     border-bottom: 2px solid var(--bg-tertiary);
     margin-bottom: 40px;
+    scroll-margin-top: 80px; /* Offset for sticky nav */
 }
 
 .course-title {
     font-size: 2.5rem;
     font-weight: 300;
     letter-spacing: -0.5px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     color: var(--text-primary);
-}
-
-.course-subtitle {
-    font-size: 1.1rem;
-    font-weight: 400;
-    color: var(--text-secondary);
-    margin-bottom: 5px;
 }
 
 .course-description {
     font-size: 0.95rem;
     color: var(--text-muted);
     max-width: 900px;
-    margin: 20px auto 0;
-    font-style: italic;
+    margin: 0 auto 20px;
     line-height: 1.6;
-    text-align: left; /* Override header centering for paragraph text */
+    text-align: left;
 }
 
 /* ===== BUTTONS ===== */
@@ -552,28 +616,75 @@ footer p {
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
     body {
-        padding: 10px;
-        padding-top: 10px;
+        padding: 0;
+    }
+    
+    .hero-section {
+        overflow: hidden;
+    }
+    
+    .hero-banner {
+        width: 100%;
+        height: auto;
+    }
+    
+    .hero-overlay {
+        padding: 20px;
+    }
+    
+    .hero-overlay .lets-go-button {
+        padding: 12px 35px;
+        font-size: 1rem;
+    }
+    
+    .sticky-nav-container {
+        padding: 10px 15px;
+    }
+    
+    .nav-brand a {
+        font-size: 1rem;
+    }
+    
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        flex-direction: column;
+        gap: 0;
+        padding: 10px 0;
+        box-shadow: 0 4px 10px var(--shadow-medium);
+    }
+    
+    .nav-links.mobile-menu-open {
+        display: flex;
+    }
+    
+    .nav-links li {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .nav-links a {
+        display: block;
+        padding: 12px 20px;
+        font-size: 0.9rem;
+        border-bottom: none;
+    }
+    
+    .nav-links a:hover {
+        background-color: var(--bg-secondary);
     }
     
     .container {
         padding: 20px;
-    }
-    
-    .sticky-nav-container {
-        padding: 12px 20px;
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .nav-links {
-        flex-wrap: wrap;
-        gap: 15px;
-        justify-content: center;
-    }
-    
-    .nav-links a {
-        font-size: 0.9rem;
     }
     
     .course-title {

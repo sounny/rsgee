@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Global Snow Observatory: Our Process</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Home</a> &gt; 
+    <a href="../week-08-global-snow-observatory/">Global Snow Observatory</a> &gt; 
+    Our Process
+  </nav>
+  <header>
+    <h1>Global Snow Observatory: Our Process</h1>
+  </header>
+  <main>
+    <section>
+      <p>
+        To create the dataset necessary for this study, we will need to modify the standard MODIS dataset somewhat. We will first need to join the two datasets (MOD10A1 and MOD09GA) to create a combined MODIS dataset. We then need to mask out those pixels with a high sensor zenith angle.
+      </p>
+      <p>
+        After we have that complete dataset, we will want to reclassify it to a simple snow/no snow/missing dataset, which will make future calculations easier. After reclassifying the data, we want to count, at each pixel, the number of days that have a snow observation and the number of days that have a valid observation. We will then need to add an X band to the data (time), and finally hand it to the LinearFit reducer before finally exporting our map. We will wrap much of that data up into functions, as outlined below, in the larger ovals. The general process will look like this:
+      </p>
+      <figure>
+        <img src="../../images/global-snow/Capture.png" alt="GSO Process Diagram" loading="lazy">
+      </figure>
+    </section>
+    <nav class="series-nav">
+      <a href="gso-1-about-modis.html">&laquo; Previous: About MODIS</a> |
+      <a href="gso-3-masking.html">Next: Masking &raquo;</a>
+    </nav>
+  </main>
+</body>
+</html>

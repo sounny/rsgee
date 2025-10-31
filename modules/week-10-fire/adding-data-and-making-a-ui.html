@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fire Module - Adding Data & Making a UI</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Home</a> &gt; <a href="../week-10-fire/introduction.html">Fire</a> &gt; Adding Data & Making a UI
+  </nav>
+  <h1>Adding Data and Making a UI</h1>
+  <ol>
+    <li>Go to <a href="https://code.earthengine.google.com/" target="_blank">Google Earth Engine Code Editor</a></li>
+    <li>Define temporal and spatial variables to filter the datasets, namely the approximate ignition coordinates and start date of the fire.</li>
+    <li>Use the following code snippet to set up location and date variables:</li>
+    <pre><code>var lon = -117.868;
+var lat = 34.241;
+var zoom = 9;
+var inYear = 2020;
+var inMonth = 9;
+var inDay = 6;
+var durationAF = 15; // in days
+var durationBA = 1; // in months
+var startDateAF = ee.Date.fromYMD(inYear, inMonth, inDay);
+var endDateAF = startDateAF.advance(durationAF, 'day');
+var startDateBA = ee.Date.fromYMD(inYear, inMonth, 1);
+var endDateBA = startDateBA.advance(durationBA, 'month');</code></pre>
+    <li>Upload the NIFC perimeter for the Bobcat Fire as an Earth Engine asset and use it as a reference layer.</li>
+    <pre><code>var WFIGS = ee.FeatureCollection('users/sounny/WFIGS');
+var reference = ee.Feature(WFIGS.filter(ee.Filter.eq('irwin_In_1', 'BOBCAT')).sort('poly_Acres', false).first());</code></pre>
+    <li>Process MODIS active fire datasets:</li>
+    <pre><code>var mod14a1 = ee.ImageCollection('MODIS/006/MOD14A1');
+var myd14a1 = ee.ImageCollection('MODIS/006/MYD14A1');
+var mod14a1Img = mod14a1.filterDate(startDateAF, endDateAF);
+var myd14a1Img = myd14a1.filterDate(startDateAF, endDateAF);
+var getFireMask = function(image) { return image.select('FireMask').gte(7); };
+var getMaxFRP = function(image) { return image.select('MaxFRP').multiply(0.1); };
+var mod14a1ImgMask = mod14a1Img.map(getFireMask).sum();
+var myd14a1ImgMask = myd14a1Img.map(getFireMask).sum();
+var mod14a1ImgFrp = mod14a1Img.map(getMaxFRP).sum();
+var myd14a1ImgFrp = myd14a1Img.map(getMaxFRP).sum();</code></pre>
+    <li>Process MODIS burned area dataset:</li>
+    <pre><code>var mcd64a1 = ee.ImageCollection('MODIS/006/MCD64A1');
+var getBurnDate = function(image) { return image.select('BurnDate'); };
+var mcd64a1Img = mcd64a1.filterDate(startDateBA, endDateBA);
+var mcd64a1ImgMask = mcd64a1Img.map(getBurnDate).min();</code></pre>
+    <li>Process GOES active fire products:</li>
+    <pre><code>var goes16 = ee.ImageCollection('NOAA/GOES/16/FDCF');
+var goes17 = ee.ImageCollection('NOAA/GOES/17/FDCF');
+var filterGOES = ee.Filter.calendarRange(0, 0, 'minute');
+var goes16Img = goes16.filterDate(startDateAF, endDateAF).filter(filterGOES);
+var goes17Img = goes17.filterDate(startDateAF, endDateAF).filter(filterGOES);
+var getFireMask = function(image) { return image.select('Mask').gte(10).and(image.select('Mask').lte(35)); };
+var getFRP = function(image) { return image.select('Power'); };
+var goes16ImgMask = goes16Img.map(getFireMask).sum();
+var goes17ImgMask = goes17Img.map(getFireMask).sum();
+var goes16ImgFrp = goes16Img.map(getFRP).sum();
+var goes17ImgFrp = goes17Img.map(getFRP).sum();</code></pre>
+    <li>Visualize the datasets and reference perimeter on the Earth Engine map:</li>
+    <pre><code>Map.addLayer(mod14a1ImgMask.selfMask(), { palette: 'orange' }, 'MOD14A1');
+Map.addLayer(myd14a1ImgMask.selfMask(), { palette: 'red' }, 'MYD14A1');
+Map.addLayer(mcd64a1ImgMask.selfMask(), { palette: 'black' }, 'MCD64A1');
+Map.addLayer(goes16ImgMask.selfMask(), { palette: 'skyblue' }, 'GOES16', false);
+Map.addLayer(goes17ImgMask.selfMask(), { palette: 'purple' }, 'GOES17', false);
+Map.setCenter(lon, lat, 9);</code></pre>
+    <li>For advanced visualization, use <code>ui.Panel</code> and <code>ui.Map.Linker</code> to compare datasets side by side.</li>
+  </ol>
+  <nav class="series-nav">
+    <a href="introduction.html">Introduction</a> |
+    <a href="theory.html">Theory</a> |
+    <a href="fire-datasets.html">Fire Datasets</a> |
+    <a href="about-the-fire.html">About the Fire</a> |
+    <a href="adding-data-and-making-a-ui.html">Adding Data & Making a UI</a>
+  </nav>
+</body>
+</html>

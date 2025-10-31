@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Heat Islands: Deriving Land Surface Temperature Using the Earth Engine Landsat LST Toolbox</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Home</a> &gt; 
+    <a href="../week-09-heat-islands/">Heat Islands</a> &gt; 
+    Deriving Land Surface Temperature Using the Earth Engine Landsat LST Toolbox
+  </nav>
+  <header>
+    <h1>Deriving Land Surface Temperature Using the Earth Engine Landsat LST Toolbox</h1>
+  </header>
+  <main>
+    <section>
+      <p>In the previous section, we explored an LST retrieval algorithm to give an example of the standard steps to get to LST from the satellite measurements in the thermal bands. In this section, we will use an Earth Engine module developed for this purpose to calculate LST.</p>
+      <pre><code>// Link to the module that computes the Landsat LST.
+var landsatLST = require('projects/gee-edu/book:Part A - Applications/A1 - Human Applications/A1.5 Heat Islands/modules/Landsat_LST.js');
+
+// Select region of interest, date range, and Landsat satellite.
+var geometry = regionInt.geometry();
+var satellite = 'L8';
+var dateStart = '2014-01-01';
+var dateEnd = '2019-01-01';
+var useNdvi = true;
+
+// Get Landsat collection with additional necessary variables.
+var landsatColl = landsatLST.collection(satellite, dateStart, dateEnd, geometry, useNdvi);
+
+// Create composite, clip, filter to summer, mask, and convert to degree Celsius.
+var landsatComp = landsatColl
+  .select('LST')
+  .filter(sumFilter)
+  .median()
+  .clip(regionInt)
+  .updateMask(notWater)
+  .subtract(273.15);
+
+Map.addLayer(landsatComp, {
+    min: 25,
+    max: 38,
+    palette: ['blue', 'white', 'red']
+  },
+  'LST_SMW');
+</code></pre>
+      <figure>
+        <img src="../../images/heat-islands/Screenshot%202023-11-09%20at%2011.24.39%E2%80%AFAM.png" alt="LST SMW screenshot" loading="lazy">
+      </figure>
+      <p>As an aside, the Landsat Collection 2 products have recently incorporated LST bands, which can be processed similarly to the MODIS data, but with the bands’ own specific offsets and scaling factors.</p>
+    </section>
+    <nav class="series-nav">
+      <a href="rs3-2-deriving-land-surface-temperature-from-landsat.html">&laquo; Previous: Deriving Land Surface Temperature from Landsat</a> |
+      <a href="rs3-4-defining-urban-and-rural-references.html">Next: Defining Urban and Rural References &raquo;</a>
+    </nav>
+  </main>
+</body>
+</html>

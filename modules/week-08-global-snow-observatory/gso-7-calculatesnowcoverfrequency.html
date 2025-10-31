@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Global Snow Observatory: Calculating Snow Cover Frequency</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Home</a> &gt; 
+    <a href="../week-08-global-snow-observatory/">Global Snow Observatory</a> &gt; 
+    Calculating Snow Cover Frequency
+  </nav>
+  <header>
+    <h1>Global Snow Observatory: Calculating Snow Cover Frequency</h1>
+  </header>
+  <main>
+    <section>
+      <p>Our dataset is now ready to be analyzed. We have an image collection of images that have a single band, called remapped, that represents a sensor-adjusted and reclassified snow cover for each day of the collection. Snow cover frequency is the number of days with a snow observation divided by the number of days with a valid observation. So, we need to count the number of times a snow value appears and the number of times a snow or land value appears. After calculating snow cover frequency, that information needs to be added to an image as a band, along with a constant time value, so that we can hand that to the reducer as discussed in the Outline and Goals section.</p>
+      <h2>About Reducers</h2>
+      <p><a href="https://sites.google.com/site/earthengineapidocs/basic-image-manipulation/image-collections/reducing-images" target="_blank">Reducers</a> are a special method that usually doesn't take an input argument. They instead act at each pixel stack in an imageCollection and calculate a specific property of that stack, returning an image. If you think back to our reclassification scheme, pixels with snow have a value of 1, pixels with a valid observation have a value of 0, and all other pixels have a value of <i>null</i>. In order to calculate snow cover frequency, we need to know both the number of snow days and the number of valid days. Luckily, GEE has just the methods for this. The <code>.count()</code> method will count the number of times a pixel has a valid value within an imageCollection and will ignore (not count) those images that have a “masked” value so that it will count both snow and no snow values in a pixel stack. We can also count the number of snow days at a pixel directly by using the <code>.sum()</code> method, which adds the values in that stack of pixels. We also want to wrap this up in its own function. The code to do so appears as follows:</p>
+      <pre><code>// Prepare MODIS snow cover data for calculating snow cover frequency
+var PrepareModisSnowCover = function(StartDate, EndDate) {
+  // ...existing code for joining, masking, and reclassifying...
+};
+
+var CalculateSnowCoverFrequency = function(ModisSnowCover) {
+  var NumOfSnowDays = ModisSnowCover.sum();
+  var NumOfValidObsDays = ModisSnowCover.count();
+  var SnowCoverFrequency = NumOfSnowDays.divide(NumOfValidObsDays);
+  return SnowCoverFrequency;
+};
+</code></pre>
+      <p>
+        <a href="https://code.earthengine.google.com/fe4ee166571c488443349dbd31b59bd2" target="_blank">Earth Engine Code Example</a>
+      </p>
+      <p>Note that we have created two functions, a "prepare the dataset within a given time frame" function and a "calculate the snow cover frequency from a given dataset" function. These two functions together give us the Y axis, but we must now attach a date time stamp to each snow cover frequency. Think back to the requirements for the <a href="https://sites.google.com/site/globalsnowobservatory/home/Presentations-and-Tutorials/aag-workshop/tutorialgoals" target="_blank">linearFit reducer</a> if this doesn't make sense.</p>
+    </section>
+    <nav class="series-nav">
+      <a href="gso-6-reclassify.html">&laquo; Previous: Reclassifying</a> |
+      <a href="gso-8-trend-analysis.html">Next: Trend Analysis &raquo;</a>
+    </nav>
+  </main>
+</body>
+</html>

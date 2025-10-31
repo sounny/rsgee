@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Global Snow Observatory - Introduction</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="../../index.html">Home</a> &gt; <a href="../week-08-global-snow-observatory/gso-0-global-snow-observatory-introduction.html">Global Snow Observatory</a> &gt; Introduction
+    </nav>
+    <h1>Global Snow Observatory: Introduction</h1>
+    <p>In this lab, you will create a GEE Program that will run an online Global Snow Observatory. We will use Google Earth Engine JavaScript application program interface (API) to:</p>
+    <ul>
+      <li>Join and modify MODIS datasets</li>
+      <li>Calculate snow cover frequency for a given period</li>
+      <li>Use reducers to generate a linear fit trend</li>
+      <li>Visualize and export maps for display on Google Earth and Google Maps.</li>
+    </ul>
+    <h2>Mapping Goals</h2>
+    <p>Our goal with this lab is to generate a worldwide map of the linear trend in snow cover frequency from water year 2004 to water year 2014 (A water year is defined as October 1<sup>st</sup> to September 30<sup>th</sup>, and is labeled as the year of the end date, so water year 2004 is Oct. 1, 2003 to Sept. 30, 2004).</p>
+    <p>Snow cover frequency is defined as the number of days that a spot on earth is covered in snow divided by the number of days that spot has a valid observation. We say this because on some days, the satellite might not pass over a particular spot, and on some days the spot may be covered in clouds, which prohibits the detection of snow. Imagine a particular spot on the globe. It might have a snow cover frequency that looks like the graph below. What we want to do is get the slope of that linear fit trend, and we want to do that for every MODIS pixel across the globe, where each pixel is approximately 500 square meters.</p>
+    <p>Keep this general framework in mind as we work forward.</p>
+    <img src="../../images/global-snow/SCFgraph.png" alt="Graph showing the relationship between Snow Cover and date." loading="lazy">
+    <nav class="series-nav">
+      <a href="gso-1-about-modis.html">Next: About MODIS &#8594;</a>
+    </nav>
+  </div>
+  <footer>
+    <p>&copy; 2025 Global Snow Observatory Series</p>
+  </footer>
+</body>
+</html>

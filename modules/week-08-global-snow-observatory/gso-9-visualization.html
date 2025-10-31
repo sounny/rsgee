@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Global Snow Observatory: Visualization</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Home</a> &gt; 
+    <a href="../week-08-global-snow-observatory/">Global Snow Observatory</a> &gt; 
+    Visualization
+  </nav>
+  <header>
+    <h1>Global Snow Observatory: Visualization</h1>
+  </header>
+  <main>
+    <section>
+      <p>Let's go ahead and add some parameters to the <code>Map.addLayer()</code> function to make this look better. If you remember back to cartography 101, one of the “rules” of cartography is that if someone looking at it for the first time can’t tell within the first 5 seconds what is being visualized, you haven't made a useful map. While this is a bit extreme, it’s an excellent goal to aim for. This is made all the harder because, at the moment, GEE doesn't support legend creation. There are, of course, any number of different ways to visualize a map, but one of my personal favorites is a Blue to Brown color scheme. This is also a fairly common choice in water trends, with dark blue indicating large increases and dark brown indicating large decreases. Use the inspector to poke around the linear fit data and find good min and max values (I settled on -0.03 and 0.03). Because we did this at a yearly interval, the slope units are percent change. And because we have (theoretically) 365 days, a slope of ~0.03 equates to about 10 days/year (365*0.03) and about 90 days over the ten-year period (a quarter of a year increase or decrease!).</p>
+      <p>Create a palette variable, and use a color gradient generator to build an evenly spaced color palette. GEE will automatically stretch this palette across the min and max values, so ensure the number of values is odd, so that 0 values have a color assigned to them (in this case, pure white). Our final map call will look something like this:</p>
+      <figure>
+        <img src="../../images/global-snow/FinalMapCall.png" alt="Final Map Call Example" loading="lazy">
+      </figure>
+      <p>
+        <a href="https://code.earthengine.google.com/b4e308ea5e7a037c7ac9b918d7d8e298" target="_blank">Earth Engine Code Example</a>
+      </p>
+      <p>Now that we have a good-looking map, it's time to export it to our Google Maps Engine to share it with the world.</p>
+    </section>
+    <nav class="series-nav">
+      <a href="gso-8-trend-analysis.html">&laquo; Previous: Trend Analysis</a> |
+      <a href="gso-10-disseminating.html">Next: Disseminating &raquo;</a>
+    </nav>
+  </main>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Part 2 - Obtain River Centerline and Width</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="../../index.html">Home</a> &gt; <a href="../week-07-river-morphology/theory.html">River Morphology</a> &gt; Part 2
+    </nav>
+    <h1>Part 2: Obtain River Centerline and Width</h1>
+    <p>After processing the image to create a river mask, we will use existing functions from RivWidthCloud to process the image further to obtain river centerlines and widths. Here, we will call RivWidthCloud functions directly, taking advantage of the ability to use exposed functions from another Earth Engine script (using the <code>require</code> functionality to load another script as a module). We'll explain the usage and purpose of the RivWidthCloud functions used here.</p>
+    <p>There are three major steps involved in obtaining river widths from a given river mask:</p>
+    <ol>
+      <li>Calculate one-pixel-width river centerlines.</li>
+      <li>Estimate the direction orthogonal to the flow direction for each centerline pixel.</li>
+      <li>Quantify river width on the channel mask along the orthogonal directions.</li>
+    </ol>
+    <h2>Extract River Centerline</h2>
+    <p>We rely on morphological image analysis techniques to extract a river centerline. This process involves three steps:</p>
+    <ol>
+      <li>Using distance transform to enhance pixels near the centerline of the river.</li>
+      <li>Using gradient to further isolate the centerline pixel having local minimal gradient values.</li>
+      <li>Cleaning the raw centerline by removing spurious centerlines.</li>
+    </ol>
+    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 10.49.35 AM.png" alt="Steps extracting river centerline" loading="lazy" style="display: block; margin-left: auto; margin-right: auto;">
+    <p><em>Figure: Steps extracting river centerline: (a) distance transform of a river mask; (b) gradient of the distance map (a); (c) raw centerline after skeletonization; (d) centerline after pruning.</em></p>
+    <p>First, a distance transform is applied to the river mask, resulting in a raster image where the closest distance to the shore replaces the value of each water pixel in the river mask. This step is done by using the <code>CalcDistanceMap</code> function from RWC. From Fig. A, we can see that, in the distance transform, the center of the river has the highest values.</p>
+    <pre><code>// Import existing functions from RivWidthCloud.
+var riverFunctions = require(
+    'users/eeProject/RivWidthCloudPaper:functions_river.js');
+var clFunctions = require(
+    'users/eeProject/RivWidthCloudPaper:functions_centerline_width.js'
+);
+
+//Calculate distance from shoreline using distance transform.
+var distance = clFunctions.CalcDistanceMap(rivermask, 256, scale);
+Map.addLayer(rpj(distance), {
+    min: 0,
+    max: 500
+}, 'distance raster', false);
+</code></pre>
+    <p>Second, to isolate the centerline of the river, we apply a gradient calculation to the distance raster. If we treat the distance raster as a digital elevation model (DEM), then the locations of the river centerline can be visualized as a ridgeline. They will thus have minimal gradient value. The gradient calculation is important, as it converts a local property of the centerline (local maximum distance) to a global property (global minimal gradient) to allow extraction of the centerline with a fixed gradient threshold (Fig. B). We use a 0.9 threshold (recommended for RivWidth (Pavelsky and Smith, 2008) and RWC) to extract the centerline pixels from the gradient image. However, the resulting initial centerline is only sometimes one pixel wide. To ensure a one-pixel-wide centerline, iterative image skeletonization is applied to thin the initial centerline (Fig. C).</p>
+    <pre><code>// Calculate gradient of the distance raster.
+// There are three different ways (kernels) to calculate the gradient.
+// By default, the function used the second approach.
+// For details on the kernels, please see the source code for this function.
+var gradient = clFunctions.CalcGradientMap(distance, 2, scale);
+Map.addLayer(rpj(gradient), {}, 'gradient raster', false);
+
+// Threshold the gradient raster and derive 1px width centerline using skeletonization.
+var centerlineRaw = clFunctions.CalcOnePixelWidthCenterline(rivermask,
+    gradient, 0.9);
+var raw1pxCenterline = rpj(centerlineRaw).eq(1).selfMask();
+Map.addLayer(raw1pxCenterline, {
+    palette: ['red']
+}, 'raw 1px centerline', false);
+</code></pre>
+    <p>Third, the centerline from the previous step will have noise along the shoreline and will have spurious branches resulting from side channels or irregular channel forms that need to be pruned. The pruning function in RWC, <code>CleanCenterline</code>, works by first identifying the end pixels of the centerline (i.e., centerline pixels with only one neighboring pixel) and then erasing pixels along the centerline pixels starting from the end pixels for a distance specified by <code>MAXDISTANCE_BRANCH_REMOVAL</code>. It will stop if the specified distance is reached or the erasing encounters a joint pixel (i.e., pixels having more than two neighboring pixels). After pruning, the final centerline should look like Fig. D.</p>
+    <pre><code>// Prune the centerline to remove spurious branches.
+var MAXDISTANCE_BRANCH_REMOVAL = 500;
+// Note: the last argument of the CleanCenterline function enables removal of the pixels so that the resulting centerline will have 1px width in an 8-connected way. Once it is done, it doesn’t need to be done the second time (thus it equals false)
+var cl1px = clFunctions
+    .CleanCenterline(centerlineRaw, MAXDISTANCE_BRANCH_REMOVAL, true);
+var cl1px = clFunctions
+    .CleanCenterline(cl1px, MAXDISTANCE_BRANCH_REMOVAL, false);
+var final1pxCenterline = rpj(cl1px).eq(1).selfMask();
+Map.addLayer(final1pxCenterline, {
+    palette: ['red']
+}, 'final 1px centerline', false);
+</code></pre>
+    <h2>Estimate Cross-Sectional Direction</h2>
+    <p>Now, we will use the centerline we obtained from the previous step to help us measure the widths of the river. River width is often measured along the direction perpendicular to the flow, which we will approximate using the course of its centerline. We convolve the centerline image with a customized kernel to estimate cross-sectional directions. The square 9 x 9 kernel has been designed so that each pixel on its rim has the radian value of the angle between the line connecting the rim pixel and the center of the kernel and the horizontal x-axis (radian angle 0). The convolution works by overlapping the center of the kernel with the centerline and calculating the average of the values of the rim pixels that overlap the centerline pixels, which corresponds to the cross-sectional direction of the particular centerline point under consideration. Here, we use the function <code>CalculateAngle</code> to estimate the cross-sectional angles. The resulting raster will replace each centerline pixel with the value of the cross-sectional directions in degrees.</p>
+    <pre><code>// Calculate perpendicular direction for the cleaned centerline.
+var angle = clFunctions.CalculateAngle(cl1px);
+var angleVis = {
+    min: 0,
+    max: 360,
+    palette: ['#ffffd4', '#fed98e', '#fe9929', '#d95f0e', '#993404']
+};
+Map.addLayer(rpj(angle), angleVis, 'cross-sectional directions', false);
+</code></pre>
+    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 10.54.47 AM.png" alt="Cross-sectional directions" loading="lazy">
+    <h2>Quantify River Widths</h2>
+    <p>To estimate river width, we will be using the RWC function <code>rwGen_waterMask</code>. This function can take any binary water mask image as input to calculate river widths, so long as the band name is ‘waterMask’ and contains the following three properties: 1) crs—UTM projection code, 2) scale—native spatial resolution, and 3) image_id—acting as an identifier for the output widths. This function first processes the input water mask to create all the intermediate images mentioned before (channel mask, river mask, centerline, and angle image). Then, it creates a <code>FeatureCollection</code> of cross-sectional lines, each centered on one centerline pixel (from the centerline raster) along the direction estimated in the “Estimate Cross-Sectional Direction” section (from the angle raster) and with a length three times longer than the distance from the centerline point to the closest shoreline pixel (obtained from the distance raster). This feature collection is then used in an <code>Image.reduceRegions</code> method as the <code>FeatureCollection</code> input. With a mean reducer, the result denotes the ratio between the actual river width and the length of the line segment (which is known). Thus, the final river width can be estimated by multiplying the ratio with the length of each line segment in the <code>FeatureCollection</code>. However, the scaling factor of 3 is chosen empirically and can over- or underestimate the maximum extent of river width. This is because the width, scaled by 3, is the minimal distance from centerline pixels to the nearest shoreline pixels. When aligning line segments along the directions orthogonal to the river centerline, we might encounter situations when the length of these segments is too short to cover the river's width (underestimation) or too long that they overlap with neighboring river reaches (overestimation). In both cases, the end(s) of the line segment overlaps with a pixel identified as “water” in the channel mask. Thus, additional steps are taken to flag these measurements.</p>
+    <p>The rwGen_waterMask takes four arguments—maximum search distance (unit: meter) to label river pixels, maximum size of islands (unit: pixel) to be filled in to calculate river mask, distance (unit: meter) to be pruned to clean the raw centerline, and the area of interest to carry out the width calculation. The output of the rwc function is a FeatureCollection with each feature having the properties listed in the table below.</p>
+    <table border="1" style="border-collapse: collapse; width: 100%;">
+      <thead>
+        <tr><th>Property</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>longitude</td><td>Longitude of the centerline point</td></tr>
+        <tr><td>latitude</td><td>Latitude of the centerline point</td></tr>
+        <tr><td>width</td><td>Wetted river width measured at the centerline point</td></tr>
+        <tr><td>orthogonalDirection</td><td>Angle of the cross-sectional direction at the centerline point</td></tr>
+        <tr><td>flag_elevation</td><td>Mean elevation across the river surface (unit: meter) based on MERIT DEM</td></tr>
+        <tr><td>image_id</td><td>Image ID of the input image</td></tr>
+        <tr><td>crs</td><td>The projection of the input image</td></tr>
+        <tr><td>endsInWater</td><td>Indicates inaccurate width due to the insufficient length of the cross-sectional segment that was used to measure the river width</td></tr>
+        <tr><td>endsOverEdge</td><td>Indicates width too close to the edge of the image such that the width can be inaccurate</td></tr>
+      </tbody>
+    </table>
+    <pre><code>// Estimate width.
+var rwcFunction = require(
+    'users/eeProject/RivWidthCloudPaper:rwc_watermask.js');
+var rwc = rwcFunction.rwGen_waterMask(4000, 333, 500, aoi);
+watermask = ee.Image(watermask.rename(['waterMask']).setMulti({
+    crs: crs,
+    scale: 30,
+    image_id: 'aoi'
+}));
+
+var widths = rwc(watermask);
+print('example width output', widths.first());
+</code></pre>
+    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 11.00.24 AM.png" alt="River width results" loading="lazy">
+    <nav class="series-nav">
+      <a href="part-1-creating-and-analyzing-a-single-river-mask.html">&#8592; Part 1</a> |
+      <a href="part-3-bank-morphology.html">Next: Part 3 &#8594;</a>
+    </nav>
+  </div>
+  <footer>
+    <p>&copy; 2025 River Morphology Series</p>
+  </footer>
+</body>
+</html>

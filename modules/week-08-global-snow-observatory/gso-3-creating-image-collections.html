@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Global Snow Observatory: Creating Image Collections</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Home</a> &gt; 
+    <a href="../week-08-global-snow-observatory/">Global Snow Observatory</a> &gt; 
+    Creating Image Collections
+  </nav>
+  <header>
+    <h1>Global Snow Observatory: Creating Image Collections</h1>
+  </header>
+  <main>
+    <section>
+      <p>One of the most basic operations you can perform is to call in imagery that Google hosts and updates. Let’s start by accessing the MOD10A1 dataset and examining its structure. You can search for datasets with the search bar above the playground interface and use the associated ID to access the data.</p>
+      <p>
+        <a href="https://code.earthengine.google.com/30d59a0550bc0ef4181942f7eaaec45a" target="_blank">Earth Engine Code Example</a>
+      </p>
+      <p>You may need to click the "show code" message that appears and then run the script with the run button. Don't worry, nothing should appear on the map; we want to direct our attention to the console panel.</p>
+      <p>Take a moment and think about what you just accomplished. Using just over 40 characters, we can download the entire MOD10A1 dataset in less than 20 seconds. To say that is impressive is a gross understatement.</p>
+      <p>All awe aside, let’s look at what we actually have. Add a line of code to the print() function:</p>
+      <pre><code>var MOD10A1 = ee.ImageCollection('MOD10A1').filterDate('2005-10-01', '2006-09-30');
+print(MOD10A1);</code></pre>
+      <p>Click on the small arrows in the Console tab. We can see the format in the information panel on the right, as shown below.</p>
+      <figure>
+        <img src="../../images/global-snow/MOD10A1DataStructure.png" alt="MOD10A1 Data Structure" loading="lazy">
+      </figure>
+      <p>Thinking back to the data types, we can see that this is an Image Collection. If you recall, MOD10A1 data products are a daily global raster with 4 bands: a quality band, a snow cover tile description, a snow cover albedo measurement, and a fractional snow cover measurement. Thinking back to our goals, we want to filter the collection for a sensor zenith angle, but that information needs to be in MOD10A1, but can be found in the MOD09GA dataset. Therefore, our next goal is to join the two datasets together.</p>
+    </section>
+    <nav class="series-nav">
+      <a href="gso-2-our-process.html">&laquo; Previous: Our Process</a> |
+      <a href="gso-4-joining-collections.html">Next: Joining Collections &raquo;</a>
+    </nav>
+  </main>
+</body>
+</html>

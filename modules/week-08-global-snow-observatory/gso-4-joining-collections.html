@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Global Snow Observatory: Joining Collections</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Home</a> &gt; 
+    <a href="../week-08-global-snow-observatory/">Global Snow Observatory</a> &gt; 
+    Joining Collections
+  </nav>
+  <header>
+    <h1>Global Snow Observatory: Joining Collections</h1>
+  </header>
+  <main>
+    <section>
+      <p>As part of our analysis, we need the snow cover tile description and the zenith angle. The Sensor zenith angle must come from another MODIS dataset, as it is not included in the standard MOD10A1 dataset. Fortunately, Google Earth Engine also contains the MOD09GA dataset. If we call it in and look at the bands it contains per the previous example, we can see the SensorZenith band (band 2 in the image below).</p>
+      <figure>
+        <img src="../../images/global-snow/MOD09GA.png" alt="SensorZenith band in MOD09GA" loading="lazy">
+      </figure>
+      <p>Our goal is to get the sensor zenith angle band from MOD09GA into the imagery that contains our snow cover data. To select a particular band to work with, we can use the <code>.select()</code> method, like so:</p>
+      <pre><code>var MOD09GA = ee.ImageCollection('MOD09GA').select('SensorZenith')
+  .filterDate('2005-10-01', '2006-09-30');
+
+print(MOD09GA);</code></pre>
+      <p>
+        <a href="https://code.earthengine.google.com/de7b19f2f283d8922ed93532b8417ead" target="_blank">Earth Engine Code Example</a>
+      </p>
+      <p>Joining two collections requires a common property between the two, just as it does in standard GIS software. In this case, the best way to join the collections is to join them based on their acquisition times, using the <code>system:time_start</code> property as the filter. We will use the <code>join.inner()</code> method. The code to join the two datasets together looks like this:</p>
+      <pre><code>// First, we define the two datasets, selecting the bands we are interested in
+var MOD09GA = ee.ImageCollection('MOD09GA').select('SensorZenith')
+  .filterDate('2005-10-01', '2005-10-31');
+var MOD10A1 = ee.ImageCollection('MOD10A1').select('Snow_Cover_Daily_Tile')
+  .filterDate('2005-10-01', '2005-10-31');
+
+// Define the join and filter
+var Join = ee.Join.inner();
+var FilterOnStartTime = ee.Filter.equals({
+  'leftField': 'system:time_start',
+  'rightField': 'system:time_start'
+});
+
+// Join the two collections, passing entries through the filter
+var JoinedMODIS = Join.apply(MOD09GA, MOD10A1, FilterOnStartTime);
+
+print(JoinedMODIS);
+</code></pre>
+      <p>
+        <a href="https://code.earthengine.google.com/46e58361354b644577374a3aa82856a4" target="_blank">Earth Engine Code Example</a>
+      </p>
+      <p>Congratulations, we've just joined two MODIS collections, and it took less than 20 lines of code to do so! However, if you print the resulting collection, you get something like this...</p>
+      <figure>
+        <img src="../../images/global-snow/Screenshot%202023-11-02%20at%209.51.57%E2%80%AFAM.png" alt="Screenshot of print results" loading="lazy">
+      </figure>
+      <p>The Image Collection has now become a FeatureCollection, and all of the features need to include the bands we want. Instead, they are in the columns "primary" and "secondary," as explained in the documentation for the join. To return this to a format that we can work with, we need to run a function across the FeatureCollection, creating a new image that has the bands in the primary column and the secondary column.</p>
+      <pre><code>// A function to merge the bands together after a join
+// the bands are referred to as the 'primary' and 'secondary' properties
+var MergeBands = function(aRow) {
+  var anImage = ee.Image.cat(aRow.get('primary'), aRow.get('secondary'));
+  return anImage;
+};
+
+var MergedMODIS = JoinedMODIS.map(MergeBands);
+
+print(MergedMODIS);
+</code></pre>
+      <p>
+        <a href="https://code.earthengine.google.com/991feec0b5548702fa411b57e6c7f8d6" target="_blank">Earth Engine Code Example</a>
+      </p>
+      <figure>
+        <img src="../../images/global-snow/Screenshot%202023-11-02%20at%209.55.46%E2%80%AFAM.png" alt="Screenshot after merging bands" loading="lazy">
+      </figure>
+      <p>Now that we have a function that joins the two collections, we need to mask out pixels that have a sensor zenith angle greater than 25&deg;.</p>
+    </section>
+    <nav class="series-nav">
+      <a href="gso-3-creating-image-collections.html">&laquo; Previous: Creating Image Collections</a> |
+      <a href="gso-5-mapmask.html">Next: Masking &raquo;</a>
+    </nav>
+  </main>
+</body>
+</html>

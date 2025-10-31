@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Global Snow Observatory: Masking</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Home</a> &gt; 
+    <a href="../week-08-global-snow-observatory/">Global Snow Observatory</a> &gt; 
+    Masking
+  </nav>
+  <header>
+    <h1>Global Snow Observatory: Masking</h1>
+  </header>
+  <main>
+    <section>
+      <p>Now that we have a function that joins the two collections, we need to mask out pixels that have a sensor zenith angle greater than 25&deg;.</p>
+      <h2>.map and .mask</h2>
+      <h3>.map</h3>
+      <p>The <code>.map()</code> method runs a function across every element in a collection and returns a collection. It is one of the most useful tools in our arsenal.</p>
+      <h3>.mask</h3>
+      <p>Masking is another widely used method to process an image. It can be difficult to understand at first, so let’s look at the description of the mask method:</p>
+      <figure>
+        <img src="../../images/global-snow/Mask.png" alt="Mask method description" loading="lazy">
+      </figure>
+      <p><i>“The output image retains the metadata and footprint of the input image.”</i> That’s the important line from the description. Anything within the mask is kept as is, and anything outside the mask is converted to a "masked" value. A mask call looks like so:</p>
+      <figure>
+        <img src="../../images/global-snow/MaksForm.png" alt="Mask function example" loading="lazy">
+      </figure>
+      <p>Using the <code>.mask</code> and <code>.map</code> functions, we will modify our code to mask out any pixels with a sensor zenith angle greater than 25 degrees. The function to do so will look like this:</p>
+      <figure>
+        <img src="../../images/global-snow/MaskSnesor.png" alt="Mask sensor function" loading="lazy">
+      </figure>
+      <p>Remember that we will want to do this to every image in the collection, so we will use the <code>.map()</code> method again, like so:</p>
+      <pre><code>//Masking collections
+// A function to assign high sensor zenith angle cells to null
+var MaskSensorPixels = function(anImage) {
+  var LessThan25 = anImage.select('SensorZenith').lte(2500); // Angle is stored as angle * 100 in MOD09
+  return anImage.mask(LessThan25);
+};
+
+// A function to merge the bands together after a join
+// the bands are referred to as the 'primary' and 'secondary' properties
+var MergeBands = function(aRow) {
+  var anImage = ee.Image.cat(aRow.get('primary'), aRow.get('secondary'));
+  return anImage;
+};
+
+// First, we define the two datasets, selecting the bands we are interested in
+var MOD09GA = ee.ImageCollection('MOD09GA').select('SensorZenith')
+  .filterDate('2005-10-01', '2005-10-31');
+var MOD10A1 = ee.ImageCollection('MOD10A1').select('Snow_Cover_Daily_Tile')
+  .filterDate('2005-10-01', '2005-10-31');
+
+// Define the join and filter
+var Join = ee.Join.inner();
+var FilterOnStartTime = ee.Filter.equals({'leftField': 'system:time_start', 'rightField': 'system:time_start'});
+
+// Join the two collections, passing entries through the filter
+var JoinedMODIS = Join.apply(MOD09GA, MOD10A1, FilterOnStartTime);
+
+print(JoinedMODIS);
+
+var MergedMODIS = JoinedMODIS.map(MergeBands);
+var MakedMODIS = ee.ImageCollection(MergedMODIS).map(MaskSensorPixels);
+</code></pre>
+      <p>
+        <a href="https://code.earthengine.google.com/8fbdd3c290f80f03ac24357f72e8bee3" target="_blank">Earth Engine Code Example</a>
+      </p>
+      <p>The next step is to reclassify the snow cover into a snow/no snow/missing scheme.</p>
+    </section>
+    <nav class="series-nav">
+      <a href="gso-4-joining-collections.html">&laquo; Previous: Joining Collections</a> |
+      <a href="gso-6-reclassify.html">Next: Reclassifying &raquo;</a>
+    </nav>
+  </main>
+</body>
+</html>

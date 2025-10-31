@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fire Module - Fire Datasets</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Home</a> &gt; <a href="../week-10-fire/introduction.html">Fire</a> &gt; Fire Datasets
+  </nav>
+  <h1>Fire Datasets</h1>
+  <p>In this Lab, we use MODIS and GOES datasets to map the Bobcat Fire, a megafire that burned 115,796 acres in Los Angeles County, California, in September 2020.</p>
+  <table>
+    <caption>MODIS and GOES fire mapping datasets available in the Google Earth Engine data catalog</caption>
+    <thead>
+      <tr>
+        <th>Satellite / Sensor</th>
+        <th>Dataset</th>
+        <th>Variable</th>
+        <th>Resolution</th>
+        <th>Dataset Coverage</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td rowspan="2">MODIS Terra, MODIS Aqua*</td>
+        <td>MOD/MYD14A1</td>
+        <td>active fires</td>
+        <td>1 km, daily</td>
+        <td>Global, 2001 to present</td>
+      </tr>
+      <tr>
+        <td>MCD64A1</td>
+        <td>burned area</td>
+        <td>500 m, monthly**</td>
+        <td>Global, 2001 to present</td>
+      </tr>
+      <tr>
+        <td>GOES-16, GOES-17*</td>
+        <td>FDCF</td>
+        <td>active fires</td>
+        <td>2 km, every 15 minutes</td>
+        <td>North / South America, 2017 to present</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>* MODIS Terra (from 2000), MODIS Aqua (from 2002), GOES-16 (from 2016), GOES-17 (from 2017)</p>
+  <p>** Can be disaggregated into daily resolution using the MCD64A1 burn date variable</p>
+  <nav class="series-nav">
+    <a href="introduction.html">Introduction</a> |
+    <a href="theory.html">Theory</a> |
+    <a href="fire-datasets.html">Fire Datasets</a> |
+    <a href="about-the-fire.html">About the Fire</a> |
+    <a href="adding-data-and-making-a-ui.html">Adding Data & Making a UI</a>
+  </nav>
+</body>
+</html>

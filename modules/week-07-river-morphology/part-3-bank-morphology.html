@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Part 3 - Bank Morphology</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="../../index.html">Home</a> &gt; <a href="../week-07-river-morphology/theory.html">River Morphology</a> &gt; Part 3
+    </nav>
+    <h1>Part 3: Bank Morphology</h1>
+    <p>In addition to a river’s centerline and width, we can also extract information about the banks of the river, such as their aspect and total length. To identify the banks, we simply dilate the channel mask and compare it to the original channel mask. These images' differences represent the land pixels adjacent to the channel mask.</p>
+    <pre><code>var bankMask = channelmask.focal_max(1).neq(channelmask);</code></pre>
+    <p>Next, we will calculate the aspect, or compass direction, of the bank faces. We use the <code>Image.cumulativeCost</code> method with the entire river channel as our source to create a new image (<code>bankDistance</code>) with increasing values away from the river channel, similar to an elevation map of river banks. In this image, the banks will ‘slope’ towards the river channel and we can take advantage of the terrain methods in EE. We will call the <code>Terrain.aspect</code> method on the bank distance and select the bank pixels by applying the bank mask. In the end, our bank aspect data will give us the direction from each bank pixel towards the center of the channel. These data could be useful for interpreting any directional preferences in erosion as a result of geological features or thawed permafrost soils from solar radiation.</p>
+    <pre><code>var bankDistance = channelmask.not().cumulativeCost({
+    source: channelmask,
+    maxDistance: 1E2,
+    geodeticDistance: false
+});
+
+var bankAspect = ee.Terrain.aspect(bankDistance)
+    .multiply(Math.PI).divide(180)
+    .mask(bankMask).rename('bankAspect');</code></pre>
+    <p>Last, we calculate the length represented by each bank pixel by convolving the bank mask with a Euclidean distance kernel. Sections of bank oriented along the pixel edges will have a value of 30 m per pixel, whereas a diagonal section will have a value of 2 * 30 m per pixel.</p>
+    <pre><code>var distanceKernel = ee.Kernel.euclidean({
+    radius: 30,
+    units: 'meters',
+    magnitude: 0.5
+});
+var bankLength = bankMask.convolve(distanceKernel)
+    .mask(bankMask).rename('bankLength');
+
+var radianVis = {
+    min: 0,
+    max: 2 * Math.PI,
+    palette: ['red', 'yellow', 'green', 'teal', 'blue', 'magenta', 'red']
+};
+Map.addLayer(rpj(bankAspect), radianVis, 'bank aspect', false);
+Map.addLayer(rpj(bankLength), {
+    min: 0,
+    max: 60
+}, 'bank length', false);</code></pre>
+    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 11.08.38 AM.png" alt="Bank morphology results" loading="lazy">
+    <nav class="series-nav">
+      <a href="part-2-obtain-river-centerline-and-width.html">&#8592; Part 2</a> |
+      <a href="part-4-multitemporal-river-width.html">Next: Part 4 &#8594;</a>
+    </nav>
+  </div>
+  <footer>
+    <p>&copy; 2025 River Morphology Series</p>
+  </footer>
+</body>
+</html>

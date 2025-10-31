@@ -7,13 +7,24 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- Hero Section with Banner -->
+    <div class="hero-section" id="top">
+        <img src="images/remote-sensing-banner.png" alt="Remote Sensing Course Banner" class="hero-banner">
+        <div class="hero-overlay">
+            <a href="#course-intro" class="lets-go-button">Let's Go! 🚀</a>
+        </div>
+    </div>
+
     <!-- Sticky Navigation Bar -->
     <nav class="sticky-nav" id="stickyNav">
         <div class="sticky-nav-container">
             <div class="nav-brand">
                 <a href="#top">Remote Sensing with GEE</a>
             </div>
-            <ul class="nav-links">
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+                ☰
+            </button>
+            <ul class="nav-links" id="navLinks">
                 <li><a href="#schedule">Schedule</a></li>
                 <li><a href="#labs">Labs</a></li>
                 <li><a href="#schedule">Modules</a></li>
@@ -22,14 +33,9 @@
         </div>
     </nav>
 
-    <div class="container" id="top">
-        <header>
-            <img src="images/remote-sensing-banner.png" alt="Remote Sensing Course Banner" style="max-width: 100%; height: auto;">
-            
+    <div class="container">
+        <header id="course-intro">
             <h1 class="course-title">Remote Sensing with Google Earth Engine</h1>
-            
-    
-            
             <p class="course-description">
                 Remote Sensing is the art of digital image processing. It is not merely a technological endeavor. 
                 It's a harmonious blend of cutting-edge technology and human wisdom, aiming to unravel the 
@@ -40,10 +46,6 @@
                 embodies the spirit of integration, innovation, and human-centered discovery, paving the way 
                 for a more informed and sustainable future.
             </p>
-            
-            <div style="text-align: center; margin-top: 2rem;">
-                <a href="#schedule" class="lets-go-button">Let's Go! 🚀</a>
-            </div>
         </header>
 
         <main>
@@ -196,8 +198,13 @@
                                 <p><strong>RS Application 1 - River Morphology</strong></p>
                             </td>
                             <td>
-                                <p><a href="week-11-river-morphology/theory.html">Theory</a></p>
-                                <p><a href="https://github.com/seanyx/RivWidthCloudPaper/blob/master/README.md" target="_blank">RivWidthCloud</a></p>
+                                    <p><a href="modules/week-07-river-morphology/theory.html">Theory</a></p>
+                                    <p><a href="modules/week-07-river-morphology/part-1.html">Part 1</a></p>
+                                    <p><a href="modules/week-07-river-morphology/part-2.html">Part 2</a></p>
+                                    <p><a href="modules/week-07-river-morphology/part-3.html">Part 3</a></p>
+                                    <p><a href="modules/week-07-river-morphology/part-4.html">Part 4</a></p>
+                                    <p><a href="modules/week-07-river-morphology/part-5.html">Part 5</a></p>
+                                    <p><a href="https://github.com/seanyx/RivWidthCloudPaper/blob/master/README.md" target="_blank">RivWidthCloud</a></p>
                             </td>
                             <td>
                                 
@@ -210,8 +217,20 @@
                             <td>
                                 <p><strong>RS Application 2 - Global Snow Observatory</strong></p>
                             </td>
-                            <td></td>
-                            <td></td>
+                                <td>
+                                    <p><a href="modules/week-08-global-snow-observatory/gso-0-global-snow-observatory-introduction.html">Introduction</a></p>
+                                    <p><a href="modules/week-08-global-snow-observatory/gso-1-about-modis.html">About MODIS</a></p>
+                                    <p><a href="modules/week-08-global-snow-observatory/gso-2-our-process.html">Our Process</a></p>
+                                    <p><a href="modules/week-08-global-snow-observatory/gso-3-creating-image-collections.html">Creating Image Collections</a></p>
+                                    <p><a href="modules/week-08-global-snow-observatory/gso-4-joining-collections.html">Joining Collections</a></p>
+                                    <p><a href="modules/week-08-global-snow-observatory/gso-5-mapmask.html">Masking</a></p>
+                                    <p><a href="modules/week-08-global-snow-observatory/gso-6-reclassify.html">Reclassifying</a></p>
+                                    <p><a href="modules/week-08-global-snow-observatory/gso-7-calculatesnowcoverfrequency.html">Calculating Snow Cover Frequency</a></p>
+                                    <p><a href="modules/week-08-global-snow-observatory/gso-8-trend-analysis.html">Trend Analysis</a></p>
+                                    <p><a href="modules/week-08-global-snow-observatory/gso-9-visualization.html">Visualization</a></p>
+                                    <p><a href="modules/week-08-global-snow-observatory/gso-10-disseminating.html">Disseminating</a></p>
+                                </td>
+                                <td></td>
                         </tr>
 
                         <!-- Week 9 -->
@@ -220,8 +239,15 @@
                             <td>
                                 <p><strong>RS Application 3 - Heat Islands</strong></p>
                             </td>
-                            <td></td>
-                            <td></td>
+                                <td>
+                                    <p><a href="modules/week-09-heat-islands/rs3-0-introduction.html">Introduction</a></p>
+                                    <p><a href="modules/week-09-heat-islands/rs3-1-data.html">Data</a></p>
+                                    <p><a href="modules/week-09-heat-islands/rs3-2-analysis.html">Analysis</a></p>
+                                    <p><a href="modules/week-09-heat-islands/rs3-3-results.html">Results</a></p>
+                                    <p><a href="modules/week-09-heat-islands/rs3-4-discussion.html">Discussion</a></p>
+                                    <p><a href="modules/week-09-heat-islands/rs3-5-conclusion.html">Conclusion</a></p>
+                                </td>
+                                <td></td>
                         </tr>
 
                         <!-- Week 10 -->
@@ -230,8 +256,14 @@
                             <td>
                                 <p><strong>RS Application 4 - Fire</strong></p>
                             </td>
-                            <td></td>
-                            <td></td>
+                                <td>
+                                    <p><a href="modules/week-10-fire/introduction.html">Introduction</a></p>
+                                    <p><a href="modules/week-10-fire/theory.html">Theory</a></p>
+                                    <p><a href="modules/week-10-fire/fire-datasets.html">Fire Datasets</a></p>
+                                    <p><a href="modules/week-10-fire/about-the-fire.html">About the Fire</a></p>
+                                    <p><a href="modules/week-10-fire/adding-data-and-making-a-ui.html">Adding Data & Making a UI</a></p>
+                                </td>
+                                <td></td>
                         </tr>
 
                         <!-- Week 11 -->
@@ -240,8 +272,23 @@
                             <td>
                                 <p><strong>Future Directions in Remote Sensing</strong></p>
                             </td>
+                                <td>
+                                    <p><a href="modules/future-directions/overview.html">Overview</a></p>
+                                    <p><a href="modules/future-directions/bibliography.html">Bibliography</a></p>
+                                </td>
+                                <td></td>
+                        </tr>
+                        <!-- Week 12 (Summary of Applications) -->
+                        <tr>
+                            <td><em>12</em></td>
                             <td>
-                                <p><a href="future-directions/bibliography.html">Bibliography for Future Directions</a></p>
+                                <p><strong>Summary & Review of RS Applications</strong></p>
+                            </td>
+                            <td>
+                                <p><a href="modules/week-07-river-morphology/theory.html">River Morphology</a></p>
+                                <p><a href="modules/week-08-global-snow-observatory/gso-0-global-snow-observatory-introduction.html">Global Snow Observatory</a></p>
+                                <p><a href="modules/week-09-heat-islands/rs3-0-introduction.html">Heat Islands</a></p>
+                                <p><a href="modules/week-10-fire/introduction.html">Fire</a></p>
                             </td>
                             <td></td>
                         </tr>
@@ -308,6 +355,16 @@
                             <li><a href="labs/lab-20-deploying-gee-apps.html">Lab 20 - Deploying GEE Apps</a></li>
                         </ul>
                     </div>
+
+                    <div class="card">
+                        <h3>Remote Sensing Applications</h3>
+                        <ul>
+                            <li><a href="modules/week-07-river-morphology/theory.html">River Morphology</a></li>
+                            <li><a href="modules/week-08-global-snow-observatory/gso-0-global-snow-observatory-introduction.html">Global Snow Observatory</a></li>
+                            <li><a href="modules/week-09-heat-islands/rs3-0-introduction.html">Heat Islands</a></li>
+                            <li><a href="modules/week-10-fire/introduction.html">Fire Monitoring</a></li>
+                        </ul>
+                    </div>
                 </div>
             </section>
 
@@ -351,6 +408,22 @@
             } else {
                 stickyNav.classList.remove('visible');
             }
+        });
+
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const navLinks = document.getElementById('navLinks');
+        
+        mobileMenuToggle.addEventListener('click', function() {
+            navLinks.classList.toggle('mobile-menu-open');
+        });
+        
+        // Close mobile menu when a link is clicked
+        const navLinkItems = navLinks.querySelectorAll('a');
+        navLinkItems.forEach(link => {
+            link.addEventListener('click', function() {
+                navLinks.classList.remove('mobile-menu-open');
+            });
         });
 
         // Smooth scroll for all anchor links
