@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discrete vs Continuous Data - Remote Sensing for GEE</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <nav class="breadcrumb">
+        <a href="../../index.html">Home</a> &gt; 
+        <a href="../../index.html#schedule">Week 3</a> &gt; 
+        <span>Discrete vs Continuous Data</span>
+    </nav>
+
+    <main>
+        <h1>Discrete vs Continuous Data</h1>
+
+        <section>
+            <div style="text-align: center; margin: 2rem 0;">
+                <img src="../../images/screenshots/discrete-continuous-classification.png" alt="Diagram showing multiple band images of a remote sensing product being classified into a classified image" style="max-width: 800px; width: 100%;">
+                <p><em>Figure: Transformation from continuous multi-band imagery to discrete classified image</em></p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Understanding Data Types</h2>
+            <p>Before diving into image classification, it's essential to understand the fundamental difference between discrete and continuous data, as this distinction forms the basis of how we transform raw satellite imagery into meaningful thematic maps.</p>
+
+            <h3>Discrete Data</h3>
+            <p><strong>Discrete data</strong> refers to data that can only take on certain numerical values, often integers. This type of data is limited to a finite number of possible outcomes. It is typically used to represent counts or whole numbers.</p>
+            
+            <p><strong>Examples of discrete data:</strong></p>
+            <ul>
+                <li>Number of people in a household</li>
+                <li>Number of students in a class</li>
+                <li>Number of cars in a parking lot</li>
+                <li>Land cover classes (1 = water, 2 = forest, 3 = urban, etc.)</li>
+                <li>Count of buildings in an image</li>
+            </ul>
+
+            <h3>Continuous Data</h3>
+            <p><strong>Continuous data</strong> can take on any value within a given range or interval. This type of data is often measured and can include fractions or decimals.</p>
+            
+            <p><strong>Examples of continuous data:</strong></p>
+            <ul>
+                <li>Temperature (e.g., 25.3°C, 78.6°F)</li>
+                <li>Weight (e.g., 150.5 lbs, 68.2 kg)</li>
+                <li>Elevation (e.g., 1,234.5 meters)</li>
+                <li>NDVI values (ranging from -1 to +1)</li>
+                <li>Surface reflectance (0 to 1)</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Application in Machine Learning</h2>
+            <p>In the context of machine learning, the distinction between discrete and continuous data determines which type of model we use:</p>
+
+            <h3>Regression Models</h3>
+            <ul>
+                <li><strong>Predict:</strong> Continuous variables</li>
+                <li><strong>Output:</strong> A numerical value on a continuous scale</li>
+                <li><strong>Example:</strong> Predicting the price of a house based on its features (size, location, age, etc.)</li>
+                <li><strong>In Remote Sensing:</strong> Estimating biomass, temperature, or soil moisture</li>
+            </ul>
+
+            <h3>Classification Models</h3>
+            <ul>
+                <li><strong>Predict:</strong> Discrete or categorical variables</li>
+                <li><strong>Output:</strong> A finite number of categories or classes</li>
+                <li><strong>Example:</strong> Predicting whether a customer will purchase a product based on demographic information</li>
+                <li><strong>In Remote Sensing:</strong> Classifying pixels into land cover types (water, forest, urban, agriculture)</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Classification in Remote Sensing</h2>
+            <p>In remote sensing, <strong>image classification</strong> is the process of categorizing every pixel in an image into a limited number of labeled land cover and/or land use classes. This resulting classified image provides a simplified thematic map.</p>
+
+            <h3>The Transformation Process</h3>
+            <p>Classification is fundamentally about <strong>transforming continuous data into discrete data</strong>:</p>
+            
+            <div style="background-color: #f0f8ff; padding: 1.5rem; border-left: 4px solid #2196F3; margin: 1rem 0;">
+                <p><strong>Continuous Input:</strong> Multi-band satellite imagery with continuous reflectance values (e.g., Band 1: 0.25, Band 2: 0.38, Band 3: 0.42, etc.)</p>
+                <p style="text-align: center; font-size: 2rem; margin: 1rem 0;">⬇️</p>
+                <p><strong>Classification Algorithm:</strong> Analyzes spectral signatures and patterns</p>
+                <p style="text-align: center; font-size: 2rem; margin: 1rem 0;">⬇️</p>
+                <p><strong>Discrete Output:</strong> Thematic map with discrete class labels (1 = Water, 2 = Forest, 3 = Urban, 4 = Agriculture, etc.)</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Why This Matters</h2>
+            <p>Understanding the discrete vs. continuous distinction is critical because:</p>
+            <ul>
+                <li><strong>Method Selection:</strong> Determines whether you use classification or regression techniques</li>
+                <li><strong>Data Interpretation:</strong> Helps you understand what your results represent</li>
+                <li><strong>Accuracy Assessment:</strong> Different metrics apply (confusion matrix for discrete, RMSE for continuous)</li>
+                <li><strong>Visualization:</strong> Discrete data uses categorical color schemes, continuous data uses gradients</li>
+                <li><strong>Analysis Capabilities:</strong> Some operations require discrete data (e.g., zonal statistics by class), others require continuous (e.g., surface modeling)</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Examples in Earth Engine</h2>
+            
+            <h3>Working with Continuous Data</h3>
+            <pre><code>// Calculate NDVI (continuous output: -1 to +1)
+var ndvi = image.normalizedDifference(['B5', 'B4']);
+
+// Get temperature data (continuous: values in Kelvin)
+var lst = image.select('LST_Day_1km');</code></pre>
+
+            <h3>Working with Discrete Data</h3>
+            <pre><code>// Load land cover classification (discrete: integer class codes)
+var landcover = ee.Image('USGS/NLCD/NLCD2019').select('landcover');
+
+// Classify image (convert continuous to discrete)
+var classified = image.classify(classifier);
+
+// Reclassify into simpler categories (discrete to discrete)
+var simplified = classified.remap([1,2,3,4,5], [1,1,2,2,3]);</code></pre>
+        </section>
+
+        <section>
+            <h2>Key Takeaways</h2>
+            <ul>
+                <li>✅ <strong>Discrete data</strong> has a finite set of possible values (categories, classes, counts)</li>
+                <li>✅ <strong>Continuous data</strong> can take any value within a range (measurements, indices)</li>
+                <li>✅ <strong>Regression</strong> predicts continuous variables</li>
+                <li>✅ <strong>Classification</strong> predicts discrete variables</li>
+                <li>✅ <strong>Image classification</strong> transforms continuous satellite data into discrete thematic maps</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../../index.html">Back to Course Home</a></p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Comments - Remote Sensing for GEE</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <nav class="breadcrumb">
+        <a href="../../index.html">Home</a> &gt; 
+        <a href="../../index.html#schedule">Week 1</a> &gt; 
+        <span>Comments</span>
+    </nav>
+
+    <main>
+        <h1>JavaScript Comments</h1>
+
+        <section>
+            <h2>Why Use Comments?</h2>
+            <p>While writing code, it is helpful to add a bit of text to explain the code or leave a note for yourself. It is a good programming practice to add comments in the code explaining each step.</p>
+            
+            <p>Comments help you and others understand:</p>
+            <ul>
+                <li>What the code is supposed to do</li>
+                <li>Why you made certain decisions</li>
+                <li>How complex sections work</li>
+                <li>What needs to be updated or fixed</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Single-Line Comments</h2>
+            <p>In JavaScript, you can prefix any line with two forward slashes <code>//</code> to make it a comment. The text in the comment will be ignored by the interpreter and will not be executed.</p>
+            <pre><code>// This is a comment!</code></pre>
+
+            <h3>Example with Code</h3>
+            <pre><code>// Define the study area geometry
+var geometry = ee.Geometry.Point([-82.3248, 29.6516]);
+
+// Load Landsat 8 imagery
+var image = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterBounds(geometry)  // Filter by location
+  .filterDate('2023-01-01', '2023-12-31')  // Filter by date
+  .first();  // Get the first image
+
+print(image);  // Display image information</code></pre>
+        </section>
+
+        <section>
+            <h2>Multi-Line Comments</h2>
+            <p>For longer explanations, you can use multi-line comments with <code>/*</code> to start and <code>*/</code> to end:</p>
+            <pre><code>/*
+This script calculates NDVI for Gainesville, Florida
+using Landsat 8 imagery from 2023.
+Author: Your Name
+Date: January 2024
+*/
+
+var geometry = ee.Geometry.Point([-82.3248, 29.6516]);</code></pre>
+        </section>
+
+        <section>
+            <h2>Keyboard Shortcuts</h2>
+            <p>The Code Editor provides a handy shortcut to quickly comment or uncomment lines:</p>
+            <ul>
+                <li><strong>Windows/Linux:</strong> <code>Ctrl + /</code></li>
+                <li><strong>Mac:</strong> <code>Cmd + /</code></li>
+            </ul>
+            
+            <p>You can select multiple lines and press the key combination to make them all comments. Press again to reverse the operation.</p>
+            
+            <p>This is especially helpful when debugging code—you can temporarily disable certain parts of the script from being executed without deleting them.</p>
+        </section>
+
+        <section>
+            <h2>Best Practices for Comments</h2>
+            
+            <h3>DO: Write Clear, Useful Comments</h3>
+            <pre><code>// Calculate NDVI for vegetation analysis
+var ndvi = image.normalizedDifference(['B5', 'B4']);
+
+// Set visualization parameters for green vegetation
+var visParams = {min: 0, max: 1, palette: ['red', 'yellow', 'green']};</code></pre>
+
+            <h3>DON'T: State the Obvious</h3>
+            <pre><code>// Bad example - comment doesn't add value
+var x = 5;  // Set x to 5
+var y = 10;  // Set y to 10
+var sum = x + y;  // Add x and y</code></pre>
+
+            <h3>DO: Explain WHY, Not Just WHAT</h3>
+            <pre><code>// Use median composite to minimize cloud interference
+var composite = collection.median();
+
+// Buffer by 1km to capture surrounding land cover context
+var bufferedArea = studyArea.buffer(1000);</code></pre>
+        </section>
+
+        <section>
+            <h2>Comments for Organization</h2>
+            <p>Use comments to organize longer scripts into sections:</p>
+            <pre><code>// ========================================
+// 1. DEFINE STUDY AREA AND DATES
+// ========================================
+var geometry = ee.Geometry.Point([-82.3248, 29.6516]);
+var startDate = '2023-01-01';
+var endDate = '2023-12-31';
+
+// ========================================
+// 2. LOAD AND FILTER DATA
+// ========================================
+var collection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterBounds(geometry)
+  .filterDate(startDate, endDate);
+
+// ========================================
+// 3. CALCULATE NDVI
+// ========================================
+var calculateNDVI = function(image) {
+  return image.normalizedDifference(['B5', 'B4']).rename('NDVI');
+};</code></pre>
+        </section>
+
+        <section>
+            <h2>Commenting Out Code for Debugging</h2>
+            <p>When troubleshooting, you can temporarily disable code without deleting it:</p>
+            <pre><code>var image = collection.first();
+
+// Temporarily disabled while testing
+// Map.addLayer(image, {bands: ['B4', 'B3', 'B2']}, 'True Color');
+
+// Testing with NDVI visualization instead
+Map.addLayer(ndvi, {min: 0, max: 1, palette: ['red', 'green']}, 'NDVI');</code></pre>
+        </section>
+
+        <section>
+            <h2>Try It Yourself</h2>
+            <p>Practice adding comments to your code:</p>
+            <ul>
+                <li>Add a header comment to your next script with your name and purpose</li>
+                <li>Comment each major section of your code</li>
+                <li>Explain why you chose certain parameters or thresholds</li>
+                <li>Use comments to temporarily disable parts of your code while testing</li>
+                <li>Leave notes for yourself about what still needs to be done</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Remember</h2>
+            <p>Good comments make your code:</p>
+            <ul>
+                <li>Easier to understand when you return to it later</li>
+                <li>More accessible to collaborators and instructors</li>
+                <li>Simpler to debug and modify</li>
+                <li>More professional and maintainable</li>
+            </ul>
+            <p>Get in the habit of commenting as you write code, not after!</p>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../../index.html">Back to Course Home</a></p>
+    </footer>
+</body>
+</html>

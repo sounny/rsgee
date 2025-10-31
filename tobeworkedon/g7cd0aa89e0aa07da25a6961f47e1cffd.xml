@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<topic xmlns="http://www.imsglobal.org/xsd/imsccv1p1/imsdt_v1p1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsglobal.org/xsd/imsccv1p1/imsdt_v1p1  http://www.imsglobal.org/profile/cc/ccv1p1/ccv1p1_imsdt_v1p1.xsd">
-  <title>Lab 13 Assignments 2 and 4 questions</title>
-  <text texttype="text/html">&lt;p&gt;&lt;a href="https://ufl.zoom.us/rec/share/LcOdpIyf36Fxdv5TJZXw72GvM3EIwHoy5e1Vglxxu2kog4hMR40C0YG8QMdx_DAx.G7w6Vi0t78N-h7md?startTime=1739544930000" target="_blank"&gt;https://ufl.zoom.us/rec/share/LcOdpIyf36Fxdv5TJZXw72GvM3EIwHoy5e1Vglxxu2kog4hMR40C0YG8QMdx_DAx.G7w6Vi0t78N-h7md?startTime=1739544930000&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Dr. Sounny and Matthew discussed the process of adding new predictor bands to their data set, including the creation of a new band from analytics and the use of Landsat image as a variable. They encountered technical issues related to passing strings and band names in their system and worked on adding a new band to their image and changing prediction bands from Landsat 1 to Landsat 2. They also discussed the process of adding new dots, the impact of increasing the number of samples extracted from the composite and unsupervised sampling on the results, and the potential frustration with coding in Earth Engine.&lt;/p&gt;</text>
-</topic>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doing Research with Remote Sensing - Remote Sensing for GEE</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <nav class="breadcrumb">
+        <a href="../../index.html">Home</a> &gt; 
+        <a href="../../index.html#schedule">Research Methodology</a> &gt; 
+        <span>Doing Research</span>
+    </nav>
+
+    <main>
+        <h1>Doing Research with Remote Sensing</h1>
+
+        <section>
+            <h2>Introduction</h2>
+            <p>Remote sensing is a powerful tool for investigating geographic phenomena and answering research questions about our planet. Whether you're studying urban development, climate change, ecosystem dynamics, or public health, remote sensing provides the spatial and temporal data needed to conduct rigorous research. This guide will help you develop a structured approach to conducting research with remote sensing in geography.</p>
+        </section>
+
+        <section>
+            <h2>Developing Your Research Question</h2>
+            <p>A strong research question is the foundation of any successful research project. Your research question should be:</p>
+            <ul>
+                <li><strong>Specific:</strong> Clearly define what you want to investigate</li>
+                <li><strong>Measurable:</strong> Can be answered using quantifiable data</li>
+                <li><strong>Relevant:</strong> Addresses a gap in knowledge or has practical applications</li>
+                <li><strong>Feasible:</strong> Can be accomplished with available resources and time</li>
+            </ul>
+
+            <h3>Examples of Good Research Questions</h3>
+            <ul>
+                <li>How has urban heat island intensity changed in coastal cities of Florida over the past 20 years?</li>
+                <li>What is the relationship between vegetation cover and malaria incidence in sub-Saharan Africa?</li>
+                <li>How do different land cover types affect surface runoff in mountainous watersheds?</li>
+                <li>Can machine learning classification of satellite imagery accurately detect illegal deforestation in the Amazon?</li>
+            </ul>
+
+            <h3>Characteristics of Strong Research Questions</h3>
+            <p>Notice that each of these questions:</p>
+            <ul>
+                <li>Defines a specific geographic area</li>
+                <li>Identifies measurable variables (temperature, vegetation cover, land cover types, etc.)</li>
+                <li>Suggests a temporal or spatial relationship to investigate</li>
+                <li>Can be answered using remote sensing data</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Formulating Your Methodological Approach</h2>
+            <p>Once you have a research question, you need to develop a clear methodology. Your approach should address:</p>
+
+            <h3>1. Data Selection</h3>
+            <ul>
+                <li><strong>Which satellite or sensor:</strong> Landsat, Sentinel, MODIS, etc.?</li>
+                <li><strong>Spatial resolution:</strong> What level of detail do you need?</li>
+                <li><strong>Temporal resolution:</strong> How frequently do you need observations?</li>
+                <li><strong>Spectral bands:</strong> Which parts of the electromagnetic spectrum are relevant?</li>
+                <li><strong>Time period:</strong> What dates or range of dates will you analyze?</li>
+            </ul>
+
+            <h3>2. Data Preprocessing</h3>
+            <ul>
+                <li><strong>Cloud masking:</strong> How will you handle cloud cover?</li>
+                <li><strong>Atmospheric correction:</strong> Is it needed for your analysis?</li>
+                <li><strong>Geometric correction:</strong> Are the images properly georeferenced?</li>
+                <li><strong>Compositing:</strong> Will you create temporal composites (median, mean, etc.)?</li>
+                <li><strong>Study area extraction:</strong> How will you define and clip your region of interest?</li>
+            </ul>
+
+            <h3>3. Analysis Methods</h3>
+            <ul>
+                <li><strong>Band arithmetic:</strong> NDVI, NDWI, or other indices?</li>
+                <li><strong>Classification:</strong> Supervised or unsupervised? Which algorithm?</li>
+                <li><strong>Change detection:</strong> Image differencing, ratios, or time series analysis?</li>
+                <li><strong>Spatial analysis:</strong> Zonal statistics, proximity analysis, spatial autocorrelation?</li>
+                <li><strong>Statistical analysis:</strong> Regression, correlation, trend analysis?</li>
+            </ul>
+
+            <h3>Example Methodology Statement</h3>
+            <blockquote>
+                <p>"To investigate urban heat island changes in Miami, Florida, I will use Landsat 8 thermal infrared data (Band 10) from 2014-2024. I will create annual summer composites (June-August median) and extract land surface temperature using the mono-window algorithm. Urban areas will be classified using supervised classification (Random Forest) applied to multispectral bands. I will calculate the difference between urban and rural temperatures for each year and perform linear regression to identify trends."</p>
+            </blockquote>
+        </section>
+
+        <section>
+            <h2>Stating Your Expected Hypotheses</h2>
+            <p>A hypothesis is a testable prediction about the relationship between variables. In remote sensing research, hypotheses often predict spatial or temporal patterns.</p>
+
+            <h3>Components of a Good Hypothesis</h3>
+            <ul>
+                <li><strong>Directional:</strong> States the expected direction of the relationship (increase, decrease, positive correlation, etc.)</li>
+                <li><strong>Based on theory:</strong> Grounded in existing literature or geographic theory</li>
+                <li><strong>Testable:</strong> Can be supported or rejected using your data and methods</li>
+            </ul>
+
+            <h3>Examples of Research Hypotheses</h3>
+            <ul>
+                <li><strong>H1:</strong> Urban areas with higher vegetation cover will exhibit lower surface temperatures compared to areas with less vegetation.</li>
+                <li><strong>H2:</strong> Deforestation rates in protected areas will be significantly lower than in unprotected areas.</li>
+                <li><strong>H3:</strong> Agricultural productivity (measured by NDVI) will show a negative correlation with drought severity indices.</li>
+                <li><strong>H4:</strong> Urban heat island intensity will increase over time as cities expand.</li>
+            </ul>
+
+            <h3>Null Hypothesis</h3>
+            <p>Don't forget to also state your null hypothesis (H0), which assumes no relationship or no difference:</p>
+            <ul>
+                <li><strong>H0:</strong> There is no significant difference in surface temperature between urban areas with high and low vegetation cover.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Incorporating Context and Broader Impacts</h2>
+            <p>Strong research doesn't exist in a vacuum. You should connect your work to:</p>
+
+            <h3>Theoretical Context</h3>
+            <ul>
+                <li>What previous studies have investigated similar questions?</li>
+                <li>What geographic theories or concepts are relevant?</li>
+                <li>What gaps in knowledge does your research address?</li>
+            </ul>
+
+            <h3>Practical Applications</h3>
+            <ul>
+                <li>How could your findings inform policy or management decisions?</li>
+                <li>What stakeholders might benefit from your research?</li>
+                <li>Can your methods be applied to other regions or problems?</li>
+            </ul>
+
+            <h3>Broader Impacts</h3>
+            <ul>
+                <li><strong>Environmental:</strong> How does your research contribute to understanding environmental change?</li>
+                <li><strong>Social:</strong> Are there implications for communities or vulnerable populations?</li>
+                <li><strong>Economic:</strong> Could your findings help optimize resource use or reduce costs?</li>
+                <li><strong>Methodological:</strong> Are you developing new techniques that others can use?</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Tips for Success</h2>
+            <ul>
+                <li><strong>Start simple:</strong> Begin with a manageable question and scale up if time permits</li>
+                <li><strong>Document everything:</strong> Keep detailed notes about your methods, decisions, and code</li>
+                <li><strong>Iterate:</strong> Expect to refine your question and methods as you work</li>
+                <li><strong>Validate your results:</strong> Use ground truth data or compare with published studies when possible</li>
+                <li><strong>Consider limitations:</strong> Every method has constraints—acknowledge them honestly</li>
+                <li><strong>Seek feedback:</strong> Share your approach with peers and instructors early and often</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Research Project Checklist</h2>
+            <p>Use this checklist to ensure your research is well-structured:</p>
+            <ul>
+                <li>☐ Research question is specific, measurable, relevant, and feasible</li>
+                <li>☐ Appropriate satellite/sensor identified with justification</li>
+                <li>☐ Data preprocessing steps clearly defined</li>
+                <li>☐ Analysis methods selected and justified</li>
+                <li>☐ Hypotheses stated (including null hypothesis)</li>
+                <li>☐ Literature review demonstrates knowledge of field</li>
+                <li>☐ Broader impacts and applications discussed</li>
+                <li>☐ Limitations and potential sources of error acknowledged</li>
+                <li>☐ Code is documented and reproducible</li>
+                <li>☐ Results are clearly visualized and interpreted</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Additional Resources</h2>
+            <ul>
+                <li><a href="https://earthengine.google.com/" target="_blank">Google Earth Engine</a> - Platform for conducting your analysis</li>
+                <li><a href="https://developers.google.com/earth-engine/datasets" target="_blank">Earth Engine Data Catalog</a> - Browse available datasets</li>
+                <li><a href="https://scholar.google.com/" target="_blank">Google Scholar</a> - Search for relevant research articles</li>
+                <li><a href="https://www.sciencedirect.com/" target="_blank">ScienceDirect</a> - Access scientific journals (through university library)</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../../index.html">Back to Course Home</a></p>
+    </footer>
+</body>
+</html>

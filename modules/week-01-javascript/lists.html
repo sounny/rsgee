@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Lists - Remote Sensing for GEE</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <nav class="breadcrumb">
+        <a href="../../index.html">Home</a> &gt; 
+        <a href="../../index.html#schedule">Week 1</a> &gt; 
+        <span>Lists</span>
+    </nav>
+
+    <main>
+        <h1>JavaScript Lists</h1>
+
+        <section>
+            <h2>Introduction to Lists</h2>
+            <p>It is helpful to store multiple values in a single variable. JavaScript provides a data structure called a list (also known as an array) that can hold multiple values. We can create a new list using the square brackets <code>[ ]</code> and add multiple values separated by a comma.</p>
+        </section>
+
+        <section>
+            <h2>Creating a List</h2>
+            <p>Try putting this code into your Earth Engine Code Editor console and running it:</p>
+            <pre><code>var cities = ['Gainesville', 'Tampa Bay', 'Orlando', 'Miami'];
+print(cities);</code></pre>
+        </section>
+
+        <section>
+            <h2>Understanding List Output</h2>
+            <p>If you look at the output in the Console, you will see "List" with an expander arrow (▹) next to it. Clicking on the arrow will expand the list and show you its content.</p>
+            
+            <p>You will notice that along with the four items in the list, there is a number next to each value. This is the <strong>index</strong> of each item. It allows you to refer to each item in the list using a numeric value that indicates its position in the list.</p>
+
+            <p><img src="../../images/javascript/lists-output.png" alt="Output from Google Earth Engine showing a list with indices" style="max-width: 600px;"></p>
+        </section>
+
+        <section>
+            <h2>Key Concepts</h2>
+            <ul>
+                <li><strong>List syntax:</strong> Use square brackets <code>[ ]</code> to create a list</li>
+                <li><strong>Comma separation:</strong> Separate items with commas</li>
+                <li><strong>Zero-indexed:</strong> The first item has index 0, the second has index 1, etc.</li>
+                <li><strong>Mixed types:</strong> Lists can contain different data types (strings, numbers, etc.)</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Accessing List Items</h2>
+            <p>You can access individual items in a list using the <code>.get()</code> method in Earth Engine:</p>
+            <pre><code>var cities = ['Gainesville', 'Tampa Bay', 'Orlando', 'Miami'];
+var firstCity = cities.get(0);
+print('First city:', firstCity);
+
+var thirdCity = cities.get(2);
+print('Third city:', thirdCity);</code></pre>
+        </section>
+
+        <section>
+            <h2>Try It Yourself</h2>
+            <p>Create your own list of values and experiment with:</p>
+            <ul>
+                <li>Creating a list with different numbers</li>
+                <li>Making a list with more than 4 items</li>
+                <li>Accessing different items using <code>.get()</code></li>
+                <li>Printing the entire list vs. individual items</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../../index.html">Back to Course Home</a></p>
+    </footer>
+</body>
+</html>

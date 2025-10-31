@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Functions - Remote Sensing for GEE</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <nav class="breadcrumb">
+        <a href="../../index.html">Home</a> &gt; 
+        <a href="../../index.html#schedule">Week 1</a> &gt; 
+        <span>Functions</span>
+    </nav>
+
+    <main>
+        <h1>JavaScript Functions</h1>
+
+        <section>
+            <h2>Introduction to Functions</h2>
+            <p>While using Earth Engine, you will need to define your own functions. Functions take user inputs, use them to perform some computation, and send output back.</p>
+            
+            <p>Functions allow you to group a set of operations and repeat the same operations with different parameters without having to rewrite them every time. Functions are defined using the <code>function</code> keyword.</p>
+        </section>
+
+        <section>
+            <h2>Defining a Function</h2>
+            <p>The code below defines a function called <code>greet</code> that takes an input called <code>name</code> and returns a greeting with "Hello" prefixed to it:</p>
+            <pre><code>var greet = function(name) {
+  return 'Hello ' + name;
+};
+
+print(greet('Albert Gator'));
+print(greet('Alberta Gator'));</code></pre>
+        </section>
+
+        <section>
+            <h2>The Power of Functions</h2>
+            <p>Note that we can call the function with different inputs, and it generates different outputs with the same code. This is the power of functions: you can create blocks of code that act as tools.</p>
+
+            <p>Your output should look like this after running it in Earth Engine:</p>
+            <p><img src="../../images/javascript/functions-output.png" alt="Output from Google Earth Engine showing function results" style="max-width: 600px;"></p>
+        </section>
+
+        <section>
+            <h2>Function Anatomy</h2>
+            <p>Let's break down the components of a function:</p>
+            <pre><code>var functionName = function(parameter1, parameter2) {
+  // Function body - code to execute
+  var result = parameter1 + parameter2;
+  return result;
+};</code></pre>
+
+            <ul>
+                <li><strong>Variable assignment:</strong> <code>var functionName =</code> stores the function in a variable</li>
+                <li><strong>Function keyword:</strong> <code>function</code> declares that this is a function</li>
+                <li><strong>Parameters:</strong> <code>(parameter1, parameter2)</code> are inputs the function receives</li>
+                <li><strong>Function body:</strong> Code between <code>{ }</code> is executed when the function is called</li>
+                <li><strong>Return statement:</strong> <code>return</code> sends a value back to whoever called the function</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Why Use Functions?</h2>
+            <ul>
+                <li><strong>Reusability:</strong> Write once, use many times with different inputs</li>
+                <li><strong>Organization:</strong> Break complex code into manageable pieces</li>
+                <li><strong>Readability:</strong> Give meaningful names to operations</li>
+                <li><strong>Maintainability:</strong> Update functionality in one place</li>
+                <li><strong>Abstraction:</strong> Hide complex operations behind simple interfaces</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Example: Temperature Conversion</h2>
+            <p>Here's a practical example for remote sensing work - converting Celsius to Fahrenheit:</p>
+            <pre><code>var celsiusToFahrenheit = function(celsius) {
+  var fahrenheit = (celsius * 9/5) + 32;
+  return fahrenheit;
+};
+
+// Convert some temperature values
+print('0°C is', celsiusToFahrenheit(0), '°F');
+print('20°C is', celsiusToFahrenheit(20), '°F');
+print('100°C is', celsiusToFahrenheit(100), '°F');</code></pre>
+        </section>
+
+        <section>
+            <h2>Functions in Earth Engine</h2>
+            <p>In Earth Engine, you'll frequently use functions to:</p>
+            <ul>
+                <li><strong>Process images:</strong> Apply calculations or filters to each image in a collection</li>
+                <li><strong>Map over collections:</strong> Apply the same operation to every image</li>
+                <li><strong>Calculate indices:</strong> Compute NDVI, NDWI, etc. for multiple images</li>
+                <li><strong>Cloud masking:</strong> Remove clouds from many images using the same logic</li>
+            </ul>
+
+            <h3>Example: NDVI Function</h3>
+            <pre><code>var calculateNDVI = function(image) {
+  var ndvi = image.normalizedDifference(['B5', 'B4']);
+  return image.addBands(ndvi.rename('NDVI'));
+};
+
+// Apply to an image collection
+var collection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterBounds(geometry)
+  .filterDate('2023-01-01', '2023-12-31')
+  .map(calculateNDVI);</code></pre>
+        </section>
+
+        <section>
+            <h2>Try It Yourself</h2>
+            <p>Practice creating functions:</p>
+            <ul>
+                <li>Write a function that takes two numbers and returns their average</li>
+                <li>Create a function that converts meters to feet</li>
+                <li>Make a function that takes a year and returns whether it's a leap year</li>
+                <li>Build a function that calculates the area of a rectangle given length and width</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../../index.html">Back to Course Home</a></p>
+    </footer>
+</body>
+</html>

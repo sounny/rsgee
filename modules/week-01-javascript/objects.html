@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Objects - Remote Sensing for GEE</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <nav class="breadcrumb">
+        <a href="../../index.html">Home</a> &gt; 
+        <a href="../../index.html#schedule">Week 1</a> &gt; 
+        <span>Objects</span>
+    </nav>
+
+    <main>
+        <h1>JavaScript Objects</h1>
+
+        <section>
+            <h2>Introduction to Objects</h2>
+            <p>Lists allow you to store multiple values in a single container variable. While useful, lists are not ideal for storing structured data. It is helpful to be able to refer to each item with its name rather than its position.</p>
+            
+            <p>Objects in JavaScript allow you to store <strong>key-value pairs</strong>, where each value can be referred to by its key. You can create an object using the curly braces <code>{ }</code>.</p>
+        </section>
+
+        <section>
+            <h2>Creating an Object</h2>
+            <p>The code below creates an object called <code>cityData</code> with some information about Gainesville:</p>
+            <pre><code>var cityData = {
+  'city': 'Gainesville',
+  'coordinates': [-82.3248, 29.6516],
+  'population': 140398
+};
+print(cityData);</code></pre>
+        </section>
+
+        <section>
+            <h2>Important Syntax Notes</h2>
+            
+            <h3>Multi-line Formatting</h3>
+            <p>We can use multiple lines to define the object. The command is considered complete only when we put in the semicolon (<code>;</code>). This helps format the code to make it more readable.</p>
+
+            <h3>Camel Case Naming</h3>
+            <p>Note the choice of the variable name <code>cityData</code>. The variable contains two words. The first word is in lowercase, and the first letter of the second word is capitalized. This type of naming scheme of joining multiple words into a single variable name is called <strong>"camel case"</strong>.</p>
+            
+            <p>While it is not mandatory to name your variables using this scheme, it is considered a good practice. Functions and parameters in the Earth Engine API follow this convention, so your code will be much more readable if you follow it too.</p>
+        </section>
+
+        <section>
+            <h2>Understanding Object Output</h2>
+            <p>Take the code above and run it in Google Earth Engine. The object will be printed in the Console. You can see that each item has a label instead of a numeric index. This is known as the <strong>key</strong> and can be used to retrieve the value of an item.</p>
+
+            <p><img src="../../images/javascript/objects-output.png" alt="Output showing an object with key-value pairs" style="max-width: 600px;"></p>
+        </section>
+
+        <section>
+            <h2>Key Concepts</h2>
+            <ul>
+                <li><strong>Object syntax:</strong> Use curly braces <code>{ }</code> to create an object</li>
+                <li><strong>Key-value pairs:</strong> Each item has a key (name) and a value</li>
+                <li><strong>Quotes around keys:</strong> Keys are typically strings in quotes</li>
+                <li><strong>Colon separator:</strong> Use <code>:</code> to separate keys from values</li>
+                <li><strong>Comma between pairs:</strong> Separate key-value pairs with commas</li>
+                <li><strong>Nested values:</strong> Values can be strings, numbers, lists, or even other objects</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Accessing Object Values</h2>
+            <p>You can access values in an object using the <code>.get()</code> method with the key name:</p>
+            <pre><code>var cityData = {
+  'city': 'Gainesville',
+  'coordinates': [-82.3248, 29.6516],
+  'population': 140398
+};
+
+var cityName = cityData.get('city');
+print('City name:', cityName);
+
+var coords = cityData.get('coordinates');
+print('Coordinates:', coords);</code></pre>
+        </section>
+
+        <section>
+            <h2>Try It Yourself</h2>
+            <p>Create your own object with information about a different location or dataset:</p>
+            <ul>
+                <li>Try adding more key-value pairs</li>
+                <li>Nest a list inside an object</li>
+                <li>Access different values using <code>.get()</code></li>
+                <li>Practice using camel case for variable names</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="../../index.html">Back to Course Home</a></p>
+    </footer>
+</body>
+</html>
