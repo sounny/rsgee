@@ -51,13 +51,13 @@ var distanceKernel = ee.Kernel.euclidean({
 });
 
 var makeChannelmask = function(year) {
-    var watermask = jrcYearly.filter(ee.Filter.eq('year', year))
+    var waterMask = jrcYearly.filter(ee.Filter.eq('year', year))
         .first()
         .gte(2).unmask()
         .focal_max().focal_min()
-        .rename('watermask');
+        .rename('waterMask');
 
-    var barPolys = watermask.not().selfMask()
+    var barPolys = waterMask.not().selfMask()
         .reduceToVectors({
             geometry: aoi,
             scale: 30,
@@ -65,17 +65,17 @@ var makeChannelmask = function(year) {
         })
         .filter(ee.Filter.lte('count', 1E4)); // Get small polys.
 
-    var filled = watermask.paint(barPolys, 1).rename('filled');
+    var filled = waterMask.paint(barPolys, 1).rename('filled');
 
     var costmap = filled.not().cumulativeCost({
-        source: watermask.and(ee.Image().toByte().paint(
+        source: waterMask.and(ee.Image().toByte().paint(
             sword, 1)),
         maxDistance: 5E3,
         geodeticDistance: false
     }).rename('costmap');
 
     var rivermask = costmap.eq(0).rename('rivermask');
-    var channelmask = rivermask.and(watermask).rename('channelmask');
+    var channelmask = rivermask.and(waterMask).rename('channelmask');
 
     var bankMask = channelmask.focal_max(1).neq(channelmask)
         .rename('bankMask');
@@ -91,7 +91,7 @@ var makeChannelmask = function(year) {
         .mask(bankMask).rename('bankLength');
 
     return ee.Image.cat([
-        watermask, channelmask, rivermask, bankMask,
+        waterMask, channelmask, rivermask, bankMask,
         bankAspect, bankLength
     ]).set('year', year)
       .clip(aoi);
@@ -117,7 +117,7 @@ Map.addLayer(year2mask, {
     <p>Next, we create an image to represent the eroded area (Fig. A2.4.4b). We can quickly calculate this by comparing the channel mask in year 2 to the inverse water mask from year 1.</p>
     <pre><code>// Pixels that are now the river channel but were previously land.
 erosion = masks2.select('channelmask')
-    .and(masks1.select('watermask').not())
+    .and(masks1.select('waterMask').not())
     .rename('erosion');
 Map.addLayer(rpj(erosion).selfMask(), {}, 'erosion', false);
 </code></pre>
@@ -197,7 +197,7 @@ var groupReduce = function(dataImg, nodeIds, reducer) {
 };
 </code></pre>
     <pre><code>dataMask = masks1.addBands(masks2).reduce(ee.Reducer.anyNonZero());
-sumBands = ['watermask', 'channelmask', 'bankLength'];
+sumBands = ['waterMask', 'channelmask', 'bankLength'];
 sumImg = erosion.addBands(masks1, sumBands)
     .addBands(masks2, sumBands);
 sumStats = groupReduce(sumImg, nodePixels, ee.Reducer.sum());
