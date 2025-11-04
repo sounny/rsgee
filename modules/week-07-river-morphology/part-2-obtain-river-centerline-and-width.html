@@ -106,13 +106,13 @@ Map.addLayer(rpj(angle), angleVis, 'cross-sectional directions', false);
 var rwcFunction = require(
     'users/eeProject/RivWidthCloudPaper:rwc_watermask.js');
 var rwc = rwcFunction.rwGen_waterMask(4000, 333, 500, aoi);
-watermask = ee.Image(watermask.rename(['waterMask']).setMulti({
+waterMask = ee.Image(waterMask.rename(['waterMask']).setMulti({
     crs: crs,
     scale: 30,
     image_id: 'aoi'
 }));
 
-var widths = rwc(watermask);
+var widths = rwc(waterMask);
 print('example width output', widths.first());
 </code></pre>
     <img src="../../images/river-morphology/Screenshot 2023-10-26 at 11.00.24 AM.png" alt="River width results" loading="lazy">

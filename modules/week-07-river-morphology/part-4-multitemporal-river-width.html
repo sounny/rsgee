@@ -58,15 +58,15 @@ var crs = getUTMProj(lon, lat);
 var scale = ee.Number(30);
 
 var multiwidths = ee.FeatureCollection(jrcYearly.map(function(i) {
-    var watermask = i.gte(2).unmask(0);
-    watermask = ee.Image(watermask.rename(['waterMask'])
+    var waterMask = i.gte(2).unmask(0);
+    waterMask = ee.Image(waterMask.rename(['waterMask'])
         .setMulti({
             crs: crs,
             scale: scale,
             image_id: i.getNumber('year')
         }));
     var rwc = rwcFunction.rwGen_waterMask(2000, 333, 300, polygon);
-    var widths = rwc(watermask)
+    var widths = rwc(waterMask)
         .filter(ee.Filter.eq('endsInWater', 0))
         .filter(ee.Filter.eq('endsOverEdge', 0));
     return ee.Algorithms.If(widths.size(), getNearestCl(widths), null);
