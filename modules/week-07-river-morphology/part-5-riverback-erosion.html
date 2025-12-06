@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -111,7 +111,7 @@ Map.addLayer(year2mask, {
     palette: ['red']
 }, 'year 2', true, 0.5);
 </code></pre>
-    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 11.29.43 AM.png" alt="Channel mask comparison" loading="lazy">
+    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 11.29.43?AM.png" alt="Channel mask comparison" loading="lazy">
     <p><strong>Fig.</strong> A single meander bend of the Madre de Dios River in Bolivia, showing areas of erosion and accretion: (a) channel mask from 2015 in blue and channel mask from 2020 in red at 50% transparency; (b) pixels that represent erosion between 2015 and 2020</p>
     <h2>Erosion Calculation</h2>
     <p>Next, we create an image to represent the eroded area (Fig. A2.4.4b). We can quickly calculate this by comparing the channel mask in year 2 to the inverse water mask from year 1.</p>
@@ -160,7 +160,7 @@ Map.addLayer(rpj(distance), {
 }, 'distance', false);
 Map.addLayer(rpj(concavityBounds), {}, 'bounds', false);
 </code></pre>
-    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 11.30.16 AM.png" alt="Node assignments" loading="lazy">
+    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 11.30.16?AM.png" alt="Node assignments" loading="lazy">
     <h2>Node Assignment and Data Summarization</h2>
     <pre><code>// Reduce the pixels according to the concavity boundaries, and set the value to SWORD node ID.
 swordImg = ee.Image(0).paint(sword, 'node_id').rename('node_id')
@@ -175,7 +175,7 @@ nodePixels = concavityBounds.addBands(swordImg)
     });
 Map.addLayer(rpj(nodePixels).randomVisualizer(), {}, 'node assignments', false);
 </code></pre>
-    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 11.30.59 AM.png" alt="Centerline properties" loading="lazy" width="770" height="965">
+    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 11.30.59?AM.png" alt="Centerline properties" loading="lazy" width="770" height="965">
     <h2>Summarizing the Data</h2>
     <p>The final step is to apply a reducer that uses our <code>nodePixels</code> image from the previous step to group our raster data. We combine the <code>reducer.forEach</code> and <code>reducer.group</code> methods into our own custom function that we can use with different reducers to get our final results. The grouped reducers in our function return a list of dictionaries. We map over the list and create a <code>FeatureCollection</code> before returning from the function.</p>
     <pre><code>// Set up a custom reducing function to summarize the data.

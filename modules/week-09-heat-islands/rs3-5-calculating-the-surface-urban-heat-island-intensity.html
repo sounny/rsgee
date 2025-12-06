@@ -19,7 +19,7 @@
       <p>Since the SUHI is the temperature difference between the urban area and the rural reference, we will calculate summary temperature values for the urban boundary and the different versions of rural reference using the Landsat and MODIS LST.</p>
       <pre><code>// Define function to reduce regions and summarize pixel values to get mean LST for different cases.
 function polygonMean(feature) {
-  // Calculate spatial mean value of LST for each case making sure the pixel values are converted to °C from Kelvin.
+  // Calculate spatial mean value of LST for each case making sure the pixel values are converted to �C from Kelvin.
   var reducedLstUrb = lstFinal.subtract(273.15).updateMask(notWater)
     .reduceRegion({
       reducer: ee.Reducer.mean(),
@@ -40,7 +40,7 @@ function polygonMean(feature) {
       geometry: feature.geometry(),
       scale: 500
     });
-  var reducedLstLandsatUrbPix = landsatComp.updateMask(notWater)
+  var reducedLstLandsatUrbPix = LandsatComp.updateMask(notWater)
     .updateMask(urbanUrban)
     .reduceRegion({
       reducer: ee.Reducer.mean(),
@@ -54,7 +54,7 @@ function polygonMean(feature) {
       geometry: feature.geometry(),
       scale: 500
     });
-  var reducedLstLandsatRurPix = landsatComp.updateMask(notWater)
+  var reducedLstLandsatRurPix = LandsatComp.updateMask(notWater)
     .updateMask(urbanNonUrban)
     .reduceRegion({
       reducer: ee.Reducer.mean(),
@@ -79,7 +79,7 @@ var reduced = regionInt.map(polygonMean);
       <p>Corresponding values are also extracted from the rural reference (including using only rural reference pixels within the urban boundary). For the buffered regions (both using constant width and variable width), we define and call another function.</p>
       <pre><code>// Define a function to reduce region and summarize pixel values to get mean LST for different cases.
 function refMean(feature) {
-  // Calculate spatial mean value of LST for each case making sure the pixel values are converted to °C from Kelvin.
+  // Calculate spatial mean value of LST for each case making sure the pixel values are converted to �C from Kelvin.
   var reducedLstRur = lstFinal.subtract(273.15).updateMask(notWater)
     .reduceRegion({
       reducer: ee.Reducer.mean(),
@@ -112,7 +112,7 @@ print('reducedRuralStd', reducedRuralStd);
       <p>We can print the newly created feature collections to review these values for the different cases. Even though absolute MODIS and Landsat urban LSTs are different (29 for Landsat and 34 for MODIS), the SUHI is similar (3.6 C for MODIS and 4.8 C from Landsat). As one might expect, when only urban pixels are considered within the boundary, the average LST is higher (and lower for rural LST).</p>
       <p>The SUHI variability within the city can then be displayed by subtracting the rural LST from the total LST:</p>
       <pre><code>// Display SUHI variability within the city.
-var suhi = landsatComp
+var suhi = LandsatComp
   .updateMask(urbanUrban)
   .subtract(ee.Number(ee.Feature(reduced.first()).get('Landsat_LST_rur_pix')));
 

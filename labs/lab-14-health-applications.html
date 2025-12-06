@@ -15,7 +15,7 @@
 
         <header class="lab-header">
                         <h1>Lab 14 - Health Applications</h1>
-                        <p><em>In this lab you’ll use satellite data to create simple public health indicators, including land surface temperature exposure and access-to-green-space metrics.</em></p>
+                        <p><em>In this lab you�ll use satellite data to create simple public health indicators, including land surface temperature exposure and access-to-green-space metrics.</em></p>
         </header>
 
         <main class="lab-content">
@@ -63,7 +63,7 @@ var city = ee.Geometry.Rectangle([-122.6, 37.6, -121.7, 37.95]); // SF Bay examp
 Map.centerObject(city, 9);
 
 // 2) Landsat 8/9 L2 collection and LST
-var l2 = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+var l2 = ee.ImageCollection('Landsat/LC08/C02/T1_L2')
     .filterBounds(city)
     .filterDate('2021-06-01', '2021-09-30')
     .filter(ee.Filter.lt('CLOUD_COVER', 20));
@@ -76,7 +76,7 @@ function toKelvin(img) {
 }
 
 var lst = l2.map(toKelvin).median().rename('LST_K').clip(city);
-Map.addLayer(lst.subtract(273.15), {min: 20, max: 45, palette: ['blue','cyan','yellow','red']}, 'LST (°C)');
+Map.addLayer(lst.subtract(273.15), {min: 20, max: 45, palette: ['blue','cyan','yellow','red']}, 'LST (�C)');
 
 // 3) Population grid (WorldPop 2020, persons per pixel)
 var pop = ee.ImageCollection('WorldPop/GP/100m/pop')
@@ -105,7 +105,7 @@ var results = stats.map(function(f){
 });
 
 // Inspect
-print('Population-weighted LST (°C) by admin unit', results.limit(5));
+print('Population-weighted LST (�C) by admin unit', results.limit(5));
 Map.addLayer(admin.style({color: 'white', width: 1}), {}, 'Admin');
 </pre>
                         </section>
@@ -143,9 +143,9 @@ print('Population within 300m of green space (%)', withPct.limit(5));
                         <section id="submission">
                                 <h2>Submission</h2>
                                 <ul>
-                                        <li>Map layers: LST (°C), administrative boundaries, and green buffers</li>
-                                        <li>Table: population-weighted LST (°C) and % population within 300 m of green space per unit</li>
-                                        <li>Short reflection (5–8 sentences): Where are the hotspots? Which neighborhoods have lower green access?</li>
+                                        <li>Map layers: LST (�C), administrative boundaries, and green buffers</li>
+                                        <li>Table: population-weighted LST (�C) and % population within 300 m of green space per unit</li>
+                                        <li>Short reflection (5�8 sentences): Where are the hotspots? Which neighborhoods have lower green access?</li>
                                         <li>Include your Earth Engine script URL and export the summary as CSV</li>
                                 </ul>
                         </section>

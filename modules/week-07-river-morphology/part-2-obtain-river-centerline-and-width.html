@@ -1,4 +1,4 @@
-Ôªø<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -25,7 +25,7 @@
       <li>Using gradient to further isolate the centerline pixel having local minimal gradient values.</li>
       <li>Cleaning the raw centerline by removing spurious centerlines.</li>
     </ol>
-    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 10.49.35‚ÄØAM.png" alt="Steps extracting river centerline" loading="lazy" style="display: block; margin-left: auto; margin-right: auto;">
+    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 10.49.35?AM.png" alt="Steps extracting river centerline" loading="lazy" style="display: block; margin-left: auto; margin-right: auto;">
     <p><em>Figure: Steps extracting river centerline: (a) distance transform of a river mask; (b) gradient of the distance map (a); (c) raw centerline after skeletonization; (d) centerline after pruning.</em></p>
     <p>First, a distance transform is applied to the river mask, resulting in a raster image where the closest distance to the shore replaces the value of each water pixel in the river mask. This step is done by using the <code>CalcDistanceMap</code> function from RWC. From Fig. A, we can see that, in the distance transform, the center of the river has the highest values.</p>
     <pre><code>// Import existing functions from RivWidthCloud.
@@ -61,7 +61,7 @@ Map.addLayer(raw1pxCenterline, {
     <p>Third, the centerline from the previous step will have noise along the shoreline and will have spurious branches resulting from side channels or irregular channel forms that need to be pruned. The pruning function in RWC, <code>CleanCenterline</code>, works by first identifying the end pixels of the centerline (i.e., centerline pixels with only one neighboring pixel) and then erasing pixels along the centerline pixels starting from the end pixels for a distance specified by <code>MAXDISTANCE_BRANCH_REMOVAL</code>. It will stop if the specified distance is reached or the erasing encounters a joint pixel (i.e., pixels having more than two neighboring pixels). After pruning, the final centerline should look like Fig. D.</p>
     <pre><code>// Prune the centerline to remove spurious branches.
 var MAXDISTANCE_BRANCH_REMOVAL = 500;
-// Note: the last argument of the CleanCenterline function enables removal of the pixels so that the resulting centerline will have 1px width in an 8-connected way. Once it is done, it doesn‚Äôt need to be done the second time (thus it equals false)
+// Note: the last argument of the CleanCenterline function enables removal of the pixels so that the resulting centerline will have 1px width in an 8-connected way. Once it is done, it doesnít need to be done the second time (thus it equals false)
 var cl1px = clFunctions
     .CleanCenterline(centerlineRaw, MAXDISTANCE_BRANCH_REMOVAL, true);
 var cl1px = clFunctions
@@ -82,10 +82,10 @@ var angleVis = {
 };
 Map.addLayer(rpj(angle), angleVis, 'cross-sectional directions', false);
 </code></pre>
-    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 10.54.47‚ÄØAM.png" alt="Cross-sectional directions" loading="lazy">
+    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 10.54.47?AM.png" alt="Cross-sectional directions" loading="lazy">
     <h2>Quantify River Widths</h2>
-    <p>To estimate river width, we will be using the RWC function <code>rwGen_waterMask</code>. This function can take any binary water mask image as input to calculate river widths, so long as the band name is ‚ÄòwaterMask‚Äô and contains the following three properties: 1) crs‚ÄîUTM projection code, 2) scale‚Äînative spatial resolution, and 3) image_id‚Äîacting as an identifier for the output widths. This function first processes the input water mask to create all the intermediate images mentioned before (channel mask, river mask, centerline, and angle image). Then, it creates a <code>FeatureCollection</code> of cross-sectional lines, each centered on one centerline pixel (from the centerline raster) along the direction estimated in the ‚ÄúEstimate Cross-Sectional Direction‚Äù section (from the angle raster) and with a length three times longer than the distance from the centerline point to the closest shoreline pixel (obtained from the distance raster). This feature collection is then used in an <code>Image.reduceRegions</code> method as the <code>FeatureCollection</code> input. With a mean reducer, the result denotes the ratio between the actual river width and the length of the line segment (which is known). Thus, the final river width can be estimated by multiplying the ratio with the length of each line segment in the <code>FeatureCollection</code>. However, the scaling factor of 3 is chosen empirically and can over- or underestimate the maximum extent of river width. This is because the width, scaled by 3, is the minimal distance from centerline pixels to the nearest shoreline pixels. When aligning line segments along the directions orthogonal to the river centerline, we might encounter situations when the length of these segments is too short to cover the river's width (underestimation) or too long that they overlap with neighboring river reaches (overestimation). In both cases, the end(s) of the line segment overlaps with a pixel identified as ‚Äúwater‚Äù in the channel mask. Thus, additional steps are taken to flag these measurements.</p>
-    <p>The rwGen_waterMask takes four arguments‚Äîmaximum search distance (unit: meter) to label river pixels, maximum size of islands (unit: pixel) to be filled in to calculate river mask, distance (unit: meter) to be pruned to clean the raw centerline, and the area of interest to carry out the width calculation. The output of the rwc function is a FeatureCollection with each feature having the properties listed in the table below.</p>
+    <p>To estimate river width, we will be using the RWC function <code>rwGen_waterMask</code>. This function can take any binary water mask image as input to calculate river widths, so long as the band name is ëwaterMaskí and contains the following three properties: 1) crsóUTM projection code, 2) scaleónative spatial resolution, and 3) image_idóacting as an identifier for the output widths. This function first processes the input water mask to create all the intermediate images mentioned before (channel mask, river mask, centerline, and angle image). Then, it creates a <code>FeatureCollection</code> of cross-sectional lines, each centered on one centerline pixel (from the centerline raster) along the direction estimated in the ìEstimate Cross-Sectional Directionî section (from the angle raster) and with a length three times longer than the distance from the centerline point to the closest shoreline pixel (obtained from the distance raster). This feature collection is then used in an <code>Image.reduceRegions</code> method as the <code>FeatureCollection</code> input. With a mean reducer, the result denotes the ratio between the actual river width and the length of the line segment (which is known). Thus, the final river width can be estimated by multiplying the ratio with the length of each line segment in the <code>FeatureCollection</code>. However, the scaling factor of 3 is chosen empirically and can over- or underestimate the maximum extent of river width. This is because the width, scaled by 3, is the minimal distance from centerline pixels to the nearest shoreline pixels. When aligning line segments along the directions orthogonal to the river centerline, we might encounter situations when the length of these segments is too short to cover the river's width (underestimation) or too long that they overlap with neighboring river reaches (overestimation). In both cases, the end(s) of the line segment overlaps with a pixel identified as ìwaterî in the channel mask. Thus, additional steps are taken to flag these measurements.</p>
+    <p>The rwGen_waterMask takes four argumentsómaximum search distance (unit: meter) to label river pixels, maximum size of islands (unit: pixel) to be filled in to calculate river mask, distance (unit: meter) to be pruned to clean the raw centerline, and the area of interest to carry out the width calculation. The output of the rwc function is a FeatureCollection with each feature having the properties listed in the table below.</p>
     <table border="1" style="border-collapse: collapse; width: 100%;">
       <thead>
         <tr><th>Property</th><th>Description</th></tr>
@@ -115,7 +115,7 @@ waterMask = ee.Image(waterMask.rename(['waterMask']).setMulti({
 var widths = rwc(waterMask);
 print('example width output', widths.first());
 </code></pre>
-    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 11.00.24‚ÄØAM.png" alt="River width results" loading="lazy">
+    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 11.00.24?AM.png" alt="River width results" loading="lazy">
     <nav class="series-nav">
       <a href="part-1-creating-and-analyzing-a-single-river-mask.html">&#8592; Part 1</a> |
       <a href="part-3-bank-morphology.html">Next: Part 3 &#8594;</a>

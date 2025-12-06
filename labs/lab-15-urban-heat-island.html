@@ -23,7 +23,7 @@
             <section class="lab-preflight">
                 <h2>Before you start</h2>
                 <ul>
-                    <li><strong>Prerequisites:</strong> Finish the urban climate readings and review Labs 13–14 for aggregation workflows.</li>
+                    <li><strong>Prerequisites:</strong> Finish the urban climate readings and review Labs 13�14 for aggregation workflows.</li>
                     <li><strong>Estimated time:</strong> 75 minutes</li>
                     <li><strong>Materials:</strong> Earth Engine access, land surface temperature datasets, and documentation for any ancillary urban layers you will use.</li>
                 </ul>
@@ -43,7 +43,7 @@
                 <ol>
                     <li>Select an AOI and a summer date range with low cloud cover.</li>
                     <li>Prepare an urban mask (e.g., GHSL built-up or NLCD developed classes) and a rural mask (vegetation or low built-up outside urban core).</li>
-                    <li>Compute median LST and SUHI = mean(LST urban) − mean(LST rural).</li>
+                    <li>Compute median LST and SUHI = mean(LST urban) - mean(LST rural).</li>
                     <li>Summarize SUHI by admin units (tracts/wards) and map the results.</li>
                 </ol>
             </section>
@@ -54,7 +54,7 @@
 var aoi = ee.Geometry.Rectangle([-77.25, 38.70, -76.80, 39.00]); // DC metro example
 Map.centerObject(aoi, 10);
 
-var imgs = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+var imgs = ee.ImageCollection('Landsat/LC08/C02/T1_L2')
   .filterBounds(aoi)
   .filterDate('2021-06-01', '2021-09-30')
   .filter(ee.Filter.lt('CLOUD_COVER', 20));
@@ -67,7 +67,7 @@ function toKelvin(img){
 
 var lst = imgs.map(toKelvin).median().clip(aoi);
 var lstC = lst.subtract(273.15).rename('LST_C');
-Map.addLayer(lstC, {min: 20, max: 45, palette: ['blue','cyan','yellow','red']}, 'LST (°C)');
+Map.addLayer(lstC, {min: 20, max: 45, palette: ['blue','cyan','yellow','red']}, 'LST (�C)');
 
 // 2) Urban/Rural masks
 // GHSL built-up: 0-100 (percent built-up). Threshold > 20% as urban example
@@ -83,7 +83,7 @@ var reducers = ee.Reducer.mean().repeat(2);
 var stacked = ee.Image.cat(lstC.updateMask(urban).rename('LST_urban'), lstC.updateMask(rural).rename('LST_rural'));
 var stats = stacked.reduceRegion({reducer: reducers, geometry: aoi, scale: 100, maxPixels: 1e9});
 var suhi = ee.Number(stats.get('LST_urban_mean')).subtract(ee.Number(stats.get('LST_rural_mean')));
-print('Citywide SUHI (°C) = urban_mean - rural_mean', suhi);
+print('Citywide SUHI (�C) = urban_mean - rural_mean', suhi);
 
 // 4) SUHI by admin units (e.g., Census tracts)
 var tracts = ee.FeatureCollection('TIGER/2018/Tracts').filterBounds(aoi);
@@ -105,8 +105,8 @@ Map.addLayer(tracts.style({color: 'black', width: 1, fillColor: '00000000'}), {}
             <section id="deliverables">
                 <h2>Deliverables</h2>
                 <ul>
-                    <li>Map: LST (°C) with urban/rural overlays and SUHI choropleth</li>
-                    <li>Table: SUHI (°C) per admin unit with top/bottom 5 tracts</li>
+                    <li>Map: LST (�C) with urban/rural overlays and SUHI choropleth</li>
+                    <li>Table: SUHI (�C) per admin unit with top/bottom 5 tracts</li>
                     <li>Short write-up: Method choices (thresholds, date window) and equity insights</li>
                     <li>EE script URL and CSV export of tract-level SUHI</li>
                 </ul>

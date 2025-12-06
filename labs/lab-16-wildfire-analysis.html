@@ -40,7 +40,7 @@
 
             <section id="method">
                 <h2>Method overview</h2>
-                <p>NBR = (NIR − SWIR2) / (NIR + SWIR2). Burn severity is estimated via dNBR = NBR<sub>pre</sub> − NBR<sub>post</sub>. Positive values generally indicate greater burn severity.</p>
+                <p>NBR = (NIR - SWIR2) / (NIR + SWIR2). Burn severity is estimated via dNBR = NBR<sub>pre</sub> - NBR<sub>post</sub>. Positive values generally indicate greater burn severity.</p>
             </section>
 
             <section id="starter-code">
@@ -71,7 +71,7 @@ function prep(img){
     return nbr.copyProperties(img, img.propertyNames());
 }
 
-var L = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterBounds(aoi);
+var L = ee.ImageCollection('Landsat/LC08/C02/T1_L2').filterBounds(aoi);
 var pre  = L.filterDate(preStart, preEnd).map(prep).median().clip(aoi);
 var post = L.filterDate(postStart, postEnd).map(prep).median().clip(aoi);
 

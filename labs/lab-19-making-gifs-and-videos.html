@@ -82,7 +82,7 @@
 <pre>// Define parameters for getVideoThumbURL and getFilmstripThumbURL methods<br>var outputParams = {<br>&nbsp; 'region': regionOfInterest,<br>&nbsp; 'dimensions': 600,<br>&nbsp; 'crs': 'EPSG:3857',<br>&nbsp; 'framesPerSecond': 10<br>};<br><br>// Create an animated image series<br>var animationUrl = visualized.getVideoThumbURL(outputParams);<br>print("Animation URL:", animationUrl);<br><br>// Create a filmstrip<br>var filmstripUrl = visualized.getFilmstripThumbURL(outputParams);<br>print("Filmstrip URL:", filmstripUrl);<br><br>// Render the animation and the filmstrip directly in the console<br>print("Animation:", ui.Thumbnail(visualized, outputParams));<br>print("Filmstrip:", ui.Thumbnail(visualized, outputParams));</pre>
 </li>
 </ul>
-<p>Congrats, you made a gif.&nbsp; It should look like this:&nbsp;</p>
+<p>Congrats, you made a gif.&nbsp; It should look like this:</p>
 <p><img src="../images/canvas/Uploaded%20Media/7df7883d1ba9d48c837bce6ee94ce6b8-a348b31bea033421668d9a5b799cf054_getPixels.gif" alt="gif output for Africa "   loading="lazy"></p>
 <h3>7. Challenge</h3>
 <ul>

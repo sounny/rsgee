@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -39,7 +39,7 @@
 var geometry = ee.Geometry.Point([-82.3248, 29.6516]);
 
 // Load Landsat 8 imagery
-var image = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+var image = ee.ImageCollection('Landsat/LC08/C02/T1_L2')
   .filterBounds(geometry)  // Filter by location
   .filterDate('2023-01-01', '2023-12-31')  // Filter by date
   .first();  // Get the first image
@@ -110,7 +110,7 @@ var endDate = '2023-12-31';
 // ========================================
 // 2. LOAD AND FILTER DATA
 // ========================================
-var collection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+var collection = ee.ImageCollection('Landsat/LC08/C02/T1_L2')
   .filterBounds(geometry)
   .filterDate(startDate, endDate);
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -102,7 +102,7 @@ print('100°C is', celsiusToFahrenheit(100), '°F');</code></pre>
 };
 
 // Apply to an image collection
-var collection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+var collection = ee.ImageCollection('Landsat/LC08/C02/T1_L2')
   .filterBounds(geometry)
   .filterDate('2023-01-01', '2023-12-31')
   .map(calculateNDVI);</code></pre>

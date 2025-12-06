@@ -16,7 +16,7 @@
   </header>
   <main>
     <section>
-      <p>Working with MODIS LST is relatively simple because the NASA team already processes the data. You can also derive LST from Landsat, which has a much finer native resolution (between ~60 m and ~120 m depending on the satellite) than the ~1 km MODIS pixels. However, you need to derive LST yourself from the measurements in the thermal bands, which usually involves some surface emissivity estimate (Li et al. 2013). The surface emissivity (ε) of a material is the effectiveness with which it can emit thermal radiation compared to a black body at the same temperature and can range from 0 (for a perfect reflector) to 1 (for a perfect absorber and emitter). Since the thermal radiation captured by satellites is a function of both LST and ε, you need to accurately prescribe or estimate ε to get to the correct LST. Let’s consider one such simple method using Landsat 8 data.</p>
+      <p>Working with MODIS LST is relatively simple because the NASA team already processes the data. You can also derive LST from Landsat, which has a much finer native resolution (between ~60 m and ~120 m depending on the satellite) than the ~1 km MODIS pixels. However, you need to derive LST yourself from the measurements in the thermal bands, which usually involves some surface emissivity estimate (Li et al. 2013). The surface emissivity (e) of a material is the effectiveness with which it can emit thermal radiation compared to a black body at the same temperature and can range from 0 (for a perfect reflector) to 1 (for a perfect absorber and emitter). Since the thermal radiation captured by satellites is a function of both LST and e, you need to accurately prescribe or estimate e to get to the correct LST. Let�s consider one such simple method using Landsat 8 data.</p>
       <p>We will start by loading in the Landsat data, cloud screening, and filtering to a time and region of interest. Continuing in the same script from part 1, add the following code:</p>
       <pre><code>// Function to filter out cloudy pixels.
 function cloudMask(cloudyScene) {
@@ -29,7 +29,7 @@ function cloudMask(cloudyScene) {
 }
 
 // Load the collection, apply cloud mask, and filter to date and region of interest.
-var col = ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA')
+var col = ee.ImageCollection('Landsat/LC08/C02/T1_TOA')
   .filterBounds(regionInt)
   .filterDate('2014-01-01', '2019-01-01')
   .filter(sumFilter)
@@ -58,7 +58,7 @@ Map.addLayer(thermal, {
       </figure>
       <p>Brightness temperature is the equivalent of the infrared radiation escaping the top of the atmosphere, assuming the Earth to be a black body. It is not the same as the LST, which requires accounting for atmospheric absorption and re-emission, as well as the emissivity of the land surface. One way to derive pixel-level emissivity is as a function of the vegetation fraction of the pixel (Malakar et al. 2018). We start by calculating the Normalized Difference Vegetation Index (NDVI) from the Landsat surface reflectance data.</p>
       <pre><code>// Calculate NDVI from Landsat surface reflectance.
-var ndvi = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+var ndvi = ee.ImageCollection('Landsat/LC08/C02/T1_L2')
   .filterBounds(regionInt)
   .filterDate('2014-01-01', '2019-01-01')
   .filter(sumFilter)
@@ -141,7 +141,7 @@ Map.addLayer(lstLandsat, {
     </section>
     <nav class="series-nav">
       <a href="rs3-1-deriving-land-surface-temperature-from-modis.html">&laquo; Previous: Deriving Land Surface Temperature from MODIS</a> |
-      <a href="rs3-3-deriving-land-surface-temperature-using-the-earth-engine-landsat-lst-toolbox.html">Next: Deriving Land Surface Temperature Using the Earth Engine Landsat LST Toolbox &raquo;</a>
+      <a href="rs3-3-deriving-land-surface-temperature-using-the-earth-engine-Landsat-lst-toolbox.html">Next: Deriving Land Surface Temperature Using the Earth Engine Landsat LST Toolbox &raquo;</a>
     </nav>
   </main>
 </body>

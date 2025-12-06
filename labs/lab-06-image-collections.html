@@ -54,7 +54,7 @@
                 </p>
 
                 <figure>
-                    <img src="../images/diagrams/landsat8_channels.png" alt="Landsat 8 spectral bands">
+                    <img src="../images/diagrams/Landsat8_channels.png" alt="Landsat 8 spectral bands">
                     <figcaption>Electromagnetic Spectrum and the Windows in the Atmosphere with the Bands for Landsat 8</figcaption>
                 </figure>
 
@@ -79,18 +79,18 @@
 /////
 
 // Import the Landsat 8 Raw Collection.
-var landsat8 = ee.ImageCollection('LANDSAT/LC08/C02/T1');
+var Landsat8 = ee.ImageCollection('Landsat/LC08/C02/T1');
 
 // Print the size of the Landsat 8 dataset.
-print('The size of the Landsat 8 image collection is:', landsat8.size());
+print('The size of the Landsat 8 image collection is:', Landsat8.size());
 
 // Try to print the image collection.
 // WARNING! Running the print code immediately below produces an error because 
 // the Console cannot print more than 5000 elements.
-print(landsat8);
+print(Landsat8);
 
 // Add the Landsat 8 dataset to the map as a mosaic.
-Map.addLayer(landsat8,
+Map.addLayer(Landsat8,
     {
         bands: ['B4', 'B3', 'B2'],
         min: 5000,
@@ -153,9 +153,9 @@ Map.addLayer(landsat8,
 /////
 
 // Filter the collection by date.
-var landsatWinter = landsat8.filterDate('2020-12-01', '2021-03-01');
+var LandsatWinter = Landsat8.filterDate('2020-12-01', '2021-03-01');
 
-Map.addLayer(landsatWinter,
+Map.addLayer(LandsatWinter,
     {
         bands: ['B4', 'B3', 'B2'],
         min: 5000,
@@ -163,7 +163,7 @@ Map.addLayer(landsatWinter,
     },
     'Winter Landsat 8');
 
-print('The size of the Winter Landsat 8 image collection is:', landsatWinter.size());</code></pre>
+print('The size of the Winter Landsat 8 image collection is:', LandsatWinter.size());</code></pre>
                         <p>
                             The result will load much faster because we filtered by date. Notice that before we had over a 
                             million images; after filtering, we have thousands.
@@ -182,7 +182,7 @@ print('The size of the Winter Landsat 8 image collection is:', landsatWinter.siz
                     <li>
                         <h3>Filter by Location</h3>
                         <p>
-                            The filtering tool <code>filterBounds</code> is based on a location—for example, a point, 
+                            The filtering tool <code>filterBounds</code> is based on a location�for example, a point, 
                             polygon, or other geometry. Copy and paste:
                         </p>
                         <pre><code>/////
@@ -193,8 +193,8 @@ print('The size of the Winter Landsat 8 image collection is:', landsatWinter.siz
 var pointFL = ee.Geometry.Point([-82.32, 29.65]);
 
 // Filter the collection by location using the point.
-var landsatFL = landsatWinter.filterBounds(pointFL);
-Map.addLayer(landsatFL,
+var LandsatFL = LandsatWinter.filterBounds(pointFL);
+Map.addLayer(LandsatFL,
     {
         bands: ['B4', 'B3', 'B2'],
         min: 5000,
@@ -205,10 +205,10 @@ Map.addLayer(landsatFL,
 // Add the point to the map to see where it is.
 Map.addLayer(pointFL, {}, 'Point FL');
 
-print('The size of the Gainesville Winter Landsat 8 image collection is: ', landsatFL.size());</code></pre>
+print('The size of the Gainesville Winter Landsat 8 image collection is: ', LandsatFL.size());</code></pre>
                         <p>
                             Note that we add the pointFL to the map with an empty dictionary <code>{}</code> for the visParams 
-                            argument—we are not specifying visualization parameters, using defaults instead.
+                            argument�we are not specifying visualization parameters, using defaults instead.
                         </p>
                         <p>Run the code. Now only images that intersect our point have been selected. Note we only have 12 images.</p>
                         <figure>
@@ -229,7 +229,7 @@ print('The size of the Gainesville Winter Landsat 8 image collection is: ', land
                             <figcaption>Filtered to a single image</figcaption>
                         </figure>
                         <p>
-                            Notice the image is very cloudy. Normally this is a problem for analysis—we prefer images without 
+                            Notice the image is very cloudy. Normally this is a problem for analysis�we prefer images without 
                             clouds. Each image in Landsat's collection has a cloud cover rating we can use.
                         </p>
                     </li>
@@ -238,14 +238,14 @@ print('The size of the Gainesville Winter Landsat 8 image collection is: ', land
                         <h3>Sort by Cloud Cover</h3>
                         <p>The basic approach is to sort the ImageCollection by cloud cover, then add the first image:</p>
                         <pre><code>// Sort the image collection by cloud cover
-var landsatSort = landsatFL.sort('CLOUD_COVER');
+var LandsatSort = LandsatFL.sort('CLOUD_COVER');
 
 // Select the first image in the sorted collection.
-var landsatFirstSort = landsatSort.first();
+var LandsatFirstSort = LandsatSort.first();
 
 // Display the first image in the sorted collection.
-Map.centerObject(landsatFirstSort, 7);
-Map.addLayer(landsatFirstSort,
+Map.centerObject(LandsatFirstSort, 7);
+Map.addLayer(LandsatFirstSort,
     {
         bands: ['B4', 'B3', 'B2'],
         min: 5000,
@@ -287,7 +287,7 @@ Map.addLayer(landsatFirstSort,
 
             <section id="submission">
                 <div class="submission-box">
-                    <h3>📧 Lab Submission</h3>
+                    <h3>?? Lab Submission</h3>
                     <p>Submit lab via email.</p>
                     <p><strong>Subject:</strong> <code>Lab 6 - Image Collections - [Your Name]</code></p>
                     <p><strong>Include:</strong></p>
@@ -301,8 +301,8 @@ Map.addLayer(landsatFirstSort,
         </main>
 
         <footer>
-            <p><a href="lab-05-challenge-refreshers.html">← Previous Lab</a> | <a href="lab-07-challenge-finding-dataset.html">Next Lab →</a></p>
-            <p><a href="../index.html">←Back to Course Home</a></p>
+            <p><a href="lab-05-challenge-refreshers.html">? Previous Lab</a> | <a href="lab-07-challenge-finding-dataset.html">Next Lab ?</a></p>
+            <p><a href="../index.html">?Back to Course Home</a></p>
         </footer>
     </div>
 </body>

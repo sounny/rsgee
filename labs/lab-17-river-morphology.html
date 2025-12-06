@@ -40,7 +40,7 @@
 
                         <section id="overview">
                                 <h2>Approach</h2>
-                                <p>We’ll compute <strong>MNDWI</strong> = (Green − SWIR1) / (Green + SWIR1) on cloud-free imagery. A threshold (e.g., &gt; 0.2) will produce a binary water mask. Then we’ll create perpendicular transects to a centerline and measure the span of water crossings.</p>
+                                <p>We�ll compute <strong>MNDWI</strong> = (Green - SWIR1) / (Green + SWIR1) on cloud-free imagery. A threshold (e.g., &gt; 0.2) will produce a binary water mask. Then we�ll create perpendicular transects to a centerline and measure the span of water crossings.</p>
                         </section>
 
                         <section id="starter-code">
@@ -52,7 +52,7 @@ var aoi = ee.Geometry.Rectangle([-91.45, 30.35, -91.05, 30.60]); // Lower Missis
 Map.centerObject(aoi, 11);
 
 // Landsat 8 SR for MNDWI
-var L = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+var L = ee.ImageCollection('Landsat/LC08/C02/T1_L2')
     .filterBounds(aoi)
     .filterDate('2021-07-01','2021-09-30')
     .filter(ee.Filter.lt('CLOUD_COVER', 20));
@@ -177,7 +177,7 @@ Export.table.toDrive({
                                 <ul>
                                         <li>Map: MNDWI, water mask, centerline, and transects</li>
                                         <li>Table: approximate width (m) along transects (export CSV)</li>
-                                        <li>Short note: Limitations of this approach and how you’d improve it (e.g., RivWidthCloud)</li>
+                                        <li>Short note: Limitations of this approach and how you�d improve it (e.g., RivWidthCloud)</li>
                                 </ul>
                         </section>
         </main>
