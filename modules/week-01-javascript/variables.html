@@ -1,11 +1,13 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Variables | Remote Sensing Course</title>
     <link rel="stylesheet" href="../../css/style.css">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -17,15 +19,45 @@
         </header>
 
         <main class="lab-content">
-<p>In a programming language, variables are used to store data values. In JavaScript, a variable is defined using the <em><strong>var</strong></em> keyword followed by the name of the variable. The code below assigns the text �Gainesville� to the variable named city.</p>
-<pre><em>var city = 'Gainesville';</em></pre>
-<p><em>Note that the text string in the code should be surrounded by quotes.</em> You are free to use either ' (single quotes) or " (double quotes), and they must match at the beginning and end of each string. In your programs, it is advisable to be consistent�use either single quotes or double quotes throughout a given script (the code in this book generally uses single quotes for code). Each statement of your script should typically end with a semicolon, although Earth Engine�s code editor does not require it.</p>
-<p>If you print the variable city, you will get the value stored in the variable (Gainesville) printed in the Console.</p>
-<pre>print(city);</pre>
-<p>When you assign a text value, the variable is automatically assigned the type string. You can also assign numbers to variables and create variables of type number. The following code creates a new variable called population and assigns a number as its value.</p>
-<pre>var population = <span>140,398</span>;<br>print(population);</pre>
-<p>Read more about variables here: <a href="https://www.w3schools.com/js/js_variables.asp" target="_blank">https://www.w3schools.com/js/js_variables.asp</a></p>
-<p></p>
+            <p>In a programming language, variables are used to store data values. In JavaScript, a variable is defined
+                using the <em><strong>var</strong></em> keyword followed by the name of the variable. The code below
+                assigns the text �Gainesville� to the variable named city.</p>
+            <pre><em>var city = 'Gainesville';</em></pre>
+            <p><em>Note that the text string in the code should be surrounded by quotes.</em> You are free to use either
+                ' (single quotes) or " (double quotes), and they must match at the beginning and end of each string. In
+                your programs, it is advisable to be consistent�use either single quotes or double quotes throughout a
+                given script (the code in this book generally uses single quotes for code). Each statement of your
+                script should typically end with a semicolon, although Earth Engine�s code editor does not require it.
+            </p>
+            <p>If you print the variable city, you will get the value stored in the variable (Gainesville) printed in
+                the Console.</p>
+            <pre>print(city);</pre>
+            <p>When you assign a text value, the variable is automatically assigned the type string. You can also assign
+                numbers to variables and create variables of type number. The following code creates a new variable
+                called population and assigns a number as its value.</p>
+            <pre>var population = <span>140,398</span>;<br>print(population);</pre>
+            <p>Read more about variables here: <a href="https://www.w3schools.com/js/js_variables.asp"
+                    target="_blank">https://www.w3schools.com/js/js_variables.asp</a></p>
+
+            <h2>Key Concepts</h2>
+            <div style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
+                <ul style="margin: 0;">
+                    <li>Use <code>var</code> to declare variables</li>
+                    <li>Variable names should be descriptive (e.g., <code>cityName</code> not <code>x</code>)</li>
+                    <li>Text values create <strong>string</strong> variables</li>
+                    <li>Numeric values create <strong>number</strong> variables</li>
+                    <li>Use <code>print()</code> to display variable values in the Console</li>
+                </ul>
+            </div>
+
+            <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+                <strong>⚠️ Common Mistake:</strong>
+                <p>In Earth Engine, regular JavaScript variables (like <code>var x = 5</code>) are <em>client-side</em>.
+                    To use values in Earth Engine computations, you often need to wrap them with <code>ee.</code>
+                    constructors (like <code>ee.Number(5)</code>). See the <a href="client-vs-server.html">Client vs
+                        Server</a> module.</p>
+            </div>
+            <p></p>
         </main>
 
         <footer>
@@ -34,4 +66,5 @@
         </footer>
     </div>
 </body>
+
 </html>

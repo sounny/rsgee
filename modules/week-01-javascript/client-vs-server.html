@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client vs Server Objects | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 1
+        </nav>
+
+        <header class="lab-header">
+            <h1>Client vs Server Objects</h1>
+        </header>
+
+        <main class="lab-content">
+            <section>
+                <h2>Understanding the Two Worlds</h2>
+                <p>When you write code in the Earth Engine Code Editor, you're actually working with <strong>two
+                        different environments</strong>:</p>
+                <ul>
+                    <li><strong>Client-side (Browser)</strong>: Your web browser running JavaScript</li>
+                    <li><strong>Server-side (Google Cloud)</strong>: Google's powerful computers that do the heavy
+                        lifting</li>
+                </ul>
+                <p>This distinction is fundamental to understanding how Earth Engine works and avoiding common errors.
+                </p>
+            </section>
+
+            <section>
+                <h2>Client-Side Objects</h2>
+                <p>Client-side objects are regular JavaScript objects that exist in your browser. They include:</p>
+                <ul>
+                    <li>Regular numbers: <code>var x = 5;</code></li>
+                    <li>Regular strings: <code>var name = 'Landsat';</code></li>
+                    <li>Regular arrays: <code>var list = [1, 2, 3];</code></li>
+                    <li>JavaScript Date objects: <code>var today = new Date();</code></li>
+                </ul>
+                <p>These objects are processed by your browser and cannot be used directly in Earth Engine computations.
+                </p>
+            </section>
+
+            <section>
+                <h2>Server-Side Objects (ee.Objects)</h2>
+                <p>Server-side objects are Earth Engine objects that represent data and computations on Google's
+                    servers. They always start with <code>ee.</code>:</p>
+                <ul>
+                    <li>Earth Engine numbers: <code>var x = ee.Number(5);</code></li>
+                    <li>Earth Engine strings: <code>var name = ee.String('Landsat');</code></li>
+                    <li>Earth Engine lists: <code>var list = ee.List([1, 2, 3]);</code></li>
+                    <li>Earth Engine dates: <code>var today = ee.Date(Date.now());</code></li>
+                </ul>
+                <p>These objects are processed on Google's servers, which have access to petabytes of satellite imagery
+                    and massive computing power.</p>
+            </section>
+
+            <section>
+                <h2>The Key Rule</h2>
+                <div class="info-box"
+                    style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+                    <strong>⚠️ Important:</strong> Do NOT mix client-side and server-side objects.
+                    Use <code>ee.</code> functions with <code>ee.</code> objects.
+                </div>
+
+                <h3>❌ This Will Break:</h3>
+                <pre><code>// Mixing client and server - DON'T DO THIS
+var serverNumber = ee.Number(5);
+var result = serverNumber + 10;  // ERROR! Can't add client number to server number
+print(result);</code></pre>
+
+                <h3>✅ This Works:</h3>
+                <pre><code>// Using server methods correctly
+var serverNumber = ee.Number(5);
+var result = serverNumber.add(10);  // Using ee.Number.add() method
+print(result);  // Prints: 15</code></pre>
+            </section>
+
+            <section>
+                <h2>Why Does This Matter?</h2>
+                <p>Understanding client vs server is essential because:</p>
+                <ol>
+                    <li><strong>Debugging</strong>: Many errors come from mixing client/server objects</li>
+                    <li><strong>Performance</strong>: Server-side operations are parallelized across Google's
+                        infrastructure</li>
+                    <li><strong>Scale</strong>: You can process global datasets that would never fit in your browser's
+                        memory</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Common Mistakes to Avoid</h2>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Mistake</th>
+                        <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Solution</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>serverNum + clientNum</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>serverNum.add(clientNum)</code></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Using JavaScript <code>for</code> loops with
+                            collections</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Use <code>.map()</code> instead</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Using <code>getInfo()</code> (blocks browser)
+                        </td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Use <code>evaluate()</code> for async
+                            operations</td>
+                    </tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>Key Takeaways</h2>
+                <div class="info-box"
+                    style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
+                    <ul style="margin: 0;">
+                        <li>Objects starting with <code>ee.</code> live on Google's servers</li>
+                        <li>Use <code>ee.</code> methods (like <code>.add()</code>, <code>.subtract()</code>) instead of
+                            JavaScript operators</li>
+                        <li>The <code>print()</code> function sends objects to the server and retrieves results
+                            asynchronously</li>
+                        <li>When in doubt, wrap your data with an <code>ee.</code> constructor</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">←Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+
+</html>

@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <nav class="breadcrumb">
-            <a href="../../index.html">Home</a> &gt; <a href="../index.html#schedule">Schedule</a> &gt; Week 2
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 2
         </nav>
 
         <header class="lab-header">
@@ -33,8 +33,8 @@
             </ul>
             <p><span>Through the class, you have already been introduced to imagery, one of the core building blocks of
                     remotely sensed imagery in Earth Engine. In this module, we will expand on this concept of images by
-                    introducing <span></span><code
-                        dir="ltr">ImageCollection</code><span></span></span><span>. Image collections in Earth
+                    introducing <span></span><code dir="ltr">ImageCollection</code><span></span></span><span>. Image
+                    collections in Earth
                     Engine organize many different images into one larger data storage structure. Image collections
                     include information about the location, date collected, and other properties of each image, allowing
                     you to sift through the <span></span><code
@@ -50,10 +50,37 @@
                     dir="ltr">ImageCollection</code><span>&nbsp;constructor. You can find</span><code
                     dir="ltr">ImageCollection</code><span>&nbsp;IDs in the</span><a
                     href="https://developers.google.com/earth-engine/datasets">data catalog</a><span>.</span></p>
+
+            <h2>Key Concepts</h2>
+            <div style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
+                <ul style="margin: 0;">
+                    <li><strong>ImageCollection</strong>: A stack of images organized by time and location</li>
+                    <li><strong>filterDate()</strong>: Select images within a time range</li>
+                    <li><strong>filterBounds()</strong>: Select images covering a location</li>
+                    <li><strong>sort()</strong>: Order images by a property (e.g., cloud cover)</li>
+                    <li><strong>first()</strong>: Get the first image from the collection</li>
+                    <li><strong>median()</strong> / <strong>mean()</strong>: Create composite images</li>
+                </ul>
+            </div>
+
+            <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+                <strong>⚠️ Common Mistakes:</strong>
+                <ul style="margin: 10px 0 0 0;">
+                    <li><strong>Printing large collections</strong>: Filter first, then print</li>
+                    <li><strong>Forgetting to filter</strong>: Always filter by date and location before processing</li>
+                    <li><strong>Wrong collection ID</strong>: Check the Data Catalog for exact IDs</li>
+                </ul>
+            </div>
+
+            <h2>Related Readings</h2>
+            <ul>
+                <li><a href="gee-data-catalogs.html">Google Earth Engine Data Catalogs</a></li>
+                <li><a href="understanding-scale.html">Understanding Scale</a></li>
+            </ul>
         </main>
 
         <footer>
-            <p><a href="../../index.html">��Back to Course Home</a></p>
+            <p><a href="../../index.html">←Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>

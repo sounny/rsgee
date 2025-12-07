@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exporting Data | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 4
+        </nav>
+
+        <header class="lab-header">
+            <h1>Exporting Data from Earth Engine</h1>
+        </header>
+
+        <main class="lab-content">
+            <section>
+                <h2>Why Export?</h2>
+                <p>Earth Engine is powerful for analysis, but sometimes you need to:</p>
+                <ul>
+                    <li>Download results for use in other software (ArcGIS, QGIS)</li>
+                    <li>Save processed images for offline viewing</li>
+                    <li>Archive analysis outputs</li>
+                    <li>Share data with colleagues who don't use Earth Engine</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Export Destinations</h2>
+                <p>Earth Engine can export to three destinations:</p>
+                <ul>
+                    <li><strong>Google Drive</strong>: Most common, easy to download</li>
+                    <li><strong>Google Cloud Storage</strong>: For large files and automation</li>
+                    <li><strong>Earth Engine Asset</strong>: Keep data in Earth Engine for future use</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Exporting Images</h2>
+                <pre><code>// Export an image to Google Drive
+Export.image.toDrive({
+  image: myImage,
+  description: 'my_classification_2024',
+  folder: 'EarthEngine',        // Folder in your Drive
+  region: roi,                   // Geometry defining export area
+  scale: 30,                     // Resolution in meters
+  maxPixels: 1e13,              // Maximum allowed pixels
+  fileFormat: 'GeoTIFF'         // or 'TFRecord'
+});</code></pre>
+
+                <h3>Required Parameters</h3>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="padding: 10px; border: 1px solid #ddd;">Parameter</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Description</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>image</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">The image to export</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>description</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Name for the task and output file</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>region</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Geometry defining the export area</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><code>scale</code></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Output resolution in meters</td>
+                    </tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>Exporting Tables (FeatureCollections)</h2>
+                <pre><code>// Export a FeatureCollection to Drive as a Shapefile
+Export.table.toDrive({
+  collection: myFeatureCollection,
+  description: 'training_points',
+  folder: 'EarthEngine',
+  fileFormat: 'SHP'  // or 'CSV', 'GeoJSON', 'KML'
+});</code></pre>
+
+                <p>Supported table formats:</p>
+                <ul>
+                    <li><strong>SHP</strong>: Shapefile (for ArcGIS, QGIS)</li>
+                    <li><strong>CSV</strong>: Comma-separated values (no geometry)</li>
+                    <li><strong>GeoJSON</strong>: Web-friendly format</li>
+                    <li><strong>KML</strong>: For Google Earth</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Exporting to Assets</h2>
+                <p>Keep processed data in Earth Engine for future scripts:</p>
+                <pre><code>// Export to your Earth Engine Assets
+Export.image.toAsset({
+  image: processedImage,
+  description: 'processed_composite_2024',
+  assetId: 'users/yourusername/processed_composite_2024',
+  region: roi,
+  scale: 30,
+  maxPixels: 1e13
+});</code></pre>
+            </section>
+
+            <section>
+                <h2>The Tasks Panel</h2>
+                <div class="info-box"
+                    style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+                    <strong>⚠️ Important:</strong> Running an export script does NOT start the export!
+                    You must click "Run" in the Tasks panel to actually start the export.
+                </div>
+                <ol>
+                    <li>Run your script with the <code>Export</code> command</li>
+                    <li>Look at the <strong>Tasks</strong> tab (right panel)</li>
+                    <li>Click <strong>Run</strong> next to your task</li>
+                    <li>Review parameters and confirm</li>
+                    <li>Wait for the task to complete (check progress in Tasks)</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Exporting Visualized Images</h2>
+                <p>To export an image as it appears on the map (RGB, stretched), use <code>.visualize()</code>:</p>
+                <pre><code>// Visualize before exporting
+var visualized = myImage.visualize({
+  bands: ['B4', 'B3', 'B2'],
+  min: 0,
+  max: 3000
+});
+
+Export.image.toDrive({
+  image: visualized,
+  description: 'rgb_visualization',
+  region: roi,
+  scale: 30
+});</code></pre>
+            </section>
+
+            <section>
+                <h2>Common Issues</h2>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="padding: 10px; border: 1px solid #ddd;">Problem</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Solution</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Export too large</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Increase scale, reduce region, use Cloud
+                            Storage</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Task fails</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Check error in Tasks panel, often memory
+                            issues</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Multiple TIF files</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Normal for large areas - use GIS software to
+                            mosaic</td>
+                    </tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>Key Takeaways</h2>
+                <div class="info-box"
+                    style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
+                    <ul style="margin: 0;">
+                        <li>Always specify <code>region</code> and <code>scale</code> in exports</li>
+                        <li>Exports don't start until you click "Run" in the Tasks panel</li>
+                        <li>Use <code>.visualize()</code> to export RGB images</li>
+                        <li>Export to Assets if you'll reuse data in Earth Engine</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">←Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+
+</html>

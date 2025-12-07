@@ -1,15 +1,17 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JavaScript Functions - Remote Sensing for GEE</title>
     <link rel="stylesheet" href="../../css/style.css">
 </head>
+
 <body>
     <nav class="breadcrumb">
-        <a href="../../index.html">Home</a> &gt; 
-        <a href="../../index.html#schedule">Week 1</a> &gt; 
+        <a href="../../index.html">Home</a> &gt;
+        <a href="../../index.html#schedule">Week 1</a> &gt;
         <span>Functions</span>
     </nav>
 
@@ -18,14 +20,18 @@
 
         <section>
             <h2>Introduction to Functions</h2>
-            <p>While using Earth Engine, you will need to define your own functions. Functions take user inputs, use them to perform some computation, and send output back.</p>
-            
-            <p>Functions allow you to group a set of operations and repeat the same operations with different parameters without having to rewrite them every time. Functions are defined using the <code>function</code> keyword.</p>
+            <p>While using Earth Engine, you will need to define your own functions. Functions take user inputs, use
+                them to perform some computation, and send output back.</p>
+
+            <p>Functions allow you to group a set of operations and repeat the same operations with different parameters
+                without having to rewrite them every time. Functions are defined using the <code>function</code>
+                keyword.</p>
         </section>
 
         <section>
             <h2>Defining a Function</h2>
-            <p>The code below defines a function called <code>greet</code> that takes an input called <code>name</code> and returns a greeting with "Hello" prefixed to it:</p>
+            <p>The code below defines a function called <code>greet</code> that takes an input called <code>name</code>
+                and returns a greeting with "Hello" prefixed to it:</p>
             <pre><code>var greet = function(name) {
   return 'Hello ' + name;
 };
@@ -36,10 +42,12 @@ print(greet('Alberta Gator'));</code></pre>
 
         <section>
             <h2>The Power of Functions</h2>
-            <p>Note that we can call the function with different inputs, and it generates different outputs with the same code. This is the power of functions: you can create blocks of code that act as tools.</p>
+            <p>Note that we can call the function with different inputs, and it generates different outputs with the
+                same code. This is the power of functions: you can create blocks of code that act as tools.</p>
 
             <p>Your output should look like this after running it in Earth Engine:</p>
-            <p><img src="../../images/javascript/functions-output.png" alt="Output from Google Earth Engine showing function results" style="max-width: 600px;"></p>
+            <p><img src="../../images/javascript/functions-output.png"
+                    alt="Output from Google Earth Engine showing function results" style="max-width: 600px;"></p>
         </section>
 
         <section>
@@ -52,11 +60,15 @@ print(greet('Alberta Gator'));</code></pre>
 };</code></pre>
 
             <ul>
-                <li><strong>Variable assignment:</strong> <code>var functionName =</code> stores the function in a variable</li>
+                <li><strong>Variable assignment:</strong> <code>var functionName =</code> stores the function in a
+                    variable</li>
                 <li><strong>Function keyword:</strong> <code>function</code> declares that this is a function</li>
-                <li><strong>Parameters:</strong> <code>(parameter1, parameter2)</code> are inputs the function receives</li>
-                <li><strong>Function body:</strong> Code between <code>{ }</code> is executed when the function is called</li>
-                <li><strong>Return statement:</strong> <code>return</code> sends a value back to whoever called the function</li>
+                <li><strong>Parameters:</strong> <code>(parameter1, parameter2)</code> are inputs the function receives
+                </li>
+                <li><strong>Function body:</strong> Code between <code>{ }</code> is executed when the function is
+                    called</li>
+                <li><strong>Return statement:</strong> <code>return</code> sends a value back to whoever called the
+                    function</li>
             </ul>
         </section>
 
@@ -118,10 +130,39 @@ var collection = ee.ImageCollection('Landsat/LC08/C02/T1_L2')
                 <li>Build a function that calculates the area of a rectangle given length and width</li>
             </ul>
         </section>
+
+        <section>
+            <h2>Key Concepts</h2>
+            <div style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
+                <ul style="margin: 0;">
+                    <li><strong>function</strong> keyword defines a function</li>
+                    <li><strong>Parameters</strong> are inputs in parentheses</li>
+                    <li><strong>return</strong> sends a value back to the caller</li>
+                    <li><strong>.map()</strong> applies a function to every item in a collection</li>
+                </ul>
+            </div>
+
+            <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+                <strong>⚠️ Common Mistakes:</strong>
+                <ul style="margin: 10px 0 0 0;">
+                    <li><strong>Forgetting return</strong>: Functions need <code>return</code> to send values back</li>
+                    <li><strong>Using for-loops</strong>: Use <code>.map()</code> instead for collections</li>
+                    <li><strong>Mixing client/server</strong>: Functions used with <code>.map()</code> run on Google's
+                        servers</li>
+                </ul>
+            </div>
+
+            <div style="background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; margin: 20px 0;">
+                <strong>💡 Pro Tip:</strong>
+                <p>When using <code>.map()</code> on an ImageCollection, your function must return an Image. If you want
+                    to extract values (like means), use reducers instead.</p>
+            </div>
+        </section>
     </main>
 
     <footer>
         <p><a href="../../index.html">Back to Course Home</a></p>
     </footer>
 </body>
+
 </html>
