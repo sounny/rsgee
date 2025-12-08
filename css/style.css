@@ -613,6 +613,435 @@ footer p {
     border-radius: 4px;
 }
 
+/* ===== PEDAGOGICAL COMPONENTS ===== */
+
+/* Learning Objectives Box */
+.learning-objectives {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    border-left: 5px solid #4caf50;
+    padding: 20px 25px;
+    margin: 25px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.15);
+}
+
+.learning-objectives h3 {
+    margin-top: 0;
+    color: #2e7d32;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+}
+
+.learning-objectives h3::before {
+    content: "🎯";
+}
+
+.learning-objectives ul {
+    margin: 15px 0 0 0;
+    padding-left: 25px;
+}
+
+.learning-objectives li {
+    margin-bottom: 8px;
+    color: #1b5e20;
+}
+
+/* Why It Matters - Real World Context */
+.why-it-matters {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-left: 5px solid #2196f3;
+    padding: 20px 25px;
+    margin: 25px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);
+}
+
+.why-it-matters h3 {
+    margin-top: 0;
+    color: #1565c0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+}
+
+.why-it-matters h3::before {
+    content: "🌍";
+}
+
+.why-it-matters p {
+    color: #0d47a1;
+    margin-bottom: 10px;
+}
+
+.why-it-matters p:last-child {
+    margin-bottom: 0;
+}
+
+/* Key Vocabulary/Terms */
+.vocabulary {
+    background-color: #fff8e1;
+    border: 2px dashed #ffc107;
+    padding: 20px 25px;
+    margin: 25px 0;
+    border-radius: 8px;
+}
+
+.vocabulary h3 {
+    margin-top: 0;
+    color: #f57c00;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+}
+
+.vocabulary h3::before {
+    content: "📚";
+}
+
+.vocabulary dl {
+    margin: 15px 0 0 0;
+}
+
+.vocabulary dt {
+    font-weight: 600;
+    color: #e65100;
+    margin-top: 12px;
+}
+
+.vocabulary dt:first-child {
+    margin-top: 0;
+}
+
+.vocabulary dd {
+    margin-left: 20px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+/* Self-Check Questions */
+.self-check {
+    background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+    border-left: 5px solid #e91e63;
+    padding: 20px 25px;
+    margin: 25px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(233, 30, 99, 0.15);
+}
+
+.self-check h3 {
+    margin-top: 0;
+    color: #ad1457;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+}
+
+.self-check h3::before {
+    content: "✓";
+    background: #e91e63;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.self-check ol {
+    margin: 15px 0 0 0;
+    padding-left: 25px;
+}
+
+.self-check li {
+    color: #880e4f;
+    margin-bottom: 10px;
+}
+
+/* Troubleshooting Section */
+.troubleshooting {
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+    border-left: 5px solid #f44336;
+    padding: 20px 25px;
+    margin: 25px 0;
+    border-radius: 8px;
+}
+
+.troubleshooting h3 {
+    margin-top: 0;
+    color: #c62828;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+}
+
+.troubleshooting h3::before {
+    content: "🔧";
+}
+
+.troubleshooting .issue {
+    background: white;
+    border-radius: 6px;
+    padding: 15px;
+    margin: 15px 0;
+    border: 1px solid #ef9a9a;
+}
+
+.troubleshooting .issue:first-of-type {
+    margin-top: 15px;
+}
+
+.troubleshooting .issue strong {
+    color: #c62828;
+}
+
+.troubleshooting .issue p {
+    margin: 8px 0 0 0;
+    color: var(--text-secondary);
+}
+
+/* Key Concepts Box (enhanced) */
+.key-concepts {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border-left: 5px solid #28a745;
+    padding: 20px 25px;
+    margin: 25px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.15);
+}
+
+.key-concepts h3 {
+    margin-top: 0;
+    color: #155724;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+}
+
+.key-concepts h3::before {
+    content: "💡";
+}
+
+.key-concepts ul {
+    margin: 15px 0 0 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.key-concepts li {
+    padding-left: 25px;
+    position: relative;
+    margin-bottom: 10px;
+    color: #155724;
+}
+
+.key-concepts li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #28a745;
+    font-weight: bold;
+}
+
+/* Common Mistakes Box (enhanced) */
+.common-mistakes {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+    border-left: 5px solid #ffc107;
+    padding: 20px 25px;
+    margin: 25px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.15);
+}
+
+.common-mistakes h3 {
+    margin-top: 0;
+    color: #856404;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+}
+
+.common-mistakes h3::before {
+    content: "⚠️";
+}
+
+.common-mistakes ul {
+    margin: 15px 0 0 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.common-mistakes li {
+    padding-left: 25px;
+    position: relative;
+    margin-bottom: 10px;
+    color: #856404;
+}
+
+.common-mistakes li::before {
+    content: "✗";
+    position: absolute;
+    left: 0;
+    color: #d39e00;
+    font-weight: bold;
+}
+
+/* Pro Tips Box */
+.pro-tips {
+    background: linear-gradient(135deg, #e7f3ff 0%, #cce5ff 100%);
+    border-left: 5px solid #2196f3;
+    padding: 20px 25px;
+    margin: 25px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);
+}
+
+.pro-tips h3 {
+    margin-top: 0;
+    color: #0d47a1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+}
+
+.pro-tips h3::before {
+    content: "⭐";
+}
+
+.pro-tips ul {
+    margin: 15px 0 0 0;
+    padding-left: 20px;
+}
+
+.pro-tips li {
+    color: #1565c0;
+    margin-bottom: 8px;
+}
+
+/* Building On Previous Learning */
+.builds-on {
+    background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+    border-left: 5px solid #9c27b0;
+    padding: 15px 20px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+
+.builds-on h4 {
+    margin: 0 0 10px 0;
+    color: #6a1b9a;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.builds-on h4::before {
+    content: "🔗";
+}
+
+.builds-on p {
+    margin: 0;
+    color: #4a148c;
+    font-size: 0.95rem;
+}
+
+.builds-on a {
+    color: #7b1fa2;
+    font-weight: 500;
+}
+
+/* Challenge Box */
+.challenge {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    border: 3px solid #ff9800;
+    padding: 20px 25px;
+    margin: 25px 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.25);
+}
+
+.challenge h3 {
+    margin-top: 0;
+    color: #e65100;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+}
+
+.challenge h3::before {
+    content: "🏆";
+}
+
+.challenge p {
+    color: #bf360c;
+}
+
+/* Try It Yourself - Interactive Prompt */
+.try-it {
+    background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+    border: 2px solid #00bcd4;
+    padding: 20px 25px;
+    margin: 25px 0;
+    border-radius: 8px;
+}
+
+.try-it h4 {
+    margin: 0 0 15px 0;
+    color: #00838f;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+}
+
+.try-it h4::before {
+    content: "👆";
+}
+
+.try-it p {
+    color: #006064;
+    margin-bottom: 10px;
+}
+
+/* Expected Output Preview */
+.expected-output {
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.expected-output h4 {
+    margin: 0 0 10px 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.expected-output h4::before {
+    content: "📋";
+}
+
+.expected-output pre {
+    margin: 0;
+    background: white;
+}
+
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
     body {

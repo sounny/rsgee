@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 2 - Hello Landsat! | Remote Sensing Course</title>
+    <meta name="description"
+        content="Learn to visualize satellite imagery bands and create RGB composites in Google Earth Engine.">
     <link rel="stylesheet" href="../css/style.css">
 </head>
 
@@ -22,18 +24,82 @@
 
         <main class="lab-content">
 
-            <section class="lab-preflight">
-                <h2>Before you start</h2>
+            <!-- Learning Objectives -->
+            <section class="learning-objectives">
+                <h3>What You'll Learn</h3>
                 <ul>
-                    <li><strong>Prerequisites:</strong> Finish Lab 1 and skim the module introduction to the Landsat
-                        archive so you recognize the scene metadata referenced below.</li>
-                    <li><strong>Estimated time:</strong> 45 minutes</li>
-                    <li><strong>Materials:</strong> Google Earth Engine login, browser with console access, and the
-                        Landsat scene links bookmarked from the module.</li>
+                    <li>Load a Landsat satellite image into Earth Engine</li>
+                    <li>Understand what image bands represent and how they store data</li>
+                    <li>Visualize individual bands as grayscale images</li>
+                    <li>Create true-color (natural) RGB composites</li>
+                    <li>Create false-color composites to highlight features invisible to the human eye</li>
+                    <li>Use the Inspector tool to examine pixel values</li>
                 </ul>
             </section>
 
+            <!-- Building on Previous Knowledge -->
+            <section class="builds-on">
+                <h4>Building On Previous Learning</h4>
+                <p>This lab builds on <a href="lab-01-getting-started-with-gee.html">Lab 1</a> where you learned to use
+                    <code>print()</code> and navigate the Code Editor. Now you'll add <code>Map.addLayer()</code> to
+                    visualize data on the map.
+                </p>
+            </section>
 
+            <!-- Why It Matters -->
+            <section class="why-it-matters">
+                <h3>Why This Matters</h3>
+                <p>Landsat has been continuously observing Earth since 1972—providing the longest continuous record of
+                    Earth's surface from space. Scientists use this archive to:</p>
+                <ul>
+                    <li>Detect changes in land cover over 50+ years</li>
+                    <li>Monitor agricultural productivity and drought conditions</li>
+                    <li>Track glacier retreat and sea level rise indicators</li>
+                    <li>Study urbanization patterns across decades</li>
+                </ul>
+                <p>Understanding how to visualize and interpret satellite bands is the foundation of all remote sensing
+                    analysis.</p>
+            </section>
+
+            <section class="lab-preflight">
+                <h2>Before You Start</h2>
+                <ul>
+                    <li><strong>Prerequisites:</strong> Finish Lab 1 and review the module introduction to the Landsat
+                        archive so you recognize the scene metadata referenced below.</li>
+                    <li><strong>Estimated time:</strong> 45 minutes</li>
+                    <li><strong>Materials:</strong> Google Earth Engine login, browser with console access.</li>
+                </ul>
+            </section>
+
+            <!-- Key Vocabulary -->
+            <section class="vocabulary">
+                <h3>Key Terms</h3>
+                <dl>
+                    <dt>Band</dt>
+                    <dd>A single layer of data in a satellite image representing measurements in a specific portion of
+                        the electromagnetic spectrum (e.g., red light, near-infrared).</dd>
+
+                    <dt>Pixel</dt>
+                    <dd>The smallest unit of a raster image. Each pixel stores a value (Digital Number) representing the
+                        measured intensity.</dd>
+
+                    <dt>Digital Number (DN)</dt>
+                    <dd>The numeric value stored in each pixel, representing the amount of electromagnetic radiation
+                        detected by the sensor.</dd>
+
+                    <dt>RGB Composite</dt>
+                    <dd>A color image created by assigning three bands to the Red, Green, and Blue color channels of
+                        your display.</dd>
+
+                    <dt>True-Color Composite</dt>
+                    <dd>An RGB composite where red, green, and blue bands are assigned to their natural display colors
+                        (looks like a photograph).</dd>
+
+                    <dt>False-Color Composite</dt>
+                    <dd>An RGB composite where bands are assigned to colors they don't naturally represent, often to
+                        highlight specific features.</dd>
+                </dl>
+            </section>
 
             <section>
                 <h2>Introduction</h2>
@@ -44,6 +110,14 @@
                     We compare different kinds of composites for satellite bands that measure electromagnetic radiation
                     in the visible and non-visible spectrum.
                 </p>
+
+                <figure>
+                    <img src="../images/diagrams/electromagnetic-spectrum.png"
+                        alt="Electromagnetic spectrum showing visible and infrared wavelengths"
+                        onerror="this.style.display='none'">
+                    <figcaption>Landsat measures both visible light (what we see) and infrared (invisible to our eyes)
+                    </figcaption>
+                </figure>
             </section>
 
             <section class="lab-steps">
@@ -52,112 +126,53 @@
                 <ol>
                     <li>
                         <h3>Part 1 - Accessing an Image</h3>
-                        <p>To begin, you will construct an image with the Code Editor. Open up <a
-                                href="https://code.earthengine.google.com/"
-                                target="_blank">https://code.earthengine.google.com/</a></p>
-                        <pre><code>var first_image = ee.Image('Landsat/LT05/C02/T1_L2/LT05_118038_20000606');</code></pre>
-                        <p>Hit the run button, and you will not see anything happen, but you have just loaded the
-                            Landsat image into memory.</p>
+                        <p>To begin, open the <a href="https://code.earthengine.google.com/" target="_blank">Code
+                                Editor</a>
+                            and create a new script. We'll load a single Landsat 5 image using its unique ID:</p>
+                        <pre><code>var first_image = ee.Image('LANDSAT/LT05/C02/T1_L2/LT05_118038_20000606');</code></pre>
+
+                        <p><strong>Understanding the code:</strong></p>
+                        <ul>
+                            <li><code>var first_image</code> - Creates a variable to store our image</li>
+                            <li><code>ee.Image()</code> - Earth Engine function to load a single image</li>
+                            <li>The long string is the image's unique identifier (like a file path)</li>
+                        </ul>
+
+                        <p>Click <strong>Run</strong>. Nothing visible happens yet—the image is loaded into memory,
+                            waiting to be used.</p>
                         <p>
-                            You can explore the image in several ways. To start, you can retrieve <em>metadata</em>
-                            (descriptive data about the image) by printing the image to the Code Editor's
-                            <strong>Console</strong>
-                            panel. Now in the next line of code, print to console first_image the way you did with Hello
-                            world.
+                            Print the image to see its metadata (information about the image):
                         </p>
                         <pre><code>print(first_image);</code></pre>
                         <p>
-                            You may need to click the expander arrows in the Console panel to show the information.
-                            You should be able to read that this image consists of 19 different <em>bands</em>. For each
-                            band, the metadata lists four properties, but for now, let's simply note that the first
-                            property
-                            is a <em>name</em> or label for the band enclosed in quotation marks. For example, the name
-                            of
-                            the first band is "SR_B1".
+                            Expand the output in the Console. You'll see this image has <strong>19 different
+                                bands</strong>.
+                            The first six bands (SR_B1 through SR_B7) represent different portions of the
+                            electromagnetic spectrum:
                         </p>
+                        <ul>
+                            <li><strong>SR_B1</strong> - Blue light</li>
+                            <li><strong>SR_B2</strong> - Green light</li>
+                            <li><strong>SR_B3</strong> - Red light</li>
+                            <li><strong>SR_B4, SR_B5, SR_B7</strong> - Infrared (invisible to humans)</li>
+                        </ul>
+
                         <figure>
                             <img src="../images/screenshots/Screenshot 2023-01-13 at 6.52.56 AM.png"
                                 alt="Console output showing image metadata">
                             <figcaption>Image metadata displayed in the Console</figcaption>
                         </figure>
-                        <p>
-                            A satellite sensor like Landsat 5 measures the magnitude of radiation in different portions
-                            of
-                            the electromagnetic spectrum. The first six bands in our image ("SR_B1" through "SR_B7")
-                            contain
-                            measurements for six different portions of the spectrum. The first three bands measure
-                            visible
-                            portions of the spectrum or quantities of blue, green, and red light. The other three bands
-                            measure infrared portions of the spectrum that are not visible to the human eye.
-                        </p>
-                        <p>
-                            An image band is an example of a <em>raster data model</em>, storing geographic data in a
-                            two-dimensional grid of pixels or <em>picture elements</em>. In remote sensing, the value
-                            stored
-                            by each pixel is often called a <em>Digital Number</em> or <em>DN</em>. Depending on the
-                            sensor,
-                            the pixel value or DN can represent a range of possible data values.
-                        </p>
                     </li>
 
                     <li>
-                        <h3>Step 2 - Visualizing Single Bands of Imagery</h3>
+                        <h3>Part 2 - Visualizing Single Bands</h3>
+                        <p>Now let's add a band to the map. We use <code>Map.addLayer()</code>:</p>
+                        <pre><code>Map.addLayer(first_image);
+Map.setCenter(122, 32, 7);</code></pre>
                         <p>
-                            Now let's add one of the bands to the map as a <em>layer</em> so that we can see it.
-                            We will use the Map.addLayer method:
-                            <a href="https://developers.google.com/earth-engine/apidocs/map-addlayer"
-                                target="_blank">Documentation</a>
+                            The image might look dark or washed out. That's because we haven't told Earth Engine
+                            <em>how</em> to display the values. Let's add <strong>visualization parameters</strong>:
                         </p>
-                        <pre><code>Map.addLayer(first_image); // dataset to display</code></pre>
-                        <p>
-                            Push the run button. Just adding the map doesn't center the map on the image. The image is
-                            added,
-                            but you may have to zoom out and zoom in to find it.
-                        </p>
-                        <p>
-                            A better way to center the map on the image is to use Map.setCenter. Add the following line
-                            of code
-                            to your script:
-                            <a href="https://developers.google.com/earth-engine/apidocs/map-setcenter"
-                                target="_blank">Documentation</a>
-                        </p>
-                        <pre><code>Map.setCenter(122, 32, 7);</code></pre>
-                        <p>Now when you hit the run button, the map will generate over the image.</p>
-                        <p>
-                            The image that is presented is not very useful yet as it is not visualized. Read the
-                            following
-                            documentation to learn how you can change the parameters of this method to visualize the
-                            image.
-                        </p>
-                        <p>
-                            Now we will play with the visualization parameters to make the image look better. If you
-                            look in
-                            the Layer panel on the map, you will see the layer you just added shown as Layer1. Hovering
-                            the
-                            mouse next to it you will see a gearbox. Click on the gearbox and put in the following
-                            settings.
-                        </p>
-                        <figure>
-                            <img src="../images/screenshots/Screenshot 2023-01-13 at 8.32.53 AM.png"
-                                alt="Visualization parameter settings">
-                            <figcaption>Setting visualization parameters</figcaption>
-                        </figure>
-                        <p>
-                            When hitting the apply button, you will see the image looks much better. We did not code
-                            these
-                            into your setting, but you can with the addLayer method and these four important components:
-                        </p>
-                        <ol>
-                            <li><strong>first_image</strong>: This is the dataset to display on the map.</li>
-                            <li><strong>bands</strong>: These are the particular bands from the dataset to display on
-                                the map.</li>
-                            <li><strong>min, max</strong>: These represent the lower and upper bounds of values to
-                                display. By default, the minimum value provided (8000) is mapped to black, and the
-                                maximum value provided (17000) is mapped to white.</li>
-                            <li><strong>'Band 1'</strong>: This is a label for the map layer to display in the Layer
-                                Manager.</li>
-                        </ol>
-                        <p>This translates to code like this:</p>
                         <pre><code>Map.addLayer(
     first_image,
     {
@@ -165,57 +180,57 @@
         min: 8000,
         max: 17000
     },
-    'Band 1'
+    'Band 1 (Blue)'
 );</code></pre>
-                        <p>Now we will repeat this and add three different bands to compare:</p>
+
+                        <p><strong>Understanding visualization parameters:</strong></p>
+                        <ul>
+                            <li><code>bands</code> - Which band(s) to display</li>
+                            <li><code>min</code> - Pixel values below this appear black</li>
+                            <li><code>max</code> - Pixel values above this appear white</li>
+                            <li><code>'Band 1 (Blue)'</code> - The layer name in the Layers panel</li>
+                        </ul>
+
+                        <p>Now add all three visible bands as separate layers:</p>
                         <pre><code>Map.addLayer(
     first_image,
-    {
-        bands: ['SR_B1'],
-        min: 8000,
-        max: 17000
-    },
-    'Band 1'
+    {bands: ['SR_B1'], min: 8000, max: 17000},
+    'Band 1 (Blue)'
 );
 
 Map.addLayer(
     first_image,
-    {
-        bands: ['SR_B2'],
-        min: 8000,
-        max: 17000
-    },
-    'Band 2'
+    {bands: ['SR_B2'], min: 8000, max: 17000},
+    'Band 2 (Green)'
 );
 
 Map.addLayer(
     first_image,
-    {
-        bands: ['SR_B3'],
-        min: 8000,
-        max: 17000
-    },
-    'Band 3'
+    {bands: ['SR_B3'], min: 8000, max: 17000},
+    'Band 3 (Red)'
 );</code></pre>
-                        <p>
-                            Examine the three layers. Try out the inspector tool. Click on areas around the map and
-                            compare
-                            the band values. Using the controls in the Layers manager, explore these layers and examine
-                            how
-                            the pixel values in each band differ.
-                        </p>
-                        <p><strong>Question:</strong> Which do you think is blue, green, and red?</p>
+
+                        <div class="try-it">
+                            <h4>Try It</h4>
+                            <p>Use the <strong>Inspector</strong> tool (right panel) to click on different areas of the
+                                map. Compare the band values between water, vegetation, and urban areas.
+                                Which band shows the most contrast between land and water?</p>
+                        </div>
                     </li>
 
                     <li>
-                        <h3>Step 3 - True-Color Composites</h3>
+                        <h3>Part 3 - True-Color Composites</h3>
                         <p>
-                            We can use color to compare these visual differences in the pixel values of each band layer
-                            all
-                            at once as an <em>RGB composite</em>. This method uses the three primary colors (red, green,
-                            and blue)
-                            to display each pixel's values across three bands.
+                            Instead of viewing bands separately, we can combine three bands into a single
+                            <strong>RGB composite</strong>. By assigning:
                         </p>
+                        <ul>
+                            <li>Red band → Red display channel</li>
+                            <li>Green band → Green display channel</li>
+                            <li>Blue band → Blue display channel</li>
+                        </ul>
+                        <p>We create an image that looks like a natural photograph:</p>
+
                         <pre><code>Map.addLayer(
     first_image,
     {
@@ -223,28 +238,28 @@ Map.addLayer(
         min: 8000,
         max: 17000
     },
-    'Natural Color');</code></pre>
-                        <p>
-                            Run the script. The result looks like the world we see, and is referred to as a
-                            <em>natural-color composite</em>, because it naturally pairs the spectral ranges of the
-                            image
-                            bands to display colors. Also called a <em>true-color composite</em>, this image shows the
-                            red
-                            spectral band with shades of red, the green band with shades of green, and the blue band
-                            with
-                            shades of blue.
-                        </p>
+    'True Color (Natural)');</code></pre>
+
                         <figure>
                             <img src="../images/screenshots/Screenshot 2023-01-13 at 8.43.38 AM.png"
                                 alt="True color composite result">
-                            <figcaption>True-color composite of Landsat imagery</figcaption>
+                            <figcaption>True-color composite looks like a natural photograph</figcaption>
                         </figure>
+
+                        <div class="note">
+                            <p><strong>Note:</strong> The order of bands matters! Earth Engine assigns bands to RGB
+                                channels
+                                in the order you list them: [Red, Green, Blue]. For Landsat 5, B3=Red, B2=Green,
+                                B1=Blue.</p>
+                        </div>
+                    </li>
+
+                    <li>
+                        <h3>Part 4 - False-Color Composites</h3>
                         <p>
-                            A Landsat image contains many more bands than just the three true-color bands. We can make
-                            RGB
-                            composites to show combinations of any bands�even those outside what the human eye can see.
-                            For
-                            example, band 4 represents the near-infrared band, just outside the range of human vision.
+                            Here's where remote sensing gets powerful. We can assign <em>any</em> band to any color
+                            channel—including bands our eyes can't see! The <strong>color-infrared composite</strong>
+                            puts the near-infrared band (B4) in the red channel:
                         </p>
                         <pre><code>Map.addLayer(
     first_image,
@@ -253,45 +268,115 @@ Map.addLayer(
         min: 8000,
         max: 17000
     },
-    'False Color');</code></pre>
-                        <p>
-                            The display colors in this false-color composite no longer pair naturally with the bands.
-                            This
-                            particular example, more precisely referred to as a <em>color-infrared composite</em>, is a
-                            scene
-                            we cannot observe with our eyes but learn to read and interpret.
-                        </p>
+    'False Color (Color Infrared)');</code></pre>
+
                         <figure>
                             <img src="../images/screenshots/Screenshot 2023-01-13 at 8.46.47 AM.png"
                                 alt="False color composite result">
-                            <figcaption>False-color (color-infrared) composite</figcaption>
+                            <figcaption>Color-infrared composite: vegetation appears bright red</figcaption>
                         </figure>
-                        <p>
-                            Notice how the land appears bright red. This is because the pixel value of the first band
-                            (which
-                            is drawing the near-infrared brightness) is much higher relative to the pixel value of the
-                            other
-                            two bands. You can check this by using the <strong>Inspector</strong> tool.
-                        </p>
-                        <p>
-                            In total, the false-color composite provides more contrast than the true-color image for
-                            understanding differences across the scene.
-                        </p>
+
+                        <p><strong>Why does vegetation appear red?</strong></p>
+                        <p>Healthy plants strongly reflect near-infrared light (for temperature regulation).
+                            Since we've assigned NIR to the red display channel, areas with healthy vegetation
+                            glow bright red. This makes it <em>much</em> easier to identify vegetation than in
+                            true-color images!</p>
+
+                        <div class="try-it">
+                            <h4>Try It</h4>
+                            <p>Toggle between the True Color and False Color layers using the Layers panel.
+                                Can you identify agricultural fields that were hard to see in true color?</p>
+                        </div>
                     </li>
                 </ol>
             </section>
 
+            <!-- Self-Check Questions -->
+            <section class="self-check">
+                <h3>Check Your Understanding</h3>
+                <ol>
+                    <li>What does "SR_B4" represent in a Landsat 5 image?</li>
+                    <li>Why do we need to specify <code>min</code> and <code>max</code> values when visualizing?</li>
+                    <li>In a false-color composite, why does vegetation appear red?</li>
+                    <li>If you wanted water to appear blue in a composite, which band should you assign to the blue
+                        channel?</li>
+                </ol>
+                <p><em>Hint: Think about what wavelengths different surfaces reflect strongly.</em></p>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <div class="issue">
+                    <strong>Problem: Image appears all white or all black</strong>
+                    <p><strong>Solution:</strong> Your min/max values are wrong. Try adjusting them. Use the Inspector
+                        to click on the image and see actual pixel values, then set min/max accordingly.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Can't find the image on the map</strong>
+                    <p><strong>Solution:</strong> The image might be outside your current view. Use
+                        <code>Map.centerObject(first_image, 8);</code> to center the map on the image.
+                    </p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Error about "band SR_B1 not found"</strong>
+                    <p><strong>Solution:</strong> Band names are case-sensitive. Make sure you use exactly
+                        <code>'SR_B1'</code> with correct capitalization.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Key Concepts Summary -->
+            <section class="key-concepts">
+                <h3>Key Takeaways</h3>
+                <ul>
+                    <li><code>ee.Image()</code> loads a single image by its catalog ID</li>
+                    <li><code>Map.addLayer()</code> displays data on the map with visualization parameters</li>
+                    <li>Satellite images contain multiple <strong>bands</strong>, each measuring different wavelengths
+                    </li>
+                    <li><strong>True-color composites</strong> (R-G-B bands) look like photos</li>
+                    <li><strong>False-color composites</strong> can reveal features invisible to our eyes</li>
+                    <li>Healthy vegetation strongly reflects near-infrared light</li>
+                </ul>
+            </section>
+
+            <!-- Common Mistakes -->
+            <section class="common-mistakes">
+                <h3>Common Mistakes to Avoid</h3>
+                <ul>
+                    <li><strong>Wrong band order:</strong> Remember, bands are assigned [Red, Green, Blue] in that order
+                    </li>
+                    <li><strong>Forgetting visualization parameters:</strong> Without min/max, images often look wrong
+                    </li>
+                    <li><strong>Case sensitivity:</strong> <code>'SR_B1'</code> is different from <code>'sr_b1'</code>
+                    </li>
+                    <li><strong>Confusing band numbers:</strong> Landsat 5/7 and Landsat 8/9 have different band
+                        numbering!</li>
+                </ul>
+            </section>
+
+            <!-- Pro Tips -->
+            <section class="pro-tips">
+                <h3>Pro Tips</h3>
+                <ul>
+                    <li>Use layer transparency (slider in Layers panel) to compare composites</li>
+                    <li>Click the gear icon next to a layer to adjust visualization on-the-fly</li>
+                    <li>The format <code>['B4', 'B3', 'B2']</code> is called a "band combination" or "band recipe"</li>
+                    <li>Try the "4-5-3" combination for Landsat 5 to highlight different land covers</li>
+                </ul>
+            </section>
+
             <section id="submission">
                 <div class="submission-box">
-                    <h3> Lab Submission</h3>
+                    <h3>📋 Lab Submission</h3>
                     <p><strong>Save your work and submit the URL of your Code.</strong></p>
-                    <p>Submit lab via email.</p>
                     <p><strong>Subject:</strong> <code>Lab 2 - Hello Landsat - [Your Name]</code></p>
                     <p><strong>Include in your email:</strong></p>
                     <ul>
                         <li>The shareable link to your GEE script</li>
-                        <li>Screenshots of both true-color and false-color composites</li>
-                        <li>Your answer to: Which bands are blue, green, and red?</li>
+                        <li>Screenshot of your true-color composite</li>
+                        <li>Screenshot of your false-color composite</li>
+                        <li>Your answer to: Which bands are blue, green, and red in Landsat 5?</li>
                     </ul>
                 </div>
             </section>
@@ -300,7 +385,7 @@ Map.addLayer(
         <footer>
             <p><a href="lab-01-getting-started-with-gee.html">← Previous Lab</a> | <a href="lab-03-js-basics.html">Next
                     Lab →</a></p>
-            <p><a href="../index.html">←Back to Course Home</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
         </footer>
     </div>
 </body>

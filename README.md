@@ -266,7 +266,7 @@ All lab assignments should be submitted via email with the following format:
 
 ---
 
-## � Content Statistics
+## 📊 Content Statistics
 
 - **25 Lab Assignments** - Hands-on exercises with Earth Engine
 - **57 Module Pages** - Theory, tutorials, and case studies
@@ -277,7 +277,7 @@ All lab assignments should be submitted via email with the following format:
 
 ---
 
-## �🛠️ Technologies Used
+## 🛠️ Technologies Used
 
 - **HTML5**: Semantic markup with accessibility features
 - **CSS3**: Custom responsive design with flexbox and grid
@@ -398,6 +398,6 @@ Visit the course website for instructor contact information
 
 ---
 
-**🎓 Ready to Learn Remote Sensing!** �️🌍
+**🎓 Ready to Learn Remote Sensing!** 🛰️🌍
 
 This comprehensive course provides everything needed to master remote sensing with Google Earth Engine, from basic JavaScript to advanced environmental applications.

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -17,15 +17,138 @@
         </header>
 
         <main class="lab-content">
-<p><span>JavaScript may not be the first choice of programming language for many researchers and data scientists, and some may be wondering why this course is based on JavaScript API instead of Python or R.</span></p>
-<p><span>The Earth Engine JavaScript API is the most mature and easiest to use when getting started. The Earth Engine platform comes with a web-based Code Editor that allows you to use the Earth Engine JavaScript API without any installation. It also provides additional functionality to display your results on a map, save your scripts, access documentation, manage tasks, and more. It has a one-click mechanism to share your code with other users�allowing for easy reproducibility and collaboration. In addition, the JavaScript API comes with a user interface library, which allows you to create charts and web-based applications with little effort.</span></p>
-<p><span><img src="https://scienceparkstudygroup.github.io/GoogleEarthEngine/fig/02_codeeditor.png" alt="screenshot of code editor" loading="lazy"></span></p>
-<p><em><strong>Figure - Screenshot of the code editor in Google Earth Engine.</strong></em></p>
-<p><span>You do not need to become a JavaScript expert in using Earth Engine. The basic syntax described here should be sufficient. A good tip is that if you find yourself doing something complicated in JavaScript, it might be done much better in Earth Engine. All the important computations in Earth Engine need to use the API functions, and even a basic operation�such as adding two numbers in Earth Engine�should be done using the Earth Engine API. </span></p>
+            <p>
+                JavaScript is the fastest on-ramp to Google Earth Engine. The in-browser Code Editor gives you a
+                ready-to-use IDE, console, map, docs, and sharing with zero installs. You only need basic JavaScript to
+                be productive - the API handles the heavy lifting.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Explain why this course starts with the JavaScript API.</li>
+                    <li>Use the Code Editor for rapid, shareable prototyping.</li>
+                    <li>Run and tweak a short JavaScript script with confidence.</li>
+                    <li>Decide when to stay in JavaScript versus move to Python.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Quick learning loops beat long setup. JavaScript in the Code Editor lets you test ideas, visualize
+                    results, and share links in minutes, so you can focus on questions, not configuration.
+                </p>
+            </section>
+
+            <figure>
+                <img src="../../images/screenshots/code-editor-interface.png"
+                    alt="Google Earth Engine Code Editor with script, console, and map" loading="lazy">
+                <figcaption>Everything in one place: script editor, docs, console, tasks, and map view.</figcaption>
+            </figure>
+
+            <section>
+                <h2>What makes JavaScript the best first stop?</h2>
+                <ul>
+                    <li><strong>Zero install:</strong> Open a browser, sign in, and run code - no local packages.</li>
+                    <li><strong>Immediate feedback:</strong> Map updates and console prints keep iterations fast.</li>
+                    <li><strong>Shareable by default:</strong> "Get link" preserves script, imports, and map view.</li>
+                    <li><strong>UI toolkit included:</strong> Build simple interfaces and charts without extra libraries.</li>
+                </ul>
+                <div class="pro-tips">
+                    <h3>Pro tips</h3>
+                    <ul>
+                        <li>Use <code>print()</code> early and often to inspect server objects.</li>
+                        <li>Keep ROIs small while prototyping; expand once results look right.</li>
+                        <li>Stay inside the Docs tab for API references and copy-paste examples.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>Quick win: run this in the Code Editor</h2>
+                <p>Paste into a new script, hit <strong>Run</strong>, and explore the map and console.</p>
+<pre><code>// Hello, Earth Engine (JavaScript Code Editor)
+var pt = ee.Geometry.Point([-122.45, 37.75]).buffer(2000);
+var col = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterBounds(pt)
+  .filterDate('2021-06-01', '2021-07-01');
+var img = col.first()
+  .select(['SR_B5', 'SR_B4', 'SR_B3'], ['NIR', 'RED', 'GREEN'])
+  .multiply(0.0000275).add(-0.2); // apply scale/offset
+Map.centerObject(pt, 10);
+Map.addLayer(img, {bands: ['NIR', 'RED', 'GREEN'], min: 0, max: 0.4}, 'False color');
+print('Image date', ee.Date(img.get('system:time_start')).format('YYYY-MM-dd'));</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A false-color composite centered on San Francisco and a console print with the image date.</p>
+                </div>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: small changes, fast learning</h4>
+                <p>Change the point to your hometown coordinates and re-run.</p>
+                <p>Swap the collection to <code>'COPERNICUS/S2_SR'</code> and adjust bands to <code>['B8', 'B4', 'B3']</code>.</p>
+                <p>Add a simple NDVI: <code>var ndvi = img.normalizedDifference(['NIR','RED']); Map.addLayer(ndvi, {min:0, max:0.8, palette:['brown','yellow','green']}, 'NDVI');</code></p>
+            </div>
+
+            <figure>
+                <img src="../../images/screenshots/hello-world-console.png"
+                    alt="Console output panel showing printed values" loading="lazy">
+                <figcaption>Console prints help you confirm what the server is returning.</figcaption>
+            </figure>
+
+            <section class="vocabulary">
+                <h3>Key vocabulary</h3>
+                <dl>
+                    <dt>Code Editor</dt>
+                    <dd>In-browser IDE for Earth Engine JavaScript with map, console, tasks, and docs panels.</dd>
+                    <dt>Map</dt>
+                    <dd>Global map object in the Code Editor used to center, add layers, and adjust visualization.</dd>
+                    <dt>Share link</dt>
+                    <dd>A URL that preserves your script, imports, and map state so others can reproduce results.</dd>
+                </dl>
+            </section>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Using client-side <code>for</code> loops instead of server-side <code>map()</code> on collections.</li>
+                    <li>Calling <code>.getInfo()</code> on large objects, causing huge downloads - prefer <code>print()</code>.</li>
+                    <li>Forgetting to apply scale/offset to Level-2 Landsat data before computing indices.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>Why is JavaScript the fastest on-ramp for Earth Engine?</li>
+                    <li>What does clicking "Get link" enable when collaborating?</li>
+                    <li>When would you switch to Python instead of JavaScript?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>When to use Python instead</h2>
+                <ul>
+                    <li>Integrating Earth Engine with local data science stacks (NumPy/Pandas/GeoPandas).</li>
+                    <li>Automating pipelines, tests, or scheduled jobs.</li>
+                    <li>Building larger applications or services outside the browser.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Where to go next</h2>
+                <ul>
+                    <li>Read the <a href="https://developers.google.com/earth-engine/guides/playground" target="_blank" rel="noopener">Code Editor guide</a> for hotkeys and sharing.</li>
+                    <li>Browse the <a href="https://developers.google.com/earth-engine/apidocs" target="_blank" rel="noopener">API Docs</a> inside the Editor for examples.</li>
+                    <li>Practice by turning the quick win into a shareable link and posting it to a peer for feedback.</li>
+                </ul>
+            </section>
         </main>
 
         <footer>
-            <p><a href="../../index.html">��Back to Course Home</a></p>
+            <p><a href="../../index.html">Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>

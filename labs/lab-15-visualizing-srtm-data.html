@@ -1,13 +1,15 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 15 - Visualizing SRTM Data | Remote Sensing Course</title>
+    <meta name="description"
+        content="Learn to visualize elevation data using SRTM DEMs, color palettes, and hillshade techniques in Google Earth Engine.">
     <link rel="stylesheet" href="../css/style.css">
-    <meta name="robots" content="index, follow">
-    <meta name="description" content="Google Earth Engine lab 15: Lab 15 - Visualizing SRTM Data">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -16,99 +18,306 @@
 
         <header class="lab-header">
             <h1>Lab 15 - Visualizing SRTM Data</h1>
+            <p><em><strong>Objective: Bring SRTM elevation data into GEE and apply color ramps and hillshade
+                        visualization.</strong></em></p>
         </header>
 
         <main class="lab-content">
 
-            <section class="lab-preflight">
-                <h2>Before you start</h2>
+            <!-- Learning Objectives -->
+            <section class="learning-objectives">
+                <h3>What You'll Learn</h3>
                 <ul>
-                    <li><strong>Prerequisites:</strong> Complete Lab 14 and skim the terrain visualization tips from the module.</li>
-                    <li><strong>Estimated time:</strong> 60 minutes</li>
-                    <li><strong>Materials:</strong> Earth Engine account, SRTM dataset ID, and a list of color palettes or visualization parameters to test.</li>
+                    <li>Load Digital Elevation Model (DEM) data using the Image constructor</li>
+                    <li>Configure map center and zoom level</li>
+                    <li>Customize visualization with min/max values</li>
+                    <li>Apply color palettes to single-band imagery</li>
+                    <li>Generate hillshade from elevation data</li>
                 </ul>
             </section>
 
-<p><em><strong>Lab 15 Lecture - Spring 2023 - Visualizing SRTMs</strong></em></p>
+            <!-- Building On Previous Learning -->
+            <section class="builds-on">
+                <h4>Building On Previous Learning</h4>
+                <p>This lab introduces terrain data visualization. You'll use <code>Map.addLayer()</code> with
+                    more advanced visualization parameters than in previous labs.</p>
+            </section>
 
-<p><em><strong>Objective:<span></span></strong></em>In this lab, you will bring an SRTM into Google Earth Engine and apply a color ramp. You will turn in a URL of your final code from Earth Engine.</p>
-<p><strong>1 - Image Constructor</strong></p>
-<p>First, you will need to instantiate an image with the Image constructor. <span>&nbsp;The</span><a class="external" href="https://developers.google.com/earth-engine/api_docs#eeimage" target="_blank"><span>image constructor</span><span class="external_link_icon" role="presentation"><span class="screenreader-only">Links to an external site.</span></span></a><span></span><code>ee.Image()</code><span> gives&nbsp;you access to the raster datasets stored on GEE, and is made using a string ID of an image in the Earth Engine data catalog.</span></p>
-<p>Search the Earth Engine data catalog using the search tool at the top of the Code Editor to discover an image ID.</p>
-<ul>
-<li>Type 'elevation' into the search field and note that a list of rasters is returned.</li>
-<li><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%208.50.44%20AM.png" alt="search results showing the version 4 of the SRTM" width="551" height="402"   loading="lazy"></li>
-<li>Click the 'SRTM Digital Elevation Data Version 4' entry for more information about that dataset.</li>
-<li>On the left side of the dataset description is an<span></span><strong>Image ID</strong><span></span>field.</li>
-<li><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%208.52.18%20AM.png" alt="where to find image id number and the import button
-" width="663" height="502"   loading="lazy"></li>
-<li>Click the<span></span><strong>Import</strong><span></span>button on the dataset description or the<span></span><strong>import</strong><span></span>link on the right side of the search results.</li>
-<li>When you click the import link or button, a variable is automatically created in a special section named<span></span><a class="external" href="https://developers.google.com/earth-engine/playground#imports" target="_blank"><span>'Imports'</span><span class="external_link_icon" role="presentation"><span class="screenreader-only">Links to an external site.</span></span></a>, at the top of your script.</li>
-<li>Rename the variable by clicking on its name in the imports section, and change it from image to 'srtm'.&nbsp; It is good practice not to use default naming.&nbsp;</li>
-<li><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%208.54.00%20AM.png" alt="renaming the image"   loading="lazy"></li>
-</ul>
-<p><strong>2 -&nbsp;Configuring the Map</strong></p>
-<p>The <code>Map.setCenter()</code> method centers the map view at given coordinates with the given zoom level. It takes three arguments:</p>
-<ul>
-<li>The longitude of the center, in decimal degrees.</li>
-<li>The latitude of the center, in decimal degrees.</li>
-<li>The zoom level, from 0 to 24.</li>
-</ul>
-<p>For example, the following code centers the map on the Grand Canyon. Put this code in the code editor of GEE:</p>
-<pre><code><span class="com">// Zoom to a location.</span><span class="pln"><br></span><span class="typ">Map</span><span class="pun">.</span><span class="pln">setCenter</span><span class="pun">(-</span><span class="lit">112.8598</span><span class="pun">,</span> <span class="lit">36.2841</span><span class="pun">,</span> <span class="lit">9</span><span class="pun">);</span> <span class="com">// Center on the Grand Canyon.</span> </code></pre>
-<p><strong><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%208.55.19%20AM.png" alt="The Result of the center"   loading="lazy"></strong></p>
-<p><strong>3- Adding a layer to the Map</strong></p>
-<p>Now use the Mapobject's addLayer() method to add an image to the map display in the Code Editor.</p>
-<pre class="prettyprint"><span class="com">// Display the image on the map.</span><span class="pln"><br></span><span class="typ">Map</span><span class="pun">.</span><span class="pln">addLayer</span><span class="pun">(</span><span class="pln">srtm</span><span class="pun">); //SRTM is the name of my var for the image. </span></pre>
-<p><strong>4 - Push Run</strong></p>
-<p>Push run, and your screen should look like this:</p>
-<p><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%209.01.47%20AM.png" alt="results from the code"   loading="lazy"></p>
-<p></p>
-<p><strong>5 - Customizing layer visualization</strong></p>
-<p>Notice that the image comes in with a default grayscale.&nbsp; It is not very easy to visualize the elevation through this. So we will customize the visualization.</p>
-<ul>
-<li>To change how the data are stretched, you can provide another parameter to the Map.addLayer() call. Specifically, the second parameter, visParams, lets you specify the minimum and maximum values to display. To discover what values to use, activate the Inspector tab and click around on the map to get an idea of the range of pixel values.</li>
-<li>
-<p>Suppose that through such experimentation, the data should be stretched to [0, 3000]. To display the image using this range, use:</p>
-<pre class="prettyprint"><span class="typ">Map</span><span class="pun">.</span><span class="pln">addLayer</span><span class="pun">(</span><span class="pln">srtm</span><span class="pun">,</span> <span class="pun">{</span><span class="pln">min</span><span class="pun">:</span> <span class="lit">0</span><span class="pun">,</span><span class="pln"> max</span><span class="pun">:</span> <span class="lit">3000</span><span class="pun">},</span> <span class="str">'custom visualization'</span><span class="pun">);</span></pre>
-<p>Note that the<span></span><code>visParams</code><span></span>parameter is an object, with properties specifying the<span></span><code>min</code><span></span>and the<span></span><code>max</code>.<br>The third argument&nbsp;is the custom name of the image that will show up in the layer manager.</p>
-</li>
-<li>
-<p><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%209.03.27%20AM.png" alt="Screenshot 2023-04-07 at 9.03.27 AM.png"   loading="lazy"></p>
-</li>
-</ul>
-<p><strong>6 - Working with color</strong></p>
-<p>To display a single band using a color palette, add a<span></span><code>palette</code><span></span>property to the<span></span><code>visParams</code><span></span>object:</p>
-<pre class="prettyprint"><span class="typ">Map</span><span class="pun">.</span><span class="pln">addLayer</span><span class="pun">(srtm</span><span class="pun">,</span> <span class="pun">{</span><span class="pln">min</span><span class="pun">:</span> <span class="lit">0</span><span class="pun">,</span><span class="pln"> max</span><span class="pun">:</span> <span class="lit">3000</span><span class="pun">,</span><span class="pln"> palette</span><span class="pun">:</span> <span class="pun">[</span><span class="str">'blue'</span><span class="pun">,</span> <span class="str">'green'</span><span class="pun">,</span> <span class="str">'red'</span><span class="pun">]},</span><span class="pln"><br>&nbsp; &nbsp; </span><span class="str">'custom palette'</span><span class="pun">);<br></span></pre>
-<p class="prettyprint"><strong><span class="pun"><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%209.04.44%20AM.png" alt="results"   loading="lazy"></span></strong></p>
-<p class="prettyprint"><strong><span class="pun">7 - Making a Hillshade</span></strong></p>
-<p class="prettyprint"><span class="pun">To display a hillshade we will use some algorithms that are built into the GEE library. </span></p>
-<p>The <code>ee.Terrain.hillshade</code> function computes a simple hillshade from a digital elevation model (DEM). It takes four arguments:</p>
-<ul>
-<li>The elevation image, in meters.</li>
-<li>The illumination azimuth in degrees from north.</li>
-<li>The illumination elevation in degrees.</li>
-<li>The exaggeration factor, which controls the steepness of the shadows.</li>
-</ul>
-<pre class="prettyprint"><span class="pun">//add a hillshade<br>var hills = ee.Terrain.hillshade(srtm, 270, 45)<br><br>//add hillshade to map<br>Map.addLayer(hills, {min: 0, max: 500},'Hillshade')<br></span></pre>
-<p class="prettyprint"><strong><span class="pun"><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-07%20at%209.07.32%20AM.png" alt="hillshade results"   loading="lazy"></span></strong></p>
-<p class="prettyprint"><strong><span class="pun">8 - Share the link</span></strong></p>
-<p>Push the Get Link button and submit the link to your code. Be sure to comment you code.</p>
+            <!-- Why It Matters -->
+            <section class="why-it-matters">
+                <h3>Why This Matters</h3>
+                <p>Elevation data is fundamental for many applications:</p>
+                <ul>
+                    <li><strong>Hydrology:</strong> Understanding water flow and drainage basins</li>
+                    <li><strong>Geomorphology:</strong> Analyzing landforms and terrain processes</li>
+                    <li><strong>Urban planning:</strong> Identifying flood-prone or steep areas</li>
+                    <li><strong>Ecology:</strong> Understanding species distribution with elevation</li>
+                    <li><strong>Visualization:</strong> Creating compelling 3D-like terrain maps</li>
+                </ul>
+            </section>
+
+            <section class="lab-preflight">
+                <h2>Before You Start</h2>
+                <ul>
+                    <li><strong>Prerequisites:</strong> Complete Lab 14 and skim the terrain visualization tips from the
+                        module.</li>
+                    <li><strong>Estimated time:</strong> 60 minutes</li>
+                    <li><strong>Materials:</strong> Earth Engine account, SRTM dataset ID, and a list of color palettes
+                        to test.</li>
+                </ul>
+            </section>
+
+            <!-- Key Vocabulary -->
+            <section class="vocabulary">
+                <h3>Key Terms</h3>
+                <dl>
+                    <dt>SRTM (Shuttle Radar Topography Mission)</dt>
+                    <dd>A NASA mission that produced near-global elevation data at ~30m and ~90m resolution.</dd>
+
+                    <dt>DEM (Digital Elevation Model)</dt>
+                    <dd>A raster representation of ground surface topography, with each pixel containing an elevation
+                        value.</dd>
+
+                    <dt>Hillshade</dt>
+                    <dd>A visualization technique that simulates shadows from a light source to show terrain relief.
+                    </dd>
+
+                    <dt>Color Palette/Ramp</dt>
+                    <dd>A sequence of colors mapped to data values for visualization.</dd>
+                </dl>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 1: Load the SRTM Image</h2>
+                <p>Use the Image constructor to load SRTM elevation data:</p>
+                <ol>
+                    <li>Search for 'elevation' in the data catalog</li>
+                    <li>Click 'SRTM Digital Elevation Data Version 4'</li>
+                    <li>Click Import and rename the variable to 'srtm'</li>
+                </ol>
+                <pre><code>// Load SRTM elevation data
+var srtm = ee.Image("USGS/SRTMGL1_003");
+
+// Print to see the band information
+print('SRTM:', srtm);</code></pre>
+
+                <div class="note">
+                    <p><strong>About SRTM:</strong> The dataset has one band called 'elevation' containing height values
+                        in meters above sea level.</p>
+                </div>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 2: Configure the Map View</h2>
+                <p>Use <code>Map.setCenter()</code> to focus on an interesting area:</p>
+                <pre><code>// Center on the Grand Canyon
+Map.setCenter(-112.8598, 36.2841, 9);</code></pre>
+
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Argument</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Longitude</td>
+                            <td>East-West position (decimal degrees)</td>
+                            <td>-112.8598</td>
+                        </tr>
+                        <tr>
+                            <td>Latitude</td>
+                            <td>North-South position (decimal degrees)</td>
+                            <td>36.2841</td>
+                        </tr>
+                        <tr>
+                            <td>Zoom</td>
+                            <td>Map scale (0=world, 20=building)</td>
+                            <td>9</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 3: Display with Default Visualization</h2>
+                <pre><code>// Display with default grayscale
+Map.addLayer(srtm, {}, 'SRTM Default');</code></pre>
+                <p>Notice the default grayscale isn't very informative - we need to customize it!</p>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 4: Customize Min/Max Values</h2>
+                <p>Use the Inspector tool to explore elevation values, then set appropriate min/max:</p>
+                <pre><code>// Set min/max for better contrast
+Map.addLayer(srtm, {min: 0, max: 3000}, 'Custom Range');</code></pre>
+
+                <div class="try-it">
+                    <h4>Try It!</h4>
+                    <p>Click around the map using the Inspector tool. What are the lowest and highest elevations in your
+                        area?</p>
+                </div>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 5: Apply a Color Palette</h2>
+                <p>Add a color palette to make elevation more visually informative:</p>
+                <pre><code>// Apply a terrain color palette
+Map.addLayer(srtm, {
+    min: 0, 
+    max: 3000, 
+    palette: ['blue', 'green', 'yellow', 'orange', 'red']
+}, 'Elevation Colors');
+
+// Or use a more natural terrain palette
+Map.addLayer(srtm, {
+    min: 0, 
+    max: 3000, 
+    palette: ['#0000FF', '#00FF00', '#FFFF00', '#FF8000', '#FF0000', '#FFFFFF']
+}, 'Terrain Palette');</code></pre>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 6: Create a Hillshade</h2>
+                <p>Use <code>ee.Terrain.hillshade()</code> to add 3D-like shading:</p>
+                <pre><code>// Create hillshade
+var hills = ee.Terrain.hillshade(srtm, 270, 45);
+
+// Display hillshade
+Map.addLayer(hills, {min: 0, max: 255}, 'Hillshade');</code></pre>
+
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Description</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Azimuth</td>
+                            <td>Light direction (degrees from north)</td>
+                            <td>270 (from west)</td>
+                        </tr>
+                        <tr>
+                            <td>Elevation</td>
+                            <td>Light angle above horizon</td>
+                            <td>45 degrees</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Complete Code</h2>
+                <pre><code>// Lab 15 - Visualizing SRTM Data
+
+// Load SRTM elevation data
+var srtm = ee.Image("USGS/SRTMGL1_003");
+
+// Center on Grand Canyon
+Map.setCenter(-112.8598, 36.2841, 9);
+
+// Display with default visualization
+Map.addLayer(srtm, {}, 'SRTM Default');
+
+// Display with custom min/max
+Map.addLayer(srtm, {min: 0, max: 3000}, 'Custom Range');
+
+// Display with color palette
+Map.addLayer(srtm, {
+    min: 0, 
+    max: 3000, 
+    palette: ['blue', 'green', 'yellow', 'orange', 'red']
+}, 'Elevation Colors');
+
+// Create and display hillshade
+var hills = ee.Terrain.hillshade(srtm, 270, 45);
+Map.addLayer(hills, {min: 0, max: 255}, 'Hillshade');</code></pre>
+            </section>
+
+            <!-- Self-Check Questions -->
+            <section class="self-check">
+                <h3>Check Your Understanding</h3>
+                <ol>
+                    <li>What does the SRTM elevation band represent? What are the units?</li>
+                    <li>Why is setting min/max important for visualization?</li>
+                    <li>What azimuth angle would you use for light from the south?</li>
+                    <li>How could you combine hillshade with the color elevation layer?</li>
+                </ol>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <div class="issue">
+                    <strong>Problem: Image appears all white or all black</strong>
+                    <p><strong>Solution:</strong> Your min/max values don't match the data range. Use the Inspector to
+                        find actual values in your area.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Color palette doesn't look smooth</strong>
+                    <p><strong>Solution:</strong> Add more color stops to your palette for smoother gradients (e.g., 6-8
+                        colors instead of 3).</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Hillshade looks flat in some areas</strong>
+                    <p><strong>Solution:</strong> Flat terrain will always appear flat in hillshade. Try different
+                        azimuth angles to highlight subtle features.</p>
+                </div>
+            </section>
+
+            <!-- Pro Tips -->
+            <section class="pro-tips">
+                <h3>Pro Tips</h3>
+                <ul>
+                    <li><strong>Combine layers:</strong> Blend hillshade with elevation colors for a professional look
+                    </li>
+                    <li><strong>Use hexadecimal colors:</strong> For precise control, use hex codes like '#FF5733'</li>
+                    <li><strong>Explore other DEMs:</strong> Try ALOS, Copernicus, or NASADEM for different
+                        areas/resolutions</li>
+                    <li><strong>Derive other products:</strong> Use ee.Terrain for slope, aspect, and curvature</li>
+                </ul>
+            </section>
+
+            <!-- Key Concepts -->
+            <section class="key-concepts">
+                <h3>Key Takeaways</h3>
+                <ul>
+                    <li>SRTM provides near-global elevation data at ~30m resolution</li>
+                    <li>Customize visualization with min, max, and palette parameters</li>
+                    <li>Hillshade adds 3D-like appearance to terrain maps</li>
+                    <li>The ee.Terrain module provides terrain analysis functions</li>
+                </ul>
+            </section>
+
             <section id="submission">
                 <div class="submission-box">
-                    <h3>Lab Submission</h3>
-                    <p>Submit lab via email.</p>
+                    <h3>📋 Lab Submission</h3>
                     <p><strong>Subject:</strong> <code>Lab 15 - Visualizing SRTM Data - [Your Name]</code></p>
+
+                    <h4>Submit:</h4>
+                    <p>A shareable URL to your GEE code that includes:</p>
+                    <ol>
+                        <li>SRTM data loaded and displayed</li>
+                        <li>Custom color palette applied</li>
+                        <li>Hillshade layer created</li>
+                        <li>Comments explaining your visualization choices</li>
+                    </ol>
                 </div>
             </section>
         </main>
 
         <footer>
-            <p><a href='lab-14-exporting-to-arcgis-pro.html'>&larr; Previous Lab</a> | <a href='lab-16-zonal-statistics.html'>Next Lab &rarr;</a></p>
-            <p><a href="../index.html">&larr;Back to Course Home</a></p>
+            <p><a href="lab-14-exporting-to-arcgis-pro.html">← Previous Lab</a> | <a
+                    href="lab-16-zonal-statistics.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
         </footer>
     </div>
-    
-</body>
-</html>
 
+</body>
+
+</html>

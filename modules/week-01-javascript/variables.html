@@ -1,13 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Variables | Remote Sensing Course</title>
+    <meta name="description" content="Learn how to use variables in JavaScript for Google Earth Engine programming.">
     <link rel="stylesheet" href="../../css/style.css">
 </head>
-
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -15,56 +14,115 @@
         </nav>
 
         <header class="lab-header">
-            <h1>Variables</h1>
+            <h1>Variables in JavaScript</h1>
         </header>
 
         <main class="lab-content">
-            <p>In a programming language, variables are used to store data values. In JavaScript, a variable is defined
-                using the <em><strong>var</strong></em> keyword followed by the name of the variable. The code below
-                assigns the text �Gainesville� to the variable named city.</p>
-            <pre><em>var city = 'Gainesville';</em></pre>
-            <p><em>Note that the text string in the code should be surrounded by quotes.</em> You are free to use either
-                ' (single quotes) or " (double quotes), and they must match at the beginning and end of each string. In
-                your programs, it is advisable to be consistent�use either single quotes or double quotes throughout a
-                given script (the code in this book generally uses single quotes for code). Each statement of your
-                script should typically end with a semicolon, although Earth Engine�s code editor does not require it.
-            </p>
-            <p>If you print the variable city, you will get the value stored in the variable (Gainesville) printed in
-                the Console.</p>
-            <pre>print(city);</pre>
-            <p>When you assign a text value, the variable is automatically assigned the type string. You can also assign
-                numbers to variables and create variables of type number. The following code creates a new variable
-                called population and assigns a number as its value.</p>
-            <pre>var population = <span>140,398</span>;<br>print(population);</pre>
-            <p>Read more about variables here: <a href="https://www.w3schools.com/js/js_variables.asp"
-                    target="_blank">https://www.w3schools.com/js/js_variables.asp</a></p>
 
-            <h2>Key Concepts</h2>
-            <div style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
-                <ul style="margin: 0;">
-                    <li>Use <code>var</code> to declare variables</li>
-                    <li>Variable names should be descriptive (e.g., <code>cityName</code> not <code>x</code>)</li>
-                    <li>Text values create <strong>string</strong> variables</li>
-                    <li>Numeric values create <strong>number</strong> variables</li>
-                    <li>Use <code>print()</code> to display variable values in the Console</li>
+            <section class="learning-objectives">
+                <h3>What you'll learn</h3>
+                <ul>
+                    <li>Create variables with <code>var</code> and store strings and numbers.</li>
+                    <li>Pick clear names that make code readable.</li>
+                    <li>Print values to inspect them in the Code Editor console.</li>
+                    <li>Understand how to wrap values as Earth Engine objects when needed.</li>
                 </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why this matters</h3>
+                <p>Variables are the foundation for every script. In Earth Engine, you store images, geometries, dates, and results in variables so you can reuse them without retyping long expressions.</p>
+            </section>
+
+            <section>
+                <h2>What is a variable-</h2>
+                <p>A variable is a labeled container for data.</p>
+<pre><code>var city = 'Gainesville';</code></pre>
+                <ul>
+                    <li><code>var</code>: declare a new variable.</li>
+                    <li><code>city</code>: the label you will reference later.</li>
+                    <li><code>=</code>: assignment operator.</li>
+                    <li><code>'Gainesville'</code>: the value stored (a string).</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Storing and printing values</h2>
+<pre><code>var population = 140398;
+var latitude = 29.6516;
+var longitude = -82.3248;
+
+print('Population:', population);
+print('Lat/Lon:', latitude, longitude);</code></pre>
+                <div class="expected-output">
+                    <h4>Expected output</h4>
+                    <p>Console lines showing the population and coordinates you stored.</p>
+                </div>
+            </section>
+
+            <section class="note">
+                <h3>Text vs numbers</h3>
+                <p>Strings need quotes (<code>'Miami'</code>), numbers do not (<code>25.76</code>).</p>
+            </section>
+
+            <section>
+                <h2>Naming variables</h2>
+<pre><code>// Hard to read
+var x = 29.6516;
+var y = -82.3248;
+
+// Clear and descriptive
+var latitude = 29.6516;
+var longitude = -82.3248;
+var zoomLevel = 9;</code></pre>
+                <p>Use camelCase for multiple words (<code>studyArea</code>). Avoid reserved words (like <code>var</code>, <code>function</code>).</p>
+            </section>
+
+            <section class="pro-tips">
+                <h3>Pro tips</h3>
+                <ul>
+                    <li>Declare once, reuse often: set <code>var roi</code> and pass it to filters and reducers.</li>
+                    <li>Use <code>print()</code> whenever you are unsure what a variable contains.</li>
+                    <li>Keep variable scope tight-declare inside functions when only used there.</li>
+                </ul>
+            </section>
+
+            <section class="builds-on">
+                <h4>Important: client vs server</h4>
+                <p>Plain JavaScript variables live in your browser. Earth Engine computations need <code>ee</code> objects (for example, <code>ee.Number(5)</code> instead of <code>5</code> when used in server math). See <a href="client-vs-server.html">Client vs Server</a> for details.</p>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it yourself</h4>
+                <ol>
+                    <li>Create <code>myCity</code> as a string and <code>myLatitude</code>/<code>myLongitude</code> as numbers.</li>
+                    <li>Print them together in one <code>print</code> call.</li>
+                    <li>Wrap the numbers as <code>ee.Number</code> and add 1 using <code>.add()</code>.</li>
+                </ol>
             </div>
 
-            <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
-                <strong>⚠️ Common Mistake:</strong>
-                <p>In Earth Engine, regular JavaScript variables (like <code>var x = 5</code>) are <em>client-side</em>.
-                    To use values in Earth Engine computations, you often need to wrap them with <code>ee.</code>
-                    constructors (like <code>ee.Number(5)</code>). See the <a href="client-vs-server.html">Client vs
-                        Server</a> module.</p>
-            </div>
-            <p></p>
+            <section class="common-mistakes">
+                <h3>Common mistakes to avoid</h3>
+                <ul>
+                    <li>Missing quotes for text: <code>var city = Gainesville;</code> will error.</li>
+                    <li>Spaces in names: <code>var study area</code> is invalid.</li>
+                    <li>Starting with a number: <code>var 2ndCity</code> is invalid.</li>
+                    <li>Mismatched quotes: <code>'Gainesville"</code> will error.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Additional resources</h2>
+                <p><a href="https://www.w3schools.com/js/js_variables.asp" target="_blank" rel="noopener">W3Schools: JavaScript Variables</a></p>
+            </section>
         </main>
 
         <footer>
-            <p><a href="../../index.html">��Back to Course Home</a></p>
+            <p><a href="introduction-to-javascript.html">Previous: Intro to JavaScript</a> | <a href="comments.html">Next: Comments</a></p>
+            <p><a href="../../index.html">Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>
 </body>
-
 </html>
+

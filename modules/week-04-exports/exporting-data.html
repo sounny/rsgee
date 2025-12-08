@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -19,6 +19,29 @@
         </header>
 
         <main class="lab-content">
+            <p>
+                Earth Engine processes data in the cloud, but eventually you need to get results out—whether to
+                share with collaborators, use in other software, or archive for publications.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Export images to Google Drive, Cloud Storage, and Assets.</li>
+                    <li>Export tables (FeatureCollections) in multiple formats.</li>
+                    <li>Understand the Tasks panel workflow.</li>
+                    <li>Troubleshoot common export issues.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Your analysis must reach its audience. Exports let you bring Earth Engine results into reports,
+                    presentations, GIS software, and long-term archives—completing the research workflow.
+                </p>
+            </section>
+
             <section>
                 <h2>Why Export?</h2>
                 <p>Earth Engine is powerful for analysis, but sometimes you need to:</p>
@@ -170,6 +193,40 @@ Export.image.toDrive({
                 </table>
             </section>
 
+            <div class="try-it">
+                <h4>Try it: Export an NDVI image</h4>
+                <p>Create a cloud-free NDVI composite and export it:</p>
+                <pre><code>var roi = ee.Geometry.Rectangle([-82.5, 29.5, -82.0, 30.0]);
+
+var ndvi = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2023-06-01', '2023-08-31')
+  .filterBounds(roi)
+  .map(function(img) {
+    return img.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI');
+  })
+  .median();
+
+Export.image.toDrive({
+  image: ndvi,
+  description: 'NDVI_Summer_2023',
+  folder: 'EarthEngine',
+  region: roi,
+  scale: 30,
+  maxPixels: 1e9
+});</code></pre>
+                <p>After running, click "Run" in the Tasks panel to start the export.</p>
+            </div>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What happens when you run a script with <code>Export.image.toDrive()</code>?</li>
+                    <li>Why would you export to an Asset instead of Drive?</li>
+                    <li>What does <code>.visualize()</code> do before exporting?</li>
+                    <li>What should you try if your export task fails?</li>
+                </ol>
+            </section>
+
             <section>
                 <h2>Key Takeaways</h2>
                 <div class="info-box"
@@ -181,6 +238,17 @@ Export.image.toDrive({
                         <li>Export to Assets if you'll reuse data in Earth Engine</li>
                     </ul>
                 </div>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li><a href="reducers.html">Reducers</a> - aggregate data before exporting</li>
+                    <li><a href="../week-02-images/cloud-masking.html">Cloud Masking</a> - create clean inputs for
+                        export</li>
+                    <li><a href="../week-06-public-engagement/engaging-public.html">Public Engagement</a> - share your
+                        results</li>
+                </ul>
             </section>
         </main>
 

@@ -1,13 +1,15 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 13 - Improving your Classifications | Remote Sensing Course</title>
+    <meta name="description"
+        content="Learn techniques to improve classification accuracy through more training data, additional predictor bands, and parameter tuning.">
     <link rel="stylesheet" href="../css/style.css">
-    <meta name="robots" content="index, follow">
-    <meta name="description" content="Google Earth Engine lab 13: Lab 13 - Improving your Classifications">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -16,48 +18,308 @@
 
         <header class="lab-header">
             <h1>Lab 13 - Improving your Classifications</h1>
+            <p><em><strong>Objective: Apply techniques to improve classification accuracy through better training data,
+                        additional predictors, and parameter tuning.</strong></em></p>
         </header>
 
         <main class="lab-content">
 
-            <section class="lab-preflight">
-                <h2>Before you start</h2>
+            <!-- Learning Objectives -->
+            <section class="learning-objectives">
+                <h3>What You'll Learn</h3>
                 <ul>
-                    <li><strong>Prerequisites:</strong> Complete Labs 11�12 and gather feedback on your initial classification outputs.</li>
-                    <li><strong>Estimated time:</strong> 60 minutes</li>
-                    <li><strong>Materials:</strong> Earth Engine access, saved classifier scripts, and evaluation metrics or confusion matrices to reference.</li>
+                    <li>Improve supervised classification through better training data collection</li>
+                    <li>Add spectral indices (NDVI, NDWI) as additional predictor bands</li>
+                    <li>Tune Random Forest parameters for better results</li>
+                    <li>Adjust unsupervised clustering parameters</li>
+                    <li>Compare different clustering algorithms</li>
                 </ul>
             </section>
 
-<p><i class="zm-icon-edit" aria-hidden="true"><span><em><strong><span class="css-138gh4t-view" dir="ltr"><span class="css-he75de-view--inline" dir="ltr"><span class="css-kuunbm-text" data-testid="message_title"><span aria-hidden="true">Lab 13 Assignments 2 and 4 questions</span></span></span></span></strong></em></span></i></p>
-<div class="userMessage">
-<p></p>
-<p>Dr. Sounny and Matthew discussed the process of adding new predictor bands to their data set, including the creation of a new band from analytics and the use of Landsat image as a variable. They encountered technical issues related to passing strings and band names in their system and worked on adding a new band to their image and changing prediction bands from Landsat 1 to Landsat 2. They also discussed the process of adding new dots, the impact of increasing the number of samples extracted from the composite and unsupervised sampling on the results, and the potential frustration with coding in Earth Engine.</p>
-</div>
+            <!-- Building On Previous Learning -->
+            <section class="builds-on">
+                <h4>Building On Previous Learning</h4>
+                <p>This lab directly extends your work from:</p>
+                <ul>
+                    <li><a href="lab-11-supervised-classification.html">Lab 11</a> - Supervised classification with
+                        Random Forest</li>
+                    <li><a href="lab-12-unsupervised-classification.html">Lab 12</a> - Unsupervised k-means clustering
+                    </li>
+                </ul>
+            </section>
 
-<p><em><strong>Lab 13 - Improving your Classifications</strong></em></p>
-<p><span>In this lab, you will improve the code you created in Lab 11 - Supervised Classification and Lab 12 - Unsupervised Classification. You'll see if you can improve the classifications by completing the following assignments. You can use your code from Lab 12 or use the following code: <a href="https://code.earthengine.google.com/82c02e163ca780304a5536c29c6c4461" target="_blank">https://code.earthengine.google.com/82c02e163ca780304a5536c29c6c4461</a></span></p>
-<p><strong>Assignment 1. </strong><span>For the supervised classification, try collecting more points for each class. The more points you have, the more spectrally represented the classes are. It is good practice to collect points across the entire composite and not just focus on one location. Also, look for pixels of the same class that show variability. For example, for the water class, collect pixels in parts of rivers that vary in color. For the developed class, collect pixels from different rooftops.</span></p>
-<p><strong>Assignment 2. </strong><span>Add more predictors. Usually, the more spectral information you feed the classifier, the easier it is to separate classes. Try calculating and incorporating a band of&nbsp; NDVI or the Normalized Difference Water Index as a predictor band. Do you think this helps the classification? Could you check for developed areas classified as herbaceous or vice versa?</span></p>
-<p><strong>Assignment 3. </strong><span>Use more trees in the Random Forest classifier. Do you see any improvements compared to 50 trees? Note that the more trees you have, the longer it will take to compute the results and that more trees might not always mean better results.</span></p>
-<p><strong>Assignment 4. </strong><span>Increase the number of samples extracted from the composite in the unsupervised classification. Does that improve the result?</span></p>
-<p><strong>Assignment 5. </strong><span>Increase the number of </span><i><span>k</span></i><span> of clusters for the </span><i><span>k</span></i><span>-means algorithm. What would happen if you tried 10 classes? Does the classified map result in meaningful classes?</span></p>
-<p><strong>Assignment 6. </strong><span>Test other clustering algorithms. We only used </span><i><span>k</span></i><span>-means; try other options under the </span><span>ee</span><span>.</span><span>Clusterer</span><span> object.</span></p>
-<p><em><strong>Complete the Assignments above and add comments showing where they are clearly, and comment on any codes.&nbsp; Submit a URL to your final work product.</strong></em></p>
+            <!-- Why It Matters -->
+            <section class="why-it-matters">
+                <h3>Why This Matters</h3>
+                <p>Initial classification results are rarely perfect. Understanding how to systematically improve your
+                    results is critical for:</p>
+                <ul>
+                    <li><strong>Accuracy:</strong> Meeting project requirements for land cover mapping</li>
+                    <li><strong>Reliability:</strong> Producing consistent results across different scenes</li>
+                    <li><strong>Understanding:</strong> Knowing WHY classifications fail helps you fix them</li>
+                </ul>
+            </section>
+
+            <section class="lab-preflight">
+                <h2>Before You Start</h2>
+                <ul>
+                    <li><strong>Prerequisites:</strong> Complete Labs 11-12 and gather feedback on your initial
+                        classification outputs.</li>
+                    <li><strong>Estimated time:</strong> 60 minutes</li>
+                    <li><strong>Materials:</strong> Earth Engine access, saved classifier scripts, and your Lab 12 code.
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Key Vocabulary -->
+            <section class="vocabulary">
+                <h3>Key Terms</h3>
+                <dl>
+                    <dt>Predictor Bands</dt>
+                    <dd>The image bands used by the classifier to make predictions. More informative bands can improve
+                        accuracy.</dd>
+
+                    <dt>Feature Space</dt>
+                    <dd>The multi-dimensional space defined by all predictor bands where pixels are classified.</dd>
+
+                    <dt>Hyperparameter</dt>
+                    <dd>Settings that control how an algorithm works (e.g., number of trees, k value) that must be tuned
+                        by the analyst.</dd>
+
+                    <dt>Spectral Separability</dt>
+                    <dd>How distinguishable different classes are based on their spectral signatures.</dd>
+                </dl>
+            </section>
+
+            <section>
+                <h2>Introduction</h2>
+                <p>In this lab, you will improve the code you created in Lab 11 - Supervised Classification and Lab 12
+                    - Unsupervised Classification. You'll see if you can improve the classifications by completing the
+                    following assignments.</p>
+                <p>You can use your code from Lab 12 or use the following code:
+                    <a href="https://code.earthengine.google.com/82c02e163ca780304a5536c29c6c4461" target="_blank">
+                        https://code.earthengine.google.com/82c02e163ca780304a5536c29c6c4461</a>
+                </p>
+            </section>
+
+            <section>
+                <h2>Strategies for Improvement</h2>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Strategy</th>
+                            <th>Applies To</th>
+                            <th>What It Improves</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>More training points</td>
+                            <td>Supervised</td>
+                            <td>Class representation, spectral variability</td>
+                        </tr>
+                        <tr>
+                            <td>Additional predictor bands</td>
+                            <td>Both</td>
+                            <td>Class separability</td>
+                        </tr>
+                        <tr>
+                            <td>More trees in RF</td>
+                            <td>Supervised</td>
+                            <td>Model stability (with diminishing returns)</td>
+                        </tr>
+                        <tr>
+                            <td>More sample pixels</td>
+                            <td>Unsupervised</td>
+                            <td>Cluster quality</td>
+                        </tr>
+                        <tr>
+                            <td>Adjust k value</td>
+                            <td>Unsupervised</td>
+                            <td>Class granularity</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Assignments</h2>
+
+                <div class="challenge">
+                    <h3>Assignment 1: Collect More Training Points</h3>
+                    <p>For the supervised classification, try collecting more points for each class.</p>
+                    <ul>
+                        <li>Collect points across the entire composite, not just one location</li>
+                        <li>Look for pixels of the same class that show variability</li>
+                        <li>For water: collect pixels in parts of rivers that vary in color</li>
+                        <li>For developed: collect pixels from different rooftops and materials</li>
+                    </ul>
+                    <div class="note">
+                        <p><strong>Tip:</strong> The more spectrally representative your training points are, the better
+                            the classifier can generalize to the entire image.</p>
+                    </div>
+                </div>
+
+                <div class="challenge">
+                    <h3>Assignment 2: Add Predictor Bands</h3>
+                    <p>Usually, the more spectral information you feed the classifier, the easier it is to separate
+                        classes.</p>
+                    <p>Add NDVI or NDWI as a new predictor band:</p>
+                    <pre><code>// Calculate NDVI and add to the image
+var ndvi = Landsat.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI');
+var imageWithNDVI = Landsat.addBands(ndvi);
+
+// Update your inputProperties to include NDVI
+var inputProperties = ['SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7', 'NDVI'];</code></pre>
+                    <p>Questions to answer in your comments:</p>
+                    <ul>
+                        <li>Does adding NDVI help the classification?</li>
+                        <li>Check developed areas classified as herbaceous (or vice versa)</li>
+                    </ul>
+                </div>
+
+                <div class="challenge">
+                    <h3>Assignment 3: Tune Random Forest Trees</h3>
+                    <p>Use more trees in the Random Forest classifier:</p>
+                    <pre><code>// Try different numbers of trees
+var classifier100 = ee.Classifier.smileRandomForest(100).train({...});
+var classifier200 = ee.Classifier.smileRandomForest(200).train({...});</code></pre>
+                    <p>Questions to answer:</p>
+                    <ul>
+                        <li>Do you see improvements compared to 50 trees?</li>
+                        <li>How does computation time change?</li>
+                    </ul>
+                    <div class="warning">
+                        <p><strong>Note:</strong> More trees increases computation time, and there are diminishing
+                            returns beyond a certain point.</p>
+                    </div>
+                </div>
+
+                <div class="challenge">
+                    <h3>Assignment 4: Increase Sample Size (Unsupervised)</h3>
+                    <p>Increase the number of samples extracted from the composite:</p>
+                    <pre><code>var training = Landsat.sample({
+    region: Landsat.geometry(),
+    scale: 30,
+    numPixels: 5000,  // Increased from 1000
+    tileScale: 8
+});</code></pre>
+                    <p>Does increasing samples improve the unsupervised result?</p>
+                </div>
+
+                <div class="challenge">
+                    <h3>Assignment 5: Increase K Clusters</h3>
+                    <p>Increase the number of k clusters:</p>
+                    <pre><code>// Try 10 clusters instead of 4
+var clusterer = ee.Clusterer.wekaKMeans(10).train(training);</code></pre>
+                    <p>Questions to answer:</p>
+                    <ul>
+                        <li>Does the classified map result in meaningful classes?</li>
+                        <li>Can multiple clusters be merged into your original 4 classes?</li>
+                    </ul>
+                </div>
+
+                <div class="challenge">
+                    <h3>Assignment 6: Test Other Clustering Algorithms</h3>
+                    <p>Try other options under the ee.Clusterer object:</p>
+                    <pre><code>// Try X-Means (automatically determines optimal k)
+var clusterer = ee.Clusterer.wekaXMeans({
+    minClusters: 2,
+    maxClusters: 10
+}).train(training);
+
+// Try Cascade K-Means
+var clusterer = ee.Clusterer.wekaCascadeKMeans({
+    minClusters: 2,
+    maxClusters: 10
+}).train(training);</code></pre>
+                    <p>How do results differ from standard k-means?</p>
+                </div>
+            </section>
+
+            <!-- Self-Check Questions -->
+            <section class="self-check">
+                <h3>Check Your Understanding</h3>
+                <ol>
+                    <li>Why is it important to collect training points across the entire image rather than in one area?
+                    </li>
+                    <li>How does adding NDVI as a predictor band help differentiate vegetation from developed areas?
+                    </li>
+                    <li>What are the trade-offs of using more trees in Random Forest?</li>
+                    <li>When might you want MORE than 4 clusters even if you only have 4 final classes?</li>
+                </ol>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <div class="issue">
+                    <strong>Problem: Adding NDVI causes an error about band names</strong>
+                    <p><strong>Solution:</strong> Make sure you add the NDVI band to the image BEFORE sampling,
+                        and update your inputProperties list to include 'NDVI'.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: More trees makes computation too slow</strong>
+                    <p><strong>Solution:</strong> 100-200 trees is usually sufficient. Beyond that, you get diminishing
+                        returns. Consider exporting the classification as a task instead of running on-the-fly.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: 10 clusters creates classes that don't make sense</strong>
+                    <p><strong>Solution:</strong> This is expected! More clusters create finer spectral distinctions
+                        that may not correspond to meaningful land cover. The analyst must interpret and merge clusters.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Pro Tips -->
+            <section class="pro-tips">
+                <h3>Pro Tips</h3>
+                <ul>
+                    <li><strong>Iterate systematically:</strong> Change one variable at a time to understand its impact
+                    </li>
+                    <li><strong>Document everything:</strong> Add comments showing what you changed and the result</li>
+                    <li><strong>Use validation data:</strong> Set aside some training points for testing accuracy</li>
+                    <li><strong>Consider your goal:</strong> More accurate isn't always better if it takes too long to
+                        compute</li>
+                </ul>
+            </section>
+
+            <!-- Key Concepts -->
+            <section class="key-concepts">
+                <h3>Key Takeaways</h3>
+                <ul>
+                    <li>Classification accuracy can be improved through better training data, more predictor bands, and
+                        parameter tuning</li>
+                    <li>There are always trade-offs between accuracy, computation time, and complexity</li>
+                    <li>Spectral indices like NDVI can significantly improve class separability</li>
+                    <li>Systematic experimentation helps you understand what works for your specific data</li>
+                </ul>
+            </section>
+
             <section id="submission">
                 <div class="submission-box">
-                    <h3>Lab Submission</h3>
-                    <p>Submit lab via email.</p>
+                    <h3>📋 Lab Submission</h3>
                     <p><strong>Subject:</strong> <code>Lab 13 - Improving your Classifications - [Your Name]</code></p>
+
+                    <h4>Submit:</h4>
+                    <p>A shareable URL to your code that includes:</p>
+                    <ol>
+                        <li>Completed assignments with clear comment separators</li>
+                        <li>Comments explaining what you changed and the results</li>
+                        <li>Your observations about which improvements worked best</li>
+                    </ol>
+                    <p><strong>Total: 60 Points (10 per assignment)</strong></p>
                 </div>
             </section>
         </main>
 
         <footer>
-            <p><a href='lab-12-unsupervised-classification.html'>&larr; Previous Lab</a> | <a href='lab-14-exporting-to-arcgis-pro.html'>Next Lab &rarr;</a></p>
-            <p><a href="../index.html">&larr;Back to Course Home</a></p>
+            <p><a href="lab-12-unsupervised-classification.html">← Previous Lab</a> | <a
+                    href="lab-14-exporting-to-arcgis-pro.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
         </footer>
     </div>
-    
+
 </body>
+
 </html>

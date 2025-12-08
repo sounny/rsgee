@@ -1,11 +1,15 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 6 - Image Collections, Filtering & Sorting | Remote Sensing Course</title>
+    <meta name="description"
+        content="Learn to work with large image collections and filter them by date, location, and properties in Google Earth Engine.">
     <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -14,54 +18,129 @@
 
         <header class="lab-header">
             <h1>Lab 6 - Image Collections, Filtering & Sorting</h1>
-            <p><em><strong>Objective: Learn to work with large image collections and filter them by date, location, and properties.</strong></em></p>
+            <p><em><strong>Objective: Learn to work with large image collections and filter them by date, location, and
+                        properties.</strong></em></p>
         </header>
 
         <main class="lab-content">
 
-            <section class="lab-preflight">
-                <h2>Before you start</h2>
+            <!-- Learning Objectives -->
+            <section class="learning-objectives">
+                <h3>What You'll Learn</h3>
                 <ul>
-                    <li><strong>Prerequisites:</strong> Finish Lab 5 and review the lesson on image collections, filtering, and sorting.</li>
-                    <li><strong>Estimated time:</strong> 60 minutes</li>
-                    <li><strong>Materials:</strong> Earth Engine access, bookmarked collection IDs, and the filtering criteria you plan to test.</li>
+                    <li>Understand what an ImageCollection is and how it differs from a single Image</li>
+                    <li>Filter collections by date using <code>filterDate()</code></li>
+                    <li>Filter collections by location using <code>filterBounds()</code></li>
+                    <li>Sort collections by metadata properties like cloud cover</li>
+                    <li>Extract a single image from a collection using <code>first()</code></li>
                 </ul>
             </section>
 
+            <!-- Building On Previous Learning -->
+            <section class="builds-on">
+                <h4>Building On Previous Learning</h4>
+                <p>This lab builds on <a href="lab-02-hello-landsat.html">Lab 2</a> where you loaded a single image
+                    by its ID. Now you'll learn to search through entire collections to find exactly the image you need.
+                </p>
+            </section>
+
+            <!-- Why It Matters -->
+            <section class="why-it-matters">
+                <h3>Why This Matters</h3>
+                <p>The Earth Engine Data Catalog contains <strong>petabytes of data</strong> - more images than you
+                    could
+                    ever browse manually. Filtering is how you:</p>
+                <ul>
+                    <li>Find cloud-free imagery for your study area</li>
+                    <li>Select images from specific seasons or years</li>
+                    <li>Build time series to track changes</li>
+                    <li>Avoid computational timeouts by reducing dataset size</li>
+                </ul>
+                <p>Without filtering, Earth Engine would try to process millions of images at once!</p>
+            </section>
+
+            <section class="lab-preflight">
+                <h2>Before You Start</h2>
+                <ul>
+                    <li><strong>Prerequisites:</strong> Finish Lab 5 and review the lesson on image collections,
+                        filtering, and sorting.</li>
+                    <li><strong>Estimated time:</strong> 60 minutes</li>
+                    <li><strong>Materials:</strong> Earth Engine access, bookmarked collection IDs, and the filtering
+                        criteria you plan to test.</li>
+                </ul>
+            </section>
+
+            <!-- Key Vocabulary -->
+            <section class="vocabulary">
+                <h3>Key Terms</h3>
+                <dl>
+                    <dt>Image Collection</dt>
+                    <dd>A stack of images, typically containing multiple images over time or space (e.g., all Landsat 8
+                        images ever captured).</dd>
+
+                    <dt>Filter</dt>
+                    <dd>An operation that reduces a collection to only images matching specific criteria (date,
+                        location, properties).</dd>
+
+                    <dt>Metadata</dt>
+                    <dd>Information about an image, such as capture date, cloud cover percentage, sun elevation, etc.
+                    </dd>
+
+                    <dt>CLOUD_COVER</dt>
+                    <dd>A metadata property in Landsat images indicating the percentage of the scene covered by clouds
+                        (0-100).</dd>
+
+                    <dt>Path/Row</dt>
+                    <dd>The grid system Landsat uses to organize images. Paths run north-south; rows run east-west.</dd>
+                </dl>
+            </section>
+
             <div class="note">
-                <p><strong>Lab Lecture:</strong> <a href="https://ufl.zoom.us/rec/share/uYl15vuKhf8pZrt_TRN08maw4i7SltbJczhhWoVrt-sSFhhELirmGtI1OiV6avez.xqUjNFUT3OMPnm42?startTime=1693931924000" target="_blank">Fall 2023 Recording</a></p>
+                <p><strong>Lab Lecture:</strong> <a
+                        href="https://ufl.zoom.us/rec/share/uYl15vuKhf8pZrt_TRN08maw4i7SltbJczhhWoVrt-sSFhhELirmGtI1OiV6avez.xqUjNFUT3OMPnm42?startTime=1693931924000"
+                        target="_blank">Fall 2023 Recording</a></p>
             </div>
 
             <section>
                 <h2>Introduction: The Landsat Program</h2>
-                
+
                 <figure>
                     <img src="../images/diagrams/5262-Landsat-timeline-FNL-2.jpg" alt="Timeline of Landsat missions">
-                    <figcaption>Timeline of the longest continuous remote sensing mission, Landsat</figcaption>
+                    <figcaption>Timeline of the longest continuous remote sensing mission, Landsat (1972-present)
+                    </figcaption>
                 </figure>
 
                 <p>
-                    The Landsat program from NASA and the United States Geological Survey (USGS) has launched a sequence 
-                    of Earth observation satellites named Landsat 1, 2, etc. Landsats have been returning images since 1972, 
-                    making that collection of images the longest continuous satellite-based observation of the Earth's surface.
+                    The Landsat program from NASA and the United States Geological Survey (USGS) has launched a sequence
+                    of Earth observation satellites named Landsat 1, 2, etc. Landsats have been returning images since
+                    1972,
+                    making that collection of images the <strong>longest continuous satellite-based observation</strong>
+                    of
+                    the Earth's surface.
                 </p>
 
                 <p>
-                    The Landsat program has revolutionized remote sensing and land observation. The program was initially 
-                    developed to improve the understanding of the Earth's terrestrial and aquatic ecosystems, but its use 
-                    quickly grew to encompass a wide range of fields, such as natural resource exploration, disaster 
+                    The Landsat program has revolutionized remote sensing and land observation. The program was
+                    initially
+                    developed to improve the understanding of the Earth's terrestrial and aquatic ecosystems, but its
+                    use
+                    quickly grew to encompass a wide range of fields, such as natural resource exploration, disaster
                     preparedness, urban planning, and agricultural monitoring.
                 </p>
 
                 <figure>
                     <img src="../images/diagrams/Landsat8_channels.png" alt="Landsat 8 spectral bands">
-                    <figcaption>Electromagnetic Spectrum and the Windows in the Atmosphere with the Bands for Landsat 8</figcaption>
+                    <figcaption>Electromagnetic Spectrum and the Windows in the Atmosphere with the Bands for Landsat 8
+                    </figcaption>
                 </figure>
 
                 <p>
-                    The Landsat satellites are designed to capture detailed images of the Earth's surface on a regular basis 
-                    with a spatial resolution of 30 meters per pixel in visible and near-infrared light bands, with additional 
-                    infrared and thermal band capabilities. Additionally, Landsat data is freely available to the public, 
+                    The Landsat satellites are designed to capture detailed images of the Earth's surface on a regular
+                    basis
+                    with a spatial resolution of 30 meters per pixel in visible and near-infrared light bands, with
+                    additional
+                    infrared and thermal band capabilities. Additionally, Landsat data is freely available to the
+                    public,
                     making it a valuable tool for both professional and amateur users.
                 </p>
             </section>
@@ -71,15 +150,16 @@
 
                 <ol>
                     <li>
-                        <h3>Viewing an Image Collection</h3>
-                        <p>Open up Google Earth Engine Code: <a href="https://code.earthengine.google.com/" target="_blank">https://code.earthengine.google.com/</a></p>
+                        <h3>Part 1 - Viewing an Image Collection</h3>
+                        <p>Open up Google Earth Engine Code: <a href="https://code.earthengine.google.com/"
+                                target="_blank">https://code.earthengine.google.com/</a></p>
                         <p>Copy and paste the following code into the center panel and click Run:</p>
                         <pre><code>/////
 // View an Image Collection
 /////
 
 // Import the Landsat 8 Raw Collection.
-var Landsat8 = ee.ImageCollection('Landsat/LC08/C02/T1');
+var Landsat8 = ee.ImageCollection('LANDSAT/LC08/C02/T1');
 
 // Print the size of the Landsat 8 dataset.
 print('The size of the Landsat 8 image collection is:', Landsat8.size());
@@ -97,56 +177,93 @@ Map.addLayer(Landsat8,
         max: 15000
     },
     'Landsat 8 Image Collection');</code></pre>
+
+                        <p><strong>Understanding the code:</strong></p>
+                        <ul>
+                            <li><code>ee.ImageCollection()</code> - Loads an entire collection of images</li>
+                            <li><code>.size()</code> - Returns the number of images in the collection</li>
+                            <li>When you add a collection to the map, Earth Engine mosaics all images together</li>
+                        </ul>
+
                         <p>
-                            While the enormous image catalog is accessed, it could take a couple of minutes to see the result. 
-                            You may note individual "scenes" being drawn, which equate to the way that the Landsat program 
+                            While the enormous image catalog is accessed, it could take a couple of minutes to see the
+                            result.
+                            You may note individual "scenes" being drawn, which equate to the way that the Landsat
+                            program
                             partitions Earth into "paths" and "rows."
                         </p>
                         <figure>
-                            <img src="../images/screenshots/Screenshot 2023-02-17 at 2.06.31 AM.png" alt="Landsat imagery being drawn">
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 2.06.31 AM.png"
+                                alt="Landsat imagery being drawn">
                             <figcaption>Screenshot of Landsat being drawn on Google Earth Engine</figcaption>
                         </figure>
+
+                        <div class="note">
+                            <p><strong>About Rows and Paths:</strong> Images from Landsat are placed in a grid pattern.
+                                A row is a sequence of images taken at the same latitude, while a path is a series of
+                                images taken
+                                at the same longitude. Paths are numbered from west to east starting at the 180-degree
+                                longitude line.
+                                Rows are numbered from south to north starting at the equator.</p>
+                        </div>
+
                         <p>
-                            <strong>Note about Rows and Paths:</strong> Images from Landsat are placed in a grid pattern. 
-                            A row is a sequence of images taken at the same latitude, while a path is a series of images taken 
-                            at the same longitude. Paths are numbered from west to east starting at the 180-degree longitude line. 
-                            Rows are numbered from south to north starting at the equator.
-                        </p>
-                        <p>
-                            Notice the high amount of cloud cover and the "layered" look. This is because Earth Engine is drawing 
+                            Notice the high amount of cloud cover and the "layered" look. This is because Earth Engine
+                            is drawing
                             each of the images one on top of the other.
                         </p>
                         <figure>
-                            <img src="../images/screenshots/Screenshot 2023-02-17 at 2.51.00 AM.png" alt="Size of Landsat collection">
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 2.51.00 AM.png"
+                                alt="Size of Landsat collection">
                             <figcaption>The number of Landsat images in the collection (over 1 million!)</figcaption>
                         </figure>
+
+                        <div class="expected-output">
+                            <h4>Expected Console Output</h4>
+                            <p>You should see a number greater than 1,000,000 and an error about too many elements to
+                                print.</p>
+                        </div>
+
                         <figure>
-                            <img src="../images/screenshots/Screenshot 2023-02-17 at 5.59.46 AM.png" alt="Error message">
-                            <figcaption>Error from trying to print too many elements</figcaption>
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 5.59.46 AM.png"
+                                alt="Error message">
+                            <figcaption>Error from trying to print too many elements (this is expected!)</figcaption>
                         </figure>
                     </li>
 
                     <li>
-                        <h3>Comment Out Code</h3>
+                        <h3>Part 2 - Comment Out Code</h3>
                         <p>
-                            Edit your code to "comment out" the last two code commands using <code>//</code> at the beginning 
+                            Edit your code to "comment out" the last two code commands using <code>//</code> at the
+                            beginning
                             of each line. This will speed up your code in subsequent sections.
                         </p>
                         <figure>
-                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.03.07 AM.png" alt="Commented out code">
-                            <figcaption>Commented out code</figcaption>
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.03.07 AM.png"
+                                alt="Commented out code">
+                            <figcaption>Commented out code prevents it from running</figcaption>
                         </figure>
+
+                        <div class="pro-tips">
+                            <h3>Keyboard Shortcut</h3>
+                            <p>Select multiple lines and press <code>Ctrl + /</code> (Windows) or <code>Cmd + /</code>
+                                (Mac)
+                                to toggle comments on/off quickly.</p>
+                        </div>
                     </li>
 
                     <li>
-                        <h3>Filter by Date</h3>
+                        <h3>Part 3 - Filter by Date</h3>
                         <p>
-                            Now we will look at finding "the needle in the haystack." The basic approach to GEE is to add an 
-                            image collection that brings in every image, then to filter the collection until you find the exact 
+                            Now we will look at finding "the needle in the haystack." The basic approach to GEE is to
+                            add an
+                            image collection that brings in every image, then to filter the collection until you find
+                            the exact
                             image you're interested in.
                         </p>
                         <p>
-                            <code>filterDate</code> allows us to narrow down the date range of the ImageCollection. Copy and paste:
+                            <code>filterDate</code> allows us to narrow down the date range of the ImageCollection. Copy
+                            and paste:
                         </p>
                         <pre><code>/////
 // Filter an Image Collection
@@ -164,25 +281,37 @@ Map.addLayer(LandsatWinter,
     'Winter Landsat 8');
 
 print('The size of the Winter Landsat 8 image collection is:', LandsatWinter.size());</code></pre>
+
+                        <p><strong>Understanding filterDate():</strong></p>
+                        <ul>
+                            <li>Takes two arguments: start date and end date</li>
+                            <li>Format: <code>'YYYY-MM-DD'</code> (year-month-day)</li>
+                            <li>The end date is <strong>exclusive</strong> - images from that exact date are not
+                                included</li>
+                        </ul>
+
                         <p>
-                            The result will load much faster because we filtered by date. Notice that before we had over a 
+                            The result will load much faster because we filtered by date. Notice that before we had over
+                            a
                             million images; after filtering, we have thousands.
                         </p>
                         <figure>
-                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.07.39 AM.png" alt="Filtered by date results">
-                            <figcaption>Results from filtering by date</figcaption>
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.07.39 AM.png"
+                                alt="Filtered by date results">
+                            <figcaption>Results from filtering by date - down to thousands of images</figcaption>
                         </figure>
                         <p>Comment out the Map.addLayer for winter imagery before moving on.</p>
                         <figure>
-                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.15.34 AM.png" alt="Commented winter code">
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.15.34 AM.png"
+                                alt="Commented winter code">
                             <figcaption>Commented out winter imagery code</figcaption>
                         </figure>
                     </li>
 
                     <li>
-                        <h3>Filter by Location</h3>
+                        <h3>Part 4 - Filter by Location</h3>
                         <p>
-                            The filtering tool <code>filterBounds</code> is based on a location�for example, a point, 
+                            The filtering tool <code>filterBounds</code> is based on a location - for example, a point,
                             polygon, or other geometry. Copy and paste:
                         </p>
                         <pre><code>/////
@@ -206,37 +335,60 @@ Map.addLayer(LandsatFL,
 Map.addLayer(pointFL, {}, 'Point FL');
 
 print('The size of the Gainesville Winter Landsat 8 image collection is: ', LandsatFL.size());</code></pre>
+
+                        <p><strong>Understanding filterBounds():</strong></p>
+                        <ul>
+                            <li>Keeps only images that <strong>intersect</strong> with your geometry</li>
+                            <li>Works with points, polygons, rectangles, or any geometry</li>
+                            <li>Dramatically reduces the collection size by focusing on your study area</li>
+                        </ul>
+
                         <p>
-                            Note that we add the pointFL to the map with an empty dictionary <code>{}</code> for the visParams 
-                            argument�we are not specifying visualization parameters, using defaults instead.
+                            Note that we add the pointFL to the map with an empty dictionary <code>{}</code> for the
+                            visParams
+                            argument - we are not specifying visualization parameters, using defaults instead.
                         </p>
-                        <p>Run the code. Now only images that intersect our point have been selected. Note we only have 12 images.</p>
+                        <p>Run the code. Now only images that intersect our point have been selected. Note we only have
+                            12 images.</p>
                         <figure>
-                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.21.57 AM.png" alt="Filtered by location">
-                            <figcaption>Filtered by location results</figcaption>
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.21.57 AM.png"
+                                alt="Filtered by location">
+                            <figcaption>Filtered by location - down to just 12 images!</figcaption>
                         </figure>
+
+                        <div class="try-it">
+                            <h4>Try It</h4>
+                            <p>Change the coordinates to your hometown and see how many images are available for that
+                                location
+                                during winter 2020-2021.</p>
+                        </div>
                     </li>
 
                     <li>
-                        <h3>Select First Image</h3>
+                        <h3>Part 5 - Select First Image</h3>
                         <p>
-                            The <code>first</code> function selects the first image in an ImageCollection. This allows us to 
-                            place a single image on the screen. Because images are stored in time order, it will select the 
+                            The <code>first</code> function selects the first image in an ImageCollection. This allows
+                            us to
+                            place a single image on the screen. Because images are stored in time order, it will select
+                            the
                             earliest image.
                         </p>
                         <figure>
-                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.24.50 AM.png" alt="First image selected">
-                            <figcaption>Filtered to a single image</figcaption>
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.24.50 AM.png"
+                                alt="First image selected">
+                            <figcaption>The first (earliest) image in the filtered collection</figcaption>
                         </figure>
                         <p>
-                            Notice the image is very cloudy. Normally this is a problem for analysis�we prefer images without 
+                            Notice the image is very cloudy. Normally this is a problem for analysis - we prefer images
+                            without
                             clouds. Each image in Landsat's collection has a cloud cover rating we can use.
                         </p>
                     </li>
 
                     <li>
-                        <h3>Sort by Cloud Cover</h3>
-                        <p>The basic approach is to sort the ImageCollection by cloud cover, then add the first image:</p>
+                        <h3>Part 6 - Sort by Cloud Cover</h3>
+                        <p>The basic approach is to sort the ImageCollection by cloud cover, then add the first image:
+                        </p>
                         <pre><code>// Sort the image collection by cloud cover
 var LandsatSort = LandsatFL.sort('CLOUD_COVER');
 
@@ -252,34 +404,114 @@ Map.addLayer(LandsatFirstSort,
         max: 15000
     },
     'Sort Landsat 8');</code></pre>
+
+                        <p><strong>Understanding the workflow:</strong></p>
+                        <ul>
+                            <li><code>.sort('CLOUD_COVER')</code> - Orders images from lowest to highest cloud cover
+                            </li>
+                            <li><code>.first()</code> - After sorting, the first image is the one with least clouds</li>
+                            <li><code>Map.centerObject()</code> - Centers the map on your image at zoom level 7</li>
+                        </ul>
+
                         <p>
-                            Now you have a single Landsat image with no cloud cover, filtered for Gainesville during the 
+                            Now you have a single Landsat image with no cloud cover, filtered for Gainesville during the
                             winter of 2020-2021!
                         </p>
                         <figure>
-                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.32.41 AM.png" alt="Cloud-free result">
+                            <img src="../images/screenshots/Screenshot 2023-02-17 at 6.32.41 AM.png"
+                                alt="Cloud-free result">
                             <figcaption>Cloud-free sorted image result</figcaption>
                         </figure>
-                        <p><em>Full code link: <a href="https://code.earthengine.google.com/63a62bb95d997e06fda0f38141ca4aa4" target="_blank">GEE Code</a></em></p>
+
+                        <div class="expected-output">
+                            <h4>The Complete Filtering Pipeline</h4>
+                            <p><strong>1,000,000+ images</strong> → filterDate → <strong>~50,000 images</strong> →
+                                filterBounds →
+                                <strong>12 images</strong> → sort + first → <strong>1 cloud-free image</strong>
+                            </p>
+                        </div>
+
+                        <p><em>Full code link: <a
+                                    href="https://code.earthengine.google.com/63a62bb95d997e06fda0f38141ca4aa4"
+                                    target="_blank">GEE Code</a></em></p>
                     </li>
                 </ol>
             </section>
 
+            <!-- Self-Check Questions -->
+            <section class="self-check">
+                <h3>Check Your Understanding</h3>
+                <ol>
+                    <li>Why does <code>print(Landsat8)</code> produce an error?</li>
+                    <li>What's the difference between <code>filterDate</code> and <code>filterBounds</code>?</li>
+                    <li>If you use <code>.first()</code> without sorting first, which image do you get?</li>
+                    <li>How would you find the <em>most</em> cloudy image instead of the least?</li>
+                </ol>
+                <p><em>Hint for Q4: Check the documentation for <code>.sort()</code> - there's an optional second
+                        argument.</em></p>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <div class="issue">
+                    <strong>Problem: "Collection query aborted" or timeout error</strong>
+                    <p><strong>Solution:</strong> Your filters aren't reducing the collection enough. Add more filters
+                        (narrower date range, smaller geometry) before trying to display or process.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: No images appear after filtering</strong>
+                    <p><strong>Solution:</strong> Your filters may be too restrictive. Try widening the date range or
+                        check that your point coordinates are correct (longitude first, then latitude!).</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Image appears but is all black</strong>
+                    <p><strong>Solution:</strong> Your min/max visualization parameters don't match the data. For
+                        Landsat Collection 2, try min: 5000, max: 15000 for raw data.</p>
+                </div>
+            </section>
+
+            <!-- Key Concepts Summary -->
+            <section class="key-concepts">
+                <h3>Key Takeaways</h3>
+                <ul>
+                    <li><code>ee.ImageCollection()</code> loads entire archives (potentially millions of images)</li>
+                    <li>Always filter collections before processing to avoid timeouts</li>
+                    <li><code>filterDate(start, end)</code> limits by time period</li>
+                    <li><code>filterBounds(geometry)</code> limits by location</li>
+                    <li><code>.sort('CLOUD_COVER').first()</code> finds the clearest image</li>
+                    <li>Filters can be chained: <code>.filterDate().filterBounds().sort().first()</code></li>
+                </ul>
+            </section>
+
+            <!-- Common Mistakes -->
+            <section class="common-mistakes">
+                <h3>Common Mistakes to Avoid</h3>
+                <ul>
+                    <li><strong>Wrong coordinate order:</strong> It's <code>[longitude, latitude]</code> not
+                        <code>[latitude, longitude]</code></li>
+                    <li><strong>Forgetting to filter:</strong> Processing unfiltered collections causes timeouts</li>
+                    <li><strong>Date format errors:</strong> Use <code>'YYYY-MM-DD'</code> with quotes and dashes</li>
+                    <li><strong>Property name typos:</strong> <code>'CLOUD_COVER'</code> is case-sensitive</li>
+                </ul>
+            </section>
+
             <section>
                 <h2>Challenge</h2>
-                <div class="warning">
-                    <p><strong>Challenge Task:</strong></p>
+                <div class="challenge">
+                    <h3>Challenge Task</h3>
                     <p>
-                        Using the filtering method, create code that displays a single cloud-free image of the 
-                        <strong>Champs De Mars in Paris, France</strong>, in the <strong>summer of 2022</strong> (June-August). 
+                        Using the filtering method, create code that displays a single cloud-free image of the
+                        <strong>Champs De Mars in Paris, France</strong>, in the <strong>summer of 2022</strong>
+                        (June-August).
                         Display the image in both Natural Color and Color Infrared.
                     </p>
                     <p><strong>Requirements:</strong></p>
                     <ul>
                         <li>Filter by date (summer 2022)</li>
-                        <li>Filter by location (Paris coordinates)</li>
+                        <li>Filter by location (Paris coordinates: approximately 2.29, 48.86)</li>
                         <li>Sort by cloud cover</li>
-                        <li>Display in two band combinations</li>
+                        <li>Display in two band combinations (True Color and False Color)</li>
                         <li>Follow good coding practices with detailed comments</li>
                     </ul>
                 </div>
@@ -287,8 +519,7 @@ Map.addLayer(LandsatFirstSort,
 
             <section id="submission">
                 <div class="submission-box">
-                    <h3> Lab Submission</h3>
-                    <p>Submit lab via email.</p>
+                    <h3>📋 Lab Submission</h3>
                     <p><strong>Subject:</strong> <code>Lab 6 - Image Collections - [Your Name]</code></p>
                     <p><strong>Include:</strong></p>
                     <ul>
@@ -301,9 +532,11 @@ Map.addLayer(LandsatFirstSort,
         </main>
 
         <footer>
-            <p><a href="lab-05-challenge-refreshers.html"> Previous Lab</a> | <a href="lab-07-challenge-finding-dataset.html">Next Lab </a></p>
-            <p><a href="../index.html">Back to Course Home</a></p>
+            <p><a href="lab-05-challenge-refreshers.html">← Previous Lab</a> | <a
+                    href="lab-07-challenge-finding-dataset.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
         </footer>
     </div>
 </body>
+
 </html>

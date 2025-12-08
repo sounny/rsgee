@@ -1,14 +1,16 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Global Snow Observatory: Masking</title>
   <link rel="stylesheet" href="../../css/style.css">
 </head>
+
 <body>
   <nav class="breadcrumb">
-    <a href="../../index.html">Home</a> &gt; 
-    <a href="../week-08-global-snow-observatory/">Global Snow Observatory</a> &gt; 
+    <a href="../../index.html">Home</a> &gt;
+    <a href="../week-08-global-snow-observatory/">Global Snow Observatory</a> &gt;
     Masking
   </nav>
   <header>
@@ -16,24 +18,31 @@
   </header>
   <main>
     <section>
-      <p>Now that we have a function that joins the two collections, we need to mask out pixels that have a sensor zenith angle greater than 25&deg;.</p>
+      <p>Now that we have a function that joins the two collections, we need to mask out pixels that have a sensor
+        zenith angle greater than 25&deg;.</p>
       <h2>.map and .mask</h2>
       <h3>.map</h3>
-      <p>The <code>.map()</code> method runs a function across every element in a collection and returns a collection. It is one of the most useful tools in our arsenal.</p>
+      <p>The <code>.map()</code> method runs a function across every element in a collection and returns a collection.
+        It is one of the most useful tools in our arsenal.</p>
       <h3>.mask</h3>
-      <p>Masking is another widely used method to process an image. It can be difficult to understand at first, so let’s look at the description of the mask method:</p>
+      <p>Masking is another widely used method to process an image. It can be difficult to understand at first, so let's
+        look at the description of the mask method:</p>
       <figure>
         <img src="../../images/global-snow/Mask.png" alt="Mask method description" loading="lazy">
       </figure>
-      <p><i>“The output image retains the metadata and footprint of the input image.”</i> That’s the important line from the description. Anything within the mask is kept as is, and anything outside the mask is converted to a "masked" value. A mask call looks like so:</p>
+      <p><i>'The output image retains the metadata and footprint of the input image.'</i> That's the important line from
+        the description. Anything within the mask is kept as is, and anything outside the mask is converted to a
+        "masked" value. A mask call looks like so:</p>
       <figure>
         <img src="../../images/global-snow/MaksForm.png" alt="Mask function example" loading="lazy">
       </figure>
-      <p>Using the <code>.mask</code> and <code>.map</code> functions, we will modify our code to mask out any pixels with a sensor zenith angle greater than 25 degrees. The function to do so will look like this:</p>
+      <p>Using the <code>.mask</code> and <code>.map</code> functions, we will modify our code to mask out any pixels
+        with a sensor zenith angle greater than 25 degrees. The function to do so will look like this:</p>
       <figure>
         <img src="../../images/global-snow/MaskSnesor.png" alt="Mask sensor function" loading="lazy">
       </figure>
-      <p>Remember that we will want to do this to every image in the collection, so we will use the <code>.map()</code> method again, like so:</p>
+      <p>Remember that we will want to do this to every image in the collection, so we will use the <code>.map()</code>
+        method again, like so:</p>
       <pre><code>//Masking collections
 // A function to assign high sensor zenith angle cells to null
 var MaskSensorPixels = function(anImage) {
@@ -67,7 +76,8 @@ var MergedMODIS = JoinedMODIS.map(MergeBands);
 var MakedMODIS = ee.ImageCollection(MergedMODIS).map(MaskSensorPixels);
 </code></pre>
       <p>
-        <a href="https://code.earthengine.google.com/8fbdd3c290f80f03ac24357f72e8bee3" target="_blank">Earth Engine Code Example</a>
+        <a href="https://code.earthengine.google.com/8fbdd3c290f80f03ac24357f72e8bee3" target="_blank">Earth Engine Code
+          Example</a>
       </p>
       <p>The next step is to reclassify the snow cover into a snow/no snow/missing scheme.</p>
     </section>
@@ -77,4 +87,5 @@ var MakedMODIS = ee.ImageCollection(MergedMODIS).map(MaskSensorPixels);
     </nav>
   </main>
 </body>
+
 </html>

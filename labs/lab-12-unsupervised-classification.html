@@ -1,13 +1,15 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 12 - Unsupervised Classification | Remote Sensing Course</title>
+    <meta name="description"
+        content="Learn unsupervised classification techniques using k-means clustering in Google Earth Engine.">
     <link rel="stylesheet" href="../css/style.css">
-    <meta name="robots" content="index, follow">
-    <meta name="description" content="Google Earth Engine lab 12: Lab 12 - Unsupervised Classification">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -16,64 +18,336 @@
 
         <header class="lab-header">
             <h1>Lab 12 - Unsupervised Classification</h1>
+            <p><em><strong>Objective: Apply unsupervised classification using k-means clustering and compare results to
+                        supervised classification.</strong></em></p>
         </header>
 
         <main class="lab-content">
 
-            <section class="lab-preflight">
-                <h2>Before you start</h2>
+            <!-- Learning Objectives -->
+            <section class="learning-objectives">
+                <h3>What You'll Learn</h3>
                 <ul>
-                    <li><strong>Prerequisites:</strong> Finish Lab 11 and review the clustering techniques overview from the readings.</li>
-                    <li><strong>Estimated time:</strong> 75 minutes</li>
-                    <li><strong>Materials:</strong> Earth Engine account, list of feature properties to analyze, and a notebook for labeling clusters after inspection.</li>
+                    <li>Understand the difference between supervised and unsupervised classification</li>
+                    <li>Generate training data using random sampling</li>
+                    <li>Apply the k-means clustering algorithm</li>
+                    <li>Interpret and label unsupervised classification clusters</li>
+                    <li>Compare supervised and unsupervised results for the same image</li>
                 </ul>
             </section>
 
-<p>In this lab, we will build off work from Lab 11 - Supervised classification. &nbsp; You can use your Lab 11, or you are welcome to use this Code to start off with: <a href="https://code.earthengine.google.com/e5b89ac826e8e2ef8c08111e929b07e1" target="_blank">https://code.earthengine.google.com/e5b89ac826e8e2ef8c08111e929b07e1. </a>In Lab 11, we trained a supervised classification with a training sample and used it to create a landuse/landcover map in Northern Italy.&nbsp; We will build off that lab to classify the same image with an unsupervised classification. At the end of this assignment, we can compare supervised versus unsupervised classification results.</p>
-<p>Before we start, we should add a comment in the code to know where we started working on Unsupervised Classification. Write a comment code like this in the last line of your Lab 11 code.</p>
-<pre><span>//////////////// Unsupervised classification ////////////////</span><span><br></span></pre>
-<p><span>Then, save the code in a new file using the Save As menu.</span></p>
-<p><span><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-24%20at%204.49.26%20AM.png" alt="adding in the comment for where unsupervised classification starts"   loading="lazy"></span></p>
-<p>A reminder of the differences between supervised and unsupervised classification. In supervised classification, a training data set is used to teach the classifier how to classify new data. The training set contains already classified data, and the classifier learns to associate certain features with certain classes. Once the classifier is trained, it can classify new data. In unsupervised classification, the classifier is not given any labeled data. Instead, it is given a set of unlabeled data and tries to find patterns. The classifier then groups the data points based on these patterns.</p>
-<p><span>The unsupervised classification in Earth Engine has this workflow:</span></p>
-<ol>
-<li aria-level="1"><span>Assemble features with numeric properties to find clusters (training data).</span></li>
-<li aria-level="1"><span>Select and instantiate a clusterer.</span></li>
-<li aria-level="1"><span>Train the clusterer with the training data.</span></li>
-<li aria-level="1"><span>Apply the clusterer to the scene (classification).</span></li>
-<li aria-level="1"><span>Label the clusters.</span></li>
-</ol>
-<p><span>To generate training data, we will use the </span><em><span>sample</span></em><span> method, which randomly takes samples from a region (unlike </span><em>sampleRegions</em><span>, which takes samples from predefined locations). We will use the image�s footprint as the region by calling the </span><em><span>geometry</span></em><span> method. Additionally, we will define the number of pixels (</span><span>numPixels</span><span>) to sample�in this case, 1000 pixels�and define a </span><em>tileScale</em><span> of 8 to avoid computation errors due to the region's size. </span></p>
-<p><span>Copy and paste the code below to sample 1000 pixels from the Landsat image.</span></p>
-<pre><span>// Make the training dataset.<br>var training = Landsat.sample({<br>&nbsp; &nbsp; region: Landsat.geometry(),<br>&nbsp; &nbsp; scale: 30,<br>&nbsp; &nbsp; numPixels: 1000,<br>&nbsp; &nbsp; tileScale: 8<br>});<br></span></pre>
-<p><span>Now we can instantiate a clusterer and train it. As with the supervised algorithms, there are many unsupervised algorithms to choose from. We will use the </span><i><span>k</span></i><span>-means clustering algorithm, a commonly used approach in remote sensing. This algorithm uses an iterative regrouping strategy to identify groups of pixels near each other in the spectral space (image x bands). We define a number of clusters, </span><i><span>k, </span></i><span>and then the method randomly distributes that number of seed points into the spectral space. A large sample of pixels is then grouped into its closest seed, and the mean spectral value of this group is calculated. That mean value is akin to a center of mass of the points, known as the centroid. Each iteration recalculates the class means and reclassifies pixels with respect to the new means. This process is repeated until the centroids remain relatively stable, and only a few pixels change from class to class on subsequent iterations.</span></p>
-<p><span><img src="../images/canvas/Uploaded%20Media/image35.png" alt=" K-means visual concept 
-"   loading="lazy"></span></p>
-<p><span>Figure -&nbsp; </span><i><span>K</span></i><span>-means visual concept</span></p>
-<p><span>Copy and paste the code below to request four clusters, the same number as for the supervised classification, in order to directly compare them.</span></p>
-<pre><span>// Instantiate the clusterer and train it.<br>var clusterer = ee.Clusterer.wekaKMeans(4).train(training);</span></pre>
-<p><span>Now copy and paste the code below to apply the clusterer to the image and add the resulting classification to the </span><strong>Map.</strong><span> Note that we use a method called </span><span>randomVisualizer</span><span> to assign colors for the visualization. We are not associating the unsupervised classes with the color palette we defined earlier in the supervised classification. Instead, we assign random colors to the classes since we do not yet know which unsupervised classes best correspond to each named class (e.g., </span><span>forest</span><span>, </span><span>herbaceous</span><span>). Note that the colors in your map might not be the same as you see on the screenshots </span><strong>Map,</strong><span> since they are assigned randomly.</span></p>
-<pre>// Cluster the input using the trained clusterer.<br>var Kclassified = Landsat.cluster(clusterer);<br><br>// Display the clusters with random colors.<br>Map.addLayer(Kclassified.randomVisualizer(), {},<br>&nbsp; &nbsp; 'K-means classified - random colors');</pre>
-<p><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-24%20at%204.59.54%20AM.png" alt="SCREENSHOT OF THE RESULT"   loading="lazy"></p>
-<p><em><strong>Challenge 1: Determine which pixel values are which land covers.&nbsp; Your image has four classes on the clustering band. Using the inspector tool, click the classes and document what cluster pixel value is which of the four landcover classes you have. Herbaceous, water, forest, and developed. Add a comment in your code documenting the pixel values and landcover classes.</strong></em></p>
-<p><em><strong>Challenge 2: Using the Map.addLayer method, Display the clusters with the same palette as supervised classification. Hint: Map.addLayer(Kclassified, {HERE GOES YOUR Visualization Parameters}, 'K-means classified').&nbsp; You want to map the palette color to pixel values for the Visualization Parameters.&nbsp; Verify your pixel values start with 0 and end with 3, and then order them based on the answer from challenge 1 with the palette values from Lab 11 {min: 0, max: 3, palette: ['d0741e','1a11ff','589400', 'ff0000']}</strong></em></p>
-<p><em><strong>Challenge 3: Inspect the results. How does this classification compare to the previous ones? Use the Inspector to check which classes were assigned to each pixel value (�cluster� band).&nbsp; Add a short paragraph comment in your code explaining the results' differences.&nbsp;</strong></em></p>
-<p><span style="font-size: 18pt;"><em><strong>TURN IN A SNAPSHOT URL OF YOUR CODE</strong></em></span></p>
+            <!-- Building On Previous Learning -->
+            <section class="builds-on">
+                <h4>Building On Previous Learning</h4>
+                <p>This lab directly extends <a href="lab-11-supervised-classification.html">Lab 11</a> where you
+                    created
+                    a supervised classification. Now you'll classify the same image without training data and learn when
+                    each approach is most appropriate.</p>
+            </section>
+
+            <!-- Why It Matters -->
+            <section class="why-it-matters">
+                <h3>Why This Matters</h3>
+                <p>Unsupervised classification is essential when:</p>
+                <ul>
+                    <li><strong>No training data exists:</strong> You don't have labeled samples for your study area
+                    </li>
+                    <li><strong>Exploring data:</strong> You want to discover natural groupings in the spectral data
+                    </li>
+                    <li><strong>Large areas:</strong> Manual interpretation of training data is impractical</li>
+                    <li><strong>Baseline mapping:</strong> Quick first-look analysis before detailed studies</li>
+                </ul>
+            </section>
+
+            <section class="lab-preflight">
+                <h2>Before You Start</h2>
+                <ul>
+                    <li><strong>Prerequisites:</strong> Finish Lab 11 and review the clustering techniques overview from
+                        the readings.</li>
+                    <li><strong>Estimated time:</strong> 75 minutes</li>
+                    <li><strong>Materials:</strong> Earth Engine account, Lab 11 code, and a notebook for labeling
+                        clusters after inspection.</li>
+                </ul>
+            </section>
+
+            <!-- Key Vocabulary -->
+            <section class="vocabulary">
+                <h3>Key Terms</h3>
+                <dl>
+                    <dt>Unsupervised Classification</dt>
+                    <dd>Classification where the algorithm discovers patterns in data without pre-labeled training
+                        samples.</dd>
+
+                    <dt>K-Means Clustering</dt>
+                    <dd>An algorithm that groups pixels into k clusters based on spectral similarity by iteratively
+                        updating cluster centers.</dd>
+
+                    <dt>Centroid</dt>
+                    <dd>The center point of a cluster, calculated as the mean of all pixel values in that cluster.</dd>
+
+                    <dt>Cluster</dt>
+                    <dd>A group of spectrally similar pixels identified by the algorithm, which must then be labeled by
+                        the analyst.</dd>
+                </dl>
+            </section>
+
+            <section>
+                <h2>Introduction</h2>
+                <p>In this lab, we will build off work from Lab 11 - Supervised classification. You can use your Lab 11,
+                    or you are welcome to use this Code to start off with:
+                    <a href="https://code.earthengine.google.com/e5b89ac826e8e2ef8c08111e929b07e1" target="_blank">
+                        https://code.earthengine.google.com/e5b89ac826e8e2ef8c08111e929b07e1</a>
+                </p>
+                <p>In Lab 11, we trained a supervised classification with a training sample and used it to create a
+                    landuse/landcover map in Northern Italy. We will build off that lab to classify the same image
+                    with an unsupervised classification. At the end of this assignment, we can compare supervised
+                    versus unsupervised classification results.</p>
+            </section>
+
+            <section>
+                <h2>Supervised vs. Unsupervised: A Comparison</h2>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Supervised</th>
+                            <th>Unsupervised</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Training Data</strong></td>
+                            <td>Requires labeled samples</td>
+                            <td>No labels needed</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Analyst Input</strong></td>
+                            <td>Before classification</td>
+                            <td>After classification (labeling clusters)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Classes</strong></td>
+                            <td>Predefined by analyst</td>
+                            <td>Discovered by algorithm</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Speed</strong></td>
+                            <td>Slower (training data collection)</td>
+                            <td>Faster initial run</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Best For</strong></td>
+                            <td>Known land cover types</td>
+                            <td>Exploratory analysis</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="lab-steps">
+                <h2>The Unsupervised Classification Workflow</h2>
+                <p>The unsupervised classification in Earth Engine has this workflow:</p>
+                <ol>
+                    <li><strong>Sample the image</strong> - Get random pixel values (training data)</li>
+                    <li><strong>Instantiate a clusterer</strong> - Choose an algorithm (k-means)</li>
+                    <li><strong>Train the clusterer</strong> - Let it find spectral clusters</li>
+                    <li><strong>Apply to scene</strong> - Classify all pixels</li>
+                    <li><strong>Label clusters</strong> - Interpret what each cluster represents</li>
+                </ol>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 1: Add a Comment Separator</h2>
+                <p>Before we start, add a comment in the code to mark where unsupervised classification begins:</p>
+                <pre><code>//////////////// Unsupervised classification ////////////////</code></pre>
+                <p>Then, save the code in a new file using the Save As menu.</p>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 2: Generate Training Data</h2>
+                <p>Unlike supervised classification where we collected specific training points, we'll randomly sample
+                    pixels from the image:</p>
+                <pre><code>// Make the training dataset.
+var training = Landsat.sample({
+    region: Landsat.geometry(),
+    scale: 30,
+    numPixels: 1000,
+    tileScale: 8
+});</code></pre>
+
+                <div class="note">
+                    <p><strong>Key Parameters:</strong></p>
+                    <ul>
+                        <li><code>numPixels: 1000</code> - We sample 1000 random pixels</li>
+                        <li><code>tileScale: 8</code> - Helps avoid memory errors for large regions</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 3: Instantiate and Train the Clusterer</h2>
+                <p>We'll use k-means clustering with 4 clusters (matching our supervised classification):</p>
+                <pre><code>// Instantiate the clusterer and train it.
+var clusterer = ee.Clusterer.wekaKMeans(4).train(training);</code></pre>
+
+                <div class="key-concepts">
+                    <h4>How K-Means Works</h4>
+                    <ol>
+                        <li>Randomly place k seed points in spectral space</li>
+                        <li>Assign each pixel to its closest seed (cluster)</li>
+                        <li>Calculate the mean (centroid) of each cluster</li>
+                        <li>Reassign pixels to the new closest centroid</li>
+                        <li>Repeat until centroids stabilize</li>
+                    </ol>
+                </div>
+
+                <img src="../images/canvas/Uploaded%20Media/image35.png" alt="K-means visual concept" loading="lazy">
+                <p><em>Figure - K-means visual concept showing iterative clustering</em></p>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 4: Apply the Clusterer</h2>
+                <p>Apply the trained clusterer to classify the entire image:</p>
+                <pre><code>// Cluster the input using the trained clusterer.
+var Kclassified = Landsat.cluster(clusterer);
+
+// Display the clusters with random colors.
+Map.addLayer(Kclassified.randomVisualizer(), {},
+    'K-means classified - random colors');</code></pre>
+
+                <div class="warning">
+                    <p><strong>Important:</strong> The colors are assigned randomly, so they won't match your supervised
+                        classification colors yet!</p>
+                </div>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Challenge Tasks</h2>
+
+                <div class="challenge">
+                    <h3>Challenge 1: Identify Cluster Land Covers (20 points)</h3>
+                    <p>Your image has four clusters (values 0-3). Using the Inspector tool:</p>
+                    <ol>
+                        <li>Click on different land cover types in your map</li>
+                        <li>Look at the "cluster" band value</li>
+                        <li>Document which cluster number corresponds to each land cover:</li>
+                    </ol>
+                    <ul>
+                        <li>Herbaceous: Cluster ___</li>
+                        <li>Water: Cluster ___</li>
+                        <li>Forest: Cluster ___</li>
+                        <li>Developed: Cluster ___</li>
+                    </ul>
+                    <p>Add a comment in your code documenting your findings.</p>
+                </div>
+
+                <div class="challenge">
+                    <h3>Challenge 2: Apply Custom Color Palette (15 points)</h3>
+                    <p>Display the clusters with the same palette as supervised classification:</p>
+                    <pre><code>// Based on your Challenge 1 findings, reorder the palette
+// Original palette: ['d0741e','1a11ff','589400', 'ff0000']
+// (herbaceous, water, forest, developed)
+
+Map.addLayer(Kclassified, {
+    min: 0, 
+    max: 3, 
+    palette: [/* YOUR REORDERED PALETTE */]
+}, 'K-means classified');</code></pre>
+                </div>
+
+                <div class="challenge">
+                    <h3>Challenge 3: Compare Results (15 points)</h3>
+                    <p>Inspect the results and add a paragraph comment explaining:</p>
+                    <ul>
+                        <li>How does the unsupervised classification compare to the supervised one?</li>
+                        <li>Which land covers were classified similarly? Which were different?</li>
+                        <li>What advantages and disadvantages do you see for each approach?</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Self-Check Questions -->
+            <section class="self-check">
+                <h3>Check Your Understanding</h3>
+                <ol>
+                    <li>Why do we need to label clusters after unsupervised classification?</li>
+                    <li>What would happen if you set k=10 instead of k=4? Would it be better or worse?</li>
+                    <li>Why might two different land cover types end up in the same cluster?</li>
+                    <li>In what situations would unsupervised classification be preferable to supervised?</li>
+                </ol>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <div class="issue">
+                    <strong>Problem: "Computation timed out" error</strong>
+                    <p><strong>Solution:</strong> Increase the <code>tileScale</code> parameter (try 16 instead of 8)
+                        or reduce <code>numPixels</code>.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Clusters don't match expected land covers</strong>
+                    <p><strong>Solution:</strong> This is normal! K-means groups pixels by spectral similarity,
+                        not by what they actually are. Some land covers may share spectral characteristics.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Results are different each time I run</strong>
+                    <p><strong>Solution:</strong> K-means has random initialization, so results can vary slightly.
+                        Set a seed for reproducibility: <code>ee.Clusterer.wekaKMeans(4).train(training)</code></p>
+                </div>
+            </section>
+
+            <!-- Pro Tips -->
+            <section class="pro-tips">
+                <h3>Pro Tips</h3>
+                <ul>
+                    <li><strong>Choose k wisely:</strong> Too few clusters merge distinct classes; too many split them
+                        unnecessarily</li>
+                    <li><strong>Sample enough pixels:</strong> 1000 is a minimum; for complex scenes, try 5000-10000
+                    </li>
+                    <li><strong>Use multiple runs:</strong> Run clustering several times to see if results are stable
+                    </li>
+                    <li><strong>Combine approaches:</strong> Use unsupervised to explore, then supervised for final map
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Key Concepts -->
+            <section class="key-concepts">
+                <h3>Key Takeaways</h3>
+                <ul>
+                    <li>Unsupervised classification finds natural spectral groupings without training data</li>
+                    <li>K-means iteratively assigns pixels to the nearest cluster centroid</li>
+                    <li>Analyst interpretation is needed AFTER clustering to label what each cluster represents</li>
+                    <li>Both supervised and unsupervised have strengths - they're complementary approaches</li>
+                </ul>
+            </section>
+
             <section id="submission">
                 <div class="submission-box">
-                    <h3>Lab Submission</h3>
-                    <p>Submit lab via email.</p>
+                    <h3>📋 Lab Submission</h3>
                     <p><strong>Subject:</strong> <code>Lab 12 - Unsupervised Classification - [Your Name]</code></p>
+
+                    <h4>Submit:</h4>
+                    <p>A shareable URL to your code that includes:</p>
+                    <ol>
+                        <li>Working k-means classification code</li>
+                        <li>Challenge 1: Comment documenting cluster-to-land-cover mapping</li>
+                        <li>Challenge 2: Map layer with correctly ordered color palette</li>
+                        <li>Challenge 3: Paragraph comparing supervised vs unsupervised results</li>
+                    </ol>
+                    <p><strong>Total: 50 Points</strong></p>
                 </div>
             </section>
         </main>
 
         <footer>
-            <p><a href='lab-11-supervised-classification.html'>&larr; Previous Lab</a> | <a href='lab-13-improving-classifications.html'>Next Lab &rarr;</a></p>
-            <p><a href="../index.html">&larr;Back to Course Home</a></p>
+            <p><a href="lab-11-supervised-classification.html">← Previous Lab</a> | <a
+                    href="lab-13-improving-classifications.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
         </footer>
     </div>
-    
-</body>
-</html>
 
+</body>
+
+</html>

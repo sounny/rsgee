@@ -1,13 +1,15 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 18 - Health Applications Part 2 | Remote Sensing Course</title>
+    <meta name="description"
+        content="Learn to visualize malaria forecasting results in Google Earth Engine by mapping predicted vs observed disease incidence.">
     <link rel="stylesheet" href="../css/style.css">
-    <meta name="robots" content="index, follow">
-    <meta name="description" content="Google Earth Engine lab 18: Lab 18 - Health Applications Part 2">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -16,112 +18,295 @@
 
         <header class="lab-header">
             <h1>Lab 18 - Health Applications Part 2</h1>
+            <p><em><strong>Objective: Visualize malaria forecasting results by mapping predicted vs observed disease
+                        incidence in GEE.</strong></em></p>
         </header>
 
         <main class="lab-content">
 
-            <section class="lab-preflight">
-                <h2>Before you start</h2>
+            <!-- Learning Objectives -->
+            <section class="learning-objectives">
+                <h3>What You'll Learn</h3>
                 <ul>
-                    <li><strong>Prerequisites:</strong> Complete Lab 17 - Health Applications Part 1 and collect any ground truth or ancillary health records you will compare.</li>
-                    <li><strong>Estimated time:</strong> 90 minutes</li>
-                    <li><strong>Materials:</strong> Earth Engine login, updated health indicators dataset, and collaboration notes from your project partner (if applicable).</li>
+                    <li>Import analysis results back into Google Earth Engine</li>
+                    <li>Filter FeatureCollections based on property values</li>
+                    <li>Create choropleth maps with custom color palettes</li>
+                    <li>Compare forecasted vs observed disease incidence visually</li>
+                    <li>Toggle between multiple data layers for comparison</li>
                 </ul>
             </section>
 
-<p>This lab pickups where you left off in Lab 17 - Health Applications Part 1 - Preparing Data for Analysis</p>
-<p><em>If you want to refer to the Lab 17 code you can look here for a completed version of it: <a href="https://code.earthengine.google.com/9f6a14b29868b9e4f989a2be61ada2a4" target="_blank">https://code.earthengine.google.com/9f6a14b29868b9e4f989a2be61ada2a4</a></em></p>
-<p>In the previous lab<span> the environmental data obtained from Earth Engine and submitted as CSV files can be used for infectious disease modeling and forecasting. The Earth Engine code was written in support of EPIDEMIA, a software system based in the R language and computing environment for forecasting malaria, and was actively used in certain study pilot </span><i><span>woredas</span></i><span> in the Amhara region of Ethiopia. The R system consists of an R package�</span><i><span>epidemiar</span></i><span>�for generic functions and a companion R project for handling all the location-specific data and settings.</span></p>
-<p><span>One of the main outputs of EPIDEMIA is the forecasted incidence of malaria in each </span><i><span>woreda</span></i><span> by week from one to eight (or more) weeks in advance. Using our publicly available demo project that uses synthetic data (not for use in epidemiological study), we created forecasts for week 32 of 2018 made eight weeks prior (�knowing� data up to week 24), and also added the observed incidence for comparison. (Note: dates and weeks follow International Organization for Standardization [ISO] standard 8601). These new data can be re-uploaded to Earth Engine for further analyses or exploration.&nbsp; That's were you are picking up at now, post anlaysis in R and ready to keep exploring in GEE.</span></p>
-<p><strong>Objective</strong>: The objective of this lab protocol is to create a map visualization of synthetic malaria incidence data for the Amhara region in Ethiopia. The map will show the incidence levels of malaria in different woredas (administrative divisions) within the region, using different colors to represent different incidence levels. The protocol consists of the following steps:</p>
-<p><strong>Lab</strong>:</p>
-<ol>
-<li>
-<p><span>Start off a new Script.&nbsp; Go to <a href="https://code.earthengine.google.com/" target="_blank">https://code.earthengine.google.com/</a> signin and start off with a blank script.</span></p>
-</li>
-<li>
-<p>Import the synthetic malaria data as a Feature Collection using the "ee.FeatureCollection" function and assign it to a variable called "epidemiaResults".</p>
-</li>
-<li>
-<pre>// This code displays an interactive map of a region in Ethiopia, and overlays different layers<br>// to display results of an analysis of synthetic malaria data.&nbsp;<br><br>// First, we import a FeatureCollection of synthetic malaria data for the Amhara region of Ethiopia.&nbsp;<br>var epidemiaResults = ee.FeatureCollection("<span>users/sounny/amhara_pilot_synthetic_2018W32</span>");</pre>
-</li>
-<li>
-<p>Filter the Feature Collection to separate the "pilot" woredas (with forecasted incidence data) from the "non-pilot" woredas (without forecasted incidence data) using the "ee.Filter.neq" and "ee.Filter.eq" functions. Assign each group to a new variable called "pilot" and "nonpilot", respectively.</p>
-</li>
-<li>
-<pre>// Filter the FeatureCollection to only keep woredas with forecasted values.<br>var pilot = epidemiaResults.filter(ee.Filter.neq('inc_n_fc', null));<br><br>// Filter the FeatureCollection to only keep woredas without forecasted values.<br>var nonpilot = epidemiaResults.filter(ee.Filter.eq('inc_n_fc', null));</pre>
-</li>
-<li>
-<p>Create a new layer for the "pilot" woredas and assign different colors to them based on their forecasted incidence levels using the "ee.Image().byte().paint()" function. Use a color palette that ranges from light to dark shades of red, with each color representing a different incidence level. The incidence levels are defined in incidence per 1000 people and are divided into 5 categories: 1 to 5, where 1 is the lowest incidence level and 5 is the highest. Assign the resulting image to a variable called "fill_fc".</p>
-</li>
-<li>
-<pre>// Define an empty image to use for painting color onto each woreda based on forecasted incidence.&nbsp;<br>var empty = ee.Image().byte();<br><br>// Paint the woredas with different colors for forecasted incidence.<br>// The 'inc_n_fc' property is the forecasted incidence (cut into factors) made on (historical) 2018W24&nbsp;<br>// (i.e. 8 weeks in advance), and the color for each woreda is based on the range the incidence falls into.&nbsp;<br>// Incidence per 1000<br>// 1 : [0 - 0.25)<br>// 2 : [0.25 - 0.5)<br>// 3 : [0.5 - 0.75)<br>// 4 : [0.75 - 1)<br>// 5 : &gt; 1<br>var fill_fc = empty.paint({<br>&nbsp; &nbsp; featureCollection: pilot,<br>&nbsp; &nbsp; color: 'inc_n_fc',<br>});<br><br>// Define a color palette for the different ranges of incidence.<br>var palette = ['fee5d9', 'fcae91', 'fb6a4a', 'de2d26', 'a50f15'];</pre>
-</li>
-<li>
-<p>Add the "fill_fc" layer to the map using the "Map.addLayer()" function. Set the palette, minimum, and maximum values using the "palette", "min", and "max" arguments, respectively. Also, set the name of the layer to "Forecasted Incidence".</p>
-</li>
-<li>
-<pre>// Set the map center and zoom level.<br>Map.setCenter(38, 11.5, 7);<br><br>// Add the layer of forecasted incidence to the map, using the color palette defined above.<br>Map.addLayer(<br>&nbsp; &nbsp; fill_fc, {<br>&nbsp; &nbsp; &nbsp; &nbsp; palette: palette,<br>&nbsp; &nbsp; &nbsp; &nbsp; min: 1,<br>&nbsp; &nbsp; &nbsp; &nbsp; max: 5<br>&nbsp; &nbsp; },<br>&nbsp; &nbsp; 'Forecasted Incidence'<br>);</pre>
-</li>
-<li>
-<p>Create a new layer for the observed incidence data of the "pilot" woredas using the same color palette as before. Use the "ee.Image().byte().paint()" function to create the layer and assign it to a variable called "fill_obs".</p>
-</li>
-<li>
-<pre>// Paint the woredas with different colors for observed incidence.<br>// The 'inc_n_obs' property is the observed incidence, and the color for each woreda is based on the range the incidence falls into.<br>// This layer is turned off by default, but can be toggled on and off by the user in the map viewer.<br>var fill_obs = empty.paint({<br>&nbsp; &nbsp; featureCollection: pilot,<br>&nbsp; &nbsp; color: 'inc_n_obs',<br>});<br><br>// Define the same color palette for the observed incidence as for the forecasted incidence.<br>var palette = ['fee5d9', 'fcae91', 'fb6a4a', 'de2d26', 'a50f15'];</pre>
-</li>
-<li>
-<p>Add the "fill_obs" layer to the map using the "Map.addLayer()" function. Set the palette, minimum, and maximum values using the "palette", "min", and "max" arguments, respectively. Also, set the name of the layer to "Observed Incidence" and set the default visibility to "false".</p>
-</li>
-<li>
-<pre>// Add the layer of observed incidence to the map, using the same color palette as for the forecasted incidence<br>Map.addLayer(<br>  &nbsp; fill_obs, {<br>  &nbsp; &nbsp; &nbsp; palette: palette,<br>  &nbsp; &nbsp; &nbsp; min: 1,<br>  &nbsp; &nbsp; &nbsp; max: 5<br>  &nbsp; },<br>  &nbsp; 'Observed Incidence',<br>  &nbsp; false<br>);</pre>
-</li>
-<li>
-<p>Create a gray layer for the "non-pilot" woredas using the "ee.Image().byte().paint()" function and assign it to a variable called "fill_na".</p>
-</li>
-<li>
-<pre>// Paint non-study woredas with gray.<br><br>var fill_na = empty.paint({<br>  &nbsp; featureCollection: nonpilot<br>});</pre>
-</li>
-<li>
-<p>Add the "fill_na" layer to the map using the "Map.addLayer()" function. Set the palette to "a1a9a8" and set the name of the layer to "Non-study woredas".</p>
-</li>
-<li>
-<pre>// Add the layer of non-study woredas to the map, using gray as the fill color.<br><br>Map.addLayer(<br>  &nbsp; fill_na, {<br>  &nbsp; &nbsp; &nbsp; palette: 'a1a9a8'<br>  &nbsp; },<br>'Non-study woredas'<br>);</pre>
-</li>
-<li>
-<p>Draw the borders of all the woredas in the Amhara region using the "ee.Image().byte().paint()" function and assign it to a variable called "outline".</p>
-</li>
-<li>
-<pre>// Draw borders for ALL Amhara region woredas.<br>var outline = empty.paint({<br>  &nbsp; featureCollection: epidemiaResults,<br>  &nbsp; color: 1,<br>  &nbsp; width: 1<br>});</pre>
-</li>
-<li>
-<p>Add the "outline" layer to the map using the "Map.addLayer()" function. Set the palette to "000000" and set the name of the layer to "Woredas".</p>
-</li>
-<li>
-<pre>// Add woreda boundaries to map.<br><br>Map.addLayer(<br>  &nbsp; outline, {<br>  &nbsp; &nbsp; &nbsp; palette: '000000'<br>  &nbsp; },<br>  &nbsp; 'Woredas'<br>);</pre>
-</li>
-<li>
-<p>Results: The resulting map will show the incidence levels of malaria in different woredas within the Amhara region in Ethiopia. The "pilot" woredas will be colored based on their forecasted incidence levels, while the "non-pilot" woredas will be gray.</p>
-</li>
-<li><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-04-14%20at%207.05.23%20AM.png" alt="results"   loading="lazy"></li>
-<li>
-<p>Share it as a link using the appropriate functions in Google Earth Engine and submit it to canvas.</p>
-</li>
-</ol>
+            <!-- Building On Previous Learning -->
+            <section class="builds-on">
+                <h4>Building On Previous Learning</h4>
+                <p>This lab continues from <a href="lab-17-health-applications-part1.html">Lab 17</a> where you
+                    extracted environmental data. Now you'll visualize the results of disease modeling done in
+                    R/EPIDEMIA.</p>
+                <p><em>Reference code from Lab 17: <a
+                            href="https://code.earthengine.google.com/9f6a14b29868b9e4f989a2be61ada2a4"
+                            target="_blank">View completed Lab 17</a></em></p>
+            </section>
+
+            <!-- Why It Matters -->
+            <section class="why-it-matters">
+                <h3>Why This Matters</h3>
+                <p>Visualizing forecast results enables:</p>
+                <ul>
+                    <li><strong>Decision support:</strong> Health officials can see which areas need resources</li>
+                    <li><strong>Validation:</strong> Compare predictions against actual observations</li>
+                    <li><strong>Communication:</strong> Maps are intuitive for non-technical stakeholders</li>
+                    <li><strong>Spatial patterns:</strong> Identify clusters of high-risk areas</li>
+                </ul>
+            </section>
+
+            <section class="lab-preflight">
+                <h2>Before You Start</h2>
+                <ul>
+                    <li><strong>Prerequisites:</strong> Complete Lab 17 - Health Applications Part 1.</li>
+                    <li><strong>Estimated time:</strong> 90 minutes</li>
+                    <li><strong>Materials:</strong> Earth Engine account and understanding of choropleth mapping.</li>
+                </ul>
+            </section>
+
+            <!-- Key Vocabulary -->
+            <section class="vocabulary">
+                <h3>Key Terms</h3>
+                <dl>
+                    <dt>Choropleth Map</dt>
+                    <dd>A thematic map where areas are colored based on a data value, such as disease incidence.</dd>
+
+                    <dt>Incidence Rate</dt>
+                    <dd>The number of new disease cases per population (often per 1,000 people) in a time period.</dd>
+
+                    <dt>Forecast Validation</dt>
+                    <dd>Comparing predicted values to observed values to assess model accuracy.</dd>
+
+                    <dt>Pilot Woreda</dt>
+                    <dd>A district where the forecasting system was actively tested and evaluated.</dd>
+                </dl>
+            </section>
+
+            <!-- Background Context -->
+            <section class="key-concepts">
+                <h3>Background: From Analysis to Visualization</h3>
+                <p>In Lab 17, you exported environmental data from GEE. That data was then used in the EPIDEMIA system -
+                    an R package called <em>epidemiar</em> - to forecast malaria incidence. The forecasts were made 8
+                    weeks in advance (from week 24 to predict week 32 of 2018).</p>
+                <p>Now, these forecast results have been uploaded back to GEE as a FeatureCollection with both:</p>
+                <ul>
+                    <li><strong>inc_n_fc:</strong> Forecasted incidence (predicted)</li>
+                    <li><strong>inc_n_obs:</strong> Observed incidence (actual)</li>
+                </ul>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 1: Import Malaria Data</h2>
+                <p>Start a new script and import the synthetic malaria data:</p>
+                <pre><code>// Import synthetic malaria data for the Amhara region of Ethiopia
+var epidemiaResults = ee.FeatureCollection("users/sounny/amhara_pilot_synthetic_2018W32");</code></pre>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 2: Filter Pilot vs Non-Pilot Woredas</h2>
+                <p>Separate woredas with forecast data from those without:</p>
+                <pre><code>// Filter to only keep woredas WITH forecasted values (pilot areas)
+var pilot = epidemiaResults.filter(ee.Filter.neq('inc_n_fc', null));
+
+// Filter to only keep woredas WITHOUT forecasted values (non-pilot areas)
+var nonpilot = epidemiaResults.filter(ee.Filter.eq('inc_n_fc', null));</code></pre>
+
+                <div class="note">
+                    <p><strong>Why filter?</strong> Only pilot woredas have forecast data. Non-pilot areas will be
+                        displayed in gray to show they weren't part of the study.</p>
+                </div>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 3: Define Incidence Categories</h2>
+                <p>The incidence data is categorized into 5 levels (per 1,000 people):</p>
+
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Incidence Range</th>
+                            <th>Color</th>
+                            <th>Risk Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>0 - 0.25</td>
+                            <td style="background:#fee5d9">#fee5d9</td>
+                            <td>Very Low</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>0.25 - 0.5</td>
+                            <td style="background:#fcae91">#fcae91</td>
+                            <td>Low</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>0.5 - 0.75</td>
+                            <td style="background:#fb6a4a">#fb6a4a</td>
+                            <td>Moderate</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>0.75 - 1.0</td>
+                            <td style="background:#de2d26;color:white">#de2d26</td>
+                            <td>High</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>&gt; 1.0</td>
+                            <td style="background:#a50f15;color:white">#a50f15</td>
+                            <td>Very High</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 4: Create Forecasted Incidence Layer</h2>
+                <p>Paint the pilot woredas based on forecasted incidence:</p>
+                <pre><code>// Create an empty image for painting
+var empty = ee.Image().byte();
+
+// Paint woredas based on forecasted incidence category
+var fill_fc = empty.paint({
+    featureCollection: pilot,
+    color: 'inc_n_fc'
+});
+
+// Define the sequential red color palette
+var palette = ['fee5d9', 'fcae91', 'fb6a4a', 'de2d26', 'a50f15'];
+
+// Set map center and add layer
+Map.setCenter(38, 11.5, 7);
+Map.addLayer(fill_fc, {palette: palette, min: 1, max: 5}, 'Forecasted Incidence');</code></pre>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 5: Create Observed Incidence Layer</h2>
+                <p>Add the observed (actual) incidence for comparison:</p>
+                <pre><code>// Paint woredas based on observed incidence
+var fill_obs = empty.paint({
+    featureCollection: pilot,
+    color: 'inc_n_obs'
+});
+
+// Add layer (hidden by default - toggle visibility to compare)
+Map.addLayer(fill_obs, {palette: palette, min: 1, max: 5}, 'Observed Incidence', false);</code></pre>
+
+                <div class="try-it">
+                    <p><strong>Try it:</strong> Toggle between "Forecasted Incidence" and "Observed Incidence" layers
+                        using the Layers panel. How well did the forecast match reality?</p>
+                </div>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 6: Add Context Layers</h2>
+                <p>Add non-study areas and boundaries for context:</p>
+                <pre><code>// Paint non-study woredas with gray
+var fill_na = empty.paint({
+    featureCollection: nonpilot
+});
+Map.addLayer(fill_na, {palette: 'a1a9a8'}, 'Non-study woredas');
+
+// Draw borders for ALL Amhara region woredas
+var outline = empty.paint({
+    featureCollection: epidemiaResults,
+    color: 1,
+    width: 1
+});
+Map.addLayer(outline, {palette: '000000'}, 'Woredas');</code></pre>
+            </section>
+
+            <!-- Self-Check Questions -->
+            <section class="self-check">
+                <h3>Check Your Understanding</h3>
+                <ol>
+                    <li>What is the difference between pilot and non-pilot woredas?</li>
+                    <li>Why do we use the same color palette for both forecasted and observed incidence?</li>
+                    <li>What would it mean if a woreda shows category 5 in forecasts but category 2 in observed?</li>
+                    <li>How could you modify this visualization to show the difference between forecast and observed?
+                    </li>
+                </ol>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <div class="issue">
+                    <strong>Problem: All woredas appear the same color</strong>
+                    <p><strong>Solution:</strong> Check that you're using the correct property name ('inc_n_fc' or
+                        'inc_n_obs') and that min/max values match your data range (1-5).</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Some woredas are missing from the map</strong>
+                    <p><strong>Solution:</strong> Ensure you've added both the pilot and nonpilot layers, and check that
+                        the FeatureCollection loaded successfully.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Layers are not toggling correctly</strong>
+                    <p><strong>Solution:</strong> Expand the Layers panel on the right side of the map. The layer order
+                        matters - check that layers aren't being hidden by layers added later.</p>
+                </div>
+            </section>
+
+            <!-- Pro Tips -->
+            <section class="pro-tips">
+                <h3>Pro Tips</h3>
+                <ul>
+                    <li><strong>Create a legend:</strong> Use ui.Panel to add a legend explaining the color categories
+                    </li>
+                    <li><strong>Add difference layer:</strong> Calculate forecast - observed to show over/under
+                        prediction</li>
+                    <li><strong>Time animation:</strong> With multiple weeks of data, create an animated time series
+                    </li>
+                    <li><strong>Inspector tool:</strong> Click on woredas to see exact forecast vs observed values</li>
+                </ul>
+            </section>
+
+            <!-- Key Concepts -->
+            <section class="key-concepts">
+                <h3>Key Takeaways</h3>
+                <ul>
+                    <li>Analysis results from external tools (R, Python) can be imported back into GEE</li>
+                    <li>Choropleth maps effectively communicate spatial patterns in health data</li>
+                    <li>Comparing forecast vs observed layers enables visual model validation</li>
+                    <li>Consistent color scales are essential for fair comparisons</li>
+                </ul>
+            </section>
+
             <section id="submission">
                 <div class="submission-box">
-                    <h3>Lab Submission</h3>
-                    <p>Submit lab via email.</p>
+                    <h3>📋 Lab Submission</h3>
                     <p><strong>Subject:</strong> <code>Lab 18 - Health Applications Part 2 - [Your Name]</code></p>
+
+                    <h4>Submit:</h4>
+                    <p>A shareable URL to your GEE script that shows:</p>
+                    <ol>
+                        <li>Forecasted incidence choropleth layer</li>
+                        <li>Observed incidence choropleth layer (can be hidden by default)</li>
+                        <li>Non-study woredas in gray</li>
+                        <li>Woreda boundaries</li>
+                        <li>Comments explaining each section</li>
+                    </ol>
                 </div>
             </section>
         </main>
 
         <footer>
-            <p><a href='lab-17-health-applications-part1.html'>&larr; Previous Lab</a> | <a href='lab-19-making-gifs-and-videos.html'>Next Lab &rarr;</a></p>
-            <p><a href="../index.html">&larr;Back to Course Home</a></p>
+            <p><a href="lab-17-health-applications-part1.html">← Previous Lab</a> | <a
+                    href="lab-19-making-gifs-and-videos.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
         </footer>
     </div>
-    
-</body>
-</html>
 
+</body>
+
+</html>

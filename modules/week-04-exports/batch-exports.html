@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Exports | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 4
+        </nav>
+
+        <header class="lab-header">
+            <h1>Batch Exports</h1>
+        </header>
+
+        <main class="lab-content">
+            <p>
+                When you need to export results for multiple regions, time periods, or variables, batch
+                exports let you queue many tasks at once without manual repetition.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Export images for multiple regions using loops.</li>
+                    <li>Create time series exports (monthly, yearly).</li>
+                    <li>Export each image in a collection separately.</li>
+                    <li>Manage large export queues effectively.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Real projects require exporting dozens or hundreds of files. Manual exports are tedious
+                    and error-prone. Batch exports automate the process and ensure consistency.
+                </p>
+            </section>
+
+            <section>
+                <h2>Quick win: Export by region</h2>
+                <p>Export NDVI for multiple parks:</p>
+                <pre><code>// Define multiple regions
+var parks = ee.FeatureCollection([
+  ee.Feature(ee.Geometry.Point([-81.0, 28.4]).buffer(10000), {name: 'Park_A'}),
+  ee.Feature(ee.Geometry.Point([-82.0, 29.1]).buffer(10000), {name: 'Park_B'}),
+  ee.Feature(ee.Geometry.Point([-80.5, 27.8]).buffer(10000), {name: 'Park_C'})
+]);
+
+// Create NDVI image
+var image = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2023-06-01', '2023-08-31')
+  .median()
+  .multiply(0.0000275).add(-0.2);
+var ndvi = image.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI');
+
+// Get list of features to loop over
+var parkList = parks.toList(parks.size());
+
+// Export each region
+for (var i = 0; i < 3; i++) {
+  var park = ee.Feature(parkList.get(i));
+  var name = park.get('name').getInfo();  // Get name client-side
+  
+  Export.image.toDrive({
+    image: ndvi,
+    description: 'NDVI_' + name + '_2023',
+    folder: 'EarthEngine/Parks',
+    region: park.geometry(),
+    scale: 30,
+    maxPixels: 1e9
+  });
+}
+
+print('3 export tasks created - check Tasks panel!');</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>Three export tasks appear in the Tasks panel. Click "Run" on each to start the exports.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Export by time period</h2>
+                <p>Create monthly composites and export each:</p>
+                <pre><code>var roi = ee.Geometry.Rectangle([-82.5, 29.5, -82.0, 30.0]);
+var year = 2023;
+
+// Loop through months
+for (var month = 1; month <= 12; month++) {
+  var startDate = ee.Date.fromYMD(year, month, 1);
+  var endDate = startDate.advance(1, 'month');
+  
+  // Get monthly composite
+  var composite = ee.ImageCollection('MODIS/061/MOD13A2')
+    .filterDate(startDate, endDate)
+    .select('NDVI')
+    .median();
+  
+  // Format month with leading zero
+  var monthStr = (month < 10) ? '0' + month : '' + month;
+  
+  Export.image.toDrive({
+    image: composite,
+    description: 'NDVI_' + year + '_' + monthStr,
+    folder: 'EarthEngine/Monthly',
+    region: roi,
+    scale: 250,
+    maxPixels: 1e9
+  });
+}
+
+print('12 monthly export tasks created!');</code></pre>
+            </section>
+
+            <section>
+                <h2>Export each image in a collection</h2>
+                <p>Export individual images (not composites):</p>
+                <pre><code>var roi = ee.Geometry.Point([-82.3, 29.6]).buffer(5000);
+
+// Get collection
+var collection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2023-06-01', '2023-06-30')
+  .filterBounds(roi);
+
+// Get list of image IDs
+var imageList = collection.toList(collection.size());
+var count = collection.size().getInfo();
+
+// Export each image
+for (var i = 0; i < count; i++) {
+  var img = ee.Image(imageList.get(i));
+  var id = img.id().getInfo();
+  var date = img.date().format('YYYY-MM-dd').getInfo();
+  
+  Export.image.toDrive({
+    image: img.select(['SR_B4', 'SR_B3', 'SR_B2']).multiply(0.0000275).add(-0.2),
+    description: 'L8_' + date,
+    folder: 'EarthEngine/L8_Images',
+    region: roi,
+    scale: 30,
+    maxPixels: 1e9
+  });
+}
+
+print(count + ' image export tasks created!');</code></pre>
+            </section>
+
+            <section>
+                <h2>Export zonal statistics for many features</h2>
+                <p>Calculate and export statistics for each polygon:</p>
+                <pre><code>// Load a FeatureCollection (counties, watersheds, etc.)
+var counties = ee.FeatureCollection('TIGER/2018/Counties')
+  .filter(ee.Filter.eq('STATEFP', '12'))  // Florida
+  .limit(10);  // Limit for demo
+
+// Calculate NDVI
+var ndvi = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2023-06-01', '2023-08-31')
+  .filterBounds(counties)
+  .median()
+  .multiply(0.0000275).add(-0.2)
+  .normalizedDifference(['SR_B5', 'SR_B4'])
+  .rename('NDVI');
+
+// Add mean NDVI to each county
+var withStats = ndvi.reduceRegions({
+  collection: counties,
+  reducer: ee.Reducer.mean(),
+  scale: 30
+});
+
+// Export as table
+Export.table.toDrive({
+  collection: withStats,
+  description: 'County_NDVI_Stats',
+  folder: 'EarthEngine',
+  fileFormat: 'CSV'
+});
+
+print('Zonal stats export task created!');</code></pre>
+            </section>
+
+            <section>
+                <h2>Multi-year time series</h2>
+                <p>Export annual composites for multiple years:</p>
+                <pre><code>var roi = ee.Geometry.Rectangle([-82.5, 29.5, -82.0, 30.0]);
+
+// Loop through years
+for (var year = 2018; year <= 2023; year++) {
+  var composite = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+    .filterDate(year + '-06-01', year + '-08-31')
+    .filterBounds(roi)
+    .median()
+    .multiply(0.0000275).add(-0.2)
+    .normalizedDifference(['SR_B5', 'SR_B4'])
+    .rename('NDVI');
+  
+  Export.image.toDrive({
+    image: composite,
+    description: 'NDVI_Summer_' + year,
+    folder: 'EarthEngine/TimeSeries',
+    region: roi,
+    scale: 30,
+    maxPixels: 1e9
+  });
+}
+
+print('6 annual export tasks created!');</code></pre>
+            </section>
+
+            <section class="pro-tips">
+                <h3>Pro tips</h3>
+                <ul>
+                    <li><strong>Start small:</strong> Test with 2-3 exports before running 100.</li>
+                    <li><strong>Use .getInfo() sparingly:</strong> It's slow—only use for loop variables.</li>
+                    <li><strong>Organize folders:</strong> Use subfolders in Drive to keep exports organized.</li>
+                    <li><strong>Consistent naming:</strong> Use the same pattern for all exports.</li>
+                    <li><strong>Monitor progress:</strong> Check the Tasks panel for errors.</li>
+                    <li><strong>Parallel limit:</strong> EE runs ~10 tasks in parallel; queue more if needed.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Running all tasks</h2>
+                <p>After running your script, you still need to click "Run" for each task in the Tasks panel.
+                    For many tasks, you can:</p>
+                <ol>
+                    <li>Use the browser console to auto-start tasks (advanced)</li>
+                    <li>Use the Python API with <code>task.start()</code></li>
+                    <li>Click quickly through the list (practical for &lt;20 tasks)</li>
+                </ol>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: Custom batch export</h4>
+                <p>Modify the yearly time series example to:</p>
+                <ol>
+                    <li>Export winter (Dec-Feb) composites instead of summer.</li>
+                    <li>Add years 2015-2017 to cover a longer period.</li>
+                    <li>Export both NDVI and NDWI as separate tasks.</li>
+                </ol>
+            </div>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Using too many <code>.getInfo()</code> calls (slows script dramatically).</li>
+                    <li>Creating exports inside a <code>.map()</code> function (won't work).</li>
+                    <li>Forgetting to click "Run" in the Tasks panel.</li>
+                    <li>Not testing a single export first.</li>
+                    <li>Running hundreds of exports without monitoring for failures.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>Why do we use a client-side for loop instead of <code>.map()</code> for exports?</li>
+                    <li>What does <code>.getInfo()</code> do and why is it slow?</li>
+                    <li>How many tasks does Earth Engine run in parallel?</li>
+                    <li>After running the script, what additional step is required?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li><a href="export-best-practices.html">Export Best Practices</a></li>
+                    <li><a href="exporting-data.html">Exporting Data</a></li>
+                    <li><a href="temporal-compositing.html">Temporal Compositing</a></li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+
+</html>

@@ -1,13 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Collections | Remote Sensing Course</title>
     <link rel="stylesheet" href="../../css/style.css">
 </head>
-
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -19,71 +17,101 @@
         </header>
 
         <main class="lab-content">
-            <p><em><strong>Objective: The purpose of this module is to introduce you to the many types of collections of
-                        images available in Google Earth Engine. These include sets of individual satellite images,
-                        pre-made composites (which merge multiple individual satellite images into one composite image),
-                        classified land use and land cover (LULC) maps, weather data, and other types of
-                        datasets.</strong></em></p>
-            <h3><span>Learning Outcomes</span></h3>
-            <ul>
-                <li aria-level="1"><span>Accessing and viewing sets of images in Earth Engine.</span></li>
-                <li aria-level="1"><span>Extracting single scenes from collections of images.</span></li>
-                <li aria-level="1"><span>Applying visualization parameters in Earth Engine to visualize an image.</span>
-                </li>
-            </ul>
-            <p><span>Through the class, you have already been introduced to imagery, one of the core building blocks of
-                    remotely sensed imagery in Earth Engine. In this module, we will expand on this concept of images by
-                    introducing <span></span><code dir="ltr">ImageCollection</code><span></span></span><span>. Image
-                    collections in Earth
-                    Engine organize many different images into one larger data storage structure. Image collections
-                    include information about the location, date collected, and other properties of each image, allowing
-                    you to sift through the <span></span><code
-                        dir="ltr">ImageCollection</code><span></span></span><span>&nbsp;for the exact image
-                    characteristics needed for your analysis. <span>GEE image collections are available from a wide
-                        range of sources, including Landsat, Sentinel-2, MODIS, NASA Global Imagery Browse Services
-                        (GIBS), and DigitalGlobe. </span></span>In addition to the pre-defined image collections, users
-                can also create custom image collections by combining multiple image collections into a single
-                collection. This can be useful for monitoring land cover or land use in a specific region.</p>
-            <p>In simplest terms, <span>An</span><code dir="ltr">ImageCollection</code><span>&nbsp;is a stack or
-                    sequence of images. An</span><code dir="ltr">ImageCollection</code><span>&nbsp;can be loaded
-                    by pasting an Earth Engine asset ID into the</span><code
-                    dir="ltr">ImageCollection</code><span>&nbsp;constructor. You can find</span><code
-                    dir="ltr">ImageCollection</code><span>&nbsp;IDs in the</span><a
-                    href="https://developers.google.com/earth-engine/datasets">data catalog</a><span>.</span></p>
+            <p>
+                ImageCollections are stacks of images organized by time and space. They let you filter by date, location,
+                and metadata, then map functions or reduce to composites.
+            </p>
 
-            <h2>Key Concepts</h2>
-            <div style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
-                <ul style="margin: 0;">
-                    <li><strong>ImageCollection</strong>: A stack of images organized by time and location</li>
-                    <li><strong>filterDate()</strong>: Select images within a time range</li>
-                    <li><strong>filterBounds()</strong>: Select images covering a location</li>
-                    <li><strong>sort()</strong>: Order images by a property (e.g., cloud cover)</li>
-                    <li><strong>first()</strong>: Get the first image from the collection</li>
-                    <li><strong>median()</strong> / <strong>mean()</strong>: Create composite images</li>
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Load an <code>ImageCollection</code> by ID.</li>
+                    <li>Filter by date, bounds, and metadata (cloud cover).</li>
+                    <li>Extract a single image and build a simple composite.</li>
+                    <li>Inspect collections without overwhelming the console.</li>
                 </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Most analyses start with an <code>ImageCollection</code>. Filtering and compositing correctly saves
+                    time, reduces cloud contamination, and keeps scripts efficient.
+                </p>
+            </section>
+
+            <section>
+                <h2>Quick win: filter, inspect, composite</h2>
+<pre><code>// Load Landsat 8 SR and filter
+var col = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterBounds(ee.Geometry.Point([-82.3, 29.6]))
+  .filterDate('2023-06-01', '2023-07-01')
+  .filter(ee.Filter.lt('CLOUD_COVER', 20));
+
+print('Count after filters', col.size());
+var first = col.first();
+Map.centerObject(first, 9);
+Map.addLayer(first, {bands: ['SR_B4', 'SR_B3', 'SR_B2'], min: 0.02, max: 0.3}, 'First image');
+
+// Median composite to reduce clouds
+var median = col.median();
+Map.addLayer(median, {bands: ['SR_B4', 'SR_B3', 'SR_B2'], min: 0.02, max: 0.3}, 'Median composite');</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A single scene and a cleaner median composite; console showing a small collection count.</p>
+                </div>
+            </section>
+
+            <section class="key-concepts">
+                <h3>Key concepts</h3>
+                <ul>
+                    <li><code>filterDate()</code>: time window.</li>
+                    <li><code>filterBounds()</code>: spatial filter.</li>
+                    <li><code>filter()</code>: metadata filters (for example, <code>CLOUD_COVER</code>).</li>
+                    <li><code>first()</code>: grab one image for debugging.</li>
+                    <li><code>median()</code> / <code>mean()</code>: simple cloud-resistant composites.</li>
+                </ul>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: refine your stack</h4>
+                <p>Add <code>.sort('CLOUD_COVER')</code> and view the first image.</p>
+                <p>Print <code>col.aggregate_histogram('CLOUD_COVER')</code> to see quality distribution.</p>
+                <p>Swap to Sentinel-2 SR and adjust band names accordingly.</p>
             </div>
 
-            <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
-                <strong>⚠️ Common Mistakes:</strong>
-                <ul style="margin: 10px 0 0 0;">
-                    <li><strong>Printing large collections</strong>: Filter first, then print</li>
-                    <li><strong>Forgetting to filter</strong>: Always filter by date and location before processing</li>
-                    <li><strong>Wrong collection ID</strong>: Check the Data Catalog for exact IDs</li>
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Printing huge collections before filtering-filter first, then inspect.</li>
+                    <li>Forgetting to scale/offset surface reflectance products before visualization.</li>
+                    <li>Using <code>first()</code> on an unfiltered collection and getting a cloudy scene.</li>
                 </ul>
-            </div>
+            </section>
 
-            <h2>Related Readings</h2>
-            <ul>
-                <li><a href="gee-data-catalogs.html">Google Earth Engine Data Catalogs</a></li>
-                <li><a href="understanding-scale.html">Understanding Scale</a></li>
-            </ul>
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What does <code>filterBounds()</code> do?</li>
+                    <li>Why use <code>median()</code> on a collection?</li>
+                    <li>How would you remove images with <code>EO:cloud_cover</code> greater than 10?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li>Apply cloud masking to each image with <code>.map()</code> before compositing.</li>
+                    <li>Export a median composite at a specified scale (see Week 04 exports).</li>
+                    <li>Explore other collections in the <a href="gee-data-catalogs.html">Data Catalog</a>.</li>
+                </ul>
+            </section>
         </main>
 
         <footer>
-            <p><a href="../../index.html">←Back to Course Home</a></p>
+            <p><a href="../../index.html">Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>
 </body>
-
 </html>

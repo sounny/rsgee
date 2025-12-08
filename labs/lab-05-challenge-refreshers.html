@@ -1,11 +1,15 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 5 - Challenge Refreshers | Remote Sensing Course</title>
+    <meta name="description"
+        content="Practice creating natural color and false color composites independently using Landsat imagery.">
     <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -14,37 +18,102 @@
 
         <header class="lab-header">
             <h1>Lab 5 - Challenge: Refreshers</h1>
-            <p><em><strong>Objective: Practice creating natural color and false color composites independently.</strong></em></p>
+            <p><em><strong>Objective: Practice creating natural color and false color composites
+                        independently.</strong></em></p>
         </header>
 
         <main class="lab-content">
 
-            <section class="lab-preflight">
-                <h2>Before you start</h2>
+            <!-- Learning Objectives -->
+            <section class="learning-objectives">
+                <h3>What You'll Learn</h3>
                 <ul>
-                    <li><strong>Prerequisites:</strong> Complete Labs 1�4 and gather your notes on study area selection from the earlier challenges.</li>
-                    <li><strong>Estimated time:</strong> 75 minutes</li>
-                    <li><strong>Materials:</strong> Earth Engine login, any saved scripts from prior labs, and supporting references for your chosen region.</li>
+                    <li>Load a specific Landsat image by its ID</li>
+                    <li>Apply scale factors to Landsat Collection 2 data</li>
+                    <li>Create natural color (true color) composites</li>
+                    <li>Create false color composites using NIR</li>
+                    <li>Compare and interpret different band combinations</li>
+                    <li>Identify environmental events from satellite imagery</li>
                 </ul>
+            </section>
+
+            <!-- Building On Previous Learning -->
+            <section class="builds-on">
+                <h4>Building On Previous Learning</h4>
+                <p>This lab challenges you to apply skills from multiple previous labs:</p>
+                <ul>
+                    <li><a href="lab-02-hello-landsat.html">Lab 2</a> - Band combinations and RGB composites</li>
+                    <li><a href="lab-03-js-basics.html">Lab 3</a> - JavaScript basics and code comments</li>
+                    <li><a href="lab-04-night-time-lights.html">Lab 4</a> - Working with specific imagery and temporal
+                        data</li>
+                </ul>
+            </section>
+
+            <!-- Why It Matters -->
+            <section class="why-it-matters">
+                <h3>Why This Matters</h3>
+                <p>The ability to quickly create and interpret different band combinations is essential for:</p>
+                <ul>
+                    <li><strong>Disaster response:</strong> Rapidly assess fire damage, floods, or storms</li>
+                    <li><strong>Environmental monitoring:</strong> Track vegetation health, water bodies, urban
+                        expansion</li>
+                    <li><strong>Verification:</strong> Confirm what you see in true color with NIR/SWIR bands</li>
+                </ul>
+                <p>This lab simulates real-world scenarios where you need to work independently with unfamiliar imagery.
+                </p>
+            </section>
+
+            <section class="lab-preflight">
+                <h2>Before You Start</h2>
+                <ul>
+                    <li><strong>Prerequisites:</strong> Complete Labs 1-4 and gather your notes on study area selection
+                        from the earlier challenges.</li>
+                    <li><strong>Estimated time:</strong> 75 minutes</li>
+                    <li><strong>Materials:</strong> Earth Engine login, any saved scripts from prior labs, and
+                        supporting references for your chosen region.</li>
+                </ul>
+            </section>
+
+            <!-- Key Vocabulary -->
+            <section class="vocabulary">
+                <h3>Key Terms</h3>
+                <dl>
+                    <dt>Natural Color Composite</dt>
+                    <dd>RGB image using Red, Green, Blue bands to show features as they appear to the human eye.</dd>
+
+                    <dt>False Color Composite</dt>
+                    <dd>RGB image using non-visible bands (like NIR) to reveal information not visible to the eye.</dd>
+
+                    <dt>Scale Factor</dt>
+                    <dd>A multiplier applied to raw satellite data to convert Digital Numbers to physical values (like
+                        reflectance).</dd>
+
+                    <dt>Path/Row</dt>
+                    <dd>Landsat's grid system for identifying scene locations (e.g., Path 22, Row 39).</dd>
+                </dl>
             </section>
 
             <section>
                 <h2>Introduction</h2>
                 <p>
-                    This challenge lab gives you the opportunity to practice the skills you've learned in the previous labs. 
-                    You'll work with a specific Landsat image to create both natural color and near-infrared false color 
+                    This challenge lab gives you the opportunity to practice the skills you've learned in the previous
+                    labs.
+                    You'll work with a specific Landsat image to create both natural color and near-infrared false color
                     composites, then analyze what each reveals about an environmental event.
                 </p>
             </section>
 
             <section class="lab-steps">
                 <h2>Challenge Task</h2>
-                <p>Create a new script to make <strong>two composites</strong> - natural color and near-infrared false color 
-                for this image:</p>
+                <p>Create a new script to make <strong>two composites</strong> - natural color and near-infrared false
+                    color
+                    for this image:</p>
 
-                <div class="note">
-                    <p><strong>Image ID:</strong></p>
-                    <code>'Landsat/LT05/C02/T1_L2/LT05_022039_20050907'</code>
+                <div class="challenge">
+                    <h4>Image ID:</h4>
+                    <pre><code>'LANDSAT/LT05/C02/T1_L2/LT05_022039_20050907'</code></pre>
+                    <p><em>Hint: Look at the date in the ID - September 7, 2005. What was happening in the southeastern
+                            US at that time?</em></p>
                 </div>
 
                 <p>In your script, make comments with the following information:</p>
@@ -52,19 +121,96 @@
                     <li>Where is this image?</li>
                     <li>What environmental event do you think the images show?</li>
                     <li>Compare and contrast the natural and false-color composites.</li>
-                    <li>What do the false-color composite help you see that is more difficult to decipher in the natural 
-                    color composite?</li>
+                    <li>What do the false-color composite help you see that is more difficult to decipher in the natural
+                        color composite?</li>
                 </ul>
             </section>
 
             <section class="lab-steps">
+                <h2>Landsat 5 Band Reference</h2>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Band Name</th>
+                            <th>Wavelength</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>SR_B1</code></td>
+                            <td>0.45-0.52 μm</td>
+                            <td>Blue</td>
+                        </tr>
+                        <tr>
+                            <td><code>SR_B2</code></td>
+                            <td>0.52-0.60 μm</td>
+                            <td>Green</td>
+                        </tr>
+                        <tr>
+                            <td><code>SR_B3</code></td>
+                            <td>0.63-0.69 μm</td>
+                            <td>Red</td>
+                        </tr>
+                        <tr>
+                            <td><code>SR_B4</code></td>
+                            <td>0.76-0.90 μm</td>
+                            <td>Near Infrared (NIR)</td>
+                        </tr>
+                        <tr>
+                            <td><code>SR_B5</code></td>
+                            <td>1.55-1.75 μm</td>
+                            <td>Shortwave Infrared 1 (SWIR1)</td>
+                        </tr>
+                        <tr>
+                            <td><code>SR_B7</code></td>
+                            <td>2.08-2.35 μm</td>
+                            <td>Shortwave Infrared 2 (SWIR2)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Composite Quick Reference</h2>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Composite Type</th>
+                            <th>RGB Bands</th>
+                            <th>What It Shows</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Natural Color</strong></td>
+                            <td>SR_B3, SR_B2, SR_B1</td>
+                            <td>As the eye would see it</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NIR False Color</strong></td>
+                            <td>SR_B4, SR_B3, SR_B2</td>
+                            <td>Vegetation appears red/pink, water appears dark</td>
+                        </tr>
+                        <tr>
+                            <td>SWIR False Color</td>
+                            <td>SR_B7, SR_B4, SR_B3</td>
+                            <td>Good for urban areas and fire scars</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="lab-steps">
                 <h2>Hints</h2>
-                <div class="note">
-                    <p><strong>Remember:</strong></p>
+                <div class="pro-tips">
+                    <h3>Technical Tips</h3>
                     <ul>
                         <li>Landsat 5 uses Collection 2 Level 2 data</li>
-                        <li>Natural color composite: Use bands SR_B3 (Red), SR_B2 (Green), SR_B1 (Blue)</li>
-                        <li>False color (NIR) composite: Use bands SR_B4 (NIR), SR_B3 (Red), SR_B2 (Green)</li>
+                        <li><strong>Natural color composite:</strong> Use bands SR_B3 (Red), SR_B2 (Green), SR_B1 (Blue)
+                        </li>
+                        <li><strong>False color (NIR) composite:</strong> Use bands SR_B4 (NIR), SR_B3 (Red), SR_B2
+                            (Green)</li>
                         <li>You may need to adjust min/max values for optimal visualization</li>
                         <li>Use <code>Map.centerObject()</code> to center on the image</li>
                         <li>Scale factors for Landsat Collection 2 Level 2: multiply by 0.0000275 and add -0.2</li>
@@ -75,7 +221,7 @@
             <section class="lab-steps">
                 <h2>Sample Code Structure</h2>
                 <pre><code>// Load the image
-var image = ee.Image('Landsat/LT05/C02/T1_L2/LT05_022039_20050907');
+var image = ee.Image('LANDSAT/LT05/C02/T1_L2/LT05_022039_20050907');
 
 // Apply scaling factors
 function applyScaleFactors(image) {
@@ -89,33 +235,75 @@ var scaledImage = applyScaleFactors(image);
 Map.centerObject(image, 8);
 
 // Create natural color composite
-// YOUR CODE HERE
+Map.addLayer(scaledImage, {
+    bands: ['SR_B3', 'SR_B2', 'SR_B1'],
+    min: 0,
+    max: 0.3
+}, 'Natural Color');
 
 // Create false color composite
-// YOUR CODE HERE</code></pre>
+Map.addLayer(scaledImage, {
+    bands: ['SR_B4', 'SR_B3', 'SR_B2'],
+    min: 0,
+    max: 0.4
+}, 'NIR False Color');</code></pre>
             </section>
 
             <section>
                 <h2>Analysis Questions</h2>
-                <p>After creating your composites, explore the image and answer these questions in your script comments:</p>
+                <p>After creating your composites, explore the image and answer these questions in your script comments:
+                </p>
                 <ol>
-                    <li><strong>Location:</strong> Where is this image located? (Hint: Look at the path/row and use 
-                    geographic features)</li>
-                    <li><strong>Environmental Event:</strong> What type of environmental event or phenomenon do you observe? 
-                    Look for clues in both the natural and false color composites.</li>
-                    <li><strong>Comparison:</strong> How do the natural color and false color composites differ in what 
-                    they reveal? Which features are more prominent in each?</li>
-                    <li><strong>False Color Advantage:</strong> What specific information does the false color composite 
-                    reveal that is harder to see in the natural color composite?</li>
+                    <li><strong>Location:</strong> Where is this image located? (Hint: Look at the path/row and use
+                        geographic features)</li>
+                    <li><strong>Environmental Event:</strong> What type of environmental event or phenomenon do you
+                        observe? Look for clues in both the natural and false color composites.</li>
+                    <li><strong>Comparison:</strong> How do the natural color and false color composites differ in what
+                        they reveal? Which features are more prominent in each?</li>
+                    <li><strong>False Color Advantage:</strong> What specific information does the false color composite
+                        reveal that is harder to see in the natural color composite?</li>
                 </ol>
+            </section>
+
+            <!-- Self-Check Questions -->
+            <section class="self-check">
+                <h3>Check Your Understanding</h3>
+                <ol>
+                    <li>Why do we need to apply scale factors to Landsat Collection 2 data?</li>
+                    <li>In a NIR false color composite, what color would healthy vegetation appear? What about water?
+                    </li>
+                    <li>How can you determine the location of a Landsat image from its ID?</li>
+                    <li>Why might a false color composite be better than natural color for assessing vegetation damage?
+                    </li>
+                </ol>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <div class="issue">
+                    <strong>Problem: Image appears all black or all white</strong>
+                    <p><strong>Solution:</strong> Your min/max values are wrong. For scaled reflectance data, try min:
+                        0, max: 0.3.
+                        Use the Inspector to check actual pixel values.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Image ID not found error</strong>
+                    <p><strong>Solution:</strong> Check that you copied the ID exactly, including the single quotes.
+                        The path is case-sensitive: use 'LANDSAT' not 'Landsat'.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Bands not found</strong>
+                    <p><strong>Solution:</strong> For Landsat 5 Collection 2 Level 2, bands are named SR_B1, SR_B2, etc.
+                        (not just B1, B2).</p>
+                </div>
             </section>
 
             <section id="submission">
                 <div class="submission-box">
-                    <h3> Lab Submission</h3>
-                    <p>Submit lab via email.</p>
+                    <h3>📋 Lab Submission</h3>
                     <p><strong>Subject:</strong> <code>Lab 5 - Challenge Refreshers - [Your Name]</code></p>
-                    
+
                     <h4>Submit:</h4>
                     <p>A <strong>shareable URL</strong> to your Google Earth Engine script that includes:</p>
                     <ul>
@@ -130,9 +318,11 @@ Map.centerObject(image, 8);
         </main>
 
         <footer>
-            <p><a href="lab-04-night-time-lights.html"> Previous Lab</a> | <a href="lab-06-image-collections.html">Next Lab </a></p>
-            <p><a href="../index.html">Back to Course Home</a></p>
+            <p><a href="lab-04-night-time-lights.html">← Previous Lab</a> | <a href="lab-06-image-collections.html">Next
+                    Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
         </footer>
     </div>
 </body>
+
 </html>

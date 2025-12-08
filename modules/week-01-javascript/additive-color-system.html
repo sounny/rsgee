@@ -1,35 +1,129 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Introduction to Additive Color System | Remote Sensing Course</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <title>Additive Color System | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
 </head>
 <body>
     <div class="container">
         <nav class="breadcrumb">
-            <a href="../../index.html">Home</a> &gt; <a href="../index.html#schedule">Schedule</a> &gt; Week 1
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 1
         </nav>
 
         <header class="lab-header">
-            <h1>Introduction to Additive Color System</h1>
+            <h1>Additive Color System</h1>
         </header>
 
         <main class="lab-content">
-<p><span>Thus far, we have used RGB composites to make a true-color image Lab 2 - Hello Landsat! in which the colors on the screen match the colors in our everyday world. We also used the same principles to draw a false-color combination of optical bands collected by the satellite called a Color Infrared Image. In this module we will get a better understanding of the <i>additive color system in order t</i>o be able to read and interpret information from composite images.</span></p>
-<p>The additive color system is used to represent colors on digital devices, like computer monitors and televisions. The system works by adding varying levels of red, green, and blue light to produce a range of colors. By adjusting the levels of each of the colors, a vast array of colors can be created. The red, green, and blue channels are represented with a three-digit number, which is then used to create a pixel. The 3-digit number combines the levels of red, green, and blue into a single color.</p>
-<p>To create a range of colors, the levels of each of the red, green, and blue channels can be adjusted. For example, a value of 0, 0, 0 would be black (no light), a value of 255, 255, 255 would be white (all light), and a value of 255, 0, 0 would be red (only red light). Combining different levels of each of the colors creates a spectrum of colors. For example, a combination of red, green and blue at the levels of 250, 70, 22 would result in Florida Orange and 0, 33, 165 would result in Florida Blue.</p>
-<p><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-02-10%20at%205.24.50%20AM.png" alt="Florida Orange and Florida Blue RGB Values" loading="lazy"></p>
-<p><span>Views of data in Earth Engine, and indeed everything drawn on a computer screen, use three channels for display (red, green, and blue). The order of the bands in a composite layer determines the </span><i><span>color channel</span></i><span> used to display the DN of pixels. When the DN is higher in one band relative to the other two bands, the pixel will appear tinted with the color channel used to display that band. For example, when the first band is higher relative to the other two bands, the pixel will appear reddish. The intensity of the pixel color will express the magnitude of difference between the DN quantities.&nbsp;&nbsp;</span></p>
-<p><span><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-02-10%20at%205.27.09%20AM.png" alt="The Additive Color System" loading="lazy"></span></p>
-<p><span>The way that primary colors combine to make new colors in an additive color system can be confusing at first. When using an additive color system, red combined with green makes yellow, green combined with blue makes cyan, and red combined with blue makes magenta (see figure above). Combining all three primary colors makes white. The absence of all primary colors makes black. For RGB composites, this means that if the pixel value of two bands are greater than that of the third band, the pixel color will appear tinted as a combined color. For example, when the pixel value of the first and second bands of a composite are higher than that of the third band, the pixel will appear yellowish.</span></p>
+            <p>
+                Screens use additive color: red, green, and blue light combine to make the colors you see. Understanding
+                RGB helps you pick bands for true-color and false-color composites in Earth Engine.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Explain how red, green, and blue channels mix in additive color.</li>
+                    <li>Predict how band order affects composite appearance.</li>
+                    <li>Relate pixel values to brightness and color tint.</li>
+                    <li>Apply the concept when choosing bands for visualization.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    When you know how RGB blending works, you can design composites that highlight vegetation, water,
+                    burn scars, or urban areas instead of guessing colors.
+                </p>
+            </section>
+
+            <section>
+                <h2>How additive color works</h2>
+                <ul>
+                    <li><strong>Three channels:</strong> Red, Green, Blue.</li>
+                    <li><strong>0,0,0:</strong> No light = black.</li>
+                    <li><strong>255,255,255:</strong> Full light = white.</li>
+                    <li><strong>Primary mixes:</strong> Red + Green = Yellow; Green + Blue = Cyan; Red + Blue = Magenta.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Examples of RGB values</h2>
+                <p>Example values used for Florida school colors:</p>
+                <ul>
+                    <li>Florida Orange: <code>250, 70, 22</code></li>
+                    <li>Florida Blue: <code>0, 33, 165</code></li>
+                </ul>
+                <figure>
+                    <img src="../../images/screenshots/Screenshot%202023-02-10%20at%205.24.50%20AM.png"
+                        alt="Sample RGB values for orange and blue" loading="lazy">
+                    <figcaption>Changing channel strengths changes the color you see.</figcaption>
+                </figure>
+            </section>
+
+            <section>
+                <h2>Why band order matters</h2>
+                <p>
+                    In a composite, the first band you supply feeds the red channel, the second feeds green, the third
+                    feeds blue. A pixel appears tinted toward whichever band has the highest value relative to the
+                    others.
+                </p>
+                <figure>
+                    <img src="../../images/screenshots/Screenshot%202023-02-10%20at%205.27.09%20AM.png"
+                        alt="Additive color diagram" loading="lazy">
+                    <figcaption>Red + Green = Yellow, Green + Blue = Cyan, Red + Blue = Magenta.</figcaption>
+                </figure>
+            </section>
+
+            <section class="try-it">
+                <h4>Try it in the Code Editor</h4>
+                <p>Create two composites from the same Landsat image:</p>
+<pre><code>var img = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623')
+  .multiply(0.0000275).add(-0.2);
+
+// True color
+Map.addLayer(img, {bands: ['SR_B4', 'SR_B3', 'SR_B2'], min: 0, max: 0.3}, 'True color');
+
+// Color infrared (NIR, Red, Green)
+Map.addLayer(img, {bands: ['SR_B5', 'SR_B4', 'SR_B3'], min: 0, max: 0.3}, 'Color IR');</code></pre>
+                <p>Toggle the layers and note how vegetation pops in the color infrared view.</p>
+            </section>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Forgetting to scale Level-2 data before visualizing.</li>
+                    <li>Swapping band order unintentionally, leading to confusing colors.</li>
+                    <li>Assuming higher values always mean brighter in the final color-relative channel balance matters.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What happens to a pixel when red and green values are high but blue is low-</li>
+                    <li>Which channel order highlights vegetation as bright red in a false-color composite-</li>
+                    <li>Why does scaling radiance/reflectance matter before visualization-</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li>Experiment with different band orders in your own imagery.</li>
+                    <li>Combine this knowledge with <a href="../week-02-images/band-arithmetic.html">Band Arithmetic</a> to design targeted composites.</li>
+                </ul>
+            </section>
         </main>
 
         <footer>
-            <p><a href="../../index.html">��Back to Course Home</a></p>
+            <p><a href="../../index.html">Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>
 </body>
 </html>
+

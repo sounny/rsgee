@@ -1,11 +1,15 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 4 - Night Time Lights | Remote Sensing Course</title>
+    <meta name="description"
+        content="Use the additive color system with nighttime lights data to analyze urban growth and human activity patterns over time.">
     <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -14,26 +18,95 @@
 
         <header class="lab-header">
             <h1>Lab 4 - Night Time Lights</h1>
-            <p><em><strong>Objective: Use the additive color system with non-optical data to analyze nighttime lights change over time.</strong></em></p>
+            <p><em><strong>Objective: Use the additive color system with non-optical data to analyze nighttime lights
+                        change over time.</strong></em></p>
         </header>
 
         <main class="lab-content">
 
-            <section class="lab-preflight">
-                <h2>Before you start</h2>
+            <!-- Learning Objectives -->
+            <section class="learning-objectives">
+                <h3>What You'll Learn</h3>
                 <ul>
-                    <li><strong>Prerequisites:</strong> Finish Lab 3 and review the Night-Time Lights overview in the weekly module.</li>
-                    <li><strong>Estimated time:</strong> 60 minutes</li>
-                    <li><strong>Materials:</strong> Earth Engine account, bookmarked VIIRS/DMSP datasets, and a place to jot observations for discussion.</li>
+                    <li>Load and visualize nighttime lights satellite data</li>
+                    <li>Create multi-temporal composites using the additive color system</li>
+                    <li>Interpret RGB composites where colors represent time, not wavelengths</li>
+                    <li>Identify patterns of urban growth, resource extraction, and human activity</li>
+                    <li>Use the Inspector tool to verify visual interpretations</li>
                 </ul>
+            </section>
+
+            <!-- Building On Previous Learning -->
+            <section class="builds-on">
+                <h4>Building On Previous Learning</h4>
+                <p>This lab builds on <a href="lab-02-hello-landsat.html">Lab 2</a> where you learned about RGB
+                    composites.
+                    Now you'll apply the same concept in a new way: instead of assigning spectral bands to color
+                    channels,
+                    you'll assign <strong>different years</strong> to create a change detection composite.</p>
+            </section>
+
+            <!-- Why It Matters -->
+            <section class="why-it-matters">
+                <h3>Why This Matters</h3>
+                <p>Nighttime lights are a unique indicator of human activity. Researchers use this data to:</p>
+                <ul>
+                    <li><strong>Track urbanization:</strong> Cities grow outward and become brighter over time</li>
+                    <li><strong>Estimate population:</strong> Brightness correlates with population density</li>
+                    <li><strong>Monitor conflict:</strong> War zones show dramatic decreases in light (e.g., Syria)</li>
+                    <li><strong>Detect economic activity:</strong> Industrial zones and shipping lanes are visible</li>
+                    <li><strong>Study energy access:</strong> Darkness indicates lack of electricity infrastructure</li>
+                </ul>
+                <p>This is one of the few datasets that directly visualizes human presence on Earth.</p>
+            </section>
+
+            <section class="lab-preflight">
+                <h2>Before You Start</h2>
+                <ul>
+                    <li><strong>Prerequisites:</strong> Finish Lab 3 and review the Night-Time Lights overview in the
+                        weekly module.</li>
+                    <li><strong>Estimated time:</strong> 60 minutes</li>
+                    <li><strong>Materials:</strong> Earth Engine account, bookmarked VIIRS/DMSP datasets, and a place to
+                        jot observations for discussion.</li>
+                </ul>
+            </section>
+
+            <!-- Key Vocabulary -->
+            <section class="vocabulary">
+                <h3>Key Terms</h3>
+                <dl>
+                    <dt>DMSP-OLS</dt>
+                    <dd>Defense Meteorological Satellite Program - Operational Linescan System. The original nighttime
+                        lights sensor, active 1992-2013.</dd>
+
+                    <dt>Stable Lights</dt>
+                    <dd>A processed band that removes ephemeral light sources (fires, lightning) to show only persistent
+                        artificial lights.</dd>
+
+                    <dt>Temporal Composite</dt>
+                    <dd>An RGB composite where each color channel represents a different time period rather than a
+                        different spectral band.</dd>
+
+                    <dt>Gas Flaring</dt>
+                    <dd>The burning of natural gas at oil extraction sites, visible as bright spots in nighttime
+                        imagery.</dd>
+
+                    <dt>addBands()</dt>
+                    <dd>An Earth Engine method that combines multiple single-band images into one multi-band image.</dd>
+                </dl>
             </section>
 
             <section>
                 <h2>Introduction</h2>
                 <p>
-                    In this lab, we will work towards applying the additive color system to bands that store non-optical 
-                    and more abstract <em>attributes.</em> This is unlike previous labs where the colors on the screen 
+                    In this lab, we will work towards applying the additive color system to bands that store non-optical
+                    and more abstract <em>attributes.</em> This is unlike previous labs where the colors on the screen
                     represented slices of the electromagnetic spectrum. For this lab, we will look at nighttime lights.
+                </p>
+                <p>
+                    The key insight is that RGB composites can represent <strong>any three variables</strong>, not just
+                    spectral bands. By putting different years into Red, Green, and Blue channels, we can see change
+                    over time at a glance.
                 </p>
             </section>
 
@@ -53,51 +126,68 @@ Map.addLayer(
     },
     'Lights');</code></pre>
 
-                <p>The first line of the code calls the NOAA Nighttime Lights Time Series. You can learn more about it here: 
-                <a href="https://developers.google.com/earth-engine/datasets/catalog/NOAA_DMSP-OLS_NIGHTTIME_LIGHTS" target="_blank">
-                https://developers.google.com/earth-engine/datasets/catalog/NOAA_DMSP-OLS_NIGHTTIME_LIGHTS</a></p>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li><code>ee.Image()</code> - Loads a single nighttime lights image from 1993</li>
+                    <li><code>stable_lights</code> - The band containing persistent artificial light sources</li>
+                    <li><code>min: 0, max: 63</code> - The data range for this sensor (0 = dark, 63 = brightest)</li>
+                </ul>
 
-                <p>The second line takes the data and prints it to the console, and this allows you to explore the different 
-                bands available to you. We are interested in Band 1, the stable lights.</p>
-
-                <p>The third section of the code adds the data to the Map and defines the range for the grayscale representation. 
-                The range of values for display (0�63) represents the minimum and maximum pixel values in this image.</p>
+                <p>The first line of the code calls the NOAA Nighttime Lights Time Series. You can learn more about it
+                    here:
+                    <a href="https://developers.google.com/earth-engine/datasets/catalog/NOAA_DMSP-OLS_NIGHTTIME_LIGHTS"
+                        target="_blank">
+                        NOAA DMSP-OLS Nighttime Lights Catalog</a>
+                </p>
 
                 <figure>
-                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.44.42 AM-1.png" alt="Results of nighttime lights code" loading="lazy">
+                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.44.42 AM-1.png"
+                        alt="Results of nighttime lights code" loading="lazy">
                     <figcaption>Nighttime lights displayed in the code editor</figcaption>
                 </figure>
 
-                <p>The global nighttime lights image represents the average brightness of nighttime lights at each pixel for a 
-                calendar year. For those of us who have sat by a window in an airplane as it descends to a destination at night, 
-                the scene may look vaguely familiar. But the image is very much an abstraction. It provides us with a view of the 
-                planet that we would never be able to see from an airplane or even from space. Night blankets the entire planet in 
-                darkness. There are no clouds. In the "stable lights" band, there are no ephemeral sources of light. Lightning 
-                strikes, wildfires, and other transient lights have been removed. It is a layer that aims to answer one question 
-                about our planet at one point in time: In 1993, how bright were Earth's stable, artificial sources of light?</p>
+                <p>The global nighttime lights image represents the average brightness of nighttime lights at each pixel
+                    for a
+                    calendar year. For those of us who have sat by a window in an airplane as it descends to a
+                    destination at night,
+                    the scene may look vaguely familiar. But the image is very much an abstraction. It provides us with
+                    a view of the
+                    planet that we would never be able to see from an airplane or even from space. Night blankets the
+                    entire planet in
+                    darkness. There are no clouds. In the "stable lights" band, there are no ephemeral sources of light.
+                    Lightning
+                    strikes, wildfires, and other transient lights have been removed. It is a layer that aims to answer
+                    one question
+                    about our planet at one point in time: In 1993, how bright were Earth's stable, artificial sources
+                    of light?</p>
 
                 <figure>
-                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.48.43 AM.png" alt="Asia nighttime lights" loading="lazy">
+                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.48.43 AM.png" alt="Asia nighttime lights"
+                        loading="lazy">
                     <figcaption>Nighttime lights showing East Asia</figcaption>
                 </figure>
 
-                <p>With the zoom controls on the map, you can zoom out to see the bright spot of Shanghai, the large blob of 
-                Seoul to the north and east, the darkness of North Korea except for the small dot of Pyongyang, and the dense 
-                strips of lights of Japan and the west coast of Taiwan.</p>
+                <div class="try-it">
+                    <h4>Try It</h4>
+                    <p>Zoom out to see the bright spot of Shanghai, the large blob of Seoul to the north and east,
+                        the darkness of North Korea except for the small dot of Pyongyang, and the dense strips of
+                        lights of Japan and the west coast of Taiwan. What stories can you already see?</p>
+                </div>
             </section>
 
             <section class="lab-steps">
                 <h2>Part 2: Creating a Temporal Composite</h2>
-                <p>Now we can use the additive color system to make an RGB composite that compares stable nighttime lights at 
-                three different slices of time. Add the code below to your script and run it.</p>
+                <p>Now we can use the additive color system to make an RGB composite that compares stable nighttime
+                    lights at
+                    three different slices of time. Add the code below to your script and run it.</p>
 
-                <pre><code><strong>var</strong> lights03 = ee.Image('NOAA/DMSP-OLS/NIGHTTIME_LIGHTS/F152003')
+                <pre><code>var lights03 = ee.Image('NOAA/DMSP-OLS/NIGHTTIME_LIGHTS/F152003')
     .select('stable_lights').rename('2003');
 
-<strong>var</strong> lights13 = ee.Image('NOAA/DMSP-OLS/NIGHTTIME_LIGHTS/F182013')
+var lights13 = ee.Image('NOAA/DMSP-OLS/NIGHTTIME_LIGHTS/F182013')
     .select('stable_lights').rename('2013');
 
-<strong>var</strong> changeImage = lights13.addBands(lights03)
+var changeImage = lights13.addBands(lights03)
     .addBands(lights93.select('stable_lights').rename('1993'));
 
 print('change image', changeImage);
@@ -110,107 +200,210 @@ Map.addLayer(
     },
     'Change composite');</code></pre>
 
-                <p>The code does a few things. First, it creates two new images, each representing a different slice of time. 
-                For both, we use the <code>select</code> method to select a band ("stable_lights") and the <code>rename</code> 
-                method to change the band name to indicate the year it represents.</p>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li><code>.select('stable_lights')</code> - Extracts just the stable lights band</li>
+                    <li><code>.rename('2003')</code> - Renames the band to indicate the year</li>
+                    <li><code>.addBands()</code> - Combines multiple images into a single multi-band image</li>
+                    <li>The order matters: 2013 → Red, 2003 → Green, 1993 → Blue</li>
+                </ul>
 
-                <p>Next, the code uses the <code>addBands</code> method to create a new, three-band image that we name 
-                "changeImage". It does this by taking one image (lights13) as the first band, using another image (lights03) 
-                as the second band, and the lights93 image seen earlier as the third band. The third band is given the name 
-                "1993" as it is placed into the image.</p>
-
-                <p>Finally, the code prints metadata to the <strong>Console</strong> and adds the layer to the map as an RGB 
-                composite using <code>Map.addLayer</code>. If you look at the printed metadata, you should see under the label 
-                "change image" that our image is composed of three bands, with each band named after a year. You should also 
-                notice the order of the bands in the image: 2013, 2003, 1993. This order determines the color channels used to 
-                represent each slice of time in the composite: 2013 as red, 2003 as green, and 1993 as blue.</p>
+                <div class="note">
+                    <p><strong>Band Order = Color Assignment:</strong> When you have a 3-band image and don't specify
+                        bands
+                        in the visualization, Earth Engine uses the first three bands as RGB in order. Here:
+                        <strong>2013 = Red, 2003 = Green, 1993 = Blue</strong>.
+                    </p>
+                </div>
 
                 <figure>
-                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.53.37 AM.png" alt="Change composite results" loading="lazy">
+                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.53.37 AM.png"
+                        alt="Change composite results" loading="lazy">
                     <figcaption>RGB composite showing change over time</figcaption>
                 </figure>
             </section>
 
             <section class="lab-steps">
                 <h2>Part 3: Interpreting the Composite</h2>
-                <p>We can now read the colors displayed on the layer to interpret different kinds of changes in nighttime lights 
-                across the planet over two decades. Pixels that appear white have high brightness in all three years. You can use 
-                the <strong>Inspector</strong> panel to confirm this. Click on the <strong>Inspector</strong> panel to change the 
-                cursor to a crosshair, and then click on a pixel that appears white. Look under the <em>Pixel</em> category of 
-                the <strong>Inspector</strong> panel for the "Change composite" layer. The pixel value for each band should be 
-                high (at or near 63).</p>
+                <p>We can now read the colors displayed on the layer to interpret different kinds of changes in
+                    nighttime lights
+                    across the planet over two decades:</p>
 
-                <p>Many clumps of white pixels represent urban cores. If you zoom into Shanghai, you will notice that the 
-                periphery of the white-colored core appears yellowish, and the terminal edges appear reddish. Yellow represents 
-                locations that were bright in 2013 and 2003 but dark in 1993. Red represents locations that appear bright in 2013 
-                but dark in 2003 and 1993. If you zoom out, you will see this gradient of white core to yellow periphery to red 
-                edge occurs around many cities across the planet and shows the global pattern of urban sprawl over the 20-year 
-                period.</p>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Color</th>
+                            <th>RGB Values</th>
+                            <th>Interpretation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span style="background: white; padding: 0 10px; border: 1px solid #ccc;">White</span>
+                            </td>
+                            <td>High in all years</td>
+                            <td>Bright in 1993, 2003, AND 2013 (established urban cores)</td>
+                        </tr>
+                        <tr>
+                            <td><span style="background: yellow; padding: 0 10px;">Yellow</span></td>
+                            <td>High R + High G, Low B</td>
+                            <td>Bright in 2013 and 2003, dark in 1993 (growth by 2003)</td>
+                        </tr>
+                        <tr>
+                            <td><span style="background: red; color: white; padding: 0 10px;">Red</span></td>
+                            <td>High R only</td>
+                            <td>Only bright in 2013 (newest growth/activity)</td>
+                        </tr>
+                        <tr>
+                            <td><span style="background: cyan; padding: 0 10px;">Cyan</span></td>
+                            <td>High G + High B, Low R</td>
+                            <td>Bright in 1993 and 2003, dark in 2013 (decline)</td>
+                        </tr>
+                        <tr>
+                            <td><span style="background: blue; color: white; padding: 0 10px;">Blue</span></td>
+                            <td>High B only</td>
+                            <td>Only bright in 1993 (abandoned/conflict areas)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>Use the <strong>Inspector</strong> panel to verify your interpretations. Click on the Inspector tab,
+                    then click on a pixel. Look under the <em>Pixel</em> category for the "Change composite" layer.
+                    The pixel value for each band should match your color interpretation.</p>
 
                 <figure>
-                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.55.49 AM.png" alt="Shanghai at night" loading="lazy">
-                    <figcaption>Shanghai showing urban growth patterns</figcaption>
+                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.55.49 AM.png" alt="Shanghai at night"
+                        loading="lazy">
+                    <figcaption>Shanghai showing urban growth patterns: white core → yellow periphery → red edge
+                    </figcaption>
                 </figure>
 
-                <p>When you zoom out from Shanghai, you will likely notice that each map layer redraws every time you change the 
-                zoom level. In order to explore the change composite layer more efficiently, use the <strong>Layer</strong> 
-                manager panel to not show (uncheck) all of the layers except for "Change composite." Now the map will respond 
-                faster when you zoom and pan because it will only refresh the single displayed shown layer.</p>
+                <div class="try-it">
+                    <h4>Try It</h4>
+                    <p>Zoom into Shanghai and notice the gradient: white core (stable urban), yellow ring (growth by
+                        2003),
+                        and red edge (newest growth by 2013). This pattern of "white-yellow-red" rings shows urban
+                        sprawl
+                        over the 20-year period.</p>
+                </div>
+
+                <p>When you zoom out from Shanghai, you will likely notice that each map layer redraws every time you
+                    change the
+                    zoom level. In order to explore the change composite layer more efficiently, use the
+                    <strong>Layer</strong>
+                    manager panel to not show (uncheck) all of the layers except for "Change composite." Now the map
+                    will respond
+                    faster when you zoom and pan.</p>
             </section>
 
             <section class="lab-steps">
                 <h2>Part 4: Patterns Beyond Cities</h2>
-                <p>In addition to urban change, the layer also shows changes in resource extraction activities that produce bright 
-                lights. Often, these activities produce lights that are stable over the span of a year (and therefore included in 
-                the "stable lights" band) but are not sustained over the span of a decade or more.</p>
-                
-                <p>For example, in the Korean Strait (between South Korea and Japan), you can see geographic shifts in fishing 
-                fleets that use bright halogen lights to attract squid and other sea creatures toward the water surface and into 
-                their nets. Bluish pixels were likely fished more heavily in 1993 and became used less frequently by 2003, while 
-                greenish pixels were likely fished more heavily in 2003 and less frequently by 2013.</p>
+                <p>In addition to urban change, the layer also shows changes in resource extraction activities that
+                    produce bright
+                    lights. Often, these activities produce lights that are stable over the span of a year (and
+                    therefore included in
+                    the "stable lights" band) but are not sustained over the span of a decade or more.</p>
+
+                <h3>Example 1: Fishing Fleets</h3>
+                <p>In the Korean Strait (between South Korea and Japan), you can see geographic shifts in fishing
+                    fleets that use bright halogen lights to attract squid and other sea creatures toward the water
+                    surface and into
+                    their nets. Bluish pixels were likely fished more heavily in 1993 and became used less frequently by
+                    2003, while
+                    greenish pixels were likely fished more heavily in 2003 and less frequently by 2013.</p>
 
                 <figure>
-                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.58.14 AM.png" alt="Korean Strait fishing lights" loading="lazy">
+                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.58.14 AM.png"
+                        alt="Korean Strait fishing lights" loading="lazy">
                     <figcaption>Fishing fleet patterns in the Korean Strait</figcaption>
                 </figure>
 
-                <p>Similarly, fossil fuel extraction produces nighttime lights through gas flaring. If you pan to North America, 
-                red blobs in Alberta and North Dakota and a red swath in southeastern Texas all represent places where oil and 
-                gas extraction were absent in 1993 and 2003 but booming by 2013.</p>
+                <h3>Example 2: Gas Flaring</h3>
+                <p>Similarly, fossil fuel extraction produces nighttime lights through gas flaring. If you pan to North
+                    America,
+                    red blobs in Alberta and North Dakota and a red swath in southeastern Texas all represent places
+                    where oil and
+                    gas extraction were absent in 1993 and 2003 but booming by 2013.</p>
 
                 <figure>
-                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.59.49 AM.png" alt="North American gas flaring" loading="lazy">
-                    <figcaption>Gas flaring in North American oil fields</figcaption>
+                    <img src="../images/screenshots/Screenshot 2023-02-10 at 5.59.49 AM.png"
+                        alt="North American gas flaring" loading="lazy">
+                    <figcaption>Gas flaring in North American oil fields (red = new by 2013)</figcaption>
                 </figure>
 
-                <p>As you explore this image, remember to check your interpretations with the <strong>Inspector</strong> panel by 
-                clicking on a pixel and reading the pixel value for each band. Refer back to the additive color figure to remember 
-                how the color system works. If you practice this, you should be able to read any RGB composite by knowing how 
-                colors relate to the relative pixel value of each band.</p>
+                <p>As you explore this image, remember to check your interpretations with the <strong>Inspector</strong>
+                    panel by
+                    clicking on a pixel and reading the pixel value for each band. Refer back to the additive color
+                    figure to remember
+                    how the color system works.</p>
+            </section>
+
+            <!-- Self-Check Questions -->
+            <section class="self-check">
+                <h3>Check Your Understanding</h3>
+                <ol>
+                    <li>In the change composite, what does a <strong>red</strong> pixel indicate about that location?
+                    </li>
+                    <li>Why would a city appear white while its suburbs appear yellow?</li>
+                    <li>If you saw bright blue pixels in Syria, what might that indicate?</li>
+                    <li>How is this temporal composite different from the spectral composites in Lab 2?</li>
+                </ol>
+            </section>
+
+            <!-- Key Concepts Summary -->
+            <section class="key-concepts">
+                <h3>Key Takeaways</h3>
+                <ul>
+                    <li>RGB composites can represent <strong>any three variables</strong>, not just spectral bands</li>
+                    <li>Temporal composites show <strong>change over time</strong> using color</li>
+                    <li>The band order determines color assignment (first = Red, second = Green, third = Blue)</li>
+                    <li>Use the <strong>Inspector</strong> tool to verify your color interpretations</li>
+                    <li>Nighttime lights reveal urbanization, resource extraction, and human activity patterns</li>
+                </ul>
+            </section>
+
+            <!-- Pro Tips -->
+            <section class="pro-tips">
+                <h3>Pro Tips</h3>
+                <ul>
+                    <li>Uncheck other layers in the Layer manager for faster zooming and panning</li>
+                    <li>The newer VIIRS sensor (2012-present) has higher resolution than DMSP</li>
+                    <li>You can create temporal composites with any data - NDVI, temperature, etc.</li>
+                    <li>Try reversing the band order to make different changes stand out</li>
+                </ul>
             </section>
 
             <section id="submission">
                 <div class="submission-box">
-                    <h3> Lab Submission</h3>
-                    <p>Submit lab via email.</p>
+                    <h3>📋 Lab Submission</h3>
                     <p><strong>Subject:</strong> <code>Lab 4 - Night Time Lights - [Your Name]</code></p>
-                    
+
                     <h4>Submit the following in a Word document:</h4>
                     <ol>
                         <li><strong>URL of your Code</strong> (10 points)</li>
-                        <li><strong>Damascus vs. Amman:</strong> Compare and contrast the changes in nighttime lights around 
-                        Damascus, Syria, versus Amman, Jordan. How are the colors for the two cities similar and different? 
-                        How do you interpret the differences? Include screenshot. (10 Points)</li>
-                        <li><strong>Port Harcourt, Nigeria:</strong> Look at the changes in nighttime lights in the region of 
-                        Port Harcourt, Nigeria. What kinds of changes do you think these colors signify? What clues in the 
-                        satellite basemap can you see to confirm your interpretation? Include screenshot. (10 Points)</li>
-                        <li><strong>Band Order:</strong> In the nighttime lights change composite, we did not specify the three 
-                        bands to use for our RGB composite. How do you think Earth Engine chose the three bands to display? How 
-                        do you think Earth Engine determined which band should be shown with the red, green, and blue channels? 
-                        (10 Points)</li>
-                        <li><strong>Your Discovery:</strong> Find an area of the world with an interesting nighttime lights story. 
-                        Explore the data and see what you can find. Showcase it with a screenshot and explanation of why we are 
-                        seeing what we see in the composite. (10 Points)</li>
+                        <li><strong>Damascus vs. Amman:</strong> Compare and contrast the changes in nighttime lights
+                            around
+                            Damascus, Syria, versus Amman, Jordan. How are the colors for the two cities similar and
+                            different?
+                            How do you interpret the differences? Include screenshot. (10 Points)</li>
+                        <li><strong>Port Harcourt, Nigeria:</strong> Look at the changes in nighttime lights in the
+                            region of
+                            Port Harcourt, Nigeria. What kinds of changes do you think these colors signify? What clues
+                            in the
+                            satellite basemap can you see to confirm your interpretation? Include screenshot. (10
+                            Points)</li>
+                        <li><strong>Band Order:</strong> In the nighttime lights change composite, we did not specify
+                            the three
+                            bands to use for our RGB composite. How do you think Earth Engine chose the three bands to
+                            display? How
+                            do you think Earth Engine determined which band should be shown with the red, green, and
+                            blue channels?
+                            (10 Points)</li>
+                        <li><strong>Your Discovery:</strong> Find an area of the world with an interesting nighttime
+                            lights story.
+                            Explore the data and see what you can find. Showcase it with a screenshot and explanation of
+                            why we are
+                            seeing what we see in the composite. (10 Points)</li>
                     </ol>
                     <p><strong>Total: 50 Points</strong></p>
                 </div>
@@ -218,9 +411,11 @@ Map.addLayer(
         </main>
 
         <footer>
-            <p><a href="lab-03-js-basics.html"> Previous Lab</a> | <a href="lab-05-challenge-refreshers.html">Next Lab </a></p>
-            <p><a href="../index.html">Back to Course Home</a></p>
+            <p><a href="lab-03-js-basics.html">← Previous Lab</a> | <a href="lab-05-challenge-refreshers.html">Next Lab
+                    →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
         </footer>
     </div>
 </body>
+
 </html>

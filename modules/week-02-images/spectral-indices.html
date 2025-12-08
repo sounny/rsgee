@@ -1,13 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spectral Indices | Remote Sensing Course</title>
     <link rel="stylesheet" href="../../css/style.css">
 </head>
-
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -19,122 +17,115 @@
         </header>
 
         <main class="lab-content">
-            <p><span>Spectral indices in remote sensing are an important tool for analyzing data from satellites. This
-                    technique harnesses the physics of solar radiation and the energy reflected from objects in
-                    different wavelengths to gain new insight to the phenomenon.&nbsp; </span>Spectral indices are based
-                on the fact that different objects and land covers on the Earth's surface reflect different amounts of
-                light from the Sun at different wavelengths. <span>Spectral indices provide a way to quantify the
-                    differences between these wavelengths in visible and infrared light, which can be used to identify
-                    objects, features, and patterns on the Earth's surface. </span></p>
-            <p>In the visible part of the spectrum, for example, a healthy green plant reflects a large amount of green
-                light while absorbing blue and red light—which is why it appears green to our eyes. Light also arrives
-                from the Sun at wavelengths outside what the human eye can see, and there are large differences in
-                reflectances between living and nonliving land covers and between different types of vegetation, both in
-                the visible and outside the visible wavelengths. We visualized this earlier in Lab 2 - Hello Landsat!
-                when we mapped color-infrared images.</p>
-            <p>The spectrum of visible light is composed of red, green, blue wavelengths, while infrared light is
-                divided into shortwave and longwave. When light is reflected off of an object, its spectral profile can
-                be used to identify the composition of the object. For example, green plants typically reflect more
-                shortwave infrared than longwave, while the opposite is true for the soil and rocks. By examining the
-                spectral profile of an area, scientists can identify differences in vegetation, land use, and other
-                features on the Earth's surface.</p>
-            <p><img src="../../images/diagrams/spectral-reflectance.jpg"
-                    alt="Spectral reflectance curves showing different land covers" loading="lazy">
+            <p>
+                Spectral indices turn multi-band information into a single value that highlights your target feature.
+                They are fast, interpretable, and power many remote-sensing workflows (vegetation, water, burn scars,
+                urban areas).
             </p>
-            <p><span>If we graph the amount of light (reflectance) at different wavelengths that an object or land cover
-                    reflects, we can visualize this more easily (see the figure) For example, look at the reflectance
-                    curves for dry bare soil and water in the graph below. Soil and water both have relatively low
-                    reflectance at wavelengths around 400 nm (blue light). Conversely, at wavelengths above 700 nm (red
-                    and infrared light) soil has relatively high reflectance, while water has very low reflectance.
-                    Vegetation, meanwhile, generally reflects large amounts of near-infrared light, relative to other
-                    land covers.&nbsp; Remote Sensing Scientists use these characteristics to do image interpretation
-                    gaining insight into digital imagery collected.</span></p>
-            <p>Spectral indices can also be used to assess the health and productivity of vegetation. By analyzing
-                spectral data from an area, scientists can identify changes in the chlorophyll content of plants, which
-                can be used to assess the health of crops or forests. In addition, spectral indices can be used to
-                detect various types of pollution and other environmental conditions.</p>
-            <p><span>Spectral indices use math to express how objects reflect light across multiple portions of the
-                    spectrum as a single number. Indices combine multiple bands, often with simple operations of
-                    subtraction and division, to create a single value across an image that is intended to help to
-                    distinguish particular land uses or land covers of interest.</span></p>
-            <p>A famous example of a spectral index is NDVI (Normalized Difference Vegetation Index). NDVI is a tool
-                used in remote sensing to identify areas with healthy vegetation and to monitor changes in vegetation
-                over time. It is commonly used to measure the health of plants on the Earth's surface. NDVI is
-                calculated by subtracting the infrared (IR) band from the visible red (R) band of the electromagnetic
-                spectrum, and then normalizing the result by adding the sum of the two bands. This formula is written
-                as:</p>
-            <p>NDVI = (IR - R) / (R + IR)</p>
-            <p>The NDVI values range from -1 to 1. Values close to -1 indicate a lack of vegetation, while values close
-                to 1 indicate an abundance of vegetation. Areas with healthy vegetation will have higher NDVI values,
-                while those with degraded vegetation will have lower NDVI values.</p>
-            <p><span>Indices derived from satellite imagery are used as the basis of many remote-sensing analyses.
-                    Indices have been used in thousands of applications, from detecting anthropogenic deforestation to
-                    examining crop health. For example, the growth of economically important crops such as wheat and
-                    cotton can be monitored throughout the growing season: Bare soil reflects more red wavelengths,
-                    whereas growing crops reflect more of near-infrared (NIR) wavelengths. Thus, calculating a ratio of
-                    these two bands can help monitor how well crops are growing (Jackson and Huete 1991).</span></p>
-            <p><em><strong>Read more</strong></em></p>
-            <p><span><span>Jackson, R. D., &amp; Huete, A. R. (1991). Interpreting vegetation
-                        indices.</span><i>Preventive veterinary
-                        medicine</i><span>,</span><i>11</i><span>(3-4), 185-200.</span></span></p>
 
-            <h2>Common Spectral Indices</h2>
-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                <tr style="background-color: #f8f9fa;">
-                    <th style="padding: 10px; border: 1px solid #ddd;">Index</th>
-                    <th style="padding: 10px; border: 1px solid #ddd;">Formula</th>
-                    <th style="padding: 10px; border: 1px solid #ddd;">Use</th>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>NDVI</strong></td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">(NIR - RED) / (NIR + RED)</td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">Vegetation health</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>NDWI</strong></td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">(NIR - SWIR) / (NIR + SWIR)</td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">Vegetation water content</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>MNDWI</strong></td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">(GREEN - SWIR) / (GREEN + SWIR)</td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">Water bodies</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>NDBI</strong></td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">(SWIR - NIR) / (SWIR + NIR)</td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">Built-up areas</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd;"><strong>NBR</strong></td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">(NIR - SWIR2) / (NIR + SWIR2)</td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">Burn severity</td>
-                </tr>
-            </table>
-
-            <h2>Key Concepts</h2>
-            <div style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
-                <ul style="margin: 0;">
-                    <li><strong>Spectral indices</strong> combine bands to highlight specific features</li>
-                    <li><strong>Normalized difference</strong> formulas range from -1 to +1</li>
-                    <li>Use <code>.normalizedDifference()</code> for easy computation in Earth Engine</li>
-                    <li>Band order matters: the first band should have higher values for your feature of interest</li>
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Explain what a normalized difference index measures.</li>
+                    <li>Compute NDVI (and one other index) in Earth Engine.</li>
+                    <li>Read band designations for different sensors.</li>
+                    <li>Interpret index ranges and common pitfalls.</li>
                 </ul>
-            </div>
+            </section>
 
-            <div style="background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; margin: 20px 0;">
-                <strong>💡 Pro Tip:</strong>
-                <p>Different sensors have different band numbers. Landsat 8 uses B5 for NIR and B4 for RED, while
-                    Sentinel-2 uses B8 for NIR and B4 for RED. Always check the band designations in the Data Catalog.
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Indices compress spectral information into intuitive numbers you can threshold, compare over time,
+                    or feed into classifiers-without heavy modeling.
                 </p>
-            </div>
+            </section>
+
+            <figure>
+                <img src="../../images/diagrams/ndvi-formula.png" alt="NDVI formula graphic" loading="lazy">
+                <figcaption>Normalized difference indices scale from -1 to 1 to highlight contrast between two bands.</figcaption>
+            </figure>
+
+            <section>
+                <h2>Quick win: NDVI on Landsat 8</h2>
+<pre><code>// NDVI example (Landsat 8 Surface Reflectance)
+var img = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623')
+  .multiply(0.0000275).add(-0.2); // apply scale/offset
+var ndvi = img.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI');
+Map.centerObject(img, 9);
+Map.addLayer(ndvi, {min: 0, max: 0.8, palette: ['brown', 'yellow', 'green']}, 'NDVI');
+print('NDVI min/max', ndvi.reduceRegion({
+  reducer: ee.Reducer.minMax(),
+  geometry: img.geometry(),
+  scale: 30
+}));</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A green-to-brown NDVI layer and console print of min/max values near 0-0.8 for vegetated areas.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Common indices</h2>
+                <ul>
+                    <li><strong>NDVI</strong> = (NIR - RED) / (NIR + RED) - vegetation vigor.</li>
+                    <li><strong>NDWI</strong> = (NIR - SWIR) / (NIR + SWIR) - vegetation water content.</li>
+                    <li><strong>MNDWI</strong> = (GREEN - SWIR) / (GREEN + SWIR) - open water detection.</li>
+                    <li><strong>NBR</strong> = (NIR - SWIR2) / (NIR + SWIR2) - burn severity.</li>
+                    <li><strong>NDBI</strong> = (SWIR - NIR) / (SWIR + NIR) - built-up areas.</li>
+                </ul>
+                <div class="pro-tips">
+                    <h3>Pro tips</h3>
+                    <ul>
+                        <li>Band names differ by sensor: Landsat 8 NIR=B5, RED=B4; Sentinel-2 NIR=B8, RED=B4.</li>
+                        <li>Use <code>.normalizedDifference()</code> to avoid manual formula mistakes.</li>
+                        <li>Mask clouds before computing indices to avoid artifacts.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>Try another index: NDWI (Sentinel-2)</h2>
+<pre><code>var s2 = ee.ImageCollection('COPERNICUS/S2_SR')
+  .filterDate('2023-06-01', '2023-06-15')
+  .filterBounds(ee.Geometry.Point([-82.3, 29.6]))
+  .first();
+var ndwi = s2.normalizedDifference(['B8', 'B11']).rename('NDWI');
+Map.addLayer(ndwi, {min: -0.5, max: 0.8, palette: ['brown','beige','cyan']}, 'NDWI');</code></pre>
+            </section>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Using wrong band numbers for a sensor (check the Data Catalog).</li>
+                    <li>Forgetting to scale/offset surface reflectance before computing indices.</li>
+                    <li>Interpreting raw index values without masking clouds/shadows.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What range do normalized difference indices fall within?</li>
+                    <li>Which bands would you use for NBR on Landsat 8?</li>
+                    <li>Why should you cloud-mask before computing an index?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li>Compute NDVI and NDWI on the same scene; compare histograms and maps.</li>
+                    <li>Test MNDWI on a coastal area to isolate water bodies.</li>
+                    <li>Read the Earth Engine docs for <code>normalizedDifference</code> and band designations per sensor.</li>
+                </ul>
+            </section>
         </main>
 
         <footer>
-            <p><a href="../../index.html">←Back to Course Home</a></p>
+            <p><a href="../../index.html">Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>
 </body>
-
 </html>

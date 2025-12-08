@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export Best Practices | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 4
+        </nav>
+
+        <header class="lab-header">
+            <h1>Export Best Practices</h1>
+        </header>
+
+        <main class="lab-content">
+            <p>
+                Exporting is the final step in many workflows. Choosing the right scale, projection, and
+                format ensures your outputs are usable and your exports succeed without errors.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Choose appropriate scale and CRS for exports.</li>
+                    <li>Optimize exports to avoid timeouts and memory errors.</li>
+                    <li>Select the right file format for your use case.</li>
+                    <li>Organize exports with naming conventions.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    A failed export means wasted time. Wrong scale means wrong data. This guide helps you
+                    get exports right the first time.
+                </p>
+            </section>
+
+            <section>
+                <h2>The complete export template</h2>
+                <p>Use this template for reliable exports:</p>
+                <pre><code>// Best practice export template
+Export.image.toDrive({
+  image: myImage,
+  description: 'NDVI_Florida_Summer2023',  // No spaces, descriptive
+  folder: 'EarthEngine',                    // Organize by project
+  fileNamePrefix: 'NDVI_Florida_Summer2023',
+  region: roi.bounds(),                     // Use .bounds() for efficiency
+  scale: 30,                                // Match source resolution
+  crs: 'EPSG:4326',                         // WGS84 for compatibility
+  maxPixels: 1e13,                          // Increase if needed
+  fileFormat: 'GeoTIFF',                    // or 'TFRecord'
+  formatOptions: {
+    cloudOptimized: true                    // For large files
+  }
+});</code></pre>
+            </section>
+
+            <section>
+                <h2>Scale: Getting it right</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data Source</th>
+                            <th>Native Resolution</th>
+                            <th>Recommended Export Scale</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Landsat 8/9</td>
+                            <td>30m</td>
+                            <td>30</td>
+                        </tr>
+                        <tr>
+                            <td>Sentinel-2 (visible)</td>
+                            <td>10m</td>
+                            <td>10</td>
+                        </tr>
+                        <tr>
+                            <td>Sentinel-2 (red edge)</td>
+                            <td>20m</td>
+                            <td>20</td>
+                        </tr>
+                        <tr>
+                            <td>MODIS</td>
+                            <td>250-1000m</td>
+                            <td>250, 500, or 1000</td>
+                        </tr>
+                        <tr>
+                            <td>SRTM DEM</td>
+                            <td>30m</td>
+                            <td>30</td>
+                        </tr>
+                        <tr>
+                            <td>Classification results</td>
+                            <td>varies</td>
+                            <td>Match input imagery</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="pro-tips">
+                    <h4>Rule of thumb</h4>
+                    <p>Export at the native resolution of your source data. Exporting at finer resolution
+                        doesn't add information—it just makes bigger files.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>CRS (Coordinate Reference System)</h2>
+                <h3>Common projections</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>CRS</th>
+                            <th>Use Case</th>
+                            <th>Units</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>EPSG:4326</code></td>
+                            <td>Global, web maps, sharing</td>
+                            <td>Degrees</td>
+                        </tr>
+                        <tr>
+                            <td><code>EPSG:32617</code></td>
+                            <td>UTM Zone 17N (Florida)</td>
+                            <td>Meters</td>
+                        </tr>
+                        <tr>
+                            <td><code>EPSG:5070</code></td>
+                            <td>CONUS Albers Equal Area</td>
+                            <td>Meters</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>Tip:</strong> For area calculations, use an equal-area projection (Albers, UTM) not WGS84.
+                </p>
+            </section>
+
+            <section>
+                <h2>File formats</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Format</th>
+                            <th>Best For</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>GeoTIFF</strong></td>
+                            <td>Raster images for GIS</td>
+                            <td>Universal, use <code>cloudOptimized: true</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>SHP (Shapefile)</strong></td>
+                            <td>Vector data for ArcGIS</td>
+                            <td>Max 2GB, limited field names</td>
+                        </tr>
+                        <tr>
+                            <td><strong>GeoJSON</strong></td>
+                            <td>Web applications</td>
+                            <td>Human-readable, larger files</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CSV</strong></td>
+                            <td>Tabular data, statistics</td>
+                            <td>No geometry by default</td>
+                        </tr>
+                        <tr>
+                            <td><strong>KML</strong></td>
+                            <td>Google Earth</td>
+                            <td>Good for visualization</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>Avoiding export failures</h2>
+
+                <h3>Problem: "User memory limit exceeded"</h3>
+                <pre><code>// Solution 1: Reduce area
+var smallerRoi = roi.buffer(-5000);  // Shrink by 5km
+
+// Solution 2: Increase scale
+Export.image.toDrive({
+  ...
+  scale: 100,  // Was 30
+});
+
+// Solution 3: Use bestEffort
+var stats = image.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: roi,
+  scale: 30,
+  bestEffort: true  // Auto-adjusts scale
+});</code></pre>
+
+                <h3>Problem: "Computation timed out"</h3>
+                <pre><code>// Solution: Export instead of print
+// DON'T: print(bigComputation);
+// DO: Export the result
+Export.table.toDrive({
+  collection: bigFeatureCollection,
+  description: 'my_results'
+});</code></pre>
+
+                <h3>Problem: Multiple TIF files created</h3>
+                <p>Large exports automatically split into tiles. This is normal!</p>
+                <pre><code>// In your GIS software, use "Mosaic to New Raster" to combine them
+// Or use fileDimensions to control tile size:
+Export.image.toDrive({
+  ...
+  fileDimensions: [4096, 4096]  // Larger tiles, fewer files
+});</code></pre>
+            </section>
+
+            <section>
+                <h2>Naming conventions</h2>
+                <p>Use consistent, descriptive names:</p>
+                <pre><code>// Pattern: Sensor_Variable_Location_Date_Notes
+// Examples:
+'L8_NDVI_Florida_2023Summer_Median'
+'S2_Classification_Miami_2023_RF'
+'MODIS_LST_California_2023_Max'</code></pre>
+                <ul>
+                    <li>No spaces (use underscores)</li>
+                    <li>Include sensor for multi-sensor projects</li>
+                    <li>Include date range</li>
+                    <li>Include processing notes (method, version)</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Export to Asset vs Drive</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Export to Drive</th>
+                            <th>Export to Asset</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Best for</strong></td>
+                            <td>Final products, sharing</td>
+                            <td>Intermediate results, reuse in EE</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Download?</strong></td>
+                            <td>Yes, easy</td>
+                            <td>Not directly</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Use in EE?</strong></td>
+                            <td>Must re-import</td>
+                            <td>Instant access</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Storage</strong></td>
+                            <td>Your Google Drive</td>
+                            <td>EE cloud (quota limited)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: Export with all best practices</h4>
+                <pre><code>var roi = ee.Geometry.Rectangle([-82.5, 29.5, -82.0, 30.0]);
+
+var composite = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2023-06-01', '2023-08-31')
+  .filterBounds(roi)
+  .median()
+  .multiply(0.0000275).add(-0.2);
+
+var ndvi = composite.normalizedDifference(['SR_B5', 'SR_B4'])
+  .rename('NDVI');
+
+Export.image.toDrive({
+  image: ndvi,
+  description: 'L8_NDVI_Gainesville_2023Summer',
+  folder: 'EarthEngine',
+  region: roi,
+  scale: 30,
+  crs: 'EPSG:32617',  // UTM 17N for Florida
+  maxPixels: 1e9,
+  fileFormat: 'GeoTIFF'
+});</code></pre>
+            </div>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Forgetting <code>scale</code> (exports at wrong resolution).</li>
+                    <li>Not specifying <code>region</code> (exports entire globe attempt).</li>
+                    <li>Using spaces in description or file names.</li>
+                    <li>Exporting visualized images when you need raw values.</li>
+                    <li>Not clicking "Run" in the Tasks panel.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What scale should you use for exporting Landsat imagery?</li>
+                    <li>When would you export to Asset instead of Drive?</li>
+                    <li>What does <code>cloudOptimized: true</code> do?</li>
+                    <li>How do you prevent "memory limit exceeded" errors?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li><a href="exporting-data.html">Exporting Data</a> - basic exports</li>
+                    <li><a href="reducers.html">Reducers</a> - aggregate before exporting</li>
+                    <li><a href="temporal-compositing.html">Temporal Compositing</a></li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+
+</html>

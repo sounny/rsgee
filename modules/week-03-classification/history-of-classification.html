@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <nav class="breadcrumb">
-            <a href="../../index.html">Home</a> &gt; <a href="../index.html#schedule">Schedule</a> &gt; Week 3
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 3
         </nav>
 
         <header class="lab-header">
@@ -19,36 +19,182 @@
         </header>
 
         <main class="lab-content">
-            <p><em><strong>The history of Remote Sensing, a story of data collection advancements, impacts
-                        analysis.&nbsp;<img
-                            src="../images/canvas/Uploaded%20Media/image-classification-techniques-remote-sensing.jpg"
-                            alt="Timeline showing a history of image classification covered in this module"
-                            loading="lazy"></strong></em></p>
-            <p>The application of image classification techniques in generating land cover and land use information has
-                been prevalent since the 1980s (Li et al., 2014). However, the evolution of image classification has
-                been driven by advancements in remote sensing products. With limited spectral, temporal, and spatial
-                resolution, unsupervised classification was the most effective method. However, with the improved
-                spectral resolution, the ability to analyze spectral signatures became more critical, leading to the
-                emergence of supervised classification.</p>
-            <p>As remote sensing technology advanced, higher spatial resolution data became available, enabling more
-                sophisticated techniques such as object-based image analysis (OBIA). Unlike pixel-based approaches, OBIA
-                involves grouping individual pixels into meaningful objects based on spatial, spectral, and contextual
-                characteristics. This approach provides more accurate and reliable information on land cover and use
-                patterns, particularly in complex landscapes and urban areas.</p>
-            <p>Furthermore, integrating different remote sensing datasets, such as LiDAR, hyperspectral, and SAR, has
-                further expanded the capabilities of image classification techniques. For instance, LiDAR data can
-                provide detailed information on the vertical structure of vegetation, while hyperspectral data can
-                provide information on the chemical properties of materials on the Earth's surface. Combining these
-                datasets can lead to more accurate and comprehensive land cover and land use mapping.</p>
-            <p>Image classification techniques have evolved significantly over the years, driven by advancements in
-                remote sensing products and data integration techniques. These developments have enabled more accurate
-                and reliable land cover and land use mapping. This leads to the question about the future.&nbsp; What
-                possibilities will come in Remote sensing with better data, and what analysis techniques will result
-                from that?</p>
+            <p>
+                Image classification techniques have evolved alongside remote sensing technology. Understanding this
+                history helps you appreciate why different methods exist and when each approach makes sense.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Trace the evolution of classification from manual interpretation to machine learning.</li>
+                    <li>Understand how sensor improvements enabled new classification techniques.</li>
+                    <li>Recognize the shift from pixel-based to object-based methods.</li>
+                    <li>Appreciate current trends in deep learning for remote sensing.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Knowing the history prevents reinventing the wheel. Many "new" ideas are refinements of older
+                    concepts. Understanding the progression helps you choose appropriate methods for your data
+                    resolution and research questions.
+                </p>
+            </section>
+
+            <section>
+                <h2>Evolution timeline</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Era</th>
+                            <th>Data Characteristics</th>
+                            <th>Dominant Methods</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1970s-1980s</strong></td>
+                            <td>Low spectral/spatial resolution (early Landsat MSS: 4 bands, 80m)</td>
+                            <td>Manual interpretation, unsupervised clustering (ISODATA, K-means)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>1980s-1990s</strong></td>
+                            <td>Improved spectral resolution (Landsat TM: 7 bands, 30m)</td>
+                            <td>Supervised classification (Maximum Likelihood, Minimum Distance)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>1990s-2000s</strong></td>
+                            <td>High spatial resolution (IKONOS, QuickBird: 1-4m)</td>
+                            <td>Object-Based Image Analysis (OBIA), decision trees</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2000s-2010s</strong></td>
+                            <td>Multi-sensor fusion (optical + radar + LiDAR)</td>
+                            <td>Random Forest, Support Vector Machines, ensemble methods</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2010s-Present</strong></td>
+                            <td>Big data (Sentinel, Planet daily), cloud computing</td>
+                            <td>Deep learning (CNNs, U-Net), time-series classification</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>Key paradigm shifts</h2>
+
+                <h3>1. Pixel-based to Object-based</h3>
+                <p>
+                    Early classifiers treated each pixel independently. As resolution improved, individual pixels
+                    became smaller than the objects of interest (a building might span 100 pixels). Object-Based
+                    Image Analysis (OBIA) first segments the image into homogeneous regions, then classifies
+                    those objects using shape, texture, and context in addition to spectral properties.
+                </p>
+
+                <h3>2. Single-date to Time Series</h3>
+                <p>
+                    Limited data availability meant most classifications used a single "best" image. With dense
+                    time series now available (Landsat archive, Sentinel-2), classification can leverage phenological
+                    patterns - how vegetation changes through seasons - dramatically improving accuracy for
+                    agricultural mapping and forest type discrimination.
+                </p>
+
+                <h3>3. Desktop to Cloud</h3>
+                <p>
+                    Processing petabytes of imagery was impossible on desktop computers. Platforms like Google Earth
+                    Engine moved computation to the cloud, enabling continental and global-scale classification
+                    that would have taken years on a single machine.
+                </p>
+            </section>
+
+            <section>
+                <h2>Quick win: Compare classification eras in GEE</h2>
+                <p>Run this to see how we can apply both old and new methods in Earth Engine:</p>
+                <pre><code>// Load a Landsat 8 composite
+var image = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2023-01-01', '2023-12-31')
+  .filterBounds(ee.Geometry.Point([-82.3, 29.6]))
+  .median()
+  .multiply(0.0000275).add(-0.2);
+
+// Select spectral bands
+var bands = ['SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7'];
+
+// 1980s approach: Unsupervised clustering
+var clustered = ee.Algorithms.Image.Segmentation.KMeans(
+  image.select(bands), 5, 100
+).select('clusters');
+
+// 2010s approach: Random Forest would need training data
+// (see supervised classification lab for full implementation)
+
+Map.centerObject(image, 9);
+Map.addLayer(image, {bands: ['SR_B4', 'SR_B3', 'SR_B2'], min: 0, max: 0.3}, 'True Color');
+Map.addLayer(clustered.randomVisualizer(), {}, 'K-means Clusters');
+
+print('This unsupervised approach mirrors 1980s methods');</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A true color image and a clustered version showing 5 spectral classes without training data.</p>
+                </div>
+            </section>
+
+            <section class="key-concepts">
+                <h3>Current frontiers</h3>
+                <ul>
+                    <li><strong>Deep Learning:</strong> Convolutional Neural Networks (CNNs) automatically learn spatial
+                        features, reducing the need for hand-crafted indices.</li>
+                    <li><strong>Transfer Learning:</strong> Models pre-trained on large datasets can be fine-tuned for
+                        specific applications with limited training data.</li>
+                    <li><strong>Self-Supervised Learning:</strong> Learning useful representations from unlabeled data,
+                        then applying to classification.</li>
+                    <li><strong>Multi-sensor Fusion:</strong> Combining optical, radar, and LiDAR data for improved
+                        discrimination of complex land covers.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>Why did unsupervised methods dominate in the 1970s-80s?</li>
+                    <li>What technological change enabled object-based image analysis?</li>
+                    <li>How has cloud computing changed what is possible in land cover mapping?</li>
+                    <li>What advantage does time-series classification offer over single-date classification?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Further reading</h2>
+                <ul>
+                    <li>Li, M., et al. (2014). A review of remote sensing image classification techniques.
+                        <em>International Journal of Remote Sensing</em>
+                    </li>
+                    <li>Blaschke, T. (2010). Object based image analysis for remote sensing.
+                        <em>ISPRS Journal of Photogrammetry and Remote Sensing</em>
+                    </li>
+                    <li>Zhu, X.X., et al. (2017). Deep learning in remote sensing: A comprehensive review.
+                        <em>IEEE Geoscience and Remote Sensing Magazine</em>
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li><a href="unsupervised-vs-supervised.html">Supervised vs Unsupervised Classification</a></li>
+                    <li><a href="introduction-to-image-classification.html">Introduction to Image Classification</a>
+                    </li>
+                    <li><a href="../../labs/lab-11-supervised-classification.html">Lab: Supervised Classification</a>
+                    </li>
+                </ul>
+            </section>
         </main>
 
         <footer>
-            <p><a href="../../index.html">��Back to Course Home</a></p>
+            <p><a href="../../index.html">Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>

@@ -1,75 +1,126 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Earth Engine Data Catalogs | Remote Sensing Course</title>
+    <title>Google Earth Engine Data Catalog | Remote Sensing Course</title>
+    <meta name="description" content="Explore the Earth Engine Data Catalog to find and use satellite and geospatial datasets.">
     <link rel="stylesheet" href="../../css/style.css">
 </head>
-
 <body>
     <div class="container">
         <nav class="breadcrumb">
-            <a href="../../index.html">Home</a> &gt; <a href="../index.html#schedule">Schedule</a> &gt; Week 2
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 2
         </nav>
 
         <header class="lab-header">
-            <h1>Google Earth Engine Data Catalogs</h1>
+            <h1>Google Earth Engine Data Catalog</h1>
         </header>
 
         <main class="lab-content">
-            <p><span>Welcome to your brief tour of the Earth Engine Data Catalog, which contains decades of satellite
-                    imagery and much more. We will view some of the different types of data sets in the following
-                    sections, including climate and weather data, digital elevation models and other terrain data, land
-                    cover, cropland, satellite imagery, and others.</span></p>
-            <p><span>You can find a catalog of the datasets available in Earth Engine on this site.</span></p>
-            <p><a href="https://developers.google.com/earth-engine/datasets/catalog"
-                    target="_blank">https://developers.google.com/earth-engine/datasets/catalog</a></p>
-            <p><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-02-17%20at%201.18.54%20AM.png"
-                    alt="Screenshot of Earth Engine Data Catalog" loading="lazy"></p>
-            <p>If you scroll down through the data, you will see all the different types of datasets available.&nbsp;
-                Here you can click on any of the datasets to learn more about them.&nbsp; I am going to explore the
-                elevation model of France.</p>
-            <p><a href="https://developers.google.com/earth-engine/datasets/catalog/IGN_RGE_ALTI_1M_2_0"
-                    target="_blank">https://developers.google.com/earth-engine/datasets/catalog/IGN_RGE_ALTI_1M_2_0</a>
+            <p>
+                The Data Catalog is your library of datasets in Earth Engine: imagery, climate, elevation, land cover,
+                and more. Knowing how to read catalog pages lets you pick the right data and use it correctly.
             </p>
-            <p><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-02-17%20at%201.20.17%20AM.png"
-                    alt="screenshot of a dataset" loading="lazy"></p>
-            <p>From this page, you can get all kinds of information. This is known as Metadata. <span>Metadata in
-                    Geospatial Technologies refers to the structured data associated with geospatial data that provides
-                    information about the data, such as its origin, purpose, author, spatial and temporal extents,
-                    accuracy, format, and associated keywords. Metadata can also provide information about data
-                    processing, such as the software used to create it, the date it was created or updated, and other
-                    data about its usage. Metadata is important for managing, organizing, understanding, and sharing
-                    geospatial datasets. The data can be helpful for data sharing, analysis, and decision-making.
-                    Metadata helps to ensure that geospatial data is accurate and can be used for its intended
-                    purpose.</span></p>
-            <p><span>In Earth Engine, this Metadata page includes some sample code to add this image catalog and view
-                    the dataset.&nbsp; If you scroll to the lower part of the page, you will find this sample
-                    code.</span></p>
-            <p><span><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-02-17%20at%201.25.25%20AM.png"
-                        alt="Screenshot 2023-02-17 at 1.25.25 AM.png" loading="lazy"></span></p>
-            <p></p>
-            <p>Examine the code, you can see how the imagecollection is access.&nbsp; First, a dataset is defined by
-                calling the imagecollection ID.&nbsp; Investigating the 'Bands' tab in the metadata, you will see that
-                the election data is set up on the MNT band.&nbsp; To access it, the second line of code uses the select
-                method of the dataset object to select the MNT band.&nbsp; Now that we have isolated elevation in the
-                memory, we are ready to visualize it.&nbsp; The elevationVis variable defines the elevation parameters,
-                and then we use the addLayer method to add it to the elevation.&nbsp; The last line of code centers the
-                screen on France.</p>
-            <p>By clicking on the Open in Code Editor, this sample code will open up in Earth Engine and allow you to
-                see it in action.&nbsp; If you push the run button, you can see the data set open up.</p>
-            <p><img src="../images/canvas/Uploaded%20Media/Screenshot%202023-02-17%20at%201.36.35%20AM.png"
-                    alt="screenshot of resulting code run" loading="lazy"></p>
-            <p></p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Find datasets in the catalog and grab their IDs.</li>
+                    <li>Read metadata: bands, resolution, temporal coverage, and providers.</li>
+                    <li>Copy and run sample code from a catalog page.</li>
+                    <li>Decide if a dataset fits your question (resolution, dates, cloudiness).</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    The right dataset saves hours of preprocessing. Metadata tells you band names, scale, date range,
+                    and usage notes-critical for accurate analysis.
+                </p>
+            </section>
+
+            <section>
+                <h2>Find and read a dataset page</h2>
+                <ol>
+                    <li>Go to <a href="https://developers.google.com/earth-engine/datasets/catalog" target="_blank" rel="noopener">EE Data Catalog</a>.</li>
+                    <li>Search for "LANDSAT/LC08/C02/T1_L2" or "COPERNICUS/S2_SR".</li>
+                    <li>Open the dataset page and note: Dataset ID, bands, resolution, temporal coverage, sample code.</li>
+                </ol>
+                <figure>
+                    <img src="../../images/screenshots/Screenshot 2023-02-17 at 1.18.54 AM.png"
+                        alt="Screenshot of Earth Engine Data Catalog" loading="lazy">
+                    <figcaption>Dataset pages list ID, bands, resolution, dates, and sample code.</figcaption>
+                </figure>
+            </section>
+
+            <section>
+                <h2>Use the sample code</h2>
+<pre><code>// Example: Landsat 8 Surface Reflectance from catalog sample
+var col = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2023-06-01', '2023-06-15')
+  .filterBounds(ee.Geometry.Point([-82.3, 29.6]))
+  .first()
+  .multiply(0.0000275).add(-0.2); // apply scale/offset
+
+Map.centerObject(col, 9);
+Map.addLayer(col, {bands: ['SR_B4', 'SR_B3', 'SR_B2'], min: 0.02, max: 0.3}, 'True color');</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A true-color Landsat scene centered on your AOI.</p>
+                </div>
+            </section>
+
+            <section class="key-concepts">
+                <h3>Key concepts to check on a dataset page</h3>
+                <ul>
+                    <li><strong>Dataset ID:</strong> string for <code>ee.Image()</code> or <code>ee.ImageCollection()</code>.</li>
+                    <li><strong>Bands:</strong> names, wavelengths, and scale/offset notes.</li>
+                    <li><strong>Spatial resolution:</strong> pixel size; match to your analysis scale.</li>
+                    <li><strong>Temporal coverage:</strong> available date range.</li>
+                    <li><strong>Sample code:</strong> fastest starting point-copy or open in Code Editor.</li>
+                </ul>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: find a dataset and run it</h4>
+                <p>Search for "SRTM" in the catalog, copy the sample code, run it, and center on your hometown.</p>
+                <p>Find Sentinel-2 SR, note NIR and red band names, and run the sample visualization.</p>
+            </div>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Using the wrong band names because you skipped the Bands tab.</li>
+                    <li>Ignoring scale/offset instructions on surface reflectance products.</li>
+                    <li>Choosing data with temporal coverage that does not include your study period.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>Where do you find the Dataset ID?</li>
+                    <li>What metadata tells you the pixel size?</li>
+                    <li>How do you open sample code directly in the Code Editor?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li>Bookmark 3 datasets you will use this term (imagery, climate, elevation).</li>
+                    <li>Test sample code for each and adjust AOI and dates.</li>
+                    <li>Add notes on band names and scale/offset to your project README.</li>
+                </ul>
+            </section>
         </main>
 
         <footer>
-            <p><a href="../../index.html">��Back to Course Home</a></p>
+            <p><a href="../../index.html">Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>
 </body>
-
 </html>

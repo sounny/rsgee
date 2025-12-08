@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debugging Guide | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Resources
+        </nav>
+
+        <header class="lab-header">
+            <h1>Debugging Guide for Earth Engine</h1>
+        </header>
+
+        <main class="lab-content">
+            <p>
+                Errors are part of coding. This guide helps you identify, understand, and fix common
+                Earth Engine problems quickly so you can get back to your analysis.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>What you'll learn</h3>
+                <ul>
+                    <li>Interpret common error messages.</li>
+                    <li>Fix client vs. server object issues.</li>
+                    <li>Resolve scale and memory problems.</li>
+                    <li>Debug step-by-step with print statements.</li>
+                    <li>Know when to ask for help (and how).</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>The debugging mindset</h2>
+                <ol>
+                    <li><strong>Read the error carefully.</strong> The message often tells you exactly what's wrong.
+                    </li>
+                    <li><strong>Isolate the problem.</strong> Comment out code until it works, then add back line by
+                        line.</li>
+                    <li><strong>Print intermediate results.</strong> Use <code>print()</code> to inspect objects.</li>
+                    <li><strong>Simplify.</strong> Test on a tiny area or single image first.</li>
+                    <li><strong>Search.</strong> Others have likely had the same problem.</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Common errors and fixes</h2>
+
+                <h3>1. "X is not a function"</h3>
+                <div class="error-box"
+                    style="background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;">
+                    <code>image.normalizedDifference is not a function</code>
+                </div>
+                <p><strong>Cause:</strong> The variable isn't what you think it is (maybe <code>null</code> or wrong
+                    type).</p>
+                <p><strong>Fix:</strong></p>
+                <pre><code>// Debug: Check what the variable actually is
+print('Type of image:', image);
+
+// Common cause: .first() on empty collection
+var collection = ee.ImageCollection('...')
+  .filterDate('2023-01-01', '2023-01-02')
+  .filterBounds(roi);
+print('Collection size:', collection.size()); // Check if empty!
+var image = collection.first();</code></pre>
+
+                <h3>2. "Image.select: Pattern 'X' did not match any bands"</h3>
+                <div class="error-box"
+                    style="background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;">
+                    <code>Image.select: Pattern 'B5' did not match any bands.</code>
+                </div>
+                <p><strong>Cause:</strong> Wrong band name for this dataset.</p>
+                <p><strong>Fix:</strong></p>
+                <pre><code>// Debug: Print actual band names
+print('Available bands:', image.bandNames());
+
+// Landsat 8 SR uses SR_B5, not B5
+var nir = image.select('SR_B5'); // Correct for Landsat 8 SR</code></pre>
+
+                <h3>3. "User memory limit exceeded"</h3>
+                <div class="error-box"
+                    style="background: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 10px 0;">
+                    <code>User memory limit exceeded.</code>
+                </div>
+                <p><strong>Cause:</strong> Too much data being processed at once.</p>
+                <p><strong>Fix:</strong></p>
+                <pre><code>// 1. Reduce the area
+var smallRoi = roi.buffer(-5000); // Shrink your ROI
+
+// 2. Increase scale (lower resolution)
+var result = image.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: roi,
+  scale: 100,  // Was 30, now 100
+  maxPixels: 1e9
+});
+
+// 3. Use bestEffort
+var result = image.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: roi,
+  scale: 30,
+  bestEffort: true  // Auto-adjust scale if needed
+});</code></pre>
+
+                <h3>4. "Cannot add an ee.Image to a number"</h3>
+                <div class="error-box"
+                    style="background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;">
+                    <code>Cannot add an ee.Image to a number</code>
+                </div>
+                <p><strong>Cause:</strong> Mixing client and server objects with JavaScript operators.</p>
+                <p><strong>Fix:</strong></p>
+                <pre><code>// Wrong: Using + with server objects
+var bad = image.add(10 + ee.Number(5));
+
+// Right: Use ee methods
+var good = image.add(ee.Number(10).add(5));</code></pre>
+
+                <h3>5. "Computation timed out"</h3>
+                <div class="error-box"
+                    style="background: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 10px 0;">
+                    <code>Computation timed out.</code>
+                </div>
+                <p><strong>Cause:</strong> The computation is too complex or the area too large.</p>
+                <p><strong>Fix:</strong></p>
+                <pre><code>// 1. Export instead of print for large results
+Export.image.toDrive({...});
+
+// 2. Reduce collection size
+var filtered = collection
+  .filterDate('2023-06-01', '2023-06-30')  // Shorter date range
+  .filter(ee.Filter.lt('CLOUD_COVER', 20)); // Fewer images
+
+// 3. Simplify the computation
+// Instead of 100 bands, select only what you need
+var simple = image.select(['SR_B4', 'SR_B5']);</code></pre>
+
+                <h3>6. "Dictionary does not contain key: X"</h3>
+                <div class="error-box"
+                    style="background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;">
+                    <code>Dictionary does not contain key: NDVI_mean</code>
+                </div>
+                <p><strong>Cause:</strong> The property or key you're accessing doesn't exist.</p>
+                <p><strong>Fix:</strong></p>
+                <pre><code>// Debug: Print all keys
+var result = image.reduceRegion({...});
+print('Keys:', result.keys());
+
+// Make sure you're using the correct property name
+var mean = result.get('SR_B5'); // Use actual key name</code></pre>
+
+                <h3>7. Empty or null results</h3>
+                <p><strong>Cause:</strong> Filters removed all data, or the geometry doesn't overlap.</p>
+                <p><strong>Fix:</strong></p>
+                <pre><code>// Check collection size at each step
+var step1 = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2');
+print('All images:', step1.size());
+
+var step2 = step1.filterDate('2023-06-01', '2023-08-31');
+print('After date filter:', step2.size());
+
+var step3 = step2.filterBounds(roi);
+print('After bounds filter:', step3.size());
+
+// If 0, check your ROI location and date range</code></pre>
+            </section>
+
+            <section>
+                <h2>Client vs. Server: Quick reference</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Client (JavaScript)</th>
+                            <th>Server (Earth Engine)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>var x = 5</code></td>
+                            <td><code>var x = ee.Number(5)</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>x + 3</code></td>
+                            <td><code>x.add(3)</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>[1, 2, 3]</code></td>
+                            <td><code>ee.List([1, 2, 3])</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>for (var i=0; ...)</code></td>
+                            <td><code>collection.map(function)</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>if (x > 5)</code></td>
+                            <td><code>ee.Algorithms.If(x.gt(5), ...)</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>Rule:</strong> Once you're in server-land (<code>ee.</code> objects), stay there. Don't try
+                    to use
+                    JavaScript operators on Earth Engine objects.</p>
+            </section>
+
+            <section>
+                <h2>Debug with print()</h2>
+                <p>Strategic print statements are your best friend:</p>
+                <pre><code>// Print at each step to find where things go wrong
+var collection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2023-06-01', '2023-08-31')
+  .filterBounds(roi);
+print('1. Collection size:', collection.size());
+print('2. First image:', collection.first());
+print('3. Band names:', collection.first().bandNames());
+
+var ndvi = collection.map(function(img) {
+  return img.normalizedDifference(['SR_B5', 'SR_B4']);
+});
+print('4. NDVI collection:', ndvi.first());
+
+var composite = ndvi.median();
+print('5. Composite:', composite);</code></pre>
+            </section>
+
+            <section>
+                <h2>Scale matters!</h2>
+                <p>Earth Engine resamples everything to match your specified scale. Wrong scale = wrong results.</p>
+                <pre><code>// Always specify scale in reduceRegion
+var stats = image.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: roi,
+  scale: 30,  // Match your data's native resolution!
+  maxPixels: 1e9
+});
+
+// Common native resolutions:
+// Landsat: 30m
+// Sentinel-2: 10m (visible), 20m (red edge), 60m (atmospheric)
+// MODIS: 250m, 500m, 1000m
+// DEM (SRTM): 30m</code></pre>
+            </section>
+
+            <section class="pro-tips">
+                <h3>Pro tips</h3>
+                <ul>
+                    <li>Use the <strong>Inspector</strong> tab to click on map pixels and see values.</li>
+                    <li>Check the <strong>Docs</strong> tab for function signatures and examples.</li>
+                    <li>Search <a href="https://gis.stackexchange.com/questions/tagged/google-earth-engine"
+                            target="_blank">GIS StackExchange</a> for your error message.</li>
+                    <li>Ask on the <a href="https://groups.google.com/g/google-earth-engine-developers"
+                            target="_blank">GEE Developers Forum</a> with a minimal reproducible example.</li>
+                    <li>When stuck, simplify: one image, small area, fewer bands.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>When to ask for help</h2>
+                <p>Before posting a question:</p>
+                <ol>
+                    <li>✅ Searched for the error message</li>
+                    <li>✅ Read the function documentation</li>
+                    <li>✅ Created a minimal example that reproduces the error</li>
+                    <li>✅ Included the full error message</li>
+                    <li>✅ Described what you expected vs. what happened</li>
+                </ol>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What's the first thing to do when you get an error?</li>
+                    <li>How do you check if a collection is empty?</li>
+                    <li>What causes "User memory limit exceeded"?</li>
+                    <li>Why can't you use <code>+</code> with <code>ee.Number</code>?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Related resources</h2>
+                <ul>
+                    <li><a href="../week-01-javascript/client-vs-server.html">Client vs. Server Objects</a></li>
+                    <li><a href="https://developers.google.com/earth-engine/guides/debugging" target="_blank">Official
+                            GEE Debugging Guide</a></li>
+                    <li><a href="https://developers.google.com/earth-engine/guides/best_practices" target="_blank">Best
+                            Practices Guide</a></li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+
+</html>

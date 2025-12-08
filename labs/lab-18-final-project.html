@@ -1,107 +1,282 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 18 - Final Project | Remote Sensing Course</title>
+    <meta name="description"
+        content="Design and execute a remote sensing analysis using Google Earth Engine that addresses a real-world question.">
     <link rel="stylesheet" href="../css/style.css">
-    <meta name="robots" content="noindex, follow">
-    <meta name="description" content="Placeholder page for Lab 18 - Final Project. This content is under development.">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
-            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 18
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Final Project
         </nav>
 
         <header class="lab-header">
             <h1>Lab 18 - Final Project</h1>
-            <p><em>Design and execute a remote sensing analysis using Google Earth Engine that addresses a real-world question. This is your capstone for the course.</em></p>
+            <p><em><strong>Objective: Design and execute a remote sensing analysis using Google Earth Engine that
+                        addresses a real-world question.</strong></em></p>
         </header>
 
         <main class="lab-content">
 
+            <!-- Learning Objectives -->
+            <section class="learning-objectives">
+                <h3>What You'll Demonstrate</h3>
+                <ul>
+                    <li>Apply remote sensing concepts to a real-world problem of your choosing</li>
+                    <li>Select appropriate datasets and methods from the course</li>
+                    <li>Create reproducible analysis workflows in Earth Engine</li>
+                    <li>Communicate results through maps, figures, and written interpretation</li>
+                    <li>Demonstrate mastery of GEE skills learned throughout the course</li>
+                </ul>
+            </section>
+
+            <!-- Why It Matters -->
+            <section class="why-it-matters">
+                <h3>Why This Matters</h3>
+                <p>The final project is your capstone experience:</p>
+                <ul>
+                    <li><strong>Portfolio piece:</strong> Demonstrate your skills to future employers</li>
+                    <li><strong>Integration:</strong> Combine multiple techniques into a complete workflow</li>
+                    <li><strong>Independence:</strong> Practice making analysis decisions on your own</li>
+                    <li><strong>Communication:</strong> Present technical work to broader audiences</li>
+                </ul>
+            </section>
+
             <section class="lab-preflight">
-                <h2>Before you start</h2>
+                <h2>Before You Start</h2>
                 <ul>
-                    <li><strong>Prerequisites:</strong> Finish all prior labs, confirm your final project proposal has been approved, and gather required datasets.</li>
-                    <li><strong>Estimated time:</strong> 120 minutes</li>
-                    <li><strong>Materials:</strong> Earth Engine account, project planning document, bibliography of supporting sources, and any ancillary datasets downloaded locally.</li>
+                    <li><strong>Prerequisites:</strong> Complete all prior labs and get your project proposal approved.
+                    </li>
+                    <li><strong>Estimated time:</strong> 120+ minutes (multiple work sessions recommended)</li>
+                    <li><strong>Materials:</strong> Earth Engine account, project plan, and reference sources.</li>
                 </ul>
             </section>
 
-            <section id="overview">
-                <h2>Overview</h2>
-                <p>Your project can be a paper or an app that demonstrates a complete workflow: problem framing, data selection, method, results, and discussion. Aim for clarity and reproducibility.</p>
+            <!-- Project Overview -->
+            <section class="key-concepts">
+                <h3>Project Overview</h3>
+                <p>Your project can be a <strong>research paper</strong> or an <strong>interactive app</strong> that
+                    demonstrates a complete workflow: problem framing, data selection, method, results, and discussion.
+                </p>
+                <p><strong>Key principles:</strong></p>
+                <ul>
+                    <li>Clarity - Can someone else understand what you did and why?</li>
+                    <li>Reproducibility - Can someone else run your code and get the same results?</li>
+                    <li>Technical rigor - Are your methods appropriate for your question?</li>
+                </ul>
             </section>
 
-            <section id="requirements">
+            <!-- Requirements -->
+            <section class="lab-steps">
                 <h2>Requirements</h2>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Requirement</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Topic</strong></td>
+                            <td>Any domain covered in class (land cover, rivers, wildfires, health, agriculture, urban,
+                                etc.)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data</strong></td>
+                            <td>Use at least one satellite image collection; cite all sources</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Methods</strong></td>
+                            <td>Apply 2+ core methods (indices, reduction, classification, zonal stats, time series,
+                                etc.)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Outputs</strong></td>
+                            <td>Maps/figures and a table of key metrics</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Reproducibility</strong></td>
+                            <td>Share a viewable Earth Engine script URL with documentation</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Project Ideas -->
+            <section class="pro-tips">
+                <h3>Project Ideas</h3>
                 <ul>
-                    <li><strong>Topic:</strong> Any domain covered in class (e.g., land cover, rivers, wildfires, health, agriculture)</li>
-                    <li><strong>Data:</strong> Use at least one satellite image collection; cite sources</li>
-                    <li><strong>Methods:</strong> Apply 2+ core methods (indices, reduction, classification, zonal stats, time series, etc.)</li>
-                    <li><strong>Outputs:</strong> Maps/figures and a short table of key metrics</li>
-                    <li><strong>Reproducibility:</strong> Share a viewable Earth Engine script URL and describe steps</li>
+                    <li><strong>Change detection:</strong> Deforestation, urban expansion, or glacier retreat over 10+
+                        years</li>
+                    <li><strong>Disaster response:</strong> Flood mapping, fire severity, or hurricane damage assessment
+                    </li>
+                    <li><strong>Agriculture:</strong> Crop classification, irrigation mapping, or drought monitoring
+                    </li>
+                    <li><strong>Health:</strong> Heat exposure, air quality proxies, or disease risk factors</li>
+                    <li><strong>Conservation:</strong> Wetland mapping, coral reef monitoring, or protected area
+                        analysis</li>
+                    <li><strong>Urban:</strong> Green space access, urban heat islands, or informal settlement growth
+                    </li>
                 </ul>
             </section>
 
-            <section id="deliverables">
+            <!-- Deliverables -->
+            <section class="lab-steps">
                 <h2>Deliverables</h2>
                 <ol>
-                    <li><strong>Report (4�6 pages)</strong>
+                    <li><strong>Report (4-6 pages)</strong>
                         <ul>
-                            <li>Title, author, and abstract (150�250 words)</li>
+                            <li>Title, author, and abstract (150-250 words)</li>
                             <li>Introduction and research question</li>
-                            <li>Data and study area</li>
-                            <li>Methods (include key code snippets/flow)</li>
+                            <li>Data and study area description</li>
+                            <li>Methods (include key code snippets and workflow diagram)</li>
                             <li>Results (maps, charts, tables)</li>
-                            <li>Discussion (limitations, future work)</li>
-                            <li>References</li>
+                            <li>Discussion (interpretation, limitations, future work)</li>
+                            <li>References (at least 3 peer-reviewed sources)</li>
                         </ul>
                     </li>
-                    <li><strong>Appendix</strong>: EE script URL(s) and instructions to reproduce</li>
-                    <li><strong>Optional App</strong>: A simple GEE App with UI controls demonstrating your workflow</li>
+                    <li><strong>Appendix:</strong> Earth Engine script URL(s) with viewer access and reproduction
+                        instructions</li>
+                    <li><strong>Optional GEE App:</strong> Interactive application demonstrating your workflow</li>
                 </ol>
             </section>
 
-            <section id="rubric">
-                <h2>Rubric (100 points)</h2>
-                <ul>
-                    <li>Problem framing and relevance: 15</li>
-                    <li>Data selection and preprocessing: 15</li>
-                    <li>Method correctness and justification: 25</li>
-                    <li>Results quality (maps/figures/tables): 25</li>
-                    <li>Reproducibility and clarity: 10</li>
-                    <li>Writing quality and references: 10</li>
-                </ul>
+            <!-- Rubric -->
+            <section class="key-concepts">
+                <h3>Grading Rubric (100 points)</h3>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Criterion</th>
+                            <th>Points</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Problem Framing</td>
+                            <td>15</td>
+                            <td>Clear question with real-world relevance</td>
+                        </tr>
+                        <tr>
+                            <td>Data Selection</td>
+                            <td>15</td>
+                            <td>Appropriate datasets, properly preprocessed</td>
+                        </tr>
+                        <tr>
+                            <td>Methods</td>
+                            <td>25</td>
+                            <td>Correct application and clear justification</td>
+                        </tr>
+                        <tr>
+                            <td>Results Quality</td>
+                            <td>25</td>
+                            <td>Clear maps, figures, and meaningful metrics</td>
+                        </tr>
+                        <tr>
+                            <td>Reproducibility</td>
+                            <td>10</td>
+                            <td>Documented, runnable code with comments</td>
+                        </tr>
+                        <tr>
+                            <td>Writing Quality</td>
+                            <td>10</td>
+                            <td>Clear prose, proper citations, professional format</td>
+                        </tr>
+                    </tbody>
+                </table>
             </section>
 
-            <section id="timeline">
+            <!-- Timeline -->
+            <section class="lab-steps">
                 <h2>Suggested Timeline</h2>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Week</th>
+                            <th>Milestone</th>
+                            <th>Activities</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Topic Selection</td>
+                            <td>Choose topic, scout data, submit proposal</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Prototype</td>
+                            <td>Develop initial analysis, create early figures</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Full Analysis</td>
+                            <td>Complete methods, generate all results</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Polish & Submit</td>
+                            <td>Write report, refine code, create app (optional)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Self-Check Questions -->
+            <section class="self-check">
+                <h3>Before Submitting, Ask Yourself</h3>
                 <ol>
-                    <li>Week 1: Topic selection and data scouting</li>
-                    <li>Week 2: Prototype analysis and early figures</li>
-                    <li>Week 3: Full analysis and results</li>
-                    <li>Week 4: Writing, polishing, and submission</li>
+                    <li>Is my research question clearly stated and answerable with my data?</li>
+                    <li>Can someone else run my code and understand what it does?</li>
+                    <li>Do my maps and figures have proper titles, legends, and scale bars?</li>
+                    <li>Have I discussed limitations and potential improvements?</li>
+                    <li>Are all my data sources properly cited?</li>
                 </ol>
+            </section>
+
+            <!-- Common Mistakes -->
+            <section class="common-mistakes">
+                <h3>Common Mistakes to Avoid</h3>
+                <ul>
+                    <li><strong>Scope too broad:</strong> Focus on one specific question rather than many</li>
+                    <li><strong>No preprocessing:</strong> Always apply cloud masking and quality filters</li>
+                    <li><strong>Missing context:</strong> Explain WHY your results matter, not just what they are</li>
+                    <li><strong>Uncommented code:</strong> Add comments explaining each major step</li>
+                    <li><strong>No error handling:</strong> Test with different AOIs and date ranges</li>
+                </ul>
             </section>
 
             <section id="submission">
-                <h2>Submission</h2>
-                <p><strong>Subject:</strong> <code>Final Project - [Your Name]</code></p>
-                <ul>
-                    <li>Attach your PDF report</li>
-                    <li>Include EE script URL(s) with viewer access</li>
-                    <li>Include link to your GEE App (if created)</li>
-                </ul>
+                <div class="submission-box">
+                    <h3>📋 Final Project Submission</h3>
+                    <p><strong>Subject:</strong> <code>Final Project - [Your Name]</code></p>
+
+                    <h4>Submit:</h4>
+                    <ul>
+                        <li>PDF report (4-6 pages)</li>
+                        <li>Earth Engine script URL(s) with viewer access enabled</li>
+                        <li>Link to GEE App (if created)</li>
+                        <li>Any exported data files (CSV, GeoTIFF) as appendix</li>
+                    </ul>
+                </div>
             </section>
         </main>
 
-        <footer class="lab-footer">
-            <p><a href="lab-17-river-morphology.html">&larr; Previous Lab</a> | <a href="lab-19-making-gifs-and-videos.html">Next Lab &rarr;</a></p>
-            <p><a href="../index.html">&larr;Back to Course Home</a></p>
+        <footer>
+            <p><a href="lab-17-river-morphology.html">← Previous Lab</a> | <a
+                    href="lab-19-making-gifs-and-videos.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
         </footer>
     </div>
+
 </body>
+
 </html>

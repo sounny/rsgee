@@ -1,13 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Introduction to JavaScript | Remote Sensing Course</title>
     <link rel="stylesheet" href="../../css/style.css">
 </head>
-
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -19,61 +17,115 @@
         </header>
 
         <main class="lab-content">
-            <p><span>JavaScript is a programming language created in the mid-1990s by Brendan Eich. It is one of the
-                    most widely used languages in the world and is used to power the web. JavaScript is a client-side
-                    scripting language that runs in the user's web browser, allowing developers to create dynamic,
-                    interactive websites and applications. It has become immensely popular due to its versatility,
-                    making it a top choice for both back-end and front-end developers.</span></p>
+            <p>
+                JavaScript is the language of the Earth Engine Code Editor. You will use it to describe data, call API
+                functions, and visualize results. You do not need to be a JavaScript specialist; you need just enough
+                syntax to read, tweak, and write short scripts.
+            </p>
 
-            <p><span>JavaScript's unique syntax allows it to be used for various tasks, from basic website development
-                    to complex web applications. It is also used to develop mobile apps and desktop software.
-                    JavaScript's popularity has continued to grow significantly over the years, and it is now used in
-                    nearly every facet of web development.</span></p>
-
-            <p><span>In remote sensing, the popularity of browser-based cloud computing products like Google Earth
-                    Engine has made JavaScript more important than ever. In order to utilize the full capabilities, you
-                    will need to use JavaScript. This module covers the JavaScript syntax and basic data structures. In
-                    the module, you will see more JavaScript code. As you encounter code, paste it into the Code Editor
-                    and run the script to follow along.</span></p>
-
-            <div style="background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; margin: 20px 0;">
-                <strong>💡 Important Note for Earth Engine:</strong>
-                <p>In Google Earth Engine, there's a crucial distinction between <strong>client-side JavaScript</strong>
-                    (running in your browser) and <strong>server-side Earth Engine objects</strong> (running on Google's
-                    servers). Objects that start with <code>ee.</code> (like <code>ee.Image</code>,
-                    <code>ee.Number</code>) are processed on Google's servers. Learn more in the <a
-                        href="client-vs-server.html">Client vs Server Objects</a> module.</p>
-            </div>
-
-            <h2>Key Concepts</h2>
-            <div style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
-                <ul style="margin: 0;">
-                    <li><strong>Variables</strong> store data using the <code>var</code> keyword</li>
-                    <li><strong>Strings</strong> are text enclosed in quotes (<code>'text'</code> or
-                        <code>"text"</code>)</li>
-                    <li><strong>Numbers</strong> can be integers or decimals</li>
-                    <li><strong>Comments</strong> use <code>//</code> for single line or <code>/* */</code> for multiple
-                        lines</li>
-                    <li><strong>Semicolons</strong> end statements (optional but recommended)</li>
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Describe what JavaScript is and why the course starts with it.</li>
+                    <li>Recognize basic syntax for variables, strings, numbers, and comments.</li>
+                    <li>Run a short script in the Code Editor to print and map something.</li>
+                    <li>Know where to go next for lists, objects, functions, and client vs server.</li>
                 </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    The Code Editor uses JavaScript for instant feedback, sharing, and UI tools. Learning a small set of
+                    patterns lets you focus on remote sensing questions instead of setup.
+                </p>
+            </section>
+
+            <figure>
+                <img src="../../images/screenshots/code-editor-interface.png"
+                    alt="Google Earth Engine Code Editor with script, console, and map" loading="lazy">
+                <figcaption>Write code, view docs, inspect the console, and see the map in one place.</figcaption>
+            </figure>
+
+            <section>
+                <h2>Quick win: first script</h2>
+                <p>Paste into the Code Editor and click <strong>Run</strong>:</p>
+<pre><code>// Hello Earth Engine
+var pt = ee.Geometry.Point([-82.3248, 29.6516]); // Gainesville, FL
+Map.centerObject(pt, 9);
+Map.addLayer(pt, {color: 'orange'}, 'My point');
+print('A friendly hello from Earth Engine');</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>An orange point on the map centered on Florida and a console message greeting you.</p>
+                </div>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key vocabulary</h3>
+                <dl>
+                    <dt>Variable</dt>
+                    <dd>A named container for data (for example, <code>var city = 'Gainesville';</code>).</dd>
+                    <dt>String</dt>
+                    <dd>Text data inside quotes (single or double).</dd>
+                    <dt>Number</dt>
+                    <dd>Numeric data without quotes (integers or decimals).</dd>
+                    <dt>Comment</dt>
+                    <dd>Notes for humans, ignored by the computer (<code>// single line</code> or <code>/* block */</code>).</dd>
+                </dl>
+            </section>
+
+            <section>
+                <h2>Basic syntax patterns to remember</h2>
+                <ul>
+                    <li><strong>Declare once, reuse often:</strong> <code>var roi = ...</code> then pass <code>roi</code> to filters and reducers.</li>
+                    <li><strong>Semicolons:</strong> Optional in JavaScript, but using them keeps scripts tidy.</li>
+                    <li><strong>Case-sensitive:</strong> <code>Map</code> is different from <code>map</code>; <code>ndvi</code> is different from <code>NDVI</code>.</li>
+                    <li><strong>Use <code>print()</code> to inspect:</strong> It sends requests to the server and returns results in the console.</li>
+                </ul>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: small tweaks, fast feedback</h4>
+                <p>Change the point coordinates to your hometown and re-run.</p>
+                <p>Swap the color to <code>'green'</code> and zoom to 12.</p>
+                <p>Add a label by printing a sentence that includes your city name.</p>
             </div>
 
-            <h2>Next Steps</h2>
-            <p>Continue with the following modules to build your JavaScript foundation:</p>
-            <ul>
-                <li><a href="variables.html">Variables</a></li>
-                <li><a href="lists.html">Lists</a></li>
-                <li><a href="objects.html">Objects</a></li>
-                <li><a href="functions.html">Functions</a></li>
-                <li><a href="client-vs-server.html">Client vs Server Objects</a> (essential for Earth Engine)</li>
-            </ul>
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Forgetting quotes around text: <code>var city = Gainesville;</code> will error.</li>
+                    <li>Using curly quotes from word processors instead of plain quotes.</li>
+                    <li>Mixing client-only objects with server objects (covered in <a href="client-vs-server.html">Client vs Server</a>).</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What happens if you remove the quotes around a string-</li>
+                    <li>How do you add a comment in JavaScript-</li>
+                    <li>Why is JavaScript the default language in the Earth Engine Code Editor-</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Where to go next</h2>
+                <ul>
+                    <li><a href="variables.html">Variables</a>: storing and naming data</li>
+                    <li><a href="lists.html">Lists</a> and <a href="objects.html">Objects</a>: organizing data</li>
+                    <li><a href="functions.html">Functions</a>: reusable logic</li>
+                    <li><a href="client-vs-server.html">Client vs Server</a>: the most important Earth Engine distinction</li>
+                </ul>
+            </section>
         </main>
 
         <footer>
-            <p><a href="../../index.html">←Back to Course Home</a></p>
+            <p><a href="../../index.html">Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>
 </body>
-
 </html>
+

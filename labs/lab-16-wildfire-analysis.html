@@ -1,60 +1,145 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 16 - Wildfire Analysis | Remote Sensing Course</title>
+    <meta name="description"
+        content="Map burn severity with Landsat NBR/dNBR, classify severity, and summarize area by class within fire perimeters.">
     <link rel="stylesheet" href="../css/style.css">
-    <meta name="description" content="Map burn severity with Landsat NBR/dNBR, classify severity, and summarize area by class within fire perimeters.">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
-            <a href="../index.html">Home</a> &gt; <a href="../index.html#schedule">Labs</a> &gt; Lab 16
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 16 (Wildfire)
         </nav>
 
         <header class="lab-header">
             <h1>Lab 16 - Wildfire Analysis</h1>
-            <p><em>Map burn severity using the Normalized Burn Ratio (NBR) and delta NBR (dNBR) from pre- and post-fire Landsat imagery, and summarize results by fire perimeter.</em></p>
+            <p><em><strong>Objective: Map burn severity using the Normalized Burn Ratio (NBR) and delta NBR (dNBR) from
+                        pre- and post-fire Landsat imagery.</strong></em></p>
         </header>
 
         <main class="lab-content">
 
-            <section class="lab-preflight">
-                <h2>Before you start</h2>
+            <!-- Learning Objectives -->
+            <section class="learning-objectives">
+                <h3>What You'll Learn</h3>
                 <ul>
-                    <li><strong>Prerequisites:</strong> Finish the hazards monitoring lesson and revisit your notes on time-series filtering.</li>
-                    <li><strong>Estimated time:</strong> 75 minutes</li>
-                    <li><strong>Materials:</strong> Earth Engine login, wildfire perimeter references, and bookmarked satellite collections for burned area analysis.</li>
-                </ul>
-            </section>
-
-            <section id="objectives">
-                <h2>Objectives</h2>
-                <ul>
-                    <li>Compute NBR for pre- and post-fire dates and derive dNBR</li>
+                    <li>Calculate NBR from Landsat NIR and SWIR bands</li>
+                    <li>Compute dNBR (delta NBR) from pre- and post-fire imagery</li>
                     <li>Classify burn severity using USGS thresholds</li>
-                    <li>Summarize area by severity class within a fire perimeter</li>
+                    <li>Summarize burned area by severity class within fire perimeters</li>
+                    <li>Export burn severity maps and statistics</li>
                 </ul>
             </section>
 
-            <section id="method">
-                <h2>Method overview</h2>
-                <p>NBR = (NIR - SWIR2) / (NIR + SWIR2). Burn severity is estimated via dNBR = NBR<sub>pre</sub> - NBR<sub>post</sub>. Positive values generally indicate greater burn severity.</p>
+            <!-- Why It Matters -->
+            <section class="why-it-matters">
+                <h3>Why This Matters</h3>
+                <p>Burn severity mapping supports wildfire management:</p>
+                <ul>
+                    <li><strong>Recovery planning:</strong> High-severity areas need different restoration strategies
+                    </li>
+                    <li><strong>Erosion risk:</strong> Burned areas are vulnerable to debris flows and floods</li>
+                    <li><strong>Carbon accounting:</strong> Fires release stored carbon to the atmosphere</li>
+                    <li><strong>Insurance/damage assessment:</strong> Quantify impacts for recovery funding</li>
+                </ul>
             </section>
 
-            <section id="starter-code">
-                <h2>Starter code</h2>
-                                <pre>// AOI and dates (adjust for your fire)
+            <section class="lab-preflight">
+                <h2>Before You Start</h2>
+                <ul>
+                    <li><strong>Prerequisites:</strong> Understand spectral indices and image differencing.</li>
+                    <li><strong>Estimated time:</strong> 75 minutes</li>
+                    <li><strong>Materials:</strong> Earth Engine account and a known fire event with perimeter data.
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Key Vocabulary -->
+            <section class="vocabulary">
+                <h3>Key Terms</h3>
+                <dl>
+                    <dt>NBR (Normalized Burn Ratio)</dt>
+                    <dd>A spectral index using NIR and SWIR bands that is sensitive to vegetation moisture and burn
+                        severity: (NIR - SWIR2) / (NIR + SWIR2)</dd>
+
+                    <dt>dNBR (delta NBR)</dt>
+                    <dd>The difference between pre-fire and post-fire NBR. Positive values indicate burn severity.</dd>
+
+                    <dt>Burn Severity</dt>
+                    <dd>The degree to which fire has altered an ecosystem, from unburned to high severity.</dd>
+
+                    <dt>MTBS</dt>
+                    <dd>Monitoring Trends in Burn Severity - a USGS/USFS program providing burn severity data for the
+                        US.</dd>
+                </dl>
+            </section>
+
+            <!-- Burn Severity Classification -->
+            <section class="key-concepts">
+                <h3>USGS Burn Severity Thresholds</h3>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>dNBR Range</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>0</td>
+                            <td>&lt; 0.1</td>
+                            <td>Unburned/Low regrowth</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>0.1 - 0.27</td>
+                            <td>Low severity</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>0.27 - 0.44</td>
+                            <td>Moderate-low severity</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>0.44 - 0.66</td>
+                            <td>Moderate-high severity</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>&gt; 0.66</td>
+                            <td>High severity</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 1: Define AOI and Date Ranges</h2>
+                <p>Set up your study area and pre/post fire dates:</p>
+                <pre><code>// AOI and dates (adjust for your fire)
 var aoi = ee.Geometry.Rectangle([-118.2, 34.1, -117.5, 34.4]);
 Map.centerObject(aoi, 10);
 
+// Pre-fire: before ignition
 var preStart = '2020-07-01';
 var preEnd   = '2020-08-31';
-var postStart= '2020-10-01';
-var postEnd  = '2020-11-30';
 
-// Mask clouds and shadows using QA_PIXEL bits (bit3=cloud, bit4=cloud shadow)
+// Post-fire: after containment, before vegetation recovery
+var postStart = '2020-10-01';
+var postEnd   = '2020-11-30';</code></pre>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 2: Calculate NBR</h2>
+                <p>Create a function to mask clouds and calculate NBR:</p>
+                <pre><code>// Mask clouds and shadows using QA_PIXEL
 function maskL2(img) {
     var qa = img.select('QA_PIXEL');
     var cloud = qa.bitwiseAnd(1 << 3).neq(0);
@@ -63,6 +148,7 @@ function maskL2(img) {
     return img.updateMask(mask);
 }
 
+// Calculate NBR from Landsat
 function prep(img){
     var sr = maskL2(img);
     var nir = sr.select('SR_B5').multiply(0.0000275).add(-0.2);
@@ -71,42 +157,55 @@ function prep(img){
     return nbr.copyProperties(img, img.propertyNames());
 }
 
-var L = ee.ImageCollection('Landsat/LC08/C02/T1_L2').filterBounds(aoi);
+// Load Landsat 8 and create pre/post NBR composites
+var L = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterBounds(aoi);
 var pre  = L.filterDate(preStart, preEnd).map(prep).median().clip(aoi);
 var post = L.filterDate(postStart, postEnd).map(prep).median().clip(aoi);
 
-var dnbr = pre.subtract(post).rename('dNBR');
 Map.addLayer(pre, {min:-1, max:1, palette:['#1a9850','#ffffbf','#d73027']}, 'NBR pre');
-Map.addLayer(post,{min:-1, max:1, palette:['#1a9850','#ffffbf','#d73027']}, 'NBR post');
-Map.addLayer(dnbr,{min:-0.2, max:1, palette:['#2c7bb6','#ffff8c','#d7191c']}, 'dNBR');
+Map.addLayer(post,{min:-1, max:1, palette:['#1a9850','#ffffbf','#d73027']}, 'NBR post');</code></pre>
+            </section>
 
-// Burn severity thresholds (USGS MTBS example)
+            <section class="lab-steps">
+                <h2>Step 3: Calculate dNBR and Classify Severity</h2>
+                <pre><code>// Calculate delta NBR
+var dnbr = pre.subtract(post).rename('dNBR');
+Map.addLayer(dnbr, {min:-0.2, max:1, palette:['#2c7bb6','#ffff8c','#d7191c']}, 'dNBR');
+
+// Classify burn severity using USGS thresholds
 var sev = dnbr.expression(
-  'b(0) <= 0.1 ? 0 : \n' +
-  'b(0) <= 0.27 ? 1 : \n' +
-  'b(0) <= 0.44 ? 2 : \n' +
+  'b(0) <= 0.1 ? 0 : ' +
+  'b(0) <= 0.27 ? 1 : ' +
+  'b(0) <= 0.44 ? 2 : ' +
   'b(0) <= 0.66 ? 3 : 4'
 ).rename('severity');
 
-Map.addLayer(sev, {min:0, max:4, palette:['#1a9641','#ffffbf','#fdae61','#d7191c','#a50026']}, 'Severity classes');
+Map.addLayer(sev, {
+    min: 0, max: 4, 
+    palette: ['#1a9641','#ffffbf','#fdae61','#d7191c','#a50026']
+}, 'Severity classes');</code></pre>
+            </section>
 
-// Fire perimeter (replace with actual perimeter FC if available)
-var perimeter = ee.FeatureCollection('USDOS/LSIB_SIMPLE/2017').filterBounds(aoi).geometry().bounds(1000);
+            <section class="lab-steps">
+                <h2>Step 4: Summarize Area by Severity Class</h2>
+                <pre><code>// Fire perimeter (replace with actual perimeter if available)
+var perimeter = aoi; // Use actual fire perimeter FeatureCollection
 
-// Area by class (hectares)
+// Calculate area (hectares) by severity class
 var areaImg = ee.Image.pixelArea().divide(10000).addBands(sev);
 var byClass = areaImg.reduceRegion({
   reducer: ee.Reducer.sum().group({groupField: 1, groupName: 'severity'}),
-  geometry: perimeter, scale: 30, maxPixels: 1e9
+  geometry: perimeter, 
+  scale: 30, 
+  maxPixels: 1e9
 });
-print('Area (ha) by severity class', byClass);
-</pre>
+
+print('Area (ha) by severity class', byClass);</code></pre>
             </section>
 
-                        <section id="exports">
-                                <h2>Exports</h2>
-                                <p>Export images and the severity area table to Google Drive.</p>
-                                <pre>// Convert grouped dictionary to a FeatureCollection for CSV export
+            <section class="lab-steps">
+                <h2>Step 5: Export Results</h2>
+                <pre><code>// Convert grouped dictionary to FeatureCollection for CSV export
 var groups = ee.List(byClass.get('groups'));
 var table = ee.FeatureCollection(groups.map(function(g){
     g = ee.Dictionary(g);
@@ -123,40 +222,81 @@ Export.table.toDrive({
     fileFormat: 'CSV'
 });
 
-// Export dNBR and severity rasters as GeoTIFFs
+// Export dNBR as GeoTIFF
 Export.image.toDrive({
-    image: dnbr.rename('dNBR'),
+    image: dnbr,
     description: 'dnbr_geotiff',
     region: aoi,
     scale: 30,
     maxPixels: 1e13
-});
+});</code></pre>
+            </section>
 
-Export.image.toDrive({
-    image: sev.rename('severity'),
-    description: 'severity_classes_geotiff',
-    region: aoi,
-    scale: 30,
-    maxPixels: 1e13
-});
-</pre>
-                        </section>
+            <!-- Self-Check Questions -->
+            <section class="self-check">
+                <h3>Check Your Understanding</h3>
+                <ol>
+                    <li>Why do we use SWIR bands in the NBR calculation?</li>
+                    <li>What would a negative dNBR value indicate?</li>
+                    <li>Why is timing of post-fire imagery important?</li>
+                    <li>How might topography affect burn severity patterns?</li>
+                </ol>
+            </section>
 
-            <section id="deliverables">
-                <h2>Deliverables</h2>
+            <!-- Troubleshooting -->
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <div class="issue">
+                    <strong>Problem: Pre-fire NBR shows burn scars</strong>
+                    <p><strong>Solution:</strong> Check your pre-fire dates - they may overlap with an earlier fire.
+                        Adjust date range.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: High dNBR values appear in water bodies</strong>
+                    <p><strong>Solution:</strong> Add a water mask using the JRC Global Surface Water dataset.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Clouds in post-fire composite</strong>
+                    <p><strong>Solution:</strong> Extend the date range or use a different cloud masking approach.</p>
+                </div>
+            </section>
+
+            <!-- Pro Tips -->
+            <section class="pro-tips">
+                <h3>Pro Tips</h3>
                 <ul>
-                    <li>Map layers: NBR pre/post, dNBR, and severity classes</li>
-                    <li>Table: area (hectares) by severity class within the fire perimeter</li>
-                    <li>Short discussion: Note any unburned/low-severity islands and likely drivers</li>
-                    <li>EE script URL; export class areas as a CSV</li>
+                    <li><strong>Use MTBS data:</strong> Compare your results to official MTBS burn severity maps</li>
+                    <li><strong>Consider RdNBR:</strong> Relativized dNBR normalizes by pre-fire NBR for more consistent
+                        results</li>
+                    <li><strong>Multiple fires:</strong> Use fire perimeter datasets (NIFC, CalFire) for specific events
+                    </li>
+                    <li><strong>Time series:</strong> Track post-fire vegetation recovery over multiple years</li>
                 </ul>
+            </section>
+
+            <section id="submission">
+                <div class="submission-box">
+                    <h3>📋 Lab Submission</h3>
+                    <p><strong>Subject:</strong> <code>Lab 16 - Wildfire Analysis - [Your Name]</code></p>
+
+                    <h4>Submit:</h4>
+                    <ul>
+                        <li>Map layers: NBR pre/post, dNBR, and severity classes</li>
+                        <li>Table: area (hectares) by severity class within fire perimeter</li>
+                        <li>Short discussion: Note any unburned/low-severity islands and likely drivers</li>
+                        <li>EE script URL and exported CSV</li>
+                    </ul>
+                </div>
             </section>
         </main>
 
-        <footer class="lab-footer">
-            <p><a href="lab-15-urban-heat-island.html">&larr; Previous Lab</a> | <a href="lab-17-river-morphology.html">Next Lab &rarr;</a></p>
-            <p><a href="../index.html">&larr;Back to Course Home</a></p>
+        <footer>
+            <p><a href="lab-15-urban-heat-island.html">← Previous Lab</a> | <a href="lab-17-river-morphology.html">Next
+                    Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
         </footer>
     </div>
+
 </body>
+
 </html>

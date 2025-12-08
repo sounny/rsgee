@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temporal Compositing | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 4
+        </nav>
+
+        <header class="lab-header">
+            <h1>Temporal Compositing</h1>
+        </header>
+
+        <main class="lab-content">
+            <p>
+                Compositing combines multiple images over time to create a single, cloud-free image.
+                This is essential for creating reliable baselines from noisy data.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Create median, mean, and maximum composites.</li>
+                    <li>Understand when to use each compositing method.</li>
+                    <li>Build seasonal and annual composites.</li>
+                    <li>Use qualityMosaic for best-pixel selection.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    No single image is perfect—clouds, shadows, and sensor artifacts contaminate individual
+                    scenes. Compositing merges the best information from many images into one clean result.
+                </p>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key vocabulary</h3>
+                <dl>
+                    <dt>Composite</dt>
+                    <dd>A single image created by combining multiple images over time.</dd>
+                    <dt>Median composite</dt>
+                    <dd>Each pixel takes the median value from the image stack—resistant to outliers.</dd>
+                    <dt>Quality mosaic</dt>
+                    <dd>Selects pixels from the image with the best quality score (e.g., highest NDVI).</dd>
+                </dl>
+            </section>
+
+            <section>
+                <h2>Quick win: Summer median composite</h2>
+                <p>Create a cloud-free summer composite from Landsat 8:</p>
+                <pre><code>// Cloud masking function
+function maskL8sr(image) {
+  var qaMask = image.select('QA_PIXEL').bitwiseAnd(1 << 3).eq(0)
+      .and(image.select('QA_PIXEL').bitwiseAnd(1 << 4).eq(0));
+  return image.updateMask(qaMask)
+      .multiply(0.0000275).add(-0.2);
+}
+
+// Load and filter collection
+var collection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2023-06-01', '2023-08-31')
+  .filterBounds(ee.Geometry.Point([-82.3, 29.6]))
+  .filter(ee.Filter.lt('CLOUD_COVER', 30))
+  .map(maskL8sr);
+
+// Create median composite
+var composite = collection.median();
+
+// Visualize
+Map.centerObject(collection, 9);
+Map.addLayer(composite, {
+  bands: ['SR_B4', 'SR_B3', 'SR_B2'],
+  min: 0,
+  max: 0.3
+}, 'Summer 2023 Composite');
+
+print('Images used:', collection.size());</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A cloud-free true color image representing typical summer conditions.
+                        The console shows how many images were combined.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Compositing methods compared</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Best For</th>
+                            <th>Caution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>.median()</code></td>
+                            <td>General purpose, cloud removal</td>
+                            <td>May blur sharp features</td>
+                        </tr>
+                        <tr>
+                            <td><code>.mean()</code></td>
+                            <td>Smooth averages</td>
+                            <td>Sensitive to outliers (clouds)</td>
+                        </tr>
+                        <tr>
+                            <td><code>.max()</code></td>
+                            <td>Peak greenness (NDVI)</td>
+                            <td>May pick cloudy pixels</td>
+                        </tr>
+                        <tr>
+                            <td><code>.min()</code></td>
+                            <td>Minimum reflectance</td>
+                            <td>Often picks shadows</td>
+                        </tr>
+                        <tr>
+                            <td><code>.mosaic()</code></td>
+                            <td>Latest/first pixel</td>
+                            <td>No quality consideration</td>
+                        </tr>
+                        <tr>
+                            <td><code>.qualityMosaic()</code></td>
+                            <td>Best-pixel selection</td>
+                            <td>Requires quality band</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>Seasonal composites</h2>
+                <p>Create composites for each season:</p>
+                <pre><code>// Define seasons
+var year = 2023;
+var seasons = {
+  'Winter': [year + '-01-01', year + '-03-31'],
+  'Spring': [year + '-04-01', year + '-06-30'],
+  'Summer': [year + '-07-01', year + '-09-30'],
+  'Fall':   [year + '-10-01', year + '-12-31']
+};
+
+// Function to create seasonal composite
+var makeComposite = function(startDate, endDate) {
+  return ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+    .filterDate(startDate, endDate)
+    .filterBounds(roi)
+    .map(maskL8sr)
+    .median();
+};
+
+// Create and add each season
+var summerComp = makeComposite(seasons.Summer[0], seasons.Summer[1]);
+var winterComp = makeComposite(seasons.Winter[0], seasons.Winter[1]);
+
+Map.addLayer(summerComp, {bands: ['SR_B4','SR_B3','SR_B2'], min:0, max:0.3}, 'Summer');
+Map.addLayer(winterComp, {bands: ['SR_B4','SR_B3','SR_B2'], min:0, max:0.3}, 'Winter');</code></pre>
+            </section>
+
+            <section>
+                <h2>Quality mosaic: Best-pixel compositing</h2>
+                <p>Select pixels from the image with the best quality score:</p>
+                <pre><code>// Add NDVI as quality band
+var withNDVI = collection.map(function(img) {
+  var ndvi = img.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI');
+  return img.addBands(ndvi);
+});
+
+// qualityMosaic selects pixels from the image 
+// with the highest value in the specified band
+var greenest = withNDVI.qualityMosaic('NDVI');
+
+Map.addLayer(greenest, {
+  bands: ['SR_B4', 'SR_B3', 'SR_B2'],
+  min: 0,
+  max: 0.3
+}, 'Greenest Pixel Composite');</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A composite where each pixel comes from the date when vegetation was greenest.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Annual NDVI composite</h2>
+                <p>Create a maximum NDVI composite for a full year:</p>
+                <pre><code>// NDVI for each image
+var ndviCollection = collection.map(function(img) {
+  return img.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI');
+});
+
+// Maximum NDVI value at each pixel
+var maxNDVI = ndviCollection.max();
+
+Map.addLayer(maxNDVI, {
+  min: 0,
+  max: 0.8,
+  palette: ['brown', 'yellow', 'green']
+}, 'Max Annual NDVI');</code></pre>
+            </section>
+
+            <section class="pro-tips">
+                <h3>Pro tips</h3>
+                <ul>
+                    <li><strong>Cloud mask first:</strong> Always apply cloud masking before compositing.</li>
+                    <li><strong>Pre-filter:</strong> Use <code>.filter(ee.Filter.lt('CLOUD_COVER', 30))</code> to speed
+                        up processing.</li>
+                    <li><strong>Check image count:</strong> Print <code>collection.size()</code> to ensure enough
+                        images.</li>
+                    <li><strong>Seasonal windows:</strong> Match your compositing window to your analysis needs.</li>
+                    <li><strong>qualityMosaic for dates:</strong> Add a date band to track which date each pixel came
+                        from.</li>
+                </ul>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: Track the date of each pixel</h4>
+                <pre><code>// Add date band (days since epoch)
+var withDate = collection.map(function(img) {
+  var date = ee.Image.constant(img.date().millis().divide(86400000))
+    .rename('date').toFloat();
+  var ndvi = img.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI');
+  return img.addBands(ndvi).addBands(date);
+});
+
+// Get greenest pixel composite with date
+var best = withDate.qualityMosaic('NDVI');
+Map.addLayer(best.select('date'), {min: 19500, max: 19600}, 'Date of Greenest');</code></pre>
+            </div>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Compositing without cloud masking (clouds contaminate result).</li>
+                    <li>Using mean instead of median for cloudy regions.</li>
+                    <li>Time window too short (not enough clean pixels).</li>
+                    <li>Not checking how many images are in the collection.</li>
+                    <li>Mixing sensors without harmonizing (Landsat 8 vs Sentinel-2).</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>Why is median often better than mean for compositing?</li>
+                    <li>What does qualityMosaic use to select pixels?</li>
+                    <li>When would you use max compositing?</li>
+                    <li>What should you always do before compositing optical imagery?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li><a href="reducers.html">Reducers and Aggregations</a></li>
+                    <li><a href="exporting-data.html">Exporting Data</a></li>
+                    <li><a href="../week-02-images/cloud-masking.html">Cloud Masking</a></li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Masking | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 2
+        </nav>
+
+        <header class="lab-header">
+            <h1>Cloud Masking</h1>
+        </header>
+
+        <main class="lab-content">
+            <p>
+                Clouds contaminate optical imagery and produce false spectral signatures. Before compositing or
+                analysis, you must identify and mask cloudy pixels. This module teaches you how to use quality
+                bands to create clean images.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Understand why cloud masking is essential for optical imagery.</li>
+                    <li>Read and interpret QA (quality assurance) band bit structures.</li>
+                    <li>Write cloud mask functions for Landsat and Sentinel-2.</li>
+                    <li>Map cloud mask functions over image collections.</li>
+                    <li>Create clean composites from masked collections.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Clouds appear bright in visible bands and can be misclassified as snow, urban areas, or bare
+                    soil. Shadows appear dark and get confused with water or vegetation. Removing these pixels
+                    before analysis prevents garbage-in, garbage-out results.
+                </p>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key vocabulary</h3>
+                <dl>
+                    <dt>QA Band</dt>
+                    <dd>Quality Assurance band containing bit-packed flags for clouds, shadows, water, snow, etc.</dd>
+                    <dt>Bit Flag</dt>
+                    <dd>A single bit (0 or 1) in a QA band that indicates presence/absence of a condition.</dd>
+                    <dt>Bitwise AND</dt>
+                    <dd>Operation to extract specific bits from a QA band (<code>.bitwiseAnd()</code>).</dd>
+                    <dt>Mask</dt>
+                    <dd>A binary image where 0 = hide pixel, 1 = show pixel.</dd>
+                </dl>
+            </section>
+
+            <section>
+                <h2>Quick win: Landsat 8/9 cloud mask</h2>
+                <p>The <code>QA_PIXEL</code> band contains cloud and shadow flags. Here's a complete example:</p>
+                <pre><code>// Cloud masking function for Landsat 8/9 Collection 2 Surface Reflectance
+function maskL8sr(image) {
+  // Bit 3: Cloud, Bit 4: Cloud Shadow
+  var cloudShadowBitMask = (1 << 4);
+  var cloudsBitMask = (1 << 3);
+  
+  // Get the QA band
+  var qa = image.select('QA_PIXEL');
+  
+  // Both flags should be zero (clear conditions)
+  var mask = qa.bitwiseAnd(cloudShadowBitMask).eq(0)
+      .and(qa.bitwiseAnd(cloudsBitMask).eq(0));
+  
+  // Apply mask and scale the image
+  return image.updateMask(mask)
+      .multiply(0.0000275).add(-0.2);
+}
+
+// Load and filter collection
+var collection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2023-06-01', '2023-08-31')
+  .filterBounds(ee.Geometry.Point([-82.3, 29.6]))
+  .map(maskL8sr);
+
+// Create median composite
+var composite = collection.median();
+
+// Visualize
+Map.centerObject(collection, 9);
+Map.addLayer(composite, {
+  bands: ['SR_B4', 'SR_B3', 'SR_B2'],
+  min: 0,
+  max: 0.3
+}, 'Cloud-free Composite');
+
+print('Images in collection:', collection.size());</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A cloud-free summer composite. Compare to a non-masked composite to see the difference.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Understanding QA band bit structure</h2>
+                <p>QA bands pack multiple flags into a single integer using bits:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bit</th>
+                            <th>Landsat QA_PIXEL</th>
+                            <th>Value when set</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>0</td>
+                            <td>Fill</td>
+                            <td>1</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Dilated Cloud</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Cirrus (high confidence)</td>
+                            <td>4</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Cloud</td>
+                            <td>8</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Cloud Shadow</td>
+                            <td>16</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Snow</td>
+                            <td>32</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>Clear</td>
+                            <td>64</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>Water</td>
+                            <td>128</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>To check if bit 3 (cloud) is set: <code>qa.bitwiseAnd(1 &lt;&lt; 3)</code> or
+                    <code>qa.bitwiseAnd(8)</code>
+                </p>
+            </section>
+
+            <section>
+                <h2>Sentinel-2 cloud mask</h2>
+                <p>Sentinel-2 uses the SCL (Scene Classification Layer) band:</p>
+                <pre><code>// Cloud masking function for Sentinel-2 SR
+function maskS2clouds(image) {
+  var scl = image.select('SCL');
+  
+  // SCL classes to mask:
+  // 3 = Cloud Shadow, 8 = Cloud Medium Probability, 
+  // 9 = Cloud High Probability, 10 = Thin Cirrus
+  var mask = scl.neq(3).and(scl.neq(8)).and(scl.neq(9)).and(scl.neq(10));
+  
+  // Apply mask and scale
+  return image.updateMask(mask).divide(10000);
+}
+
+// Apply to collection
+var s2Collection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+  .filterDate('2023-06-01', '2023-08-31')
+  .filterBounds(ee.Geometry.Point([-82.3, 29.6]))
+  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 30))
+  .map(maskS2clouds);
+
+var s2Composite = s2Collection.median();
+
+Map.addLayer(s2Composite, {
+  bands: ['B4', 'B3', 'B2'],
+  min: 0,
+  max: 0.3
+}, 'Sentinel-2 Clean');</code></pre>
+            </section>
+
+            <section>
+                <h2>Sensor band reference</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sensor</th>
+                            <th>QA Band</th>
+                            <th>Scale Factor</th>
+                            <th>Cloud Bits/Values</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Landsat 8/9 SR</td>
+                            <td><code>QA_PIXEL</code></td>
+                            <td>0.0000275, offset -0.2</td>
+                            <td>Bit 3 (cloud), Bit 4 (shadow)</td>
+                        </tr>
+                        <tr>
+                            <td>Landsat 5/7 SR</td>
+                            <td><code>QA_PIXEL</code></td>
+                            <td>0.0000275, offset -0.2</td>
+                            <td>Bit 3 (cloud), Bit 4 (shadow)</td>
+                        </tr>
+                        <tr>
+                            <td>Sentinel-2 SR</td>
+                            <td><code>SCL</code></td>
+                            <td>1/10000</td>
+                            <td>Values 3, 8, 9, 10</td>
+                        </tr>
+                        <tr>
+                            <td>MODIS</td>
+                            <td><code>state_1km</code></td>
+                            <td>varies by product</td>
+                            <td>Bits 0-1 (cloud state)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="pro-tips">
+                <h3>Pro tips</h3>
+                <ul>
+                    <li>Always pre-filter by cloud cover metadata (<code>CLOUD_COVER</code> or
+                        <code>CLOUDY_PIXEL_PERCENTAGE</code>) to speed up processing.
+                    </li>
+                    <li>For aggressive masking, include dilated cloud (bit 1) and cirrus (bit 2).</li>
+                    <li>Test your mask on a single image before mapping over the collection.</li>
+                    <li>In persistently cloudy regions, use longer time windows or radar data.</li>
+                </ul>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: Compare masked vs unmasked</h4>
+                <p>Add an unmasked composite to see the difference:</p>
+                <pre><code>// Unmasked composite for comparison
+var unmasked = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2023-06-01', '2023-08-31')
+  .filterBounds(ee.Geometry.Point([-82.3, 29.6]))
+  .median()
+  .multiply(0.0000275).add(-0.2);
+
+Map.addLayer(unmasked, {
+  bands: ['SR_B4', 'SR_B3', 'SR_B2'],
+  min: 0, max: 0.3
+}, 'Unmasked (with clouds)', false);</code></pre>
+                <p>Toggle between layers to see how clouds contaminate the composite.</p>
+            </div>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Forgetting to map the mask function over the collection (<code>.map(maskL8sr)</code>).</li>
+                    <li>Using wrong bit positions for different Landsat collections.</li>
+                    <li>Not applying scale factors after masking.</li>
+                    <li>Masking too aggressively and losing valid pixels.</li>
+                    <li>Expecting perfect results - some cloud edges always slip through.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>Why do we need to mask clouds before calculating NDVI?</li>
+                    <li>What does <code>bitwiseAnd(1 &lt;&lt; 3)</code> extract?</li>
+                    <li>What is the difference between Landsat's QA_PIXEL and Sentinel-2's SCL?</li>
+                    <li>Why pre-filter by cloud cover percentage before applying a pixel mask?</li>
+                </ol>
+            </section>
+
+            <section class="builds-on">
+                <h3>This module builds on</h3>
+                <ul>
+                    <li><a href="image-collections.html">Image Collections</a> - filtering and mapping over collections
+                    </li>
+                    <li><a href="../week-01-javascript/functions.html">Functions</a> - writing reusable mask functions
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li><a href="../week-04-exports/temporal-compositing.html">Temporal Compositing</a> - create
+                        cloud-free composites</li>
+                    <li><a href="ndvi.html">NDVI</a> - calculate vegetation indices on clean images</li>
+                    <li><a href="band-arithmetic.html">Band Arithmetic</a> - perform calculations on clean data</li>
+                    <li><a href="../week-03-classification/introduction-to-image-classification.html">Classification</a>
+                        - classify clean imagery</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+
+</html>

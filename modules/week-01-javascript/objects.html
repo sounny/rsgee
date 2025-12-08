@@ -1,100 +1,123 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JavaScript Objects - Remote Sensing for GEE</title>
+    <title>Objects | Remote Sensing Course</title>
     <link rel="stylesheet" href="../../css/style.css">
 </head>
 <body>
-    <nav class="breadcrumb">
-        <a href="../../index.html">Home</a> &gt; 
-        <a href="../../index.html#schedule">Week 1</a> &gt; 
-        <span>Objects</span>
-    </nav>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 1
+        </nav>
 
-    <main>
-        <h1>JavaScript Objects</h1>
+        <header class="lab-header">
+            <h1>Objects</h1>
+        </header>
 
-        <section>
-            <h2>Introduction to Objects</h2>
-            <p>Lists allow you to store multiple values in a single container variable. While useful, lists are not ideal for storing structured data. It is helpful to be able to refer to each item with its name rather than its position.</p>
-            
-            <p>Objects in JavaScript allow you to store <strong>key-value pairs</strong>, where each value can be referred to by its key. You can create an object using the curly braces <code>{ }</code>.</p>
-        </section>
+        <main class="lab-content">
+            <p>
+                Objects store labeled data as key-value pairs. They make your code more readable than lists when you
+                care about names instead of positions.
+            </p>
 
-        <section>
-            <h2>Creating an Object</h2>
-            <p>The code below creates an object called <code>cityData</code> with some information about Gainesville:</p>
-            <pre><code>var cityData = {
-  'city': 'Gainesville',
-  'coordinates': [-82.3248, 29.6516],
-  'population': 140398
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Create objects with curly braces and key-value pairs.</li>
+                    <li>Access values by key using <code>.get()</code>.</li>
+                    <li>Use camelCase naming to keep code clear.</li>
+                    <li>Understand when to choose objects over lists.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Objects let you bundle metadata (location, dates, band lists) together in a self-documenting way.
+                    Earth Engine also returns many results as objects, so reading them is essential.
+                </p>
+            </section>
+
+            <section>
+                <h2>Quick win: make and inspect an object</h2>
+<pre><code>var cityData = {
+  name: 'Gainesville',
+  coordinates: [-82.3248, 29.6516],
+  population: 140398
 };
-print(cityData);</code></pre>
-        </section>
+print('City data', cityData);</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A console entry labeled "Dictionary" with keys <code>name</code>, <code>coordinates</code>, and <code>population</code>.</p>
+                </div>
+                <figure>
+                    <img src="../../images/javascript/objects-output.png"
+                        alt="Console output showing object key-value pairs" loading="lazy">
+                    <figcaption>Objects show keys so you can access values by name.</figcaption>
+                </figure>
+            </section>
 
-        <section>
-            <h2>Important Syntax Notes</h2>
-            
-            <h3>Multi-line Formatting</h3>
-            <p>We can use multiple lines to define the object. The command is considered complete only when we put in the semicolon (<code>;</code>). This helps format the code to make it more readable.</p>
-
-            <h3>Camel Case Naming</h3>
-            <p>Note the choice of the variable name <code>cityData</code>. The variable contains two words. The first word is in lowercase, and the first letter of the second word is capitalized. This type of naming scheme of joining multiple words into a single variable name is called <strong>"camel case"</strong>.</p>
-            
-            <p>While it is not mandatory to name your variables using this scheme, it is considered a good practice. Functions and parameters in the Earth Engine API follow this convention, so your code will be much more readable if you follow it too.</p>
-        </section>
-
-        <section>
-            <h2>Understanding Object Output</h2>
-            <p>Take the code above and run it in Google Earth Engine. The object will be printed in the Console. You can see that each item has a label instead of a numeric index. This is known as the <strong>key</strong> and can be used to retrieve the value of an item.</p>
-
-            <p><img src="../../images/javascript/objects-output.png" alt="Output showing an object with key-value pairs" style="max-width: 600px;"></p>
-        </section>
-
-        <section>
-            <h2>Key Concepts</h2>
-            <ul>
-                <li><strong>Object syntax:</strong> Use curly braces <code>{ }</code> to create an object</li>
-                <li><strong>Key-value pairs:</strong> Each item has a key (name) and a value</li>
-                <li><strong>Quotes around keys:</strong> Keys are typically strings in quotes</li>
-                <li><strong>Colon separator:</strong> Use <code>:</code> to separate keys from values</li>
-                <li><strong>Comma between pairs:</strong> Separate key-value pairs with commas</li>
-                <li><strong>Nested values:</strong> Values can be strings, numbers, lists, or even other objects</li>
-            </ul>
-        </section>
-
-        <section>
-            <h2>Accessing Object Values</h2>
-            <p>You can access values in an object using the <code>.get()</code> method with the key name:</p>
-            <pre><code>var cityData = {
-  'city': 'Gainesville',
-  'coordinates': [-82.3248, 29.6516],
-  'population': 140398
-};
-
-var cityName = cityData.get('city');
-print('City name:', cityName);
-
+            <section>
+                <h2>Accessing values</h2>
+                <p>Use <code>.get()</code> with the key name:</p>
+<pre><code>var cityName = cityData.get('name');
 var coords = cityData.get('coordinates');
+print('City name:', cityName);
 print('Coordinates:', coords);</code></pre>
-        </section>
+            </section>
 
-        <section>
-            <h2>Try It Yourself</h2>
-            <p>Create your own object with information about a different location or dataset:</p>
-            <ul>
-                <li>Try adding more key-value pairs</li>
-                <li>Nest a list inside an object</li>
-                <li>Access different values using <code>.get()</code></li>
-                <li>Practice using camel case for variable names</li>
-            </ul>
-        </section>
-    </main>
+            <section class="key-concepts">
+                <h3>Key concepts</h3>
+                <ul>
+                    <li><strong>Syntax:</strong> <code>{ key: value, anotherKey: value }</code></li>
+                    <li><strong>Keys are strings:</strong> You can quote them or not; be consistent.</li>
+                    <li><strong>Comma separated:</strong> Each key-value pair ends with a comma except the last.</li>
+                    <li><strong>Nested values:</strong> Values can be strings, numbers, lists, or other objects.</li>
+                </ul>
+            </section>
 
-    <footer>
-        <p><a href="../../index.html">Back to Course Home</a></p>
-    </footer>
+            <div class="try-it">
+                <h4>Try it: build your own</h4>
+                <p>Create an object for a study site with keys <code>name</code>, <code>lat</code>, <code>lon</code>, and <code>sensor</code>. Print it.</p>
+                <p>Add a <code>bands</code> key that stores a list of band names.</p>
+                <p>Make another object and compare keys to see how objects stay readable.</p>
+            </div>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Leaving out commas between pairs.</li>
+                    <li>Forgetting quotes around string values.</li>
+                    <li>Mixing client objects with Earth Engine objects: use <code>ee.Dictionary</code> when you need an object on the server.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What is the key for retrieving the population in the example above-</li>
+                    <li>When would you prefer an object over a list-</li>
+                    <li>How do you access a value stored under a key-</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li><a href="lists.html">Lists</a> for ordered data.</li>
+                    <li><a href="functions.html">Functions</a> to process lists of objects with <code>.map()</code>.</li>
+                    <li><a href="client-vs-server.html">Client vs Server</a> to learn when to wrap with <code>ee.Dictionary</code>.</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
 </body>
 </html>
+

@@ -1,19 +1,116 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Future Directions Overview</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../../css/style.css">
 </head>
 <body>
-  <nav class="breadcrumb">
-    <a href="../../index.html">Home</a> &gt; <a href="overview.html">Future Directions</a> &gt; Overview
-  </nav>
-  <h1>Future Directions in Remote Sensing</h1>
-  <p>This section explores the emerging trends, challenges, and opportunities in remote sensing. Topics include advances in technology, new applications, and the evolving role of remote sensing in environmental monitoring, resource management, and scientific research.</p>
-  <nav class="series-nav">
-    <a href="overview.html">Overview</a> |
-    <a href="bibliography.html">Bibliography</a>
-  </nav>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="../../index.html">Home</a> &gt; <a href="overview.html">Future Directions</a> &gt; Overview
+    </nav>
+
+    <header class="lab-header">
+      <h1>Future Directions in Remote Sensing</h1>
+    </header>
+
+    <main class="lab-content">
+      <p>
+        Remote sensing is evolving quickly as sensors, cloud platforms, and AI advance. Use this overview as a roadmap
+        for where to invest learning time after the core modules.
+      </p>
+
+      <section class="learning-objectives">
+        <h3>Learning objectives</h3>
+        <ul>
+          <li>Identify emerging technical trends to watch.</li>
+          <li>Connect skills from this course to next-step topics.</li>
+          <li>Find trusted resources (papers, datasets, communities) to keep learning.</li>
+          <li>Plan a lightweight personal roadmap for the next 3-6 months.</li>
+        </ul>
+      </section>
+
+      <section class="why-it-matters">
+        <h3>Why it matters</h3>
+        <p>
+          The tools, data, and expectations for remote sensing change yearly. Knowing the horizon helps you pick
+          projects, stay relevant, and contribute to open communities.
+        </p>
+      </section>
+
+      <figure>
+        <img src="../../images/remote-sensing-banner.png" alt="Illustration of global remote sensing applications" loading="lazy">
+        <figcaption>Cloud, AI, and open data are reshaping how we monitor Earth.</figcaption>
+      </figure>
+
+      <section>
+        <h2>Trends to watch</h2>
+        <ul>
+          <li><strong>Higher cadence and resolution:</strong> More daily imagery (Planet, Sentinel, commercial SAR) with finer detail.</li>
+          <li><strong>AI-native pipelines:</strong> Foundation models, self-supervised learning, and on-device ML for edge analytics.</li>
+          <li><strong>Fusion at scale:</strong> Optical + SAR + LiDAR + IoT data streams fused in cloud platforms.</li>
+          <li><strong>Open ecosystems:</strong> Growing open-source tools (geemap, rio, xarray) and open datasets.</li>
+          <li><strong>Responsible use:</strong> More focus on ethics, bias, privacy, and transparent methods.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Skills that build on this course</h2>
+        <ul>
+          <li>Time series analysis (harmonics, trend + seasonality) on image collections.</li>
+          <li>Machine learning for classification and regression (random forests, gradient boosting, deep nets).</li>
+          <li>SAR fundamentals (polarization, speckle filtering, coherence change detection).</li>
+          <li>Change detection workflows (pre/post composites, image differencing, stability masking).</li>
+          <li>Data fusion (Sentinel-1 + Sentinel-2, LiDAR + optical, DEM + optical).</li>
+        </ul>
+      </section>
+
+      <section class="try-it">
+        <h4>Pick a next-step project (30-60 minutes to scope)</h4>
+        <p>Choose one real-world question, outline data + method, and note blockers:</p>
+        <ol>
+          <li>Question: What do you want to map or monitor?</li>
+          <li>Data: Which collections (optical, SAR, DEM) and date range?</li>
+          <li>Method: Composite, index, classifier, or change detection?</li>
+          <li>Validation: How will you check results (ground truth, cross-source comparison)?</li>
+          <li>Risks: Clouds, phenology, seasonality, resolution limits?</li>
+        </ol>
+      </section>
+
+      <section class="key-concepts">
+        <h3>Where to learn more</h3>
+        <ul>
+          <li>Earth Engine Docs: guides, reducers, charting, exporting, and Apps.</li>
+          <li>Community forums: Earth Engine Developers Group; GIS Stack Exchange.</li>
+          <li>Open courses/texts: EEFA Book (Fundamentals and Applications), USGS/ESA trainings.</li>
+          <li>Packages: <code>geemap</code>, <code>rgee</code>, <code>rio-tiler</code>, <code>xarray</code>.</li>
+        </ul>
+      </section>
+
+      <section class="self-check">
+        <h3>Quick self-check</h3>
+        <ol>
+          <li>Which trend above is most relevant to your interests, and why?</li>
+          <li>What data sources would you fuse for a change detection project?</li>
+          <li>What is one community or resource you will try this month?</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>Next steps</h2>
+        <ul>
+          <li>Scan the <a href="bibliography.html">bibliography</a> for starter papers and reports.</li>
+          <li>Draft a 3-week micro-project plan: data, method, output, validation.</li>
+          <li>Share a Code Editor link or notebook with a peer and ask for feedback.</li>
+        </ul>
+      </section>
+
+      <nav class="series-nav">
+        <a href="overview.html">Overview</a> |
+        <a href="bibliography.html">Bibliography</a>
+      </nav>
+    </main>
+  </div>
 </body>
 </html>

@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <nav class="breadcrumb">
-            <a href="../../index.html">Home</a> &gt; <a href="../index.html#schedule">Schedule</a> &gt; Week 3
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 3
         </nav>
 
         <header class="lab-header">
@@ -19,46 +19,193 @@
         </header>
 
         <main class="lab-content">
-            <p>Unsupervised classification is a type of classification where the data is not labeled. This means that
-                the algorithm does not know the different classes, and it has to figure them out on its own. It is
-                <span>the opposite process of supervised classification. Spectral classes are grouped first and then
-                    categorized into clusters.</span></p>
-            <p><span>One way to do unsupervised classification is to use a clusterer algorithm. A clusterer algorithm
-                    takes a set of data and tries to find groups of data points that are similar to each other. Once the
-                    clusterer has found these groups, it can assign labels to them. In Earth Engine, these classifiers
-                    are </span><em><span>ee</span><span>.</span><span>Clusterer</span></em><span> objects. These are
-                    �self-taught� algorithms that do not use a set of labeled training data (i.e., they are
-                    �unsupervised�).&nbsp; </span>There are many different clusterer algorithms, but some of the most
-                common ones include k-means, hierarchical clustering, and DBSCAN.</p>
-            <ul>
-                <li>K-means is a simple clusterer algorithm that works by dividing the data into k groups. The algorithm
-                    chooses k random points, and then it assigns each data point to the group that is closest to the
-                    random point.</li>
-                <li>Hierarchical clustering is a more complex clusterer algorithm that works by starting with all of the
-                    data points in one cluster, and then repeatedly splitting the clusters until each cluster contains
-                    only one data point.</li>
-                <li>DBSCAN is a clustering algorithm that is designed for data that has outliers. Outliers are data
-                    points that do not fit into any of the clusters. DBSCAN tries to find clusters that contain at least
-                    a certain number of data points, and it also tries to find clusters that are dense enough.</li>
-            </ul>
-            <p><span>To better understand unsupervised classification, you can think of it as performing a task you have
-                    not experienced before, starting by gathering as much information as possible. For example, imagine
-                    learning a new language without knowing the basic grammar, learning only by watching a TV series in
-                    that language, listening to examples, and finding patterns.</span></p>
-            <p><span>Similar to the supervised classification, unsupervised classification in Earth Engine has this
-                    workflow:</span></p>
-            <ol>
-                <li aria-level="1"><span>Assemble features with numeric properties in which to find clusters (training
-                        data).</span></li>
-                <li aria-level="1"><span>Select and instantiate a clusterer.</span></li>
-                <li aria-level="1"><span>Train the clusterer with the training data.</span></li>
-                <li aria-level="1"><span>Apply the clusterer to the scene (classification).</span></li>
-                <li aria-level="1"><span>Label the clusters.</span></li>
-            </ol>
+            <p>
+                Unsupervised classification finds natural groupings in your data without labeled examples.
+                The algorithm discovers clusters based on spectral similarity, and you assign meaning to them afterward.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Explain how unsupervised classification differs from supervised.</li>
+                    <li>Apply K-means clustering to a satellite image.</li>
+                    <li>Interpret and label resulting clusters.</li>
+                    <li>Know when unsupervised methods are appropriate.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    When you don't have training data or don't know what classes exist, unsupervised classification
+                    reveals the spectral structure of your scene. It's exploratory—perfect for initial data
+                    investigation or when ground truth is unavailable.
+                </p>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key vocabulary</h3>
+                <dl>
+                    <dt>Cluster</dt>
+                    <dd>A group of spectrally similar pixels identified by the algorithm.</dd>
+                    <dt>K-means</dt>
+                    <dd>An algorithm that partitions data into K clusters by minimizing within-cluster variance.</dd>
+                    <dt>Spectral space</dt>
+                    <dd>A multi-dimensional space where each axis represents a band's reflectance values.</dd>
+                </dl>
+            </section>
+
+            <section>
+                <h2>Quick win: K-means clustering</h2>
+                <p>This example finds 5 spectral clusters in a Landsat image:</p>
+                <pre><code>// Load and prepare image
+var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623')
+  .multiply(0.0000275).add(-0.2)
+  .select(['SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7']);
+
+// Define region for training
+var roi = image.geometry();
+
+// Sample the image to get training data
+var training = image.sample({
+  region: roi,
+  scale: 30,
+  numPixels: 5000  // Random sample of 5000 pixels
+});
+
+// Create and train the clusterer
+var clusterer = ee.Clusterer.wekaKMeans(5).train(training);
+
+// Apply the clusterer to the image
+var result = image.cluster(clusterer);
+
+// Visualize results
+Map.centerObject(image, 10);
+Map.addLayer(image, {bands: ['SR_B4', 'SR_B3', 'SR_B2'], min: 0, max: 0.3}, 'True Color');
+Map.addLayer(result.randomVisualizer(), {}, 'Clusters');
+
+print('Number of clusters:', 5);</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A map with 5 distinct colored regions. Each color represents a cluster of spectrally
+                        similar pixels. You'll need to inspect each cluster to assign meaningful labels
+                        (water, vegetation, urban, etc.).</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>When to use unsupervised classification</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Use Unsupervised When...</th>
+                            <th>Use Supervised When...</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>You don't have training data</td>
+                            <td>You have labeled ground truth</td>
+                        </tr>
+                        <tr>
+                            <td>You're exploring an unfamiliar area</td>
+                            <td>You know exactly what classes you need</td>
+                        </tr>
+                        <tr>
+                            <td>You want to discover spectral patterns</td>
+                            <td>You need reproducible, defined classes</td>
+                        </tr>
+                        <tr>
+                            <td>The classes are spectrally distinct</td>
+                            <td>Classes may overlap spectrally</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>The unsupervised workflow</h2>
+                <ol>
+                    <li><strong>Sample the image</strong> - Extract pixel values for clustering.</li>
+                    <li><strong>Choose number of clusters (K)</strong> - Start with more than you need.</li>
+                    <li><strong>Train the clusterer</strong> - Algorithm finds natural groupings.</li>
+                    <li><strong>Apply to image</strong> - Each pixel gets a cluster ID.</li>
+                    <li><strong>Interpret clusters</strong> - View each cluster and assign labels.</li>
+                    <li><strong>Merge similar clusters</strong> - Combine clusters that represent the same class.</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Inspecting clusters</h2>
+                <p>To understand what each cluster represents, visualize them individually:</p>
+                <pre><code>// Show only cluster 0 (water?)
+var cluster0 = result.eq(0);
+Map.addLayer(cluster0.updateMask(cluster0), {palette: ['blue']}, 'Cluster 0');
+
+// Show only cluster 1 (vegetation?)
+var cluster1 = result.eq(1);
+Map.addLayer(cluster1.updateMask(cluster1), {palette: ['green']}, 'Cluster 1');
+
+// Compare with the true color image to interpret</code></pre>
+            </section>
+
+            <section>
+                <h2>Choosing the right K</h2>
+                <p>How many clusters should you use?</p>
+                <ul>
+                    <li><strong>Start high:</strong> Try K = 10-15, then merge similar clusters.</li>
+                    <li><strong>Consider your goal:</strong> If you need 4 land cover classes, start with K = 8-10.</li>
+                    <li><strong>Iterate:</strong> Run multiple times with different K values and compare results.</li>
+                </ul>
+                <div class="pro-tips">
+                    <h3>Rule of thumb</h3>
+                    <p>Use 2-3× more clusters than your expected number of classes, then merge.</p>
+                </div>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: Change the number of clusters</h4>
+                <ol>
+                    <li>Run the K-means example with K = 3, then K = 10.</li>
+                    <li>Compare how the clusters change.</li>
+                    <li>Identify which clusters represent water, vegetation, and urban areas.</li>
+                </ol>
+            </div>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Using too few clusters (classes get merged together).</li>
+                    <li>Expecting clusters to match your desired classes exactly.</li>
+                    <li>Forgetting that cluster numbers are arbitrary (cluster 0 could be anything).</li>
+                    <li>Not sampling enough pixels for training (use at least 1000-5000).</li>
+                    <li>Applying to a different image than trained on.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What's the main difference between supervised and unsupervised classification?</li>
+                    <li>What does the K in K-means represent?</li>
+                    <li>Why might you use more clusters than your final number of classes?</li>
+                    <li>How do you figure out what each cluster represents?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li><a href="unsupervised-vs-supervised.html">Unsupervised vs Supervised Classification</a></li>
+                    <li><a href="accuracy-assessment.html">Accuracy Assessment</a></li>
+                    <li><a href="../../labs/lab-12-unsupervised-classification.html">Lab 12: Unsupervised
+                            Classification</a></li>
+                </ul>
+            </section>
         </main>
 
         <footer>
-            <p><a href="../../index.html">��Back to Course Home</a></p>
+            <p><a href="../../index.html">Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>

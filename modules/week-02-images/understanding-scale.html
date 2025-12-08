@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Understanding Scale | Remote Sensing Course</title>
     <link rel="stylesheet" href="../../css/style.css">
 </head>
-
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -19,142 +17,116 @@
         </header>
 
         <main class="lab-content">
-            <section>
-                <h2>Three Types of Resolution</h2>
-                <p>In remote sensing, "resolution" has three distinct meanings:</p>
+            <p>
+                Scale determines the size of pixels used in computations and exports. If you do not set it, Earth Engine
+                guesses from your map zoom-leading to inconsistent results. Always be explicit.
+            </p>
 
-                <h3>1. Spatial Resolution (Pixel Size)</h3>
-                <p>The physical area on the ground represented by one pixel.</p>
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
                 <ul>
-                    <li><strong>Landsat:</strong> 30 meters (roughly a baseball diamond infield)</li>
-                    <li><strong>Sentinel-2:</strong> 10-60 meters depending on band</li>
-                    <li><strong>MODIS:</strong> 250-1000 meters</li>
-                    <li><strong>Commercial (Maxar):</strong> 30 cm (can count cars)</li>
-                </ul>
-
-                <h3>2. Temporal Resolution (Revisit Time)</h3>
-                <p>How often the satellite revisits the same location.</p>
-                <ul>
-                    <li><strong>Landsat:</strong> Every 16 days</li>
-                    <li><strong>Sentinel-2:</strong> Every 5-10 days</li>
-                    <li><strong>Planet:</strong> Daily (using many small satellites)</li>
-                </ul>
-
-                <h3>3. Radiometric Resolution (Bit Depth)</h3>
-                <p>The range of values a pixel can store.</p>
-                <ul>
-                    <li><strong>8-bit:</strong> 0-255 (older sensors)</li>
-                    <li><strong>16-bit:</strong> 0-65,535 (modern sensors like Landsat 8)</li>
+                    <li>Define spatial, temporal, and radiometric resolution.</li>
+                    <li>Find a dataset's native resolution.</li>
+                    <li>Set scale in reducers and exports to avoid surprises.</li>
+                    <li>Troubleshoot "too many pixels" errors with scale choices.</li>
                 </ul>
             </section>
 
-            <section>
-                <h2>Why Scale Matters in Earth Engine</h2>
-                <div class="info-box"
-                    style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
-                    <strong>⚠️ Critical Rule:</strong> In Earth Engine, scale is defined at the <em>output</em>.
-                    You must explicitly specify the scale, or Earth Engine will guess based on your zoom level!
-                </div>
-
-                <p>This leads to two common issues:</p>
-                <ol>
-                    <li>Statistics change as you zoom in/out if you don't specify scale</li>
-                    <li>Computations may fail if the scale produces too many pixels</li>
-                </ol>
-            </section>
-
-            <section>
-                <h2>Always Specify Scale</h2>
-
-                <h3>In reduceRegion()</h3>
-                <pre><code>// ❌ BAD: No scale specified - results will vary with zoom level
-var badStats = image.reduceRegion({
-  reducer: ee.Reducer.mean(),
-  geometry: roi
-});
-
-// ✅ GOOD: Always specify scale
-var goodStats = image.reduceRegion({
-  reducer: ee.Reducer.mean(),
-  geometry: roi,
-  scale: 30  // meters - match Landsat's native resolution
-});</code></pre>
-
-                <h3>In Exports</h3>
-                <pre><code>Export.image.toDrive({
-  image: myImage,
-  description: 'my_export',
-  region: roi,
-  scale: 30  // Always specify scale for exports!
-});</code></pre>
-            </section>
-
-            <section>
-                <h2>Native Resolution</h2>
-                <p>Each dataset has a "native" resolution - the scale at which it was originally captured. Using a
-                    different scale requires resampling:</p>
-                <ul>
-                    <li><strong>Upsampling</strong> (finer scale): Creates more pixels from fewer - doesn't add real
-                        detail</li>
-                    <li><strong>Downsampling</strong> (coarser scale): Averages pixels together - loses detail but
-                        faster</li>
-                </ul>
-
-                <p>Check native resolution in the <a href="https://developers.google.com/earth-engine/datasets"
-                        target="_blank">Data Catalog</a> or by printing the image:</p>
-                <pre><code>var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210101');
-print('Projection:', image.projection());
-print('Scale:', image.projection().nominalScale());</code></pre>
-            </section>
-
-            <section>
-                <h2>The Inspector and Zoom Level</h2>
-                <p>When you click on the map with the Inspector tool, notice the scale displayed:</p>
-                <ul>
-                    <li>At zoom level 10: ~150 meters</li>
-                    <li>At zoom level 12: ~40 meters</li>
-                    <li>At zoom level 14: ~10 meters</li>
-                </ul>
-                <p>This is the scale at which computations happen <em>if you don't specify one</em>. Always be explicit!
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Scale controls accuracy, runtime, and cost. A missing scale can change your statistics when you zoom
+                    the map or cause tasks to fail.
                 </p>
             </section>
 
             <section>
-                <h2>Handling "Too Many Pixels" Errors</h2>
-                <p>If you get a "Computation timed out" or "maxPixels" error:</p>
-                <ol>
-                    <li>Increase <code>maxPixels</code>: <code>maxPixels: 1e9</code></li>
-                    <li>Use <code>bestEffort: true</code> for quick estimates</li>
-                    <li>Increase scale (coarser resolution)</li>
-                </ol>
-                <pre><code>var stats = image.reduceRegion({
-  reducer: ee.Reducer.mean(),
-  geometry: largeRegion,
-  scale: 100,          // Coarser than native 30m
-  maxPixels: 1e9,      // Allow more pixels
-  bestEffort: true     // Auto-adjust if still too many
-});</code></pre>
+                <h2>Three kinds of resolution</h2>
+                <ul>
+                    <li><strong>Spatial:</strong> pixel size (Landsat 30 m, Sentinel-2 10-60 m, MODIS 250-1000 m).</li>
+                    <li><strong>Temporal:</strong> revisit time (Landsat 16 days, Sentinel-2 5-10 days, Planet daily).</li>
+                    <li><strong>Radiometric:</strong> bit depth (8-bit: 0-255; 16-bit: 0-65,535).</li>
+                </ul>
             </section>
 
             <section>
-                <h2>Key Takeaways</h2>
-                <div class="info-box"
-                    style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
-                    <ul style="margin: 0;">
-                        <li>Scale is in <strong>meters</strong> in Earth Engine</li>
-                        <li>Always specify scale in <code>reduceRegion()</code> and exports</li>
-                        <li>Match scale to your data's native resolution when possible</li>
-                        <li>Smaller scale = more detail = more pixels = longer computation</li>
+                <h2>Always set scale</h2>
+<pre><code>// reduceRegion: specify scale
+var stats = image.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: roi,
+  scale: 30  // match Landsat native resolution
+});
+
+// Export: specify scale
+Export.image.toDrive({
+  image: image,
+  description: 'export_example',
+  region: roi,
+  scale: 30
+});</code></pre>
+                <div class="pro-tips">
+                    <h3>Pro tips</h3>
+                    <ul>
+                        <li>Use native resolution when possible; coarsen (larger scale) for large regions to avoid timeouts.</li>
+                        <li>Print <code>image.projection()</code> and <code>image.projection().nominalScale()</code> to confirm native scale.</li>
+                        <li>Set <code>maxPixels</code> and <code>bestEffort</code> only when you understand the trade-offs.</li>
                     </ul>
                 </div>
+            </section>
+
+            <section class="try-it">
+                <h4>Try it: inspect native scale</h4>
+<pre><code>var l8 = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623');
+print('Projection', l8.projection());
+print('Native scale (m)', l8.projection().nominalScale());</code></pre>
+                <p>Compare with Sentinel-2 and MODIS to see different scales.</p>
+            </section>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Letting zoom level dictate scale (results change when you pan/zoom).</li>
+                    <li>Using a finer scale than native and expecting new detail (upsampling adds no new information).</li>
+                    <li>Ignoring projection differences when mixing datasets-reproject or use <code>resample</code> carefully.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Handling "too many pixels"</h2>
+<pre><code>var stats = image.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: largeArea,
+  scale: 100,      // coarser to reduce pixels
+  maxPixels: 1e9,
+  bestEffort: true
+});</code></pre>
+                <p>Coarsen scale first; raising <code>maxPixels</code> is secondary.</p>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>Where do you set scale for a reducer?</li>
+                    <li>What does <code>nominalScale()</code> return?</li>
+                    <li>Why does upsampling not add detail?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li>Run the same reducer at 10 m, 30 m, and 100 m; compare runtime and results.</li>
+                    <li>Practice reprojecting one dataset to match another before combining them.</li>
+                    <li>Apply explicit scale in exports for reproducible outputs.</li>
+                </ul>
             </section>
         </main>
 
         <footer>
-            <p><a href="../../index.html">←Back to Course Home</a></p>
+            <p><a href="../../index.html">Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>
 </body>
-
 </html>

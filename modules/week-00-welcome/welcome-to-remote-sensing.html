@@ -20,10 +20,51 @@
 
         <main class="lab-content">
             <p>
-                Welcome to the Remote Sensing course with Google Earth Engine. You'll learn how to see Earth from space
-                and how to work with digital images.
-                This course brings together technology and human insight to help us better understand our planet.
+                Welcome to the Remote Sensing course with Google Earth Engine! You'll learn how to see Earth from space,
+                analyze satellite imagery, and create maps that answer real questions about our changing planet.
             </p>
+
+            <section class="learning-objectives">
+                <h3>Course goals</h3>
+                <ul>
+                    <li>Navigate the Earth Engine Code Editor confidently.</li>
+                    <li>Load, filter, and visualize satellite imagery.</li>
+                    <li>Calculate spectral indices (NDVI, NDWI) and apply thresholds.</li>
+                    <li>Classify land cover using supervised and unsupervised methods.</li>
+                    <li>Export results and build interactive apps.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why remote sensing matters</h3>
+                <p>
+                    Satellites capture images of every corner of Earth, every day. Learning to analyze this data
+                    opens doors to careers in environmental monitoring, urban planning, disaster response,
+                    agriculture, and climate science. The skills you learn here are in high demand.
+                </p>
+            </section>
+
+            <section>
+                <h2>Your first map in 60 seconds</h2>
+                <p>Before diving into theory, let's get you a win. Copy this code into the
+                    <a href="https://code.earthengine.google.com/" target="_blank">Earth Engine Code Editor</a> and
+                    click Run:
+                </p>
+                <pre><code>// Your first Earth Engine map!
+var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623');
+Map.centerObject(image, 8);
+Map.addLayer(image, {
+  bands: ['SR_B4', 'SR_B3', 'SR_B2'],
+  min: 7000,
+  max: 12000
+}, 'San Francisco Bay');
+print('Congratulations! You just loaded a Landsat 8 image.');</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A true-color satellite image of San Francisco Bay appears on the map.
+                        The console shows your success message. You've just used Earth Engine!</p>
+                </div>
+            </section>
 
             <section>
                 <h2>What You Will Learn</h2>
@@ -69,7 +110,7 @@
                 <p>
                     The goal is to provide you with a solid foundation in remote sensing fundamentals, practical skills
                     in Google Earth Engine,
-                    and hands-on experience analyzing real-world environmental data�all presented in a way that is
+                    and hands-on experience analyzing real-world environmental data—all presented in a way that is
                     accessible and engaging.
                 </p>
             </section>

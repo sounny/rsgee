@@ -1,122 +1,261 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 15 - Urban Heat Island | Remote Sensing Course</title>
+    <meta name="description"
+        content="Compute Surface Urban Heat Island (SUHI) using Landsat LST with urban/rural reference masks and summarize by administrative units.">
     <link rel="stylesheet" href="../css/style.css">
-    <meta name="description" content="Compute Surface Urban Heat Island (SUHI) using Landsat L2 LST with urban/rural reference masks and summarize by admin units.">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
-            <a href="../index.html">Home</a> &gt; <a href="../index.html#schedule">Labs</a> &gt; Lab 15
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 15 (UHI)
         </nav>
 
         <header class="lab-header">
             <h1>Lab 15 - Urban Heat Island Analysis</h1>
-            <p><em>Measure Surface Urban Heat Island (SUHI) by contrasting urban and rural reference areas using Landsat L2 LST and summarize differences across your city.</em></p>
+            <p><em><strong>Objective: Measure Surface Urban Heat Island (SUHI) intensity by contrasting urban and rural
+                        reference areas.</strong></em></p>
         </header>
 
         <main class="lab-content">
 
+            <!-- Learning Objectives -->
+            <section class="learning-objectives">
+                <h3>What You'll Learn</h3>
+                <ul>
+                    <li>Derive LST from Landsat 8/9 L2 thermal data</li>
+                    <li>Define urban and rural reference masks using built-up datasets</li>
+                    <li>Calculate Surface Urban Heat Island (SUHI) intensity</li>
+                    <li>Summarize SUHI by administrative units for spatial equity analysis</li>
+                </ul>
+            </section>
+
+            <!-- Building On Previous Learning -->
+            <section class="builds-on">
+                <h4>Building On Previous Learning</h4>
+                <p>This lab extends <a href="lab-14-health-applications.html">Lab 14</a> by focusing specifically on
+                    the urban-rural temperature contrast. You'll use similar LST techniques but add the SUHI
+                    calculation.</p>
+            </section>
+
+            <!-- Why It Matters -->
+            <section class="why-it-matters">
+                <h3>Why This Matters</h3>
+                <p>Urban Heat Islands have significant impacts:</p>
+                <ul>
+                    <li><strong>Health equity:</strong> Low-income neighborhoods often have higher SUHI</li>
+                    <li><strong>Energy consumption:</strong> Higher temperatures increase cooling demand</li>
+                    <li><strong>Climate adaptation:</strong> Cities must plan for increasing heat exposure</li>
+                    <li><strong>Urban planning:</strong> Data guides tree planting and cool roof policies</li>
+                </ul>
+            </section>
+
             <section class="lab-preflight">
-                <h2>Before you start</h2>
+                <h2>Before You Start</h2>
                 <ul>
-                    <li><strong>Prerequisites:</strong> Finish the urban climate readings and review Labs 13�14 for aggregation workflows.</li>
+                    <li><strong>Prerequisites:</strong> Complete Lab 14 and understand LST derivation.</li>
                     <li><strong>Estimated time:</strong> 75 minutes</li>
-                    <li><strong>Materials:</strong> Earth Engine access, land surface temperature datasets, and documentation for any ancillary urban layers you will use.</li>
+                    <li><strong>Materials:</strong> Earth Engine account and a city AOI.</li>
                 </ul>
             </section>
 
-            <section id="objectives">
-                <h2>Objectives</h2>
-                <ul>
-                    <li>Derive LST from Landsat 8/9 L2 and visualize summertime temperature patterns</li>
-                    <li>Define urban and rural reference masks to estimate SUHI intensity</li>
-                    <li>Compute SUHI per administrative unit and evaluate spatial equity</li>
-                </ul>
+            <!-- Key Vocabulary -->
+            <section class="vocabulary">
+                <h3>Key Terms</h3>
+                <dl>
+                    <dt>Surface Urban Heat Island (SUHI)</dt>
+                    <dd>The difference between urban and rural land surface temperatures, typically positive (urban is
+                        warmer).</dd>
+
+                    <dt>Urban Mask</dt>
+                    <dd>Areas classified as built-up or developed land, used as the "urban" reference.</dd>
+
+                    <dt>Rural Reference</dt>
+                    <dd>Areas with low built-up percentage outside the urban core, used as the baseline temperature.
+                    </dd>
+
+                    <dt>GHSL (Global Human Settlement Layer)</dt>
+                    <dd>JRC dataset providing global built-up area information.</dd>
+                </dl>
             </section>
 
-            <section id="steps">
-                <h2>Steps</h2>
-                <ol>
-                    <li>Select an AOI and a summer date range with low cloud cover.</li>
-                    <li>Prepare an urban mask (e.g., GHSL built-up or NLCD developed classes) and a rural mask (vegetation or low built-up outside urban core).</li>
-                    <li>Compute median LST and SUHI = mean(LST urban) - mean(LST rural).</li>
-                    <li>Summarize SUHI by admin units (tracts/wards) and map the results.</li>
-                </ol>
-            </section>
-
-            <section id="starter-code">
-                <h2>Starter code</h2>
-                <pre>// 1) AOI and date window
-var aoi = ee.Geometry.Rectangle([-77.25, 38.70, -76.80, 39.00]); // DC metro example
+            <section class="lab-steps">
+                <h2>Step 1: Load Landsat LST Data</h2>
+                <p>Define AOI and calculate median summer LST:</p>
+                <pre><code>// 1) AOI and date window - Washington DC metro example
+var aoi = ee.Geometry.Rectangle([-77.25, 38.70, -76.80, 39.00]);
 Map.centerObject(aoi, 10);
 
-var imgs = ee.ImageCollection('Landsat/LC08/C02/T1_L2')
+// Load Landsat 8 Collection 2 Level 2
+var imgs = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterBounds(aoi)
   .filterDate('2021-06-01', '2021-09-30')
   .filter(ee.Filter.lt('CLOUD_COVER', 20));
 
+// Convert thermal band to Kelvin
 function toKelvin(img){
   var kelvin = img.select('ST_B10').multiply(0.00341802).add(149.0);
-  var cloudFree = img.select('QA_PIXEL').bitwiseAnd(1).eq(0); // bit0 cloud
+  var cloudFree = img.select('QA_PIXEL').bitwiseAnd(1).eq(0);
   return kelvin.updateMask(cloudFree).copyProperties(img, img.propertyNames());
 }
 
+// Calculate median LST and convert to Celsius
 var lst = imgs.map(toKelvin).median().clip(aoi);
 var lstC = lst.subtract(273.15).rename('LST_C');
-Map.addLayer(lstC, {min: 20, max: 45, palette: ['blue','cyan','yellow','red']}, 'LST (�C)');
+Map.addLayer(lstC, {min: 20, max: 45, palette: ['blue','cyan','yellow','red']}, 'LST (C)');</code></pre>
+            </section>
 
-// 2) Urban/Rural masks
-// GHSL built-up: 0-100 (percent built-up). Threshold > 20% as urban example
-var ghsl = ee.Image('JRC/GHSL/P2016/BUILT_LDSMT_GLOBE_V1')
-  .select('built');
+            <section class="lab-steps">
+                <h2>Step 2: Create Urban/Rural Masks</h2>
+                <p>Use GHSL built-up percentage to define urban and rural areas:</p>
+                <pre><code>// GHSL built-up: 0-100 (percent built-up)
+var ghsl = ee.Image('JRC/GHSL/P2016/BUILT_LDSMT_GLOBE_V1').select('built');
+
+// Urban mask: > 20% built-up
 var urban = ghsl.gt(20).selfMask().clip(aoi);
+
+// Rural mask: <= 5% built-up
 var rural = ghsl.lte(5).selfMask().clip(aoi);
+
 Map.addLayer(urban, {palette: 'white'}, 'Urban mask', false);
-Map.addLayer(rural, {palette: 'green'}, 'Rural mask', false);
+Map.addLayer(rural, {palette: 'green'}, 'Rural mask', false);</code></pre>
 
-// 3) SUHI intensity
-var reducers = ee.Reducer.mean().repeat(2);
-var stacked = ee.Image.cat(lstC.updateMask(urban).rename('LST_urban'), lstC.updateMask(rural).rename('LST_rural'));
-var stats = stacked.reduceRegion({reducer: reducers, geometry: aoi, scale: 100, maxPixels: 1e9});
-var suhi = ee.Number(stats.get('LST_urban_mean')).subtract(ee.Number(stats.get('LST_rural_mean')));
-print('Citywide SUHI (�C) = urban_mean - rural_mean', suhi);
+                <div class="note">
+                    <p><strong>Threshold Selection:</strong> The 20% and 5% thresholds are examples. Adjust based on
+                        your city's development patterns.</p>
+                </div>
+            </section>
 
-// 4) SUHI by admin units (e.g., Census tracts)
+            <section class="lab-steps">
+                <h2>Step 3: Calculate SUHI Intensity</h2>
+                <p>Compute city-wide SUHI as the difference between urban and rural mean LST:</p>
+                <pre><code>// Stack urban and rural masked LST
+var stacked = ee.Image.cat(
+    lstC.updateMask(urban).rename('LST_urban'), 
+    lstC.updateMask(rural).rename('LST_rural')
+);
+
+// Calculate means
+var stats = stacked.reduceRegion({
+    reducer: ee.Reducer.mean().repeat(2), 
+    geometry: aoi, 
+    scale: 100, 
+    maxPixels: 1e9
+});
+
+// SUHI = urban mean - rural mean
+var suhi = ee.Number(stats.get('LST_urban_mean'))
+    .subtract(ee.Number(stats.get('LST_rural_mean')));
+
+print('Citywide SUHI (C) = urban_mean - rural_mean:', suhi);</code></pre>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 4: SUHI by Administrative Units</h2>
+                <p>Calculate SUHI for each Census tract:</p>
+                <pre><code>// Load Census tracts
 var tracts = ee.FeatureCollection('TIGER/2018/Tracts').filterBounds(aoi);
+
+// Calculate LST means by tract for urban and rural areas
 var urbMean = lstC.updateMask(urban).rename('LST_u');
 var rurMean = lstC.updateMask(rural).rename('LST_r');
 var two = urbMean.addBands(rurMean);
-var tractStats = two.reduceRegions({collection: tracts, reducer: ee.Reducer.mean().repeat(2), scale: 100, tileScale: 4});
-var tractSuhi = tractStats.map(function(f){
-  return f.set('SUHI_C', ee.Number(f.get('LST_u_mean')).subtract(ee.Number(f.get('LST_r_mean'))));
+
+var tractStats = two.reduceRegions({
+    collection: tracts, 
+    reducer: ee.Reducer.mean().repeat(2), 
+    scale: 100, 
+    tileScale: 4
 });
+
+// Calculate SUHI for each tract
+var tractSuhi = tractStats.map(function(f){
+  return f.set('SUHI_C', ee.Number(f.get('LST_u_mean'))
+      .subtract(ee.Number(f.get('LST_r_mean'))));
+});
+
 print('SUHI by tract', tractSuhi.limit(5));
-// Choropleth visualization: convert property to image
-var suhiImage = tractSuhi.reduceToImage({properties: ['SUHI_C'], reducer: ee.Reducer.first()});
+
+// Visualize as choropleth
+var suhiImage = tractSuhi.reduceToImage({
+    properties: ['SUHI_C'], 
+    reducer: ee.Reducer.first()
+});
 Map.addLayer(suhiImage, {min: 0, max: 8, palette: ['#2c7bb6','#ffff8c','#d7191c']}, 'SUHI by tract');
-Map.addLayer(tracts.style({color: 'black', width: 1, fillColor: '00000000'}), {}, 'Tract boundaries', false);
-</pre>
+Map.addLayer(tracts.style({color: 'black', width: 1, fillColor: '00000000'}), {}, 'Tract boundaries', false);</code></pre>
             </section>
 
-            <section id="deliverables">
-                <h2>Deliverables</h2>
+            <!-- Self-Check Questions -->
+            <section class="self-check">
+                <h3>Check Your Understanding</h3>
+                <ol>
+                    <li>Why do we need separate urban and rural masks instead of using all pixels?</li>
+                    <li>What would a negative SUHI value mean?</li>
+                    <li>How might SUHI vary by time of day or season?</li>
+                    <li>What factors besides land cover contribute to urban heat islands?</li>
+                </ol>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <div class="issue">
+                    <strong>Problem: Rural mask is empty</strong>
+                    <p><strong>Solution:</strong> Your AOI may be entirely urban. Expand to include surrounding areas or
+                        lower the rural threshold.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Some tracts have null SUHI</strong>
+                    <p><strong>Solution:</strong> Tracts with no urban or rural pixels will have null values. Filter
+                        these out or use city-wide averages.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: SUHI values seem too high or low</strong>
+                    <p><strong>Solution:</strong> Check your urban/rural thresholds and ensure date filtering captures
+                        hot summer days.</p>
+                </div>
+            </section>
+
+            <!-- Pro Tips -->
+            <section class="pro-tips">
+                <h3>Pro Tips</h3>
                 <ul>
-                    <li>Map: LST (�C) with urban/rural overlays and SUHI choropleth</li>
-                    <li>Table: SUHI (�C) per admin unit with top/bottom 5 tracts</li>
-                    <li>Short write-up: Method choices (thresholds, date window) and equity insights</li>
-                    <li>EE script URL and CSV export of tract-level SUHI</li>
+                    <li><strong>Compare day vs night:</strong> Use MODIS for day/night LST comparison</li>
+                    <li><strong>Consider elevation:</strong> Higher areas are naturally cooler - normalize if needed
+                    </li>
+                    <li><strong>Temporal analysis:</strong> Compare SUHI across years to track urban growth impacts</li>
+                    <li><strong>Validate with weather data:</strong> Compare to ground-based temperature stations</li>
                 </ul>
+            </section>
+
+            <section id="submission">
+                <div class="submission-box">
+                    <h3>📋 Lab Submission</h3>
+                    <p><strong>Subject:</strong> <code>Lab 15 - Urban Heat Island - [Your Name]</code></p>
+
+                    <h4>Submit:</h4>
+                    <ul>
+                        <li>Map: LST (C) with urban/rural overlays and SUHI choropleth</li>
+                        <li>Table: SUHI (C) per admin unit with top/bottom 5 tracts</li>
+                        <li>Short write-up: Method choices and equity insights</li>
+                        <li>EE script URL and CSV export of tract-level SUHI</li>
+                    </ul>
+                </div>
             </section>
         </main>
 
-        <footer class="lab-footer">
-            <p><a href="lab-14-health-applications.html">&larr; Previous Lab</a> | <a href="lab-16-wildfire-analysis.html">Next Lab &rarr;</a></p>
-            <p><a href="../index.html">&larr;Back to Course Home</a></p>
+        <footer>
+            <p><a href="lab-14-health-applications.html">← Previous Lab</a> | <a
+                    href="lab-16-wildfire-analysis.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
         </footer>
     </div>
+
 </body>
+
 </html>

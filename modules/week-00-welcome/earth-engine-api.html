@@ -17,9 +17,174 @@
         </header>
 
         <main class="lab-content">
-<p><span>Google Earth Engine is a cloud-based platform for scientific data analysis. It provides ready-to-use, cloud-hosted datasets and a large pool of servers. One feature that makes Earth Engine particularly attractive is its ability to run large computations quickly by distributing them across a large pool of servers. The Earth Engine API enables the ability to use cloud-hosted datasets and computation efficiently.</span></p>
-<p><span>An API is a way to communicate with Earth Engine servers. It allows you to specify what computation you want to do and then receive the results. The API is designed so that users do not need to worry about </span><i><span>how</span></i><span> the computation is distributed across a cluster of machines and the results are assembled. Users of the API specify what needs to be done. This greatly simplifies the code by hiding the implementation detail from the users. It also makes Earth Engine very approachable for users unfamiliar with writing code.</span></p>
-<p><span>Earth Engine API is designed to be language agnostic. Google provides official client libraries to use the API from both JavaScript and Python. The API remains largely the same regardless of the programming language you use. The main difference is the syntax used to call the API functions. Once you learn the syntax for programming languages, your code can be adapted easily because they all use the same API functions.</span></p>
+            <p>
+                Google Earth Engine exposes its power through an API: you describe the data you want and the
+                computations to run, and Google’s servers do the heavy lifting next to the data. The API lets you
+                analyze massive geospatial datasets without downloading them or managing clusters.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Describe what the Earth Engine API does and why it is cloud-first.</li>
+                    <li>Explain the client (JavaScript/Python) to server workflow and lazy execution model.</li>
+                    <li>Run a short script that loads data, computes a metric, and renders the result.</li>
+                    <li>Identify where to go for documentation, debugging help, and next steps.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Environmental monitoring, disaster response, agriculture, and climate research all need
+                    fast answers from petabytes of imagery. The API hides the infrastructure so you can focus
+                    on asking good questions and interpreting the results.
+                </p>
+            </section>
+
+            <figure>
+                <img src="../../images/screenshots/code-editor-interface.png"
+                    alt="Google Earth Engine Code Editor showing script, map, and console panels" loading="lazy">
+                <figcaption>Earth Engine Code Editor: write, run, visualize, and inspect in one place.</figcaption>
+            </figure>
+
+            <section>
+                <h2>Mental model: how Earth Engine runs your code</h2>
+                <ul>
+                    <li><strong>Client vs server:</strong> You write scripts locally; computation runs in Google’s data centers next to the imagery.</li>
+                    <li><strong>Lazy evaluation:</strong> API calls build a recipe. Work happens only when you request output (e.g., <code>Map.addLayer</code>, <code>print</code>, or an export).</li>
+                    <li><strong>Immutable objects:</strong> Operations on <code>ee.Image</code>, <code>ee.Feature</code>, and <code>ee.ImageCollection</code> return new objects; originals stay unchanged.</li>
+                    <li><strong>Reproducibility:</strong> Scripts reference catalog IDs and geometries, not local files. Anyone can re-run your code and get the same result.</li>
+                </ul>
+                <div class="pro-tips">
+                    <h3>Pro tips</h3>
+                    <ul>
+                        <li>Use the Inspector tab to spot-check pixels after each major step.</li>
+                        <li>Keep test regions small to avoid long server queues.</li>
+                        <li><code>print()</code> is the safest way to inspect server objects; use <code>.evaluate()</code> only when you truly need client-side values.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>Two official language clients, one API</h2>
+                <p>
+                    The underlying API is the same. Choose JavaScript for the in-browser Code Editor (fastest to start),
+                    or Python for notebooks and integration with other data science workflows.
+                </p>
+                <div class="card">
+                    <h3>JavaScript in the Code Editor</h3>
+                    <ul>
+                        <li>Best for quick exploration, sharing links, and map-based debugging.</li>
+                        <li>No installs required; runs entirely in the browser.</li>
+                        <li>UI widgets and charts are built in.</li>
+                    </ul>
+<pre><code>// Minimal NDVI example (Code Editor)
+var roi = ee.Geometry.Point([-122.45, 37.75]).buffer(2000);
+var sr = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623')
+  .select(['SR_B5', 'SR_B4'], ['NIR', 'RED'])
+  .multiply(0.0000275).add(-0.2); // apply scale/offset
+var ndvi = sr.normalizedDifference(['NIR', 'RED']).rename('NDVI');
+Map.centerObject(roi, 10);
+Map.addLayer(ndvi, {min: 0, max: 0.8, palette: ['brown', 'yellow', 'green']}, 'NDVI');
+print('NDVI min/max', ndvi.reduceRegion({
+  reducer: ee.Reducer.minMax(),
+  geometry: roi,
+  scale: 30
+}));</code></pre>
+                </div>
+
+                <div class="card">
+                    <h3>Python in notebooks</h3>
+                    <ul>
+                        <li>Great for pipelines, unit tests, and mixing EE with NumPy/Pandas/GeoPandas.</li>
+                        <li>Install with <code>pip install earthengine-api</code>, then authenticate once.</li>
+                        <li>Use <code>folium</code> or <code>geemap</code> for interactive maps.</li>
+                    </ul>
+<pre><code class="language-python">import ee
+ee.Initialize()
+roi = ee.Geometry.Point([-122.45, 37.75]).buffer(2000)
+sr = (ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623')
+      .select(['SR_B5', 'SR_B4'], ['NIR', 'RED'])
+      .multiply(0.0000275).add(-0.2))
+ndvi = sr.normalizedDifference(['NIR', 'RED']).rename('NDVI')
+stats = ndvi.reduceRegion(
+    reducer=ee.Reducer.minMax(),
+    geometry=roi,
+    scale=30
+).getInfo()
+print('NDVI min/max:', stats)</code></pre>
+                </div>
+            </section>
+
+            <figure>
+                <img src="../../images/screenshots/hello-world-console.png"
+                    alt="Console output from a simple Earth Engine script" loading="lazy">
+                <figcaption>Console prints are the fastest way to confirm what the server is returning.</figcaption>
+            </figure>
+
+            <section>
+                <h2>Hands-on: 10-minute orientation</h2>
+                <ol class="lab-steps">
+                    <li>Open the <a href="https://code.earthengine.google.com/" target="_blank" rel="noopener">Code Editor</a> (sign in if prompted).</li>
+                    <li>Create a new script, paste the JavaScript example above, and run it.</li>
+                    <li>Inspect pixels with the crosshair and Inspector tab to see NDVI values.</li>
+                    <li>Change the <code>buffer</code> size or palette to see how outputs update.</li>
+                    <li>Click the Docs tab and search for <code>Image.normalizedDifference</code> to read parameters and examples.</li>
+                </ol>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A green-to-brown NDVI layer centered on the ROI and a console printout with minimum and maximum values.</p>
+                </div>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: small tweaks that build intuition</h4>
+                <p>Swap to another image ID from the same collection (pick a nearby date) and note how NDVI changes.</p>
+                <p>Replace <code>NDVI</code> with a false-color composite by adding <code>SR_B6</code> and visualizing with <code>{bands: ['NIR', 'RED', 'SR_B6']}</code>.</p>
+                <p>Print the image projection (<code>ndvi.projection()</code>) to connect scale units to the map.</p>
+            </div>
+
+            <section class="vocabulary">
+                <h3>Key vocabulary</h3>
+                <dl>
+                    <dt>API</dt>
+                    <dd>A contract that defines the functions and objects you use to ask the server for data and computations.</dd>
+                    <dt>Client library</dt>
+                    <dd>JavaScript or Python package that implements the API and handles authentication and requests.</dd>
+                    <dt>Server-side object</dt>
+                    <dd>Placeholder for data living on Earth Engine (e.g., <code>ee.Image</code>); it represents work to be done.</dd>
+                    <dt>Lazy evaluation</dt>
+                    <dd>Earth Engine waits to run work until you request output; this keeps scripts fast and composable.</dd>
+                </dl>
+            </section>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Trying to loop over features with client-side <code>for</code> loops instead of using <code>map()</code>.</li>
+                    <li>Forgetting to keep test areas small (large regions can time out when you are prototyping).</li>
+                    <li>Calling <code>.getInfo()</code> on huge objects in Python notebooks, which downloads too much data.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What triggers Earth Engine to actually execute the graph you built?</li>
+                    <li>How would you explain the difference between server-side and client-side objects to a classmate?</li>
+                    <li>Where do you change scale and region when summarizing results?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Where to go next</h2>
+                <ul>
+                    <li>Skim the <a href="https://developers.google.com/earth-engine/guides" target="_blank" rel="noopener">Earth Engine developer guide</a> to see available data types and reducers.</li>
+                    <li>Follow the <a href="https://developers.google.com/earth-engine/tutorials" target="_blank" rel="noopener">API tutorials</a> for more worked examples.</li>
+                    <li>When stuck, search or post in the <a href="https://groups.google.com/g/google-earth-engine-developers" target="_blank" rel="noopener">Earth Engine Developers forum</a>.</li>
+                </ul>
+            </section>
         </main>
 
         <footer>

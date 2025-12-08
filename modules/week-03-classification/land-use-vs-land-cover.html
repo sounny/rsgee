@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <nav class="breadcrumb">
-            <a href="../../index.html">Home</a> &gt; <a href="../index.html#schedule">Schedule</a> &gt; Week 3
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 3
         </nav>
 
         <header class="lab-header">
@@ -19,26 +19,164 @@
         </header>
 
         <main class="lab-content">
-            <p><strong>LULC</strong></p>
-            <p><strong>LAND USE <span style="font-size: 18pt;">? </span>LAND COVER</strong></p>
-            <p>Understanding land use and cover concepts is essential for image classification. Land cover refers to the
-                physical and biophysical properties of the Earth's surface, such as vegetation, water bodies, and
-                impervious surfaces, which can be identified through remote sensing techniques. By analyzing and
-                categorizing these land covers, we can gain valuable information about the state and condition of
-                different regions of the Earth's surface.</p>
-            <p>On the other hand, land use refers to the human activities on the land and how they interact with the
-                land cover. Land use encompasses various activities, such as agriculture, urbanization,
-                industrialization, transportation, and recreation. Land use is often related to social, economic, and
-                cultural factors, and it can vary significantly across regions and countries.</p>
-            <p>For example, a forest can be a land cover in one area and be used for logging or hunting. In contrast,
-                the same forest may be a protected area in another region, primarily for ecological conservation and
-                recreation. Similarly, herbaceous vegetation such as grass can indicate different land uses. In rural
-                areas, it may be used for grazing livestock, while in urban areas, it may be part of a park or green
-                space.</p>
+            <p>
+                Before classifying an image, you must decide what you are mapping: the physical surface (land cover)
+                or how humans use it (land use). This distinction shapes your training data, class labels, and
+                how you interpret results.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Distinguish between land cover and land use.</li>
+                    <li>Recognize why the same spectral signature can represent different classes.</li>
+                    <li>Choose appropriate class labels for your classification project.</li>
+                    <li>Understand limitations of spectral-only classification for land use mapping.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Confusing land use with land cover leads to misclassification. A grassy area looks the same to
+                    a satellite whether it is a park, a golf course, or a cattle pasture. Understanding this
+                    distinction helps you set realistic expectations for your classifier.
+                </p>
+            </section>
+
+            <section>
+                <h2>Key definitions</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Term</th>
+                            <th>Definition</th>
+                            <th>Examples</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Land Cover</strong></td>
+                            <td>Physical material on the Earth's surface</td>
+                            <td>Forest, water, bare soil, impervious surface, grass</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Land Use</strong></td>
+                            <td>Human activity or function of the land</td>
+                            <td>Residential, commercial, agriculture, recreation, conservation</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>The same cover, different uses</h2>
+                <p>Consider these examples where identical spectral signatures represent different land uses:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Land Cover</th>
+                            <th>Possible Land Uses</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Grass/Herbaceous</td>
+                            <td>Park, golf course, pasture, lawn, sports field, airport</td>
+                        </tr>
+                        <tr>
+                            <td>Forest</td>
+                            <td>Conservation area, timber harvest, recreation, watershed protection</td>
+                        </tr>
+                        <tr>
+                            <td>Water</td>
+                            <td>Reservoir, aquaculture, natural lake, wastewater treatment</td>
+                        </tr>
+                        <tr>
+                            <td>Impervious</td>
+                            <td>Residential, commercial, industrial, transportation</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="key-concepts">
+                <h3>Key insight</h3>
+                <p>
+                    <strong>Satellites see land cover, not land use.</strong> A classifier trained on spectral bands
+                    can reliably distinguish forest from water, but it cannot tell a city park from a cattle ranch
+                    based on reflectance alone. Land use mapping often requires ancillary data: parcel boundaries,
+                    building footprints, road networks, or temporal patterns.
+                </p>
+            </section>
+
+            <section>
+                <h2>LULC: The hybrid approach</h2>
+                <p>
+                    Many classification schemes combine both concepts into "Land Use/Land Cover" (LULC) classes.
+                    Common examples include:
+                </p>
+                <ul>
+                    <li><strong>NLCD (National Land Cover Database):</strong> Primarily land cover with some use-based
+                        classes like "Developed" at different intensities.</li>
+                    <li><strong>CORINE (Europe):</strong> Hierarchical system mixing cover and use.</li>
+                    <li><strong>FAO LCCS:</strong> Classification system designed to separate cover from use when
+                        needed.</li>
+                </ul>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: Examine a LULC dataset</h4>
+                <p>Load NLCD in Earth Engine and explore the class legend:</p>
+                <pre><code>// Load NLCD 2021
+var nlcd = ee.Image('USGS/NLCD_RELEASES/2021_REL/NLCD/2021');
+var landcover = nlcd.select('landcover');
+
+// Add to map with built-in palette
+Map.setCenter(-98.5, 39.5, 5);
+Map.addLayer(landcover, {}, 'NLCD 2021');
+
+// Print the class names
+print('NLCD classes:', landcover.get('landcover_class_names'));</code></pre>
+                <p>Notice how "Developed" classes mix land cover (impervious percentage) with land use (urban).</p>
+            </div>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Training "agriculture" samples on bare fields some months and crops other months.</li>
+                    <li>Expecting a classifier to distinguish "residential" from "commercial" using only spectral data.
+                    </li>
+                    <li>Mixing classification schemes (for example, calling grass "pasture" in one sample and "lawn" in
+                        another).</li>
+                    <li>Ignoring that the same pixel may be classified differently at different times of year.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>Can a satellite distinguish a forest used for conservation from one used for logging?</li>
+                    <li>Why might "Developed, High Intensity" be considered a hybrid LULC class?</li>
+                    <li>What additional data would help classify grass as either "park" or "pasture"?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li><a href="introduction-to-image-classification.html">Introduction to Image Classification</a> -
+                        classification fundamentals</li>
+                    <li><a href="unsupervised-vs-supervised.html">Supervised vs Unsupervised</a> - choosing an approach
+                    </li>
+                    <li><a href="discrete-vs-continuous-data.html">Discrete vs Continuous Data</a> - understanding
+                        output types</li>
+                </ul>
+            </section>
         </main>
 
         <footer>
-            <p><a href="../../index.html">��Back to Course Home</a></p>
+            <p><a href="../../index.html">Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>

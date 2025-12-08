@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Path | Remote Sensing Course</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .learning-path {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .path-week {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+            position: relative;
+        }
+
+        .path-week::before {
+            content: '';
+            position: absolute;
+            left: -14px;
+            top: 50%;
+            width: 24px;
+            height: 24px;
+            background: #667eea;
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+
+        .path-week h3 {
+            color: #667eea;
+            margin-top: 0;
+            font-size: 1.3em;
+        }
+
+        .path-modules {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .path-module {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            text-decoration: none;
+            color: #333;
+            border: 1px solid #ddd;
+            transition: all 0.2s;
+        }
+
+        .path-module:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .path-module.lab {
+            background: #e8f5e9;
+            border-color: #a5d6a7;
+        }
+
+        .path-module.lab:hover {
+            background: #4caf50;
+            color: white;
+        }
+
+        .skill-track {
+            background: #fff3e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+
+        .skill-track h3 {
+            color: #e65100;
+            margin-top: 0;
+        }
+
+        .track-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .track-item {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #ffcc80;
+        }
+
+        .connector {
+            text-align: center;
+            padding: 10px;
+            color: #667eea;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="index.html">Home</a> &gt; Learning Path
+        </nav>
+
+        <header class="lab-header">
+            <h1>Your Learning Path</h1>
+            <p>Follow this progression to master Google Earth Engine</p>
+        </header>
+
+        <main class="lab-content">
+            <section class="skill-track">
+                <h3>🎯 Skills You'll Master</h3>
+                <div class="track-items">
+                    <div class="track-item">JavaScript Basics</div>
+                    <div class="track-item">Image Loading</div>
+                    <div class="track-item">Band Math & Indices</div>
+                    <div class="track-item">Cloud Masking</div>
+                    <div class="track-item">Compositing</div>
+                    <div class="track-item">Classification</div>
+                    <div class="track-item">Accuracy Assessment</div>
+                    <div class="track-item">Exports</div>
+                    <div class="track-item">UI & Apps</div>
+                </div>
+            </section>
+
+            <div class="learning-path">
+                <div class="path-week">
+                    <h3>Week 0: Welcome</h3>
+                    <p>Get set up and see what you'll achieve</p>
+                    <div class="path-modules">
+                        <a href="modules/week-00-welcome/welcome-to-remote-sensing.html" class="path-module">Welcome</a>
+                        <a href="modules/week-00-welcome/earth-engine-api.html" class="path-module">Earth Engine API</a>
+                        <a href="modules/week-00-welcome/why-javascript.html" class="path-module">Why JavaScript?</a>
+                    </div>
+                </div>
+
+                <div class="connector">↓</div>
+
+                <div class="path-week">
+                    <h3>Week 1: JavaScript Fundamentals</h3>
+                    <p>Learn the language that powers Earth Engine</p>
+                    <div class="path-modules">
+                        <a href="modules/week-01-javascript/introduction-to-javascript.html"
+                            class="path-module">JavaScript Intro</a>
+                        <a href="modules/week-01-javascript/client-vs-server.html" class="path-module">Client vs Server
+                            ⚡</a>
+                        <a href="modules/week-01-javascript/variables.html" class="path-module">Variables</a>
+                        <a href="modules/week-01-javascript/functions.html" class="path-module">Functions</a>
+                        <a href="labs/lab-01-getting-started-with-gee.html" class="path-module lab">Lab 1</a>
+                        <a href="labs/lab-02-hello-Landsat.html" class="path-module lab">Lab 2</a>
+                        <a href="labs/lab-03-js-basics.html" class="path-module lab">Lab 3</a>
+                    </div>
+                </div>
+
+                <div class="connector">↓</div>
+
+                <div class="path-week">
+                    <h3>Week 2: Working with Images</h3>
+                    <p>Load, filter, and analyze satellite imagery</p>
+                    <div class="path-modules">
+                        <a href="modules/week-02-images/image-collections.html" class="path-module">Image
+                            Collections</a>
+                        <a href="modules/week-02-images/cloud-masking.html" class="path-module">Cloud Masking ⚡</a>
+                        <a href="modules/week-02-images/band-arithmetic.html" class="path-module">Band Arithmetic</a>
+                        <a href="modules/week-02-images/spectral-indices.html" class="path-module">Spectral Indices</a>
+                        <a href="modules/week-02-images/ndvi.html" class="path-module">NDVI</a>
+                        <a href="labs/lab-06-image-collections.html" class="path-module lab">Lab 6</a>
+                        <a href="labs/lab-08-band-arithmetic-ndvi.html" class="path-module lab">Lab 8</a>
+                    </div>
+                </div>
+
+                <div class="connector">↓</div>
+
+                <div class="path-week">
+                    <h3>Week 3: Classification</h3>
+                    <p>Turn imagery into meaningful categories</p>
+                    <div class="path-modules">
+                        <a href="modules/week-03-classification/introduction-to-image-classification.html"
+                            class="path-module">Classification Intro ⚡</a>
+                        <a href="modules/week-03-classification/unsupervised-classification.html"
+                            class="path-module">Unsupervised</a>
+                        <a href="modules/week-03-classification/unsupervised-vs-supervised.html"
+                            class="path-module">Supervised vs Unsupervised</a>
+                        <a href="modules/week-03-classification/accuracy-assessment.html" class="path-module">Accuracy
+                            Assessment ⚡</a>
+                        <a href="labs/lab-11-supervised-classification.html" class="path-module lab">Lab 11</a>
+                        <a href="labs/lab-12-unsupervised-classification.html" class="path-module lab">Lab 12</a>
+                    </div>
+                </div>
+
+                <div class="connector">↓</div>
+
+                <div class="path-week">
+                    <h3>Week 4: Data Export & Analysis</h3>
+                    <p>Aggregate data and export your results</p>
+                    <div class="path-modules">
+                        <a href="modules/week-04-exports/reducers.html" class="path-module">Reducers</a>
+                        <a href="modules/week-04-exports/temporal-compositing.html" class="path-module">Temporal
+                            Compositing ⚡</a>
+                        <a href="modules/week-04-exports/exporting-data.html" class="path-module">Exporting Data</a>
+                        <a href="modules/week-04-exports/batch-exports.html" class="path-module">Batch Exports ⚡</a>
+                        <a href="modules/week-04-exports/export-best-practices.html" class="path-module">Best
+                            Practices</a>
+                        <a href="labs/lab-14-exporting-to-arcgis-pro.html" class="path-module lab">Lab 14</a>
+                        <a href="labs/lab-16-zonal-statistics.html" class="path-module lab">Lab 16</a>
+                    </div>
+                </div>
+
+                <div class="connector">↓</div>
+
+                <div class="path-week">
+                    <h3>Week 5: Case Studies</h3>
+                    <p>Apply your skills to real-world problems</p>
+                    <div class="path-modules">
+                        <a href="modules/week-05-case-studies/remote-sensing-applications-case-studies.html"
+                            class="path-module">Case Studies Overview</a>
+                        <a href="labs/lab-17-health-applications-part1.html" class="path-module lab">Lab 17</a>
+                        <a href="labs/lab-18-health-applications-part2.html" class="path-module lab">Lab 18</a>
+                    </div>
+                </div>
+
+                <div class="connector">↓</div>
+
+                <div class="path-week">
+                    <h3>Week 6: Public Engagement & Apps</h3>
+                    <p>Share your work with the world</p>
+                    <div class="path-modules">
+                        <a href="modules/week-06-public-engagement/engaging-public.html" class="path-module">Public
+                            Engagement</a>
+                        <a href="modules/week-06-public-engagement/ui-widgets.html" class="path-module">UI Widgets ⚡</a>
+                        <a href="modules/week-06-public-engagement/interactive-app-examples.html"
+                            class="path-module">App Examples ⚡</a>
+                        <a href="modules/week-06-public-engagement/publishing-apps.html" class="path-module">Publishing
+                            Apps</a>
+                        <a href="labs/lab-19-making-gifs-and-videos.html" class="path-module lab">Lab 19</a>
+                        <a href="labs/lab-20-deploying-gee-apps.html" class="path-module lab">Lab 20</a>
+                    </div>
+                </div>
+
+                <div class="connector">↓</div>
+
+                <div class="path-week" style="border-color: #4caf50;">
+                    <h3 style="color: #4caf50;">🎓 Advanced Topics</h3>
+                    <p>Deep dives into specific applications</p>
+                    <div class="path-modules">
+                        <a href="modules/week-07-river-morphology/theory.html" class="path-module">River Morphology</a>
+                        <a href="modules/week-08-global-snow-observatory/gso-0-global-snow-observatory-introduction.html"
+                            class="path-module">Snow Observatory</a>
+                        <a href="modules/week-09-heat-islands/rs3-0-introduction.html" class="path-module">Urban Heat
+                            Islands</a>
+                        <a href="modules/week-10-fire/introduction.html" class="path-module">Fire Monitoring</a>
+                    </div>
+                </div>
+            </div>
+
+            <section class="skill-track" style="background: #e3f2fd; margin-top: 40px;">
+                <h3 style="color: #1565c0;">📚 Essential Resources</h3>
+                <div class="path-modules">
+                    <a href="modules/supplementary/debugging-guide.html" class="path-module">Debugging Guide</a>
+                    <a href="modules/supplementary/further-readings.html" class="path-module">Further Readings</a>
+                    <a href="https://developers.google.com/earth-engine/guides" target="_blank"
+                        class="path-module">Official GEE Docs →</a>
+                </div>
+            </section>
+
+            <section style="text-align: center; margin-top: 40px;">
+                <p><strong>Legend:</strong></p>
+                <p>
+                    <span class="path-module" style="display: inline-block;">Module</span>
+                    <span class="path-module lab" style="display: inline-block;">Lab</span>
+                    <span>⚡ = Key module</span>
+                </p>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+
+</html>

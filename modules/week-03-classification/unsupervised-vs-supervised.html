@@ -4,138 +4,358 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unsupervised vs Supervised vs Object Based | Remote Sensing Course</title>
+    <title>Unsupervised vs Supervised vs Object-Based Classification | Remote Sensing Course</title>
+    <meta name="description"
+        content="Compare the three main approaches to image classification in remote sensing: unsupervised, supervised, and object-based analysis.">
     <link rel="stylesheet" href="../../css/style.css">
 </head>
 
 <body>
     <div class="container">
         <nav class="breadcrumb">
-            <a href="../../index.html">Home</a> &gt; <a href="../index.html#schedule">Schedule</a> &gt; Week 3
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 3 &gt;
+            Classification Types
         </nav>
 
         <header class="lab-header">
-            <h1>Unsupervised vs Supervised vs Object Based</h1>
+            <h1>Classification Approaches in Remote Sensing</h1>
+            <p><em>Unsupervised vs Supervised vs Object-Based</em></p>
         </header>
 
         <main class="lab-content">
-            <p>The three main<span></span><strong>types of image
-                    classification</strong><span></span>techniques in remote sensing are:</p>
-            <ul>
-                <li>Unsupervised image classification</li>
-                <li>Supervised image classification</li>
-                <li>Object-based image analysis</li>
-            </ul>
-            <p>The two most commonly used approaches are unsupervised and supervised classification. However,
-                object-based classification is becoming more popular due to its effectiveness in analyzing
-                high-resolution data.</p>
-            <p><span
-                    style="font-family: 'Lato Extended', Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 1.5em; color: var(--ic-brand-font-color-dark);">Unsupervised
-                    Classification</span></p>
-            <p><span>Unsupervised classification involves grouping pixels into clusters based on their properties and
-                    then classifying each cluster with a land cover class.</span>Overall, unsupervised
-                classification is the most basic technique. Because you don�t need samples for unsupervised
-                classification, it�s an easy way to segment and understand an image.</p>
-            <p><img style="display: block; margin-left: auto; margin-right: auto;"
-                    src="../images/canvas/Uploaded%20Media/unsupervised-diagram.png" alt="Unsupervised Based Diagram"
-                    loading="lazy"></p>
-            <p>The two basic steps for unsupervised classification are:</p>
-            <ul>
-                <li>Generate clusters</li>
-                <li>Assign classes</li>
-            </ul>
-            <p>Some of the common image clustering algorithms are:</p>
-            <ul>
-                <li>K-means</li>
-                <li>ISODATA</li>
-            </ul>
-            <p>After picking a clustering algorithm, you identify the number of groups you want to generate. For
-                example, you can create 8, 20, or 42 clusters. Fewer clusters have more resembling pixels within groups.
-                But more clusters increase the variability within groups.</p>
-            <p>To be clear, these are unclassified clusters. The next step is to assign land cover classes to each
-                cluster manually.<span></span></p>
-            <h3 id="2-supervised-classification">Supervised Classification</h3>
-            <p><span>supervised classification involves selecting representative samples for each land cover class,
-                    which the software then uses as training sites to classify the entire image. The three basic steps
-                    for supervised classification are selecting training areas, generating signature files, and
-                    classifying.</span></p>
-            <p><span><img style="display: block; margin-left: auto; margin-right: auto;"
+
+            <!-- Learning Objectives -->
+            <section class="learning-objectives">
+                <h3>What You'll Learn</h3>
+                <ul>
+                    <li>Understand the three main classification approaches in remote sensing</li>
+                    <li>Identify when to use unsupervised vs. supervised classification</li>
+                    <li>Explain the advantages and limitations of each approach</li>
+                    <li>Recognize the role of object-based analysis for high-resolution imagery</li>
+                </ul>
+            </section>
+
+            <!-- Why It Matters -->
+            <section class="why-it-matters">
+                <h3>Why This Matters</h3>
+                <p>Image classification transforms raw satellite data into useful maps showing:</p>
+                <ul>
+                    <li><strong>Land cover:</strong> What's on the ground (forest, water, urban areas)</li>
+                    <li><strong>Land use:</strong> How land is being used (agriculture, residential, commercial)</li>
+                    <li><strong>Change detection:</strong> How landscapes evolve over time</li>
+                </ul>
+                <p>The classification approach you choose directly impacts the accuracy and usefulness of your final
+                    map.
+                    Understanding the trade-offs helps you select the right method for your research question.</p>
+            </section>
+
+            <!-- Overview Comparison -->
+            <section>
+                <h2>The Three Main Approaches</h2>
+                <p>Remote sensing classification techniques fall into three main categories:</p>
+
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Training Data Required?</th>
+                            <th>Best For</th>
+                            <th>Complexity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Unsupervised</strong></td>
+                            <td>No</td>
+                            <td>Exploratory analysis, unknown areas</td>
+                            <td>Low</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Supervised</strong></td>
+                            <td>Yes</td>
+                            <td>Known classes, accuracy-focused maps</td>
+                            <td>Medium</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Object-Based (OBIA)</strong></td>
+                            <td>Yes</td>
+                            <td>High-resolution imagery, complex features</td>
+                            <td>High</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Unsupervised Classification -->
+            <section>
+                <h2>1. Unsupervised Classification</h2>
+
+                <div class="card">
+                    <h3>The Concept</h3>
+                    <p>Unsupervised classification groups pixels into <strong>clusters</strong> based on their spectral
+                        similarity—without any prior knowledge of what's on the ground. Think of it as asking the
+                        computer:
+                        "Find me pixels that look similar to each other."</p>
+                </div>
+
+                <figure>
+                    <img style="display: block; margin-left: auto; margin-right: auto;"
+                        src="../images/canvas/Uploaded%20Media/unsupervised-diagram.png"
+                        alt="Unsupervised Classification Diagram" loading="lazy">
+                    <figcaption>Unsupervised classification groups spectrally similar pixels into clusters</figcaption>
+                </figure>
+
+                <h3>The Two-Step Process</h3>
+                <ol>
+                    <li><strong>Generate clusters:</strong> The algorithm groups pixels based on spectral properties
+                    </li>
+                    <li><strong>Assign classes:</strong> YOU interpret what each cluster represents (forest, water,
+                        etc.)</li>
+                </ol>
+
+                <h3>Common Algorithms</h3>
+                <ul>
+                    <li><strong>K-means:</strong> Fast, requires you to specify the number of clusters</li>
+                    <li><strong>ISODATA:</strong> Iterative, can merge/split clusters automatically</li>
+                </ul>
+
+                <div class="note">
+                    <p><strong>Key Decision:</strong> How many clusters should you create? Fewer clusters = more
+                        homogeneous groups. More clusters = finer distinctions but harder to interpret.
+                        A common starting point is 10-20 clusters, then merge similar ones.</p>
+                </div>
+
+                <h3>When to Use Unsupervised Classification</h3>
+                <ul>
+                    <li>You're unfamiliar with the study area</li>
+                    <li>You want to explore what spectral patterns exist</li>
+                    <li>You don't have training data or ground truth</li>
+                    <li>As a first step before supervised classification</li>
+                </ul>
+
+                <div class="common-mistakes">
+                    <h3>Common Mistakes</h3>
+                    <ul>
+                        <li>Expecting clusters to automatically match your desired classes</li>
+                        <li>Using too few clusters and losing important distinctions</li>
+                        <li>Forgetting that clusters are based on <em>spectral</em> similarity, not visual similarity
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Supervised Classification -->
+            <section>
+                <h2>2. Supervised Classification</h2>
+
+                <div class="card">
+                    <h3>The Concept</h3>
+                    <p>Supervised classification uses <strong>training data</strong>—samples where you tell the computer
+                        "this is forest, this is water, this is urban." The algorithm learns the spectral patterns of
+                        each class and then applies those patterns to classify the entire image.</p>
+                </div>
+
+                <figure>
+                    <img style="display: block; margin-left: auto; margin-right: auto;"
                         src="../images/canvas/Uploaded%20Media/supervised-diagram.png"
-                        alt="Supervised based classification diagram" loading="lazy"></span></p>
-            <p>The three basic steps for supervised classification are:</p>
-            <ul>
-                <li>Select training areas</li>
-                <li>Generate signature file</li>
-                <li>Classify</li>
-            </ul>
-            <p>For supervised image classification, you first create training samples. For example, you mark urban areas
-                by marking them in the image. Then, you would continue adding training sites representative in the
-                entire image.</p>
-            <p>You continue creating training samples for each land cover class until you have representative samples
-                for each class. This would generate a signature file, which stores all training samples� spectral
-                information.</p>
-            <p>Finally, the last step would be to use the signature file to run a classification. From here, you would
-                have to pick a classification algorithm such as:</p>
-            <ul>
-                <li>Maximum likelihood</li>
-                <li>Minimum-distance</li>
-                <li>Principal components</li>
-                <li>Support vector machine (SVM)</li>
-                <li>Iso cluster</li>
-            </ul>
-            <h3 id="3-objectbased-image-analysis-obia">Object-Based Image Analysis (OBIA)</h3>
-                        <p>Object-based image analysis differs from the pixel-based approach in supervised
-                and unsupervised classification. It groups pixels into representative vector
-                shapes with size and geometry. The steps for object-based image analysis
-                classification include performing multiresolution segmentation, selecting
-                training areas, defining statistics, and classifying. Object-based
-                classification is particularly useful for analyzing high-resolution data.</p>
-            <p><img style="display: block; margin-left: auto; margin-right: auto;"
-                    src="../images/canvas/Uploaded%20Media/object-based-diagram.png"
-                    alt="Object-based Diagram" loading="lazy"></p>
-            <p>Here are the steps to perform object-based image analysis classification:</p>
-            <ul>
-                <li>Perform multiresolution segmentation</li>
-                <li>Select training areas</li>
-                <li>Define statistics</li>
-                <li>Classify</li>
-            </ul>
-            <p>Object-based image analysis (OBIA)<span></span>segments an image by grouping pixels. It doesn�t
-                create single pixels. Instead, it generates objects with different geometries. If you have the right
-                image, objects can be so meaningful that it does the<span></span><strong>digitizing for
-                    you</strong>. For example, the segmentation results below highlight buildings.</p>
-            <div class="wp-block-image">
-                <figure class="aligncenter"><img class="wp-image-17593"
-                        src="https://gisgeography.com/wp-content/uploads/2018/01/obia-segmentation-clustering-ml.png"
-                        alt="obia segmentation clustering ml" width="486" height="381" loading="lazy"></figure>
-            </div>
-            <p>The two most common segmentation algorithms are:</p>
-            <ul>
-                <li>Multi-resolution segmentation in<span></span>eCognition</li>
-                <li>The segment mean shift tool in<span></span>ArcGIS</li>
-            </ul>
-            <p>In Object-Based Image Analysis (OBIA) classification, you can use different methods to classify objects.
-                For example, you can use the following:</p>
-            <p><strong>SHAPE:</strong><span></span>If you want to classify buildings, you can use a shape
-                statistic such as �rectangular fit�. This tests an object�s geometry to the shape of a rectangle.</p>
-            <p><strong>TEXTURE:</strong><span></span>Texture is the homogeneity of an object. For example, water
-                is mostly homogeneous because it�s mostly dark blue. But forests have shadows and are a mix of green and
-                black.</p>
-            <p><strong>SPECTRAL:</strong><span></span>You can use the mean value of spectral properties such as
-                near-infrared, short-wave infrared, red, green, or blue.</p>
-            <p><strong>GEOGRAPHIC CONTEXT:</strong><span></span>Objects have proximity and distance relationships
-                between neighbors.</p>
-            <p><strong>NEAREST NEIGHBOR CLASSIFICATION:</strong><span></span>Nearest neighbor (NN)
-                classification<span></span>is similar to supervised classification. After multi-resolution
-                segmentation, the user identifies sample sites for each land cover class. Next, they define statistics
-                to classify image objects. Finally, the nearest neighbor classifies objects based on their resemblance
-                to the training sites and the statistics defined.</p>
-            <p><em>This content is adapted from:
-                    https://gisgeography.com/image-classification-techniques-remote-sensing/</em></p>
+                        alt="Supervised Classification Diagram" loading="lazy">
+                    <figcaption>Supervised classification learns from labeled training samples you provide</figcaption>
+                </figure>
+
+                <h3>The Three-Step Process</h3>
+                <ol>
+                    <li><strong>Select training areas:</strong> Mark examples of each class on the image</li>
+                    <li><strong>Generate signature file:</strong> Computer learns spectral characteristics of each class
+                    </li>
+                    <li><strong>Classify:</strong> Apply the learned rules to classify all pixels</li>
+                </ol>
+
+                <h3>Common Algorithms</h3>
+                <ul>
+                    <li><strong>Maximum Likelihood:</strong> Classic statistical approach, assumes normal distribution
+                    </li>
+                    <li><strong>Random Forest:</strong> Ensemble of decision trees, robust and accurate</li>
+                    <li><strong>Support Vector Machine (SVM):</strong> Finds optimal boundaries between classes</li>
+                    <li><strong>CART (Decision Trees):</strong> Creates interpretable rule-based classification</li>
+                </ul>
+
+                <div class="pro-tips">
+                    <h3>Training Data Best Practices</h3>
+                    <ul>
+                        <li>Collect <strong>at least 20-30 samples per class</strong></li>
+                        <li>Distribute samples across the entire study area</li>
+                        <li>Include the variability within each class (e.g., different forest types)</li>
+                        <li>Use high-resolution imagery or field knowledge to verify locations</li>
+                        <li>Keep some samples separate for accuracy assessment (validation)</li>
+                    </ul>
+                </div>
+
+                <h3>When to Use Supervised Classification</h3>
+                <ul>
+                    <li>You know exactly what classes you want to map</li>
+                    <li>You have reliable ground truth or reference data</li>
+                    <li>You need to quantify accuracy</li>
+                    <li>You're creating a map for specific applications</li>
+                </ul>
+            </section>
+
+            <!-- Object-Based Classification -->
+            <section>
+                <h2>3. Object-Based Image Analysis (OBIA)</h2>
+
+                <div class="card">
+                    <h3>The Concept</h3>
+                    <p>Unlike pixel-based approaches, OBIA first groups pixels into <strong>meaningful objects</strong>
+                        (segments) based on spectral similarity AND spatial properties. These objects—rather than
+                        individual pixels—are then classified.</p>
+                </div>
+
+                <figure>
+                    <img style="display: block; margin-left: auto; margin-right: auto;"
+                        src="../images/canvas/Uploaded%20Media/object-based-diagram.png"
+                        alt="Object-based Classification Diagram" loading="lazy">
+                    <figcaption>OBIA groups pixels into objects, then classifies the objects</figcaption>
+                </figure>
+
+                <h3>The Four-Step Process</h3>
+                <ol>
+                    <li><strong>Segmentation:</strong> Group pixels into homogeneous objects</li>
+                    <li><strong>Select training areas:</strong> Label example objects</li>
+                    <li><strong>Define statistics:</strong> Choose features for classification (shape, texture,
+                        spectral)</li>
+                    <li><strong>Classify:</strong> Assign classes to all objects</li>
+                </ol>
+
+                <h3>What Makes OBIA Different?</h3>
+                <p>Objects contain more information than individual pixels:</p>
+
+                <div class="card">
+                    <h4>🔷 Shape</h4>
+                    <p>Buildings are rectangular; lakes are irregular. Shape statistics like "rectangular fit"
+                        can distinguish man-made structures.</p>
+                </div>
+
+                <div class="card">
+                    <h4>📐 Texture</h4>
+                    <p>Water is spectrally homogeneous (smooth). Forests have lots of variation (rough).
+                        Texture helps distinguish classes with similar colors.</p>
+                </div>
+
+                <div class="card">
+                    <h4>🎨 Spectral</h4>
+                    <p>Mean values of spectral bands within each object—similar to pixel-based approaches.</p>
+                </div>
+
+                <div class="card">
+                    <h4>📍 Context</h4>
+                    <p>What's next to the object? A small blue object surrounded by buildings might be a pool;
+                        surrounded by forest, it might be a pond.</p>
+                </div>
+
+                <div class="why-it-matters">
+                    <h3>Why Use OBIA?</h3>
+                    <p>With high-resolution imagery (1-5 meter pixels), individual pixels often don't represent
+                        complete features. A building roof might span dozens of pixels with different colors.
+                        OBIA groups these into a single object, making classification more intuitive and accurate.</p>
+                </div>
+
+                <h3>Common Segmentation Algorithms</h3>
+                <ul>
+                    <li><strong>Multi-resolution segmentation</strong> (eCognition)</li>
+                    <li><strong>Segment Mean Shift</strong> (ArcGIS)</li>
+                    <li><strong>SNIC</strong> (Google Earth Engine)</li>
+                </ul>
+            </section>
+
+            <!-- Comparison Summary -->
+            <section>
+                <h2>Choosing the Right Approach</h2>
+
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Factor</th>
+                            <th>Unsupervised</th>
+                            <th>Supervised</th>
+                            <th>Object-Based</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Training effort</strong></td>
+                            <td>None</td>
+                            <td>Moderate</td>
+                            <td>High</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Accuracy potential</strong></td>
+                            <td>Lower</td>
+                            <td>High</td>
+                            <td>Highest (for HR imagery)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Best resolution</strong></td>
+                            <td>Any</td>
+                            <td>Medium (10-30m)</td>
+                            <td>High (< 5m)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>GEE support</strong></td>
+                            <td>Excellent</td>
+                            <td>Excellent</td>
+                            <td>Limited</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="pro-tips">
+                    <h3>Decision Flowchart</h3>
+                    <ul>
+                        <li><strong>New to the area?</strong> → Start with unsupervised to explore</li>
+                        <li><strong>Have training data and know your classes?</strong> → Use supervised</li>
+                        <li><strong>High-resolution imagery with complex features?</strong> → Consider OBIA</li>
+                        <li><strong>Large area, moderate resolution, in GEE?</strong> → Supervised (Random Forest)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Self-Check -->
+            <section class="self-check">
+                <h3>Check Your Understanding</h3>
+                <ol>
+                    <li>What's the main difference between unsupervised and supervised classification?</li>
+                    <li>Why might an unsupervised cluster NOT correspond to a single land cover class?</li>
+                    <li>When would you choose object-based classification over pixel-based?</li>
+                    <li>What are three pieces of information (beyond spectral values) that OBIA can use?</li>
+                </ol>
+            </section>
+
+            <!-- Key Takeaways -->
+            <section class="key-concepts">
+                <h3>Key Takeaways</h3>
+                <ul>
+                    <li><strong>Unsupervised:</strong> Groups pixels by similarity, YOU interpret the clusters</li>
+                    <li><strong>Supervised:</strong> YOU provide training data, computer learns patterns</li>
+                    <li><strong>Object-Based:</strong> Groups pixels into objects first, then classifies</li>
+                    <li>No single approach is "best"—choose based on your data, goals, and resources</li>
+                    <li>Supervised classification in Earth Engine (Random Forest) is powerful and accessible</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Additional Resources</h2>
+                <p><em>This content is adapted from:
+                        <a href="https://gisgeography.com/image-classification-techniques-remote-sensing/"
+                            target="_blank">
+                            GIS Geography - Image Classification Techniques</a></em></p>
+            </section>
         </main>
 
         <footer>
-            <p><a href="../../index.html">��Back to Course Home</a></p>
+            <p><a href="unsupervised-classification.html">← Previous: Unsupervised Classification</a> |
+                <a href="history-of-classification.html">Next: History of Classification →</a>
+            </p>
+            <p><a href="../../index.html">← Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>

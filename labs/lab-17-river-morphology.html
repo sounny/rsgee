@@ -1,63 +1,103 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 17 - River Morphology | Remote Sensing Course</title>
+    <meta name="description"
+        content="Extract a river mask with MNDWI, generate transects, and estimate river widths along a reach in Earth Engine.">
     <link rel="stylesheet" href="../css/style.css">
-    <meta name="description" content="Extract a river mask with MNDWI, generate transects, and estimate river widths along a reach in Earth Engine.">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
-            <a href="../index.html">Home</a> &gt; <a href="../index.html#schedule">Labs</a> &gt; Lab 17
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 17 (River)
         </nav>
 
         <header class="lab-header">
-                        <h1>Lab 17 - River Morphology</h1>
-                        <p><em>Extract a river mask from optical imagery, generate transects, and estimate river width statistics along a reach.</em></p>
+            <h1>Lab 17 - River Morphology</h1>
+            <p><em><strong>Objective: Extract a river mask from optical imagery, generate transects, and estimate river
+                        width statistics along a reach.</strong></em></p>
         </header>
 
         <main class="lab-content">
 
-            <section class="lab-preflight">
-                <h2>Before you start</h2>
+            <!-- Learning Objectives -->
+            <section class="learning-objectives">
+                <h3>What You'll Learn</h3>
                 <ul>
-                    <li><strong>Prerequisites:</strong> Complete the fluvial geomorphology lesson and refresh your understanding of vector overlays.</li>
-                    <li><strong>Estimated time:</strong> 75 minutes</li>
-                    <li><strong>Materials:</strong> Earth Engine login, hydrography datasets bookmarked, and reference measurements for the river reach you will analyze.</li>
+                    <li>Build a water mask using MNDWI thresholding</li>
+                    <li>Create reach-perpendicular transects from a centerline</li>
+                    <li>Compute approximate river width statistics</li>
+                    <li>Export transect measurements and masks for further analysis</li>
                 </ul>
             </section>
 
-                        <section id="objectives">
-                                <h2>Objectives</h2>
-                                <ul>
-                                        <li>Build a water mask using MNDWI thresholding</li>
-                                        <li>Create reach-normal transects and intersect with the mask</li>
-                                        <li>Compute river width statistics along the reach</li>
-                                </ul>
-                        </section>
+            <!-- Why It Matters -->
+            <section class="why-it-matters">
+                <h3>Why This Matters</h3>
+                <p>River morphology monitoring supports water management:</p>
+                <ul>
+                    <li><strong>Flood modeling:</strong> Channel width is a key hydraulic parameter</li>
+                    <li><strong>Erosion/deposition:</strong> Track changes over time</li>
+                    <li><strong>Ecosystem health:</strong> River width affects habitat and temperature</li>
+                    <li><strong>Navigation:</strong> Shipping requires minimum channel widths</li>
+                </ul>
+            </section>
 
-                        <section id="overview">
-                                <h2>Approach</h2>
-                                <p>We�ll compute <strong>MNDWI</strong> = (Green - SWIR1) / (Green + SWIR1) on cloud-free imagery. A threshold (e.g., &gt; 0.2) will produce a binary water mask. Then we�ll create perpendicular transects to a centerline and measure the span of water crossings.</p>
-                        </section>
+            <section class="lab-preflight">
+                <h2>Before You Start</h2>
+                <ul>
+                    <li><strong>Prerequisites:</strong> Understand spectral indices and vector geometry operations.</li>
+                    <li><strong>Estimated time:</strong> 75 minutes</li>
+                    <li><strong>Materials:</strong> Earth Engine account and a river of interest.</li>
+                </ul>
+            </section>
 
-                        <section id="starter-code">
-                                <h2>Starter code</h2>
-                                <pre>// 1) Reach selection
-// Tip: In the Code Editor, draw/import a line and rename it to 'centerline'.
-// If none is provided, a simple fallback line is used within the AOI.
-var aoi = ee.Geometry.Rectangle([-91.45, 30.35, -91.05, 30.60]); // Lower Mississippi example
+            <!-- Key Vocabulary -->
+            <section class="vocabulary">
+                <h3>Key Terms</h3>
+                <dl>
+                    <dt>MNDWI (Modified NDWI)</dt>
+                    <dd>A water index using Green and SWIR bands: (Green - SWIR) / (Green + SWIR). Better at
+                        distinguishing water from built-up areas than NDWI.</dd>
+
+                    <dt>Centerline</dt>
+                    <dd>A line representing the center of a river channel, used as a reference for transects.</dd>
+
+                    <dt>Transect</dt>
+                    <dd>A line perpendicular to the centerline used to measure river width.</dd>
+
+                    <dt>River Width</dt>
+                    <dd>The distance across a river channel, typically measured perpendicular to flow direction.</dd>
+                </dl>
+            </section>
+
+            <!-- Approach Overview -->
+            <section class="key-concepts">
+                <h3>Approach Overview</h3>
+                <ol>
+                    <li><strong>Water Detection:</strong> Calculate MNDWI and threshold to create binary water mask</li>
+                    <li><strong>Centerline:</strong> Draw or import a line representing the river channel</li>
+                    <li><strong>Transects:</strong> Generate perpendicular lines at regular intervals</li>
+                    <li><strong>Width Measurement:</strong> Measure water extent along each transect</li>
+                </ol>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 1: Create Water Mask with MNDWI</h2>
+                <pre><code>// AOI - Lower Mississippi River example
+var aoi = ee.Geometry.Rectangle([-91.45, 30.35, -91.05, 30.60]);
 Map.centerObject(aoi, 11);
 
-// Landsat 8 SR for MNDWI
-var L = ee.ImageCollection('Landsat/LC08/C02/T1_L2')
+// Load Landsat 8 and mask clouds
+var L = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
     .filterBounds(aoi)
     .filterDate('2021-07-01','2021-09-30')
     .filter(ee.Filter.lt('CLOUD_COVER', 20));
 
-// Mask clouds and shadows using QA_PIXEL bits (bit3=cloud, bit4=shadow)
 function maskL2(img){
   var qa = img.select('QA_PIXEL');
   var cloud = qa.bitwiseAnd(1 << 3).neq(0);
@@ -73,21 +113,30 @@ function toSR(img){
 }
 
 var med = L.map(toSR).median().clip(aoi);
-var mndwi = med.expression('(g - s) / (g + s)', {g: med.select('green'), s: med.select('swir1')}).rename('MNDWI');
+
+// Calculate MNDWI
+var mndwi = med.expression('(g - s) / (g + s)', {
+    g: med.select('green'), 
+    s: med.select('swir1')
+}).rename('MNDWI');
+
 Map.addLayer(mndwi, {min:-0.5, max:0.5, palette:['#8c510a','#f6e8c3','#01665e']}, 'MNDWI');
 
-// 2) Water mask
+// Create water mask
 var water = mndwi.gt(0.2).selfMask();
-Map.addLayer(water, {palette:['#2b83ba']}, 'Water mask');
+Map.addLayer(water, {palette:['#2b83ba']}, 'Water mask');</code></pre>
+            </section>
 
-// 3) Centerline and transects
-// Use a user-drawn 'centerline' if present; otherwise use a fallback line inside the AOI.
+            <section class="lab-steps">
+                <h2>Step 2: Create Centerline and Transects</h2>
+                <p>Draw a centerline in the Code Editor or use a predefined one:</p>
+                <pre><code>// Fallback centerline if none is drawn
 var fallbackCenterline = ee.FeatureCollection([
     ee.Feature(ee.Geometry.LineString([[-91.40, 30.38], [-91.10, 30.58]]))
 ]);
 var centerlineFc = (typeof centerline !== 'undefined') ? centerline : fallbackCenterline;
 
-// Create points along the line every N meters
+// Create points along the centerline every 200 meters
 var spacing = 200; // meters between transects
 var line = ee.Feature(centerlineFc.first()).geometry();
 var length = line.length();
@@ -97,20 +146,20 @@ var pts = ee.FeatureCollection(ee.List.sequence(0, length, spacing).map(function
     return ee.Feature(ee.Geometry.Point(p), {d: d});
 }));
 
-// Compute approximate normals using bearing differences (simple approach for short reaches)
+// Calculate perpendicular angles at each point
 var bearings = pts.map(function(f){
     var d = ee.Number(f.get('d'));
     var a = line.coordinateAlong(d);
     var b = line.coordinateAlong(d.add(10));
     var dx = ee.Number(ee.List(b).get(0)).subtract(ee.Number(ee.List(a).get(0)));
     var dy = ee.Number(ee.List(b).get(1)).subtract(ee.Number(ee.List(a).get(1)));
-    var angle = ee.Number.atan2(dy, dx); // radians
+    var angle = ee.Number.atan2(dy, dx);
     var normal = angle.add(Math.PI/2.0);
     return f.set({normal: normal});
 });
 
-// Build transect lines of fixed length centered at each point
-var half = 400; // half-length in meters (total width 800 m)
+// Build transect lines (800m total width)
+var half = 400; // half-length in meters
 var transects = bearings.map(function(f){
     f = ee.Feature(f);
     var p = ee.Geometry.Point(f.geometry().coordinates());
@@ -122,32 +171,37 @@ var transects = bearings.map(function(f){
     return ee.Feature(ee.Geometry.LineString([p1.coordinates(), p2.coordinates()]), f.toDictionary());
 });
 
-Map.addLayer(transects, {color: 'yellow'}, 'Transects');
+Map.addLayer(transects, {color: 'yellow'}, 'Transects');</code></pre>
+            </section>
 
-// 4) Width estimation: intersect transects with water mask
-var edge = water.fastDistanceTransform(30).sqrt(); // for visualization
-Map.addLayer(edge, {min:0, max:60, palette:['black','aqua','white']}, 'distance (m)', false);
-
+            <section class="lab-steps">
+                <h2>Step 3: Estimate River Width</h2>
+                <pre><code>// Estimate width by measuring water fraction along each transect
 var widths = transects.map(function(t){
     var geom = ee.Feature(t).geometry();
-    var profile = water.reduceRegion({reducer: ee.Reducer.anyNonZero(), geometry: geom.buffer(15), scale: 30, bestEffort: true});
-    // Approx width via fraction of water along transect length (coarse but illustrative)
     var length = geom.length();
-    var sampled = water.reduceRegion({reducer: ee.Reducer.mean(), geometry: geom.buffer(15), scale: 30, bestEffort: true});
-    var frac = ee.Number(sampled.get('MNDWI')); // Note: after threshold, band name is constant 0/1 mask; mean ~ fraction
+    var sampled = water.reduceRegion({
+        reducer: ee.Reducer.mean(), 
+        geometry: geom.buffer(15), 
+        scale: 30, 
+        bestEffort: true
+    });
+    var frac = ee.Number(sampled.get('MNDWI'));
     var w = ee.Algorithms.If(frac, ee.Number(frac).multiply(length), 0);
     return ee.Feature(geom, {approx_width_m: w});
 });
 
-print('Approximate widths (m)', widths.limit(10));
-Map.addLayer(water, {palette:['#2b83ba']}, 'Water mask (ref)');
-</pre>
-                        </section>
+print('Approximate widths (m)', widths.limit(10));</code></pre>
 
-                                                <section id="exports">
-                                                                <h2>Exports</h2>
-                                                                <p>Export the derived products for use in GIS or reporting.</p>
-                                                                <pre>// Export transect widths as CSV
+                <div class="note">
+                    <p><strong>Limitation:</strong> This is an approximate method. For more accurate measurements,
+                        consider using the RivWidthCloud package or similar algorithms.</p>
+                </div>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 4: Export Results</h2>
+                <pre><code>// Export transect widths as CSV
 Export.table.toDrive({
     collection: widths,
     description: 'river_widths_transects',
@@ -168,24 +222,77 @@ Export.table.toDrive({
     collection: transects,
     description: 'transects_geojson',
     fileFormat: 'GeoJSON'
-});
-</pre>
-                                                </section>
+});</code></pre>
+            </section>
 
-                        <section id="deliverables">
-                                <h2>Deliverables</h2>
-                                <ul>
-                                        <li>Map: MNDWI, water mask, centerline, and transects</li>
-                                        <li>Table: approximate width (m) along transects (export CSV)</li>
-                                        <li>Short note: Limitations of this approach and how you�d improve it (e.g., RivWidthCloud)</li>
-                                </ul>
-                        </section>
+            <!-- Self-Check Questions -->
+            <section class="self-check">
+                <h3>Check Your Understanding</h3>
+                <ol>
+                    <li>Why do we use MNDWI instead of NDWI for water detection?</li>
+                    <li>What challenges arise when measuring width on braided rivers?</li>
+                    <li>How would seasonal water level changes affect your width measurements?</li>
+                    <li>What would you need to add to track channel migration over time?</li>
+                </ol>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <div class="issue">
+                    <strong>Problem: Water mask includes shadows or dark surfaces</strong>
+                    <p><strong>Solution:</strong> Adjust the MNDWI threshold or add additional filtering (e.g., slope
+                        mask for hillshadows).</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Transects are not perpendicular</strong>
+                    <p><strong>Solution:</strong> This approach works best for straight reaches. For meandering rivers,
+                        compute local tangent more carefully.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Width values seem too large</strong>
+                    <p><strong>Solution:</strong> Check transect length and ensure your water mask doesn't include
+                        floodplain lakes.</p>
+                </div>
+            </section>
+
+            <!-- Pro Tips -->
+            <section class="pro-tips">
+                <h3>Pro Tips</h3>
+                <ul>
+                    <li><strong>Use RivWidthCloud:</strong> A GEE package specifically designed for river width
+                        measurement</li>
+                    <li><strong>JRC Global Surface Water:</strong> Pre-computed water occurrence can supplement Landsat
+                    </li>
+                    <li><strong>Multi-temporal:</strong> Compare low and high flow seasons for width variability</li>
+                    <li><strong>Validate with field data:</strong> Compare to gauging station cross-sections if
+                        available</li>
+                </ul>
+            </section>
+
+            <section id="submission">
+                <div class="submission-box">
+                    <h3>📋 Lab Submission</h3>
+                    <p><strong>Subject:</strong> <code>Lab 17 - River Morphology - [Your Name]</code></p>
+
+                    <h4>Submit:</h4>
+                    <ul>
+                        <li>Map: MNDWI, water mask, centerline, and transects</li>
+                        <li>Table: approximate width (m) along transects (CSV export)</li>
+                        <li>Short note: Limitations of this approach and how you'd improve it</li>
+                        <li>EE script URL</li>
+                    </ul>
+                </div>
+            </section>
         </main>
 
-                <footer class="lab-footer">
-                        <p><a href="lab-16-wildfire-analysis.html">&larr; Previous Lab</a> | <a href="lab-18-final-project.html">Next Lab &rarr;</a></p>
-                        <p><a href="../index.html">&larr;Back to Course Home</a></p>
-                </footer>
+        <footer>
+            <p><a href="lab-16-wildfire-analysis.html">← Previous Lab</a> | <a href="lab-18-final-project.html">Next Lab
+                    →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
+        </footer>
     </div>
+
 </body>
+
 </html>

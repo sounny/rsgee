@@ -1,168 +1,149 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JavaScript Functions - Remote Sensing for GEE</title>
+    <title>Functions | Remote Sensing Course</title>
     <link rel="stylesheet" href="../../css/style.css">
 </head>
-
 <body>
-    <nav class="breadcrumb">
-        <a href="../../index.html">Home</a> &gt;
-        <a href="../../index.html#schedule">Week 1</a> &gt;
-        <span>Functions</span>
-    </nav>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 1
+        </nav>
 
-    <main>
-        <h1>JavaScript Functions</h1>
+        <header class="lab-header">
+            <h1>Functions</h1>
+        </header>
 
-        <section>
-            <h2>Introduction to Functions</h2>
-            <p>While using Earth Engine, you will need to define your own functions. Functions take user inputs, use
-                them to perform some computation, and send output back.</p>
+        <main class="lab-content">
+            <p>
+                Functions are reusable blocks of code. They take inputs, do work, and return outputs. In Earth Engine,
+                you will write functions to clean imagery, compute indices, and map over collections.
+            </p>
 
-            <p>Functions allow you to group a set of operations and repeat the same operations with different parameters
-                without having to rewrite them every time. Functions are defined using the <code>function</code>
-                keyword.</p>
-        </section>
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Define functions with the <code>function</code> keyword.</li>
+                    <li>Return values so callers can use results.</li>
+                    <li>Understand parameters versus variables inside the function.</li>
+                    <li>Apply functions with <code>.map()</code> on collections.</li>
+                </ul>
+            </section>
 
-        <section>
-            <h2>Defining a Function</h2>
-            <p>The code below defines a function called <code>greet</code> that takes an input called <code>name</code>
-                and returns a greeting with "Hello" prefixed to it:</p>
-            <pre><code>var greet = function(name) {
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Functions keep your scripts concise and consistent. They let you change logic in one place instead
+                    of editing the same code everywhere.
+                </p>
+            </section>
+
+            <section>
+                <h2>Quick win: tiny function</h2>
+<pre><code>var greet = function(name) {
   return 'Hello ' + name;
 };
 
-print(greet('Albert Gator'));
-print(greet('Alberta Gator'));</code></pre>
-        </section>
+print(greet('Albert'));
+print(greet('Alberta'));</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>Two lines in the console: "Hello Albert" and "Hello Alberta".</p>
+                </div>
+                <figure>
+                    <img src="../../images/javascript/functions-output.png"
+                        alt="Console output for a simple function" loading="lazy">
+                    <figcaption>Functions let you reuse logic with different inputs.</figcaption>
+                </figure>
+            </section>
 
-        <section>
-            <h2>The Power of Functions</h2>
-            <p>Note that we can call the function with different inputs, and it generates different outputs with the
-                same code. This is the power of functions: you can create blocks of code that act as tools.</p>
-
-            <p>Your output should look like this after running it in Earth Engine:</p>
-            <p><img src="../../images/javascript/functions-output.png"
-                    alt="Output from Google Earth Engine showing function results" style="max-width: 600px;"></p>
-        </section>
-
-        <section>
-            <h2>Function Anatomy</h2>
-            <p>Let's break down the components of a function:</p>
-            <pre><code>var functionName = function(parameter1, parameter2) {
-  // Function body - code to execute
+            <section>
+                <h2>Function anatomy</h2>
+<pre><code>var functionName = function(parameter1, parameter2) {
   var result = parameter1 + parameter2;
-  return result;
+  return result; // send a value back
 };</code></pre>
+                <ul>
+                    <li><strong>Parameters</strong>: inputs listed in parentheses.</li>
+                    <li><strong>Body</strong>: code inside braces runs when called.</li>
+                    <li><strong>Return</strong>: without <code>return</code>, callers receive <code>undefined</code>.</li>
+                </ul>
+            </section>
 
-            <ul>
-                <li><strong>Variable assignment:</strong> <code>var functionName =</code> stores the function in a
-                    variable</li>
-                <li><strong>Function keyword:</strong> <code>function</code> declares that this is a function</li>
-                <li><strong>Parameters:</strong> <code>(parameter1, parameter2)</code> are inputs the function receives
-                </li>
-                <li><strong>Function body:</strong> Code between <code>{ }</code> is executed when the function is
-                    called</li>
-                <li><strong>Return statement:</strong> <code>return</code> sends a value back to whoever called the
-                    function</li>
-            </ul>
-        </section>
-
-        <section>
-            <h2>Why Use Functions?</h2>
-            <ul>
-                <li><strong>Reusability:</strong> Write once, use many times with different inputs</li>
-                <li><strong>Organization:</strong> Break complex code into manageable pieces</li>
-                <li><strong>Readability:</strong> Give meaningful names to operations</li>
-                <li><strong>Maintainability:</strong> Update functionality in one place</li>
-                <li><strong>Abstraction:</strong> Hide complex operations behind simple interfaces</li>
-            </ul>
-        </section>
-
-        <section>
-            <h2>Example: Temperature Conversion</h2>
-            <p>Here's a practical example for remote sensing work - converting Celsius to Fahrenheit:</p>
-            <pre><code>var celsiusToFahrenheit = function(celsius) {
-  var fahrenheit = (celsius * 9/5) + 32;
-  return fahrenheit;
+            <section>
+                <h2>Example: Celsius to Fahrenheit</h2>
+<pre><code>var celsiusToFahrenheit = function(celsius) {
+  return (celsius * 9 / 5) + 32;
 };
 
-// Convert some temperature values
-print('0°C is', celsiusToFahrenheit(0), '°F');
-print('20°C is', celsiusToFahrenheit(20), '°F');
-print('100°C is', celsiusToFahrenheit(100), '°F');</code></pre>
-        </section>
+print('0 C is', celsiusToFahrenheit(0), 'F');
+print('20 C is', celsiusToFahrenheit(20), 'F');
+print('100 C is', celsiusToFahrenheit(100), 'F');</code></pre>
+            </section>
 
-        <section>
-            <h2>Functions in Earth Engine</h2>
-            <p>In Earth Engine, you'll frequently use functions to:</p>
-            <ul>
-                <li><strong>Process images:</strong> Apply calculations or filters to each image in a collection</li>
-                <li><strong>Map over collections:</strong> Apply the same operation to every image</li>
-                <li><strong>Calculate indices:</strong> Compute NDVI, NDWI, etc. for multiple images</li>
-                <li><strong>Cloud masking:</strong> Remove clouds from many images using the same logic</li>
-            </ul>
-
-            <h3>Example: NDVI Function</h3>
-            <pre><code>var calculateNDVI = function(image) {
-  var ndvi = image.normalizedDifference(['B5', 'B4']);
-  return image.addBands(ndvi.rename('NDVI'));
+            <section>
+                <h2>Functions in Earth Engine</h2>
+                <p>Use functions to process every item in a collection with <code>.map()</code>:</p>
+<pre><code>var calculateNDVI = function(image) {
+  var ndvi = image.normalizedDifference(['B5', 'B4']).rename('NDVI');
+  return image.addBands(ndvi);
 };
 
-// Apply to an image collection
-var collection = ee.ImageCollection('Landsat/LC08/C02/T1_L2')
-  .filterBounds(geometry)
+var collection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate('2023-01-01', '2023-12-31')
   .map(calculateNDVI);</code></pre>
-        </section>
+                <div class="pro-tips">
+                    <h3>Pro tips</h3>
+                    <ul>
+                        <li>A function passed to <code>.map()</code> must return the same type it receives (image in, image out).</li>
+                        <li>Do not use <code>Map.addLayer</code> or <code>print</code> inside mapped functions-they are client-side.</li>
+                        <li>Use clear parameter names to make mapped functions readable.</li>
+                    </ul>
+                </div>
+            </section>
 
-        <section>
-            <h2>Try It Yourself</h2>
-            <p>Practice creating functions:</p>
-            <ul>
-                <li>Write a function that takes two numbers and returns their average</li>
-                <li>Create a function that converts meters to feet</li>
-                <li>Make a function that takes a year and returns whether it's a leap year</li>
-                <li>Build a function that calculates the area of a rectangle given length and width</li>
-            </ul>
-        </section>
+            <div class="try-it">
+                <h4>Try it: practice</h4>
+                <p>Write a function that averages two numbers and test it with <code>print</code>.</p>
+                <p>Create a function that buffers a geometry by a distance parameter; call it with two different distances.</p>
+                <p>Modify <code>calculateNDVI</code> to compute EVI instead, returning the new band.</p>
+            </div>
 
-        <section>
-            <h2>Key Concepts</h2>
-            <div style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
-                <ul style="margin: 0;">
-                    <li><strong>function</strong> keyword defines a function</li>
-                    <li><strong>Parameters</strong> are inputs in parentheses</li>
-                    <li><strong>return</strong> sends a value back to the caller</li>
-                    <li><strong>.map()</strong> applies a function to every item in a collection</li>
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Forgetting <code>return</code> and getting <code>undefined</code>.</li>
+                    <li>Using client-only calls (<code>Map.addLayer</code>) inside functions mapped on the server.</li>
+                    <li>Changing variables outside the function instead of returning a result.</li>
                 </ul>
-            </div>
+            </section>
 
-            <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
-                <strong>⚠️ Common Mistakes:</strong>
-                <ul style="margin: 10px 0 0 0;">
-                    <li><strong>Forgetting return</strong>: Functions need <code>return</code> to send values back</li>
-                    <li><strong>Using for-loops</strong>: Use <code>.map()</code> instead for collections</li>
-                    <li><strong>Mixing client/server</strong>: Functions used with <code>.map()</code> run on Google's
-                        servers</li>
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What happens if you omit <code>return</code>-</li>
+                    <li>Why should mapped functions avoid <code>print()</code>-</li>
+                    <li>How do you ensure your mapped function returns the correct type-</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li><a href="lists.html">Lists</a> to feed functions multiple values.</li>
+                    <li><a href="objects.html">Objects</a> to structure function inputs.</li>
+                    <li><a href="client-vs-server.html">Client vs Server</a> to avoid mixing environments.</li>
                 </ul>
-            </div>
+            </section>
+        </main>
 
-            <div style="background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; margin: 20px 0;">
-                <strong>💡 Pro Tip:</strong>
-                <p>When using <code>.map()</code> on an ImageCollection, your function must return an Image. If you want
-                    to extract values (like means), use reducers instead.</p>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <p><a href="../../index.html">Back to Course Home</a></p>
-    </footer>
+        <footer>
+            <p><a href="../../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
 </body>
-
 </html>
+

@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <nav class="breadcrumb">
-            <a href="../../index.html">Home</a> &gt; <a href="../index.html#schedule">Schedule</a> &gt; Week 3
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 3
         </nav>
 
         <header class="lab-header">
@@ -19,61 +19,248 @@
         </header>
 
         <main class="lab-content">
-            <p>Image classification is a critical task in remote sensing that involves categorizing image pixels into
-                distinct classes or categories based on their spectral characteristics. This process is essential in
-                identifying land use, vegetation cover, water bodies, and other features on the earth's surface.
-                Classification is a multi-step process that requires a thorough understanding of the image data, the
-                available classifiers, and the desired output.</p>
-            <p>To better understand the steps of classification, we will look here at the general steps for supervised
-                classification.</p>
-            <p><img src="../images/canvas/Uploaded%20Media/p9p1-lg-1.jpg" alt="Landsat 8 Imagery composite of the world"
-                    loading="lazy"></p>
-            <p><em><strong>Step 1: Data Mining, aka Finding the Data.</strong></em></p>
-            <p>One of the first steps in image classification is data collection, which involves acquiring imagery of
-                the area of interest. The imagery can be obtained from various sources, such as satellites, aircraft, or
-                drones. Once the imagery is obtained, it is essential to preprocess the data to remove any noise and
-                correct for atmospheric effects.</p>
-            <p><img src="../images/canvas/Uploaded%20Media/0_xALkI7HzKTqq6jTa.jpg"
-                    alt="Diagram showing the Different approaches to Machine Learning" loading="lazy"></p>
-            <p><em><strong>Step 2: Planning your classification approach</strong></em></p>
-            <p>After preprocessing the data, the next step is selecting a classifier to classify the pixels into the
-                desired categories accurately. Numerous classification algorithms are available, such as maximum
-                likelihood, support vector machines, random forest, and neural networks. The choice of the classifier
-                depends on the image data's characteristics and the classification task's complexity.</p>
-            <p></p>
-            <p><em><strong>Step 3: Create a Training Sample</strong></em></p>
-            <p>Once the classifier is selected, the next step is to train the classifier by creating a training sample.
-                This process involves selecting representative samples from the image data and labeling them according
-                to their corresponding classes. The sample data is then used to train the classifier, and the resulting
-                model can be tested using validation data.</p>
-            <p><em><strong>Step 4: Run Classification</strong></em></p>
-            <p>The final step in image classification is the actual classification of the image data. This process
-                involves applying the trained classifier to the entire image and assigning each pixel to its
-                corresponding class. The resulting classified image can be used for various applications such as land
-                use planning, environmental monitoring, and resource management.</p>
-            <p>Overall, image classification is a complex and iterative process requiring technical knowledge, domain
-                expertise, and creativity. With the vast array of tools and techniques available in Earth Engine, users
-                can create accurate and detailed classifications that can inform decision-making and promote sustainable
-                development.</p>
-            <h3><span>Learning Outcomes</span></h3>
-            <ul>
-                <li aria-level="1"><span>Running a classification in Earth Engine.</span></li>
-                <li aria-level="1"><span>Understanding the difference between supervised and unsupervised
-                        classification.</span></li>
-                <li aria-level="1"><span>Learning how to use Earth Engine geometry drawing tools.</span></li>
-                <li aria-level="1"><span>Learning how to collect sample data in Earth Engine.</span></li>
-                <li aria-level="1"><span>Learning the basics of the hexadecimal numbering system.</span></li>
-            </ul>
-            <p>This module introduces the concepts of supervised and unsupervised pixel-based
-                                        classifications and the process of testing different classifiers. Additionally,
-                                        it covers the concept and application of object-based classification. By
-                                        understanding these classification techniques, student can generate accurate and
-                                        useful land cover and land use information that can be utilized in various
-                                        fields to facilitate informed decision-making and sustainable development.</p>
+            <p>
+                Classification transforms continuous spectral data into meaningful categories—water, vegetation,
+                urban, bare soil. This is where remote sensing becomes actionable information.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Explain what image classification does and why it matters.</li>
+                    <li>Distinguish supervised from unsupervised approaches.</li>
+                    <li>Understand the classification workflow in Earth Engine.</li>
+                    <li>Run a simple classification and visualize results.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Raw satellite images are just pixels. Classification creates land cover maps, change detection,
+                    and thematic products that inform decisions about conservation, urban planning, disaster
+                    response, and resource management.
+                </p>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key vocabulary</h3>
+                <dl>
+                    <dt>Classification</dt>
+                    <dd>Assigning each pixel to a discrete category based on its spectral values.</dd>
+                    <dt>Training data</dt>
+                    <dd>Labeled examples that teach the classifier what each class looks like.</dd>
+                    <dt>Classifier</dt>
+                    <dd>An algorithm that learns patterns from training data and applies them to new pixels.</dd>
+                </dl>
+            </section>
+
+            <section>
+                <h2>Quick win: Your first classification</h2>
+                <p>This example classifies an image into 3 land cover types using Random Forest:</p>
+                <pre><code>// Load and prepare image
+var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623')
+  .multiply(0.0000275).add(-0.2)
+  .select(['SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7']);
+
+// Define training points (in practice, draw these on the map)
+var water = ee.FeatureCollection([
+  ee.Feature(ee.Geometry.Point([-122.42, 37.78]), {class: 0}),
+  ee.Feature(ee.Geometry.Point([-122.45, 37.80]), {class: 0})
+]);
+var vegetation = ee.FeatureCollection([
+  ee.Feature(ee.Geometry.Point([-122.20, 37.85]), {class: 1}),
+  ee.Feature(ee.Geometry.Point([-122.18, 37.82]), {class: 1})
+]);
+var urban = ee.FeatureCollection([
+  ee.Feature(ee.Geometry.Point([-122.40, 37.75]), {class: 2}),
+  ee.Feature(ee.Geometry.Point([-122.38, 37.77]), {class: 2})
+]);
+
+// Merge training points
+var trainingPoints = water.merge(vegetation).merge(urban);
+
+// Sample the image at training point locations
+var training = image.sampleRegions({
+  collection: trainingPoints,
+  properties: ['class'],
+  scale: 30
+});
+
+// Train a Random Forest classifier
+var classifier = ee.Classifier.smileRandomForest(50).train({
+  features: training,
+  classProperty: 'class',
+  inputProperties: image.bandNames()
+});
+
+// Classify the image
+var classified = image.classify(classifier);
+
+// Visualize
+Map.centerObject(image, 10);
+Map.addLayer(image, {bands: ['SR_B4','SR_B3','SR_B2'], min: 0, max: 0.3}, 'True Color');
+Map.addLayer(classified, {min: 0, max: 2, palette: ['blue', 'green', 'gray']}, 'Classification');
+
+print('Classes: 0=Water, 1=Vegetation, 2=Urban');</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A classified map showing water (blue), vegetation (green), and urban (gray) areas.
+                        The accuracy depends on training point quality and quantity.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>The classification workflow</h2>
+                <figure>
+                    <img src="../../images/diagrams/classification-workflow.png" alt="Classification workflow diagram"
+                        loading="lazy">
+                    <figcaption>The four-step classification process in Earth Engine.</figcaption>
+                </figure>
+
+                <h3>Step 1: Prepare your data</h3>
+                <p>Load imagery, apply cloud masks, and select relevant bands. Consider adding spectral
+                    indices (NDVI, NDWI) as additional features.</p>
+
+                <h3>Step 2: Collect training samples</h3>
+                <p>Create points or polygons for each class using the geometry tools. More samples = better
+                    classification. Aim for 50+ points per class, distributed across the scene.</p>
+
+                <h3>Step 3: Train the classifier</h3>
+                <p>Choose an algorithm and feed it your training data. The classifier learns the spectral
+                    patterns that define each class.</p>
+
+                <h3>Step 4: Apply and evaluate</h3>
+                <p>Classify the entire image and assess accuracy using independent validation data.</p>
+            </section>
+
+            <section>
+                <h2>Supervised vs. unsupervised</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Supervised</th>
+                            <th>Unsupervised</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Training data</strong></td>
+                            <td>Required (labeled examples)</td>
+                            <td>Not required</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Classes</strong></td>
+                            <td>You define them</td>
+                            <td>Algorithm discovers them</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Output</strong></td>
+                            <td>Your specific classes</td>
+                            <td>Spectral clusters (you label after)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Best for</strong></td>
+                            <td>Known classes, ground truth available</td>
+                            <td>Exploration, no reference data</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>Classifiers in Earth Engine</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Classifier</th>
+                            <th>Type</th>
+                            <th>Best For</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>smileRandomForest()</code></td>
+                            <td>Supervised</td>
+                            <td>General purpose, handles many features well</td>
+                        </tr>
+                        <tr>
+                            <td><code>smileCart()</code></td>
+                            <td>Supervised</td>
+                            <td>Simple, interpretable decision tree</td>
+                        </tr>
+                        <tr>
+                            <td><code>libsvm()</code></td>
+                            <td>Supervised</td>
+                            <td>High accuracy with proper tuning</td>
+                        </tr>
+                        <tr>
+                            <td><code>wekaKMeans()</code></td>
+                            <td>Unsupervised</td>
+                            <td>Finding natural spectral clusters</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: Add more training points</h4>
+                <ol>
+                    <li>Use the geometry tools to draw polygons for each class.</li>
+                    <li>Import them as FeatureCollections with a 'class' property.</li>
+                    <li>Re-run the classification and compare results.</li>
+                </ol>
+            </div>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Too few training points (need 50+ per class).</li>
+                    <li>Training points only in one part of the image.</li>
+                    <li>Including cloudy pixels in training data.</li>
+                    <li>Testing on training data (use a separate validation set).</li>
+                    <li>Forgetting to scale/offset surface reflectance bands.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What is the purpose of training data?</li>
+                    <li>Name two supervised classifiers in Earth Engine.</li>
+                    <li>When would you choose unsupervised over supervised classification?</li>
+                </ol>
+            </section>
+
+            <section class="builds-on">
+                <h3>This module builds on</h3>
+                <ul>
+                    <li><a href="../week-02-images/image-collections.html">Image Collections</a> - loading and preparing
+                        imagery</li>
+                    <li><a href="../week-02-images/cloud-masking.html">Cloud Masking</a> - creating clean training
+                        imagery</li>
+                    <li><a href="../week-02-images/spectral-indices.html">Spectral Indices</a> - adding NDVI/NDWI as
+                        features</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li><a href="unsupervised-vs-supervised.html">Supervised vs Unsupervised vs Object-Based</a></li>
+                    <li><a href="unsupervised-classification.html">Unsupervised Classification</a></li>
+                    <li><a href="accuracy-assessment.html">Accuracy Assessment</a> - validate your results</li>
+                    <li><a href="../week-04-exports/exporting-data.html">Exporting Data</a> - save your classified map
+                    </li>
+                    <li><a href="../../labs/lab-11-supervised-classification.html">Lab 11: Supervised Classification</a>
+                    </li>
+                </ul>
+            </section>
         </main>
 
         <footer>
-            <p><a href="../../index.html">��Back to Course Home</a></p>
+            <p><a href="../../index.html">Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>

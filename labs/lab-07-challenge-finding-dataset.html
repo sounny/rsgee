@@ -1,11 +1,15 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 7 - Challenge: Finding a Dataset | Remote Sensing Course</title>
+    <meta name="description"
+        content="Learn to explore the GEE Data Catalog and select appropriate datasets for your research area.">
     <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -14,36 +18,96 @@
 
         <header class="lab-header">
             <h1>Lab 7 - Challenge: Finding a Dataset for Your Site</h1>
-            <p><em><strong>Objective: Learn to explore the GEE Data Catalog and select appropriate datasets for your research area.</strong></em></p>
+            <p><em><strong>Objective: Learn to explore the GEE Data Catalog and select appropriate datasets for your
+                        research area.</strong></em></p>
         </header>
 
         <main class="lab-content">
 
-            <section class="lab-preflight">
-                <h2>Before you start</h2>
+            <!-- Learning Objectives -->
+            <section class="learning-objectives">
+                <h3>What You'll Learn</h3>
                 <ul>
-                    <li><strong>Prerequisites:</strong> Complete Lab 6 and refine the area of interest you identified in Module 3.</li>
-                    <li><strong>Estimated time:</strong> 75 minutes</li>
-                    <li><strong>Materials:</strong> Earth Engine account, AOI coordinates or shapefile, and links to potential datasets you plan to evaluate.</li>
+                    <li>Navigate the Google Earth Engine Data Catalog</li>
+                    <li>Evaluate datasets based on spatial and temporal resolution</li>
+                    <li>Compare spectral bands and coverage across different sensors</li>
+                    <li>Select appropriate datasets for specific research questions</li>
+                    <li>Document and justify dataset selection decisions</li>
                 </ul>
+            </section>
+
+            <!-- Building On Previous Learning -->
+            <section class="builds-on">
+                <h4>Building On Previous Learning</h4>
+                <p>In <a href="lab-06-image-collections.html">Lab 6</a>, you learned to filter and sort image
+                    collections.
+                    Now you'll learn to choose the RIGHT collection in the first place - a critical skill for any
+                    project.</p>
+            </section>
+
+            <!-- Why It Matters -->
+            <section class="why-it-matters">
+                <h3>Why This Matters</h3>
+                <p>Choosing the right dataset is one of the most important decisions in any remote sensing project:</p>
+                <ul>
+                    <li><strong>Wrong resolution</strong> → Can't see the features you need</li>
+                    <li><strong>Wrong time period</strong> → Data doesn't cover your study period</li>
+                    <li><strong>Wrong bands</strong> → Can't calculate the indices you need</li>
+                    <li><strong>Too much data</strong> → Processing takes forever</li>
+                </ul>
+                <p>This skill will serve you in every future GEE project!</p>
+            </section>
+
+            <section class="lab-preflight">
+                <h2>Before You Start</h2>
+                <ul>
+                    <li><strong>Prerequisites:</strong> Complete Lab 6 and refine the area of interest you identified in
+                        Module 3.</li>
+                    <li><strong>Estimated time:</strong> 75 minutes</li>
+                    <li><strong>Materials:</strong> Earth Engine account, AOI coordinates or shapefile, and links to
+                        potential datasets you plan to evaluate.</li>
+                </ul>
+            </section>
+
+            <!-- Key Vocabulary -->
+            <section class="vocabulary">
+                <h3>Key Terms</h3>
+                <dl>
+                    <dt>Spatial Resolution</dt>
+                    <dd>The size of each pixel on the ground (e.g., 10m means each pixel covers 10x10 meters).</dd>
+
+                    <dt>Temporal Resolution</dt>
+                    <dd>How frequently the satellite returns to image the same location (e.g., 16-day revisit).</dd>
+
+                    <dt>Temporal Coverage</dt>
+                    <dd>The date range for which data is available (e.g., 1984-present for Landsat).</dd>
+
+                    <dt>Spectral Bands</dt>
+                    <dd>The wavelength ranges a sensor captures (e.g., visible, NIR, thermal).</dd>
+
+                    <dt>Swath Width</dt>
+                    <dd>The width of the area imaged in one pass (wider = faster global coverage).</dd>
+                </dl>
             </section>
 
             <section>
                 <h2>Introduction</h2>
                 <p>
-                    Google Earth Engine provides access to a vast catalog of geospatial datasets. In this challenge lab, 
-                    you will learn to navigate the GEE Data Catalog, understand dataset characteristics, and select 
-                    appropriate imagery for your area of interest. This is an essential skill for any remote sensing project.
+                    Google Earth Engine provides access to a vast catalog of geospatial datasets. In this challenge lab,
+                    you will learn to navigate the GEE Data Catalog, understand dataset characteristics, and select
+                    appropriate imagery for your area of interest. This is an essential skill for any remote sensing
+                    project.
                 </p>
             </section>
 
             <section class="lab-steps">
                 <h2>Challenge Instructions</h2>
-                <div class="warning">
-                    <p><strong>Your Task:</strong></p>
+                <div class="challenge">
+                    <h3>Your Task</h3>
                     <ol>
                         <li>Choose a location of interest (your hometown, study site, etc.)</li>
-                        <li>Browse the <a href="https://developers.google.com/earth-engine/datasets" target="_blank">GEE Data Catalog</a></li>
+                        <li>Browse the <a href="https://developers.google.com/earth-engine/datasets" target="_blank">GEE
+                                Data Catalog</a></li>
                         <li>Find at least 3 different datasets suitable for your location</li>
                         <li>Load and visualize each dataset in GEE</li>
                         <li>Document the characteristics of each dataset</li>
@@ -55,27 +119,85 @@
             <section class="lab-steps">
                 <h2>Dataset Characteristics to Document</h2>
                 <p>For each of the three datasets you choose, document the following:</p>
-                <ul>
-                    <li><strong>Spatial Resolution:</strong> What is the pixel size? (e.g., 10m, 30m, 500m)</li>
-                    <li><strong>Temporal Coverage:</strong> What time period does the data cover?</li>
-                    <li><strong>Temporal Resolution:</strong> How frequently is new data collected? (daily, weekly, 16-day, etc.)</li>
-                    <li><strong>Spectral Bands:</strong> What bands are available? (RGB, NIR, SWIR, thermal, etc.)</li>
-                    <li><strong>Data Provider:</strong> Who provides the data? (NASA, ESA, USGS, etc.)</li>
-                    <li><strong>Best Use Cases:</strong> What is this dataset best suited for?</li>
-                </ul>
+
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Characteristic</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Spatial Resolution</strong></td>
+                            <td>Pixel size (ground coverage)</td>
+                            <td>10m, 30m, 500m</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Temporal Coverage</strong></td>
+                            <td>Date range of available data</td>
+                            <td>1984-present</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Temporal Resolution</strong></td>
+                            <td>How often new images are collected</td>
+                            <td>Daily, 5-day, 16-day</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Spectral Bands</strong></td>
+                            <td>Available wavelengths</td>
+                            <td>RGB, NIR, SWIR, thermal</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data Provider</strong></td>
+                            <td>Organization responsible</td>
+                            <td>NASA, ESA, USGS</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Best Use Cases</strong></td>
+                            <td>What is it suited for?</td>
+                            <td>Land cover, vegetation, ocean color</td>
+                        </tr>
+                    </tbody>
+                </table>
             </section>
 
             <section class="lab-steps">
                 <h2>Suggested Dataset Categories</h2>
                 <p>Consider choosing datasets from different categories to see the variety available:</p>
-                <div class="note">
+
+                <div class="card">
+                    <h3>🛰️ Optical Imagery</h3>
                     <ul>
-                        <li><strong>Optical Imagery:</strong> Landsat, Sentinel-2, MODIS</li>
-                        <li><strong>Radar Imagery:</strong> Sentinel-1</li>
-                        <li><strong>Climate Data:</strong> Temperature, precipitation</li>
-                        <li><strong>Elevation Data:</strong> SRTM, ASTER DEM</li>
-                        <li><strong>Land Cover:</strong> MODIS Land Cover, ESA WorldCover</li>
-                        <li><strong>Specialized:</strong> Nighttime lights, population density, fire data</li>
+                        <li><strong>Landsat 8/9:</strong> 30m, 16-day, since 2013</li>
+                        <li><strong>Sentinel-2:</strong> 10m, 5-day, since 2015</li>
+                        <li><strong>MODIS:</strong> 250m-1km, daily, since 2000</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>📡 Radar Imagery</h3>
+                    <ul>
+                        <li><strong>Sentinel-1:</strong> Works through clouds! 10m resolution</li>
+                        <li>Great for flood mapping, change detection</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>🌡️ Climate & Environment</h3>
+                    <ul>
+                        <li>Temperature and precipitation data</li>
+                        <li>Land surface temperature</li>
+                        <li>Fire and burn severity</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>🏔️ Elevation & Terrain</h3>
+                    <ul>
+                        <li><strong>SRTM:</strong> 30m global elevation</li>
+                        <li><strong>ASTER DEM:</strong> Alternative elevation source</li>
                     </ul>
                 </div>
             </section>
@@ -93,38 +215,93 @@ Map.centerObject(aoi, 10);
 var dataset1 = ee.ImageCollection('DATASET_ID_HERE')
     .filterBounds(aoi)
     .filterDate('START_DATE', 'END_DATE')
+    .sort('CLOUD_COVER')
     .first();
 
 Map.addLayer(dataset1, {bands: ['B4', 'B3', 'B2'], min: 0, max: 3000}, 'Dataset 1');
 
 // Repeat for Dataset 2 and Dataset 3
 // ...</code></pre>
+
+                <div class="try-it">
+                    <h4>Try It</h4>
+                    <p>Use the Data Catalog search to find dataset IDs. Each dataset page shows the exact collection ID
+                        to use.</p>
+                </div>
             </section>
 
             <section class="lab-steps">
                 <h2>Comparison Questions</h2>
                 <p>After loading all three datasets, answer these questions in your script comments:</p>
                 <ol>
-                    <li>Which dataset has the highest spatial resolution? What are the trade-offs?</li>
-                    <li>Which dataset provides the most frequent updates?</li>
-                    <li>Which dataset has the most spectral bands? How might this be useful?</li>
-                    <li>For your chosen location and research question, which dataset would you recommend? Why?</li>
+                    <li>Which dataset has the <strong>highest spatial resolution</strong>? What are the trade-offs?</li>
+                    <li>Which dataset provides the <strong>most frequent updates</strong>?</li>
+                    <li>Which dataset has the <strong>most spectral bands</strong>? How might this be useful?</li>
+                    <li>For your chosen location and research question, which dataset would you
+                        <strong>recommend</strong>? Why?</li>
                 </ol>
+            </section>
+
+            <!-- Self-Check Questions -->
+            <section class="self-check">
+                <h3>Check Your Understanding</h3>
+                <ol>
+                    <li>Why might you choose a 500m resolution dataset over a 10m dataset?</li>
+                    <li>What's the difference between temporal resolution and temporal coverage?</li>
+                    <li>Why would you care about the swath width of a satellite?</li>
+                    <li>When would radar imagery be preferable to optical imagery?</li>
+                </ol>
+            </section>
+
+            <!-- Pro Tips -->
+            <section class="pro-tips">
+                <h3>Pro Tips for Dataset Selection</h3>
+                <ul>
+                    <li><strong>Check availability:</strong> Some datasets don't cover all areas (e.g., some are
+                        US-only)</li>
+                    <li><strong>Consider your study period:</strong> Older studies may require Landsat (1984+) vs
+                        Sentinel (2015+)</li>
+                    <li><strong>Balance resolution with coverage:</strong> Higher resolution = smaller swath = fewer
+                        images</li>
+                    <li><strong>Read the documentation:</strong> Each dataset page has crucial information about bands,
+                        scaling, and known issues</li>
+                </ul>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <div class="issue">
+                    <strong>Problem: No images found after filtering</strong>
+                    <p><strong>Solution:</strong> Expand your date range or check if the dataset covers your area.
+                        Some datasets are regional, not global.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Image appears all black</strong>
+                    <p><strong>Solution:</strong> Your visualization parameters (min/max) don't match the data.
+                        Check the dataset documentation for recommended values.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Don't know which bands to use</strong>
+                    <p><strong>Solution:</strong> The "Bands" section of each dataset page lists all available bands
+                        with their wavelength ranges and recommended visualizations.</p>
+                </div>
             </section>
 
             <section id="submission">
                 <div class="submission-box">
-                    <h3> Lab Submission</h3>
-                    <p>Submit lab via email.</p>
+                    <h3>📋 Lab Submission</h3>
                     <p><strong>Subject:</strong> <code>Lab 7 - Challenge Finding Dataset - [Your Name]</code></p>
-                    
+
                     <h4>Submit:</h4>
                     <p>A document containing:</p>
                     <ol>
                         <li><strong>URL to your GEE script</strong> with all three datasets loaded and visualized</li>
                         <li><strong>Screenshots</strong> of all three datasets showing your area of interest</li>
-                        <li><strong>Dataset comparison table</strong> with characteristics (resolution, coverage, bands, etc.)</li>
-                        <li><strong>Recommendation paragraph</strong> explaining which dataset is best for your site and why</li>
+                        <li><strong>Dataset comparison table</strong> with characteristics (resolution, coverage, bands,
+                            etc.)</li>
+                        <li><strong>Recommendation paragraph</strong> explaining which dataset is best for your site and
+                            why</li>
                         <li><strong>Answers to comparison questions</strong> above</li>
                     </ol>
                     <p><strong>Total: 50 Points</strong></p>
@@ -133,9 +310,11 @@ Map.addLayer(dataset1, {bands: ['B4', 'B3', 'B2'], min: 0, max: 3000}, 'Dataset 
         </main>
 
         <footer>
-            <p><a href="lab-06-image-collections.html"> Previous Lab</a> | <a href="lab-08-band-arithmetic-ndvi.html">Next Lab </a></p>
-            <p><a href="../index.html">Back to Course Home</a></p>
+            <p><a href="lab-06-image-collections.html">← Previous Lab</a> | <a
+                    href="lab-08-band-arithmetic-ndvi.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
         </footer>
     </div>
 </body>
+
 </html>

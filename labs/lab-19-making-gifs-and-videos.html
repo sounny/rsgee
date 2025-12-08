@@ -1,13 +1,15 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab 19 - Making GIFs and Videos of Environmental Change | Remote Sensing Course</title>
+    <meta name="description"
+        content="Learn to create animated GIFs and filmstrips in Google Earth Engine to visualize environmental change over time.">
     <link rel="stylesheet" href="../css/style.css">
-    <meta name="robots" content="index, follow">
-    <meta name="description" content="Google Earth Engine lab 19: Lab 19 - Making GIFs and Videos of Environmental Change">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -16,95 +18,278 @@
 
         <header class="lab-header">
             <h1>Lab 19 - Making GIFs and Videos of Environmental Change</h1>
+            <p><em><strong>Objective: Create animated GIFs and filmstrips to visualize temporal changes in satellite
+                        imagery.</strong></em></p>
         </header>
 
         <main class="lab-content">
 
-            <section class="lab-preflight">
-                <h2>Before you start</h2>
+            <!-- Learning Objectives -->
+            <section class="learning-objectives">
+                <h3>What You'll Learn</h3>
                 <ul>
-                    <li><strong>Prerequisites:</strong> Finish the time-series storytelling module and finalize the scripts you will animate.</li>
-                    <li><strong>Estimated time:</strong> 60 minutes</li>
-                    <li><strong>Materials:</strong> Earth Engine account, export directory with write access, and a storyboard for the animation sequence.</li>
+                    <li>Filter ImageCollections by date and location</li>
+                    <li>Create temporal composites from image series</li>
+                    <li>Sort images chronologically for animation</li>
+                    <li>Apply visualization parameters to image collections</li>
+                    <li>Generate animated GIFs and filmstrip thumbnails</li>
                 </ul>
             </section>
 
-<div class="gmail_default">Fall 2023 Lecture - Lab 19</div>
-<div class="gmail_default"></div>
-<div class="gmail_default"></div>
-<p><em>Objective: In this lab, you will learn how to create an animated image series and a filmstrip using Google Earth Engine. You will work with an ImageCollection to filter, composite, sort, and visualize images before generating the final outputs.</em><em></em></p>
-<p>Overview: You will go through the following steps:</p>
-<p>1. Filtering<br>2. Compositing<br>3. Sorting<br>4. Image visualization</p>
-<h2>Lab Instructions:</h2>
-<h2>1. Introduction and setup</h2>
-<ul>
-<li>Go to Google Earth Engine (https://earthengine.google.com/)</li>
-<li>Sign in with your Google account</li>
-<li>Create a new script and name it something like&nbsp; "Lab19_Animation_Filmstrip"</li>
-</ul>
-<h3>2. Filtering</h3>
-<ul>
-<li>Start by importing a dataset you want to work with in the script editor. For example, you can use the MODIS Terra Vegetation Indices 16-Day Global 1km dataset and select the NDVI band:</li>
-<li>
-<pre>var col = ee.ImageCollection('MODIS/006/MOD13A2').select('NDVI');</pre>
-</li>
-<li>Now, filter the ImageCollection to include only the relevant data based on dates, spatial extent, and other properties. You can use the filterDate and filterBounds methods for this purpose.</li>
-<li>
-<pre>// Filter the ImageCollection based on dates and spatial extent<br>var startDate = '2018-01-01';<br>var endDate = '2018-12-31';<br>var regionOfInterest = ee.Geometry.Rectangle([-18.698368046353494, 38.1446395611524, 52.229366328646506, -36.16300755581617]);<br><br>var filtered = col.filterDate(startDate, endDate)<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; .filterBounds(regionOfInterest);</pre>
-</li>
-</ul>
-<h3>3. Compositing</h3>
-<ul>
-<li>Create a composite image by reducing the images within the desired date ranges. This will help to reduce the number of images in the collection and improve quality. Use the reduce method to achieve this.</li>
-<li>
-<pre>// Composite images within a date range using the median reducer<br><br>var composite = filtered.reduce(ee.Reducer.median());</pre>
-</li>
-</ul>
-<h3>4. Sorting</h3>
-<ul>
-<li>Sort the collection by time to ensure the proper chronological sequence. You can use the sort method and the system:time_start property to sort the collection by time.</li>
-<li>
-<pre>// Sort the collection by time<br><br>var sorted = filtered.sort('system:time_start');</pre>
-</li>
-</ul>
-<h3>5. Image visualization</h3>
-<ul>
-<li>Visualize the images in the collection by mapping image bands to color channels or grading values of a single band along a color palette. Use the getVideoThumbURL and getFilmstripThumbURL methods to achieve this.</li>
-<li>
-<pre>// Define visualization parameters<br>var visParams = {<br>&nbsp; min: 0.0,<br>&nbsp; max: 9000.0,<br>&nbsp; palette: [<br>&nbsp; &nbsp; 'FFFFFF', 'CE7E45', 'DF923D', 'F1B555', 'FCD163', '99B718', '74A901',<br>&nbsp; &nbsp; '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',<br>&nbsp; &nbsp; '012E01', '011D01', '011301'<br>&nbsp; ],<br>};<br><br>// Visualize the images in the collection<br>var visualized = sorted.map(function(image) {<br>&nbsp; return image.visualize(visParams);<br>});</pre>
-</li>
-</ul>
-<h3>6. Generate the outputs</h3>
-<ul>
-<li>Create an animated image series using the getVideoThumbURL method, and a filmstrip using the getFilmstripThumbURL method. Define the necessary parameters for both methods, such as region, dimensions, and framesPerSecond.</li>
-<li>Print the URLs for both the animation and the filmstrip. You can also render the animation and the filmstrip directly in the console using the ui.Thumbnail function.</li>
-<li>
-<pre>// Define parameters for getVideoThumbURL and getFilmstripThumbURL methods<br>var outputParams = {<br>&nbsp; 'region': regionOfInterest,<br>&nbsp; 'dimensions': 600,<br>&nbsp; 'crs': 'EPSG:3857',<br>&nbsp; 'framesPerSecond': 10<br>};<br><br>// Create an animated image series<br>var animationUrl = visualized.getVideoThumbURL(outputParams);<br>print("Animation URL:", animationUrl);<br><br>// Create a filmstrip<br>var filmstripUrl = visualized.getFilmstripThumbURL(outputParams);<br>print("Filmstrip URL:", filmstripUrl);<br><br>// Render the animation and the filmstrip directly in the console<br>print("Animation:", ui.Thumbnail(visualized, outputParams));<br>print("Filmstrip:", ui.Thumbnail(visualized, outputParams));</pre>
-</li>
-</ul>
-<p>Congrats, you made a gif.&nbsp; It should look like this:</p>
-<p><img src="../images/canvas/Uploaded%20Media/7df7883d1ba9d48c837bce6ee94ce6b8-a348b31bea033421668d9a5b799cf054_getPixels.gif" alt="gif output for Africa "   loading="lazy"></p>
-<h3>7. Challenge</h3>
-<ul>
-<li>Now that you have worked through the example,, could you change it up? Create a gif at a different scale or location.&nbsp; Modify the code to show a different convenience, for example, or zoom in or out to show something interesting.&nbsp; Or, if you want to have a lot of fun, try out a different dataset. Read: <a href="https://developers.google.com/earth-engine/guides/ic_visualization" target="_blank">https://developers.google.com/earth-engine/guides/ic_visualization</a> for some more ideas.&nbsp;</li>
-<li>After completing the lab and challenge, save your script by clicking the "Save" button at the top of the script editor. Make sure you comment well your code.&nbsp;</li>
-<li>Share your work with by clicking the "Share" button and providing the generated link here on Canvas.</li>
-</ul>
+            <!-- Why It Matters -->
+            <section class="why-it-matters">
+                <h3>Why This Matters</h3>
+                <p>Animations are powerful tools for communication:</p>
+                <ul>
+                    <li><strong>Show change:</strong> Animations reveal patterns invisible in single images</li>
+                    <li><strong>Engage audiences:</strong> Motion captures attention better than static images</li>
+                    <li><strong>Tell stories:</strong> Seasonal cycles, disasters, and trends become visible</li>
+                    <li><strong>Share easily:</strong> GIFs work in presentations, social media, and reports</li>
+                </ul>
+            </section>
+
+            <section class="lab-preflight">
+                <h2>Before You Start</h2>
+                <ul>
+                    <li><strong>Prerequisites:</strong> Understand ImageCollections and visualization parameters.</li>
+                    <li><strong>Estimated time:</strong> 60 minutes</li>
+                    <li><strong>Materials:</strong> Earth Engine account and a region of interest in mind.</li>
+                </ul>
+            </section>
+
+            <!-- Key Vocabulary -->
+            <section class="vocabulary">
+                <h3>Key Terms</h3>
+                <dl>
+                    <dt>Animation</dt>
+                    <dd>A sequence of images displayed rapidly to create the illusion of motion.</dd>
+
+                    <dt>Filmstrip</dt>
+                    <dd>A single image showing all frames of an animation side-by-side for comparison.</dd>
+
+                    <dt>Temporal Composite</dt>
+                    <dd>An image created by combining multiple images from different times (e.g., monthly median).</dd>
+
+                    <dt>Frame Rate (FPS)</dt>
+                    <dd>Frames per second - how many images are shown each second in an animation.</dd>
+                </dl>
+            </section>
+
+            <!-- Animation Workflow -->
+            <section class="key-concepts">
+                <h3>Animation Workflow</h3>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Step</th>
+                            <th>Purpose</th>
+                            <th>Method</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1. Filter</td>
+                            <td>Select images by date/location</td>
+                            <td>filterDate(), filterBounds()</td>
+                        </tr>
+                        <tr>
+                            <td>2. Composite</td>
+                            <td>Reduce cloud/noise effects</td>
+                            <td>reduce(), median()</td>
+                        </tr>
+                        <tr>
+                            <td>3. Sort</td>
+                            <td>Ensure chronological order</td>
+                            <td>sort('system:time_start')</td>
+                        </tr>
+                        <tr>
+                            <td>4. Visualize</td>
+                            <td>Apply color palette</td>
+                            <td>map() + visualize()</td>
+                        </tr>
+                        <tr>
+                            <td>5. Export</td>
+                            <td>Generate GIF/filmstrip</td>
+                            <td>getVideoThumbURL()</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 1: Filter the ImageCollection</h2>
+                <p>Start by importing MODIS NDVI data and filtering by date and region:</p>
+                <pre><code>// Import MODIS NDVI dataset
+var col = ee.ImageCollection('MODIS/006/MOD13A2').select('NDVI');
+
+// Define date range and region of interest (Africa continent)
+var startDate = '2018-01-01';
+var endDate = '2018-12-31';
+var regionOfInterest = ee.Geometry.Rectangle([
+    -18.698368046353494, 38.1446395611524, 
+    52.229366328646506, -36.16300755581617
+]);
+
+// Filter the ImageCollection
+var filtered = col.filterDate(startDate, endDate)
+                  .filterBounds(regionOfInterest);</code></pre>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 2: Create Composites (Optional)</h2>
+                <p>If you want to reduce the number of frames, create temporal composites:</p>
+                <pre><code>// Create a single composite using median reducer
+var composite = filtered.reduce(ee.Reducer.median());</code></pre>
+
+                <div class="note">
+                    <p><strong>When to composite:</strong> Use compositing when you have many images per time period and
+                        want to reduce noise. Skip this step if you want each original image as a frame.</p>
+                </div>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 3: Sort Chronologically</h2>
+                <p>Ensure images appear in the correct time order:</p>
+                <pre><code>// Sort the collection by acquisition time
+var sorted = filtered.sort('system:time_start');</code></pre>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 4: Apply Visualization</h2>
+                <p>Define a color palette and apply it to each image:</p>
+                <pre><code>// Define visualization parameters for NDVI
+var visParams = {
+  min: 0.0,
+  max: 9000.0,
+  palette: [
+    'FFFFFF', 'CE7E45', 'DF923D', 'F1B555', 'FCD163', '99B718', '74A901',
+    '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',
+    '012E01', '011D01', '011301'
+  ]
+};
+
+// Apply visualization to each image in the collection
+var visualized = sorted.map(function(image) {
+  return image.visualize(visParams);
+});</code></pre>
+            </section>
+
+            <section class="lab-steps">
+                <h2>Step 5: Generate the Animation</h2>
+                <p>Create the animated GIF and filmstrip:</p>
+                <pre><code>// Define output parameters
+var outputParams = {
+  'region': regionOfInterest,
+  'dimensions': 600,
+  'crs': 'EPSG:3857',
+  'framesPerSecond': 10
+};
+
+// Generate animation URL
+var animationUrl = visualized.getVideoThumbURL(outputParams);
+print("Animation URL:", animationUrl);
+
+// Generate filmstrip URL
+var filmstripUrl = visualized.getFilmstripThumbURL(outputParams);
+print("Filmstrip URL:", filmstripUrl);
+
+// Render animation directly in the console
+print("Animation:", ui.Thumbnail(visualized, outputParams));</code></pre>
+            </section>
+
+            <!-- Expected Output -->
+            <section class="expected-output">
+                <h3>Expected Result</h3>
+                <p>Your animation should show seasonal vegetation changes across Africa throughout 2018:</p>
+                <img src="../images/canvas/Uploaded%20Media/7df7883d1ba9d48c837bce6ee94ce6b8-a348b31bea033421668d9a5b799cf054_getPixels.gif"
+                    alt="NDVI animation of Africa" loading="lazy">
+            </section>
+
+            <!-- Challenge -->
+            <section class="challenge">
+                <h3>Challenge: Customize Your Animation</h3>
+                <p>Now that you've created the example, try these modifications:</p>
+                <ul>
+                    <li><strong>Different location:</strong> Zoom into a specific country or region</li>
+                    <li><strong>Different dataset:</strong> Try Landsat true color or land surface temperature</li>
+                    <li><strong>Different time period:</strong> Show change over multiple years</li>
+                    <li><strong>Adjust frame rate:</strong> Slow down or speed up the animation</li>
+                </ul>
+                <p>For more ideas, see: <a href="https://developers.google.com/earth-engine/guides/ic_visualization"
+                        target="_blank">GEE ImageCollection Visualization Guide</a></p>
+            </section>
+
+            <!-- Self-Check Questions -->
+            <section class="self-check">
+                <h3>Check Your Understanding</h3>
+                <ol>
+                    <li>Why is it important to sort the ImageCollection before creating an animation?</li>
+                    <li>What's the difference between getVideoThumbURL and getFilmstripThumbURL?</li>
+                    <li>How does the framesPerSecond parameter affect your animation?</li>
+                    <li>What visual pattern would you expect to see in an annual NDVI animation for Africa?</li>
+                </ol>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <div class="issue">
+                    <strong>Problem: Animation is too fast/slow</strong>
+                    <p><strong>Solution:</strong> Adjust the framesPerSecond parameter. Lower values (2-5) are slower;
+                        higher values (15-30) are faster.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: "User memory limit exceeded" error</strong>
+                    <p><strong>Solution:</strong> Reduce the dimensions parameter, use a smaller region, or filter to
+                        fewer images.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Animation shows only one frame</strong>
+                    <p><strong>Solution:</strong> Check that your filter returns multiple images. Print the collection
+                        size using print(filtered.size()).</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Colors don't look right</strong>
+                    <p><strong>Solution:</strong> Adjust the min/max values in visParams to match your data's actual
+                        value range.</p>
+                </div>
+            </section>
+
+            <!-- Pro Tips -->
+            <section class="pro-tips">
+                <h3>Pro Tips</h3>
+                <ul>
+                    <li><strong>Add text annotations:</strong> Use image.annotate() to add dates to each frame</li>
+                    <li><strong>Create monthly composites:</strong> Group images by month for smoother animations</li>
+                    <li><strong>Export high quality:</strong> Use Export.video.toDrive() for full resolution videos</li>
+                    <li><strong>Optimal frame count:</strong> 12-36 frames usually work best for seasonal animations
+                    </li>
+                </ul>
+            </section>
+
             <section id="submission">
                 <div class="submission-box">
-                    <h3>Lab Submission</h3>
-                    <p>Submit lab via email.</p>
-                    <p><strong>Subject:</strong> <code>Lab 19 - Making GIFs and Videos of Environmental Change - [Your Name]</code></p>
+                    <h3>📋 Lab Submission</h3>
+                    <p><strong>Subject:</strong> <code>Lab 19 - Making GIFs and Videos - [Your Name]</code></p>
+
+                    <h4>Submit:</h4>
+                    <p>A shareable URL to your GEE script that includes:</p>
+                    <ol>
+                        <li>The example Africa NDVI animation</li>
+                        <li>Your customized animation (different location, dataset, or time period)</li>
+                        <li>Comments explaining your customization choices</li>
+                    </ol>
                 </div>
             </section>
         </main>
 
         <footer>
-            <p><a href='lab-18-health-applications-part2.html'>&larr; Previous Lab</a> | <a href='lab-20-deploying-gee-apps.html'>Next Lab &rarr;</a></p>
-            <p><a href="../index.html">&larr;Back to Course Home</a></p>
+            <p><a href="lab-18-health-applications-part2.html">← Previous Lab</a> | <a
+                    href="lab-20-deploying-gee-apps.html">Next Lab →</a></p>
+            <p><a href="../index.html">← Back to Course Home</a></p>
         </footer>
     </div>
-    
-</body>
-</html>
 
+</body>
+
+</html>

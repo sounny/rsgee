@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accuracy Assessment | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 3
+        </nav>
+
+        <header class="lab-header">
+            <h1>Accuracy Assessment</h1>
+        </header>
+
+        <main class="lab-content">
+            <p>
+                A classification is only as good as its accuracy. This module teaches you to measure how well
+                your classifier performs using confusion matrices, overall accuracy, and class-specific metrics.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Split data into training and validation sets.</li>
+                    <li>Generate and interpret a confusion matrix.</li>
+                    <li>Calculate overall accuracy, producer's accuracy, and user's accuracy.</li>
+                    <li>Understand kappa coefficient and when to use it.</li>
+                    <li>Apply best practices for unbiased accuracy assessment.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Without accuracy assessment, you don't know if your map is 50% or 95% correct.
+                    Decision-makers need to understand the reliability of your results before using them
+                    for policy, conservation, or planning.
+                </p>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key vocabulary</h3>
+                <dl>
+                    <dt>Confusion Matrix</dt>
+                    <dd>A table comparing predicted classes (columns) against actual classes (rows).</dd>
+                    <dt>Overall Accuracy</dt>
+                    <dd>Percentage of correctly classified samples: (correct / total) × 100.</dd>
+                    <dt>Producer's Accuracy</dt>
+                    <dd>How well the classifier identifies a class (omission error complement).</dd>
+                    <dt>User's Accuracy</dt>
+                    <dd>How reliable the map is for a class (commission error complement).</dd>
+                    <dt>Kappa Coefficient</dt>
+                    <dd>Accuracy adjusted for chance agreement (0 = random, 1 = perfect).</dd>
+                </dl>
+            </section>
+
+            <section>
+                <h2>Quick win: Complete accuracy assessment</h2>
+                <p>This example trains a classifier and evaluates it with a confusion matrix:</p>
+                <pre><code>// 1. Load image and define bands
+var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623')
+  .multiply(0.0000275).add(-0.2)
+  .select(['SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7']);
+
+// 2. Create training points (in practice, use imported geometry)
+var water = ee.FeatureCollection([
+  ee.Feature(ee.Geometry.Point([-122.085, 37.422]), {class: 0}),
+  ee.Feature(ee.Geometry.Point([-122.090, 37.420]), {class: 0})
+]);
+var vegetation = ee.FeatureCollection([
+  ee.Feature(ee.Geometry.Point([-122.100, 37.430]), {class: 1}),
+  ee.Feature(ee.Geometry.Point([-122.105, 37.432]), {class: 1})
+]);
+var urban = ee.FeatureCollection([
+  ee.Feature(ee.Geometry.Point([-122.070, 37.415]), {class: 2}),
+  ee.Feature(ee.Geometry.Point([-122.065, 37.418]), {class: 2})
+]);
+
+var allPoints = water.merge(vegetation).merge(urban);
+
+// 3. Sample the image at point locations
+var training = image.sampleRegions({
+  collection: allPoints,
+  properties: ['class'],
+  scale: 30
+});
+
+// 4. Add random column for splitting
+var withRandom = training.randomColumn('random');
+var trainSet = withRandom.filter(ee.Filter.lt('random', 0.7));
+var testSet = withRandom.filter(ee.Filter.gte('random', 0.7));
+
+// 5. Train classifier on training set
+var classifier = ee.Classifier.smileRandomForest(50).train({
+  features: trainSet,
+  classProperty: 'class',
+  inputProperties: image.bandNames()
+});
+
+// 6. Classify the test set
+var validated = testSet.classify(classifier);
+
+// 7. Get confusion matrix
+var confusionMatrix = validated.errorMatrix('class', 'classification');
+
+// 8. Print results
+print('Confusion Matrix:', confusionMatrix);
+print('Overall Accuracy:', confusionMatrix.accuracy());
+print('Kappa:', confusionMatrix.kappa());
+print('Producer Accuracy:', confusionMatrix.producersAccuracy());
+print('User Accuracy:', confusionMatrix.consumersAccuracy());
+
+// 9. Apply classifier to image
+var classified = image.classify(classifier);
+Map.centerObject(image, 10);
+Map.addLayer(classified, {min: 0, max: 2, palette: ['blue', 'green', 'gray']}, 'Classification');</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>Console output showing the confusion matrix, overall accuracy (0-1), kappa coefficient,
+                        and per-class accuracies. The map displays the classified image.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Understanding the confusion matrix</h2>
+                <p>The confusion matrix shows where your classifier makes mistakes:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Predicted: Water</th>
+                            <th>Predicted: Vegetation</th>
+                            <th>Predicted: Urban</th>
+                            <th>Row Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Actual: Water</strong></td>
+                            <td style="background: #d4edda;">45</td>
+                            <td>3</td>
+                            <td>2</td>
+                            <td>50</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Actual: Vegetation</strong></td>
+                            <td>2</td>
+                            <td style="background: #d4edda;">43</td>
+                            <td>5</td>
+                            <td>50</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Actual: Urban</strong></td>
+                            <td>1</td>
+                            <td>4</td>
+                            <td style="background: #d4edda;">45</td>
+                            <td>50</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Column Total</strong></td>
+                            <td>48</td>
+                            <td>50</td>
+                            <td>52</td>
+                            <td>150</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <ul>
+                    <li><strong>Diagonal (green):</strong> Correct classifications</li>
+                    <li><strong>Off-diagonal:</strong> Misclassifications</li>
+                    <li><strong>Overall Accuracy:</strong> (45+43+45)/150 = 88.7%</li>
+                    <li><strong>Producer's Accuracy (Water):</strong> 45/50 = 90% (how much water was correctly found)
+                    </li>
+                    <li><strong>User's Accuracy (Water):</strong> 45/48 = 93.8% (how reliable "water" pixels are)</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Best practices</h2>
+                <h3>1. Use independent validation data</h3>
+                <p>Never test on the same points you trained with. Options:</p>
+                <ul>
+                    <li><strong>Random split:</strong> 70% training, 30% validation (easiest)</li>
+                    <li><strong>Spatial split:</strong> Train in one area, test in another (prevents spatial
+                        autocorrelation)</li>
+                    <li><strong>Temporal split:</strong> Train on one date, test on another</li>
+                </ul>
+
+                <h3>2. Stratified sampling</h3>
+                <p>Ensure each class is represented proportionally in both training and test sets:</p>
+                <pre><code>// Stratified random split
+var split = allPoints.randomColumn('random');
+var trainSet = split.filter(ee.Filter.lt('random', 0.7));
+var testSet = split.filter(ee.Filter.gte('random', 0.7));</code></pre>
+
+                <h3>3. Sufficient sample size</h3>
+                <p>Rule of thumb: At least 50 validation points per class, more for rare classes.</p>
+
+                <h3>4. Report all metrics</h3>
+                <p>Don't just report overall accuracy—include the full confusion matrix and per-class metrics.</p>
+            </section>
+
+            <section class="pro-tips">
+                <h3>Pro tips</h3>
+                <ul>
+                    <li>Use <code>.errorMatrix('actual', 'predicted')</code> with the correct order of arguments.</li>
+                    <li>For large datasets, use <code>testSet.limit(5000)</code> to avoid memory issues.</li>
+                    <li>Export the confusion matrix to Drive for publication-ready tables.</li>
+                    <li>Consider F1-score for imbalanced datasets (not built-in, but calculable from precision/recall).
+                    </li>
+                </ul>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: Improve your accuracy</h4>
+                <ol>
+                    <li>Add more training points for each class (aim for 50+ per class).</li>
+                    <li>Include additional spectral indices (NDVI, NDWI) as input bands.</li>
+                    <li>Experiment with different classifiers (CART, SVM, Random Forest).</li>
+                    <li>Compare accuracy metrics before and after each change.</li>
+                </ol>
+            </div>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Testing on training data (produces overly optimistic accuracy).</li>
+                    <li>Ignoring class imbalance (rare classes may have poor accuracy).</li>
+                    <li>Reporting only overall accuracy (hides per-class problems).</li>
+                    <li>Using too few validation points (unstable accuracy estimates).</li>
+                    <li>Confusing producer's and user's accuracy.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>Why should training and validation data be separate?</li>
+                    <li>What does a high user's accuracy but low producer's accuracy indicate?</li>
+                    <li>What is kappa, and when is it useful?</li>
+                    <li>How many validation points per class is a good minimum?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li><a href="introduction-to-image-classification.html">Introduction to Classification</a></li>
+                    <li><a href="unsupervised-classification.html">Unsupervised Classification</a></li>
+                    <li><a href="../week-04-exports/exporting-data.html">Exporting Data</a> - save your accuracy report
+                    </li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+
+</html>
