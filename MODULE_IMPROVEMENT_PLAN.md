@@ -9,19 +9,19 @@ This plan outlines a systematic approach to enhance the course modules to ensure
 ## 📊 Current State Assessment
 
 ### Module Inventory (57 pages across 14 directories)
-| Week | Topic | Files | Current State |
-|------|-------|-------|---------------|
-| 0 | Welcome | 3 | Good introduction but needs more hands-on |
-| 1 | JavaScript | 8 | Solid foundation, well-structured |
-| 2 | Images | 6 | Core concepts covered, needs more exercises |
-| 3 | Classification | 6 | Theory-heavy, needs practical examples |
-| 4 | Exports | 2 | Sparse, needs expansion |
-| 5 | Case Studies | 1 | Under-developed gateway |
-| 6 | Public Engagement | 2 | Needs UI/App development depth |
-| 7 | River Morphology | 6 | Complete case study series |
-| 8 | Snow Observatory | 11 | Complete case study series |
-| 9 | Heat Islands | 6 | Complete case study series |
-| 10 | Fire Monitoring | 5 | Complete case study series |
+| Week | Topic             | Files | Current State                               |
+|------|-------------------|-------|---------------------------------------------|
+| 0    | Welcome           | 3     | Good introduction but needs more hands-on   |
+| 1    | JavaScript        | 8     | Solid foundation, well-structured           |
+| 2    | Images            | 6     | Core concepts covered, needs more exercises |
+| 3    | Classification    | 6     | Theory-heavy, needs practical examples      |
+| 4    | Exports           | 2     | Sparse, needs expansion                     |
+| 5    | Case Studies      | 1     | Under-developed gateway                     |
+| 6    | Public Engagement | 2     | Needs UI/App development depth              |
+| 7    | River Morphology  | 6     | Complete case study series                  |
+| 8    | Snow Observatory  | 11    | Complete case study series                  |
+| 9    | Heat Islands      | 6     | Complete case study series                  |
+| 10   | Fire Monitoring   | 5     | Complete case study series                  |
 
 ### Reference Materials Available
 1. **EarthEngineBeginningCurriculum.html** - Google's official EE101 workshop (14 sections)
@@ -128,13 +128,13 @@ var cleanCollection = collection.map(maskL8sr);
 - Good structure but missing practical EE context in some files
 
 **Improvements for each file:**
-| File | Enhancement |
-|------|-------------|
-| `variables.html` | Add ee.Number, ee.String examples alongside client-side |
-| `lists.html` | Add ee.List operations (get, size, map) |
-| `objects.html` | Add ee.Dictionary and feature properties |
-| `functions.html` | Add mapping functions over collections |
-| `client-vs-server.html` | Add common error examples and fixes |
+| File                    | Enhancement                                             |
+|-------------------------|---------------------------------------------------------|
+| `variables.html`        | Add ee.Number, ee.String examples alongside client-side |
+| `lists.html`            | Add ee.List operations (get, size, map)                 |
+| `objects.html`          | Add ee.Dictionary and feature properties                |
+| `functions.html`        | Add mapping functions over collections                  |
+| `client-vs-server.html` | Add common error examples and fixes                     |
 
 #### 2.3 Week 2 - Images (Core Competency)
 **Current Issues:**
@@ -244,19 +244,19 @@ Add "Builds On" and "Leads To" sections linking modules:
 
 Based on reference materials (EE101 curriculum + Stanford lecture notes):
 
-| New Module | Week | Rationale |
-|------------|------|-----------|
-| `geometry-tools.html` | 1 | Drawing ROIs is fundamental |
-| `reducers.html` | 2 | Central EE concept currently missing |
-| `cloud-masking.html` | 2 | Essential for clean composites |
-| `temporal-compositing.html` | 2 | Median, mosaic, qualityMosaic |
-| `feature-collections.html` | 2 | Working with vector data |
-| `joins.html` | 2 | Advanced: joining collections |
-| `accuracy-assessment.html` | 3 | Validating classifications |
-| `regression.html` | 3 | Continuous prediction |
-| `time-series-charts.html` | 5 | Temporal analysis |
-| `batch-processing.html` | 4 | Processing multiple regions |
-| `debugging-guide.html` | Supplementary | Common errors and solutions |
+| New Module                  | Week          | Rationale                            |
+|-----------------------------|---------------|--------------------------------------|
+| `geometry-tools.html`       | 1             | Drawing ROIs is fundamental          |
+| `reducers.html`             | 2             | Central EE concept currently missing |
+| `cloud-masking.html`        | 2             | Essential for clean composites       |
+| `temporal-compositing.html` | 2             | Median, mosaic, qualityMosaic        |
+| `feature-collections.html`  | 2             | Working with vector data             |
+| `joins.html`                | 2             | Advanced: joining collections        |
+| `accuracy-assessment.html`  | 3             | Validating classifications           |
+| `regression.html`           | 3             | Continuous prediction                |
+| `time-series-charts.html`   | 5             | Temporal analysis                    |
+| `batch-processing.html`     | 4             | Processing multiple regions          |
+| `debugging-guide.html`      | Supplementary | Common errors and solutions          |
 
 ---
 
@@ -292,10 +292,8 @@ Based on reference materials (EE101 curriculum + Stanford lecture notes):
   - Location search with inspector
 
 ### Phase 4: Polish & Connect (1-2 weeks)
-- [ ] Apply standard template to remaining modules (ongoing)
-- [x] Add cross-references (builds-on, leads-to) ✓ IN PROGRESS
-  - Added to NDVI module
-- [x] Create "Learning Path" visualization (`learning-path.html`) ✓ COMPLETED
+  - Headings, code, HTML structure, images, writing style
+  - Quick checklist for new modules
 - [ ] Final QA pass (links, images, code testing)
 - [x] Create debugging guide (`debugging-guide.html`) ✓ COMPLETED
 
@@ -328,16 +326,16 @@ Based on reference materials (EE101 curriculum + Stanford lecture notes):
 
 A graduate of this course should be able to:
 
-| Skill | Assessment |
-|-------|------------|
-| Load Landsat/Sentinel data | Create filtered collection in <2 minutes |
-| Compute NDVI | Write formula without looking it up |
-| Create cloud-free composite | Apply cloud mask + median composite |
-| Zonal statistics | Calculate mean value for a shapefile polygon |
-| Basic classification | Train CART with 3+ classes, apply to image |
-| Export results | Export classified image to Drive at correct scale |
-| Simple UI | Create slider that updates map visualization |
-| Debug errors | Identify client vs server issues, fix scale problems |
+| Skill                       | Assessment                                           |
+|-----------------------------|------------------------------------------------------|
+| Load Landsat/Sentinel data  | Create filtered collection in <2 minutes             |
+| Compute NDVI                | Write formula without looking it up                  |
+| Create cloud-free composite | Apply cloud mask + median composite                  |
+| Zonal statistics            | Calculate mean value for a shapefile polygon         |
+| Basic classification        | Train CART with 3+ classes, apply to image           |
+| Export results              | Export classified image to Drive at correct scale    |
+| Simple UI                   | Create slider that updates map visualization         |
+| Debug errors                | Identify client vs server issues, fix scale problems |
 
 ---
 

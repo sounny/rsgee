@@ -108,27 +108,15 @@
                     approach in Earth Engine follows these steps:</p>
                 <ol>
                     <li>Get a satellite scene</li>
-                    <li>Collect training data (labeled points or polygons)</li>
-                    <li>Select and train a classifier using the training data</li>
-                    <li>Classify the image using the trained classifier</li>
-                </ol>
+                    <h2>Lab Instructions</h2>
 
-                <figure>
-                    <img src="../images/diagrams/supervised-workflow.png"
-                        alt="Supervised classification workflow diagram" onerror="this.style.display='none'">
-                    <figcaption>The supervised classification workflow</figcaption>
-                </figure>
-            </section>
-
-            <section class="lab-steps">
-                <h2>Lab Instructions</h2>
-
-                <ol>
-                    <li>
-                        <h3>Part 1 - Load the Satellite Image</h3>
-                        <p>We will begin by loading a clear Landsat 8 image. We'll use a point in Milan, Italy, as the
-                            center of our study area.</p>
-                        <pre><code>// Create an Earth Engine Point object over Milan.
+                    <ol>
+                        <li>
+                            <h3>Part 1 - Load the Satellite Image</h3>
+                            <p>We will begin by loading a clear Landsat 8 image. We'll use a point in Milan, Italy, as
+                                the
+                                center of our study area.</p>
+                            <pre><code>// Create an Earth Engine Point object over Milan.
 var pt = ee.Geometry.Point([9.453, 45.424]);
 
 // Filter the Landsat 8 collection and select the least cloudy image.
@@ -149,176 +137,184 @@ var visParams = {
 };
 Map.addLayer(Landsat, visParams, 'Landsat 8 image');</code></pre>
 
-                        <p><strong>Understanding the code:</strong></p>
-                        <ul>
-                            <li><code>.sort('CLOUD_COVER')</code> - Orders images by cloud cover percentage</li>
-                            <li><code>.first()</code> - Takes the least cloudy image (first after sorting)</li>
-                            <li>The visParams display a true-color composite (Red-Green-Blue)</li>
-                        </ul>
+                            <p><strong>Understanding the code:</strong></p>
+                            <ul>
+                                <li><code>.sort('CLOUD_COVER')</code> - Orders images by cloud cover percentage</li>
+                                <li><code>.first()</code> - Takes the least cloudy image (first after sorting)</li>
+                                <li>The visParams display a true-color composite (Red-Green-Blue)</li>
+                            </ul>
 
-                        <figure>
-                            <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%206.55.38%20AM.png"
-                                alt="Landsat 8 image of Milan, Italy" loading="lazy">
-                            <figcaption>Landsat 8 true-color image of Milan, Italy</figcaption>
-                        </figure>
-                    </li>
+                            <figure>
+                                <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%206.55.38%20AM.png"
+                                    alt="Landsat 8 image of Milan, Italy" loading="lazy">
+                                <figcaption>Landsat 8 true-color image of Milan, Italy</figcaption>
+                            </figure>
+                        </li>
 
-                    <li>
-                        <h3>Part 2 - Define Your Land Cover Classes</h3>
-                        <p>Before collecting training points, define the classes you want to map. For this exercise,
-                            we'll use four classes:</p>
+                        <li>
+                            <h3>Part 2 - Define Your Land Cover Classes</h3>
+                            <p>Before collecting training points, define the classes you want to map. For this exercise,
+                                we'll use four classes:</p>
 
-                        <table class="schedule-table">
-                            <thead>
-                                <tr>
-                                    <th>Class Name</th>
-                                    <th>Class Code</th>
-                                    <th>Hex Color</th>
-                                    <th>Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Forest</td>
-                                    <td>0</td>
-                                    <td>#589400</td>
-                                    <td>Trees and dense vegetation</td>
-                                </tr>
-                                <tr>
-                                    <td>Developed</td>
-                                    <td>1</td>
-                                    <td>#FF0000</td>
-                                    <td>Urban areas, buildings, roads</td>
-                                </tr>
-                                <tr>
-                                    <td>Water</td>
-                                    <td>2</td>
-                                    <td>#1A11FF</td>
-                                    <td>Rivers, lakes, sea</td>
-                                </tr>
-                                <tr>
-                                    <td>Herbaceous</td>
-                                    <td>3</td>
-                                    <td>#D0741E</td>
-                                    <td>Crops, grassland, bare fields</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table class="schedule-table">
+                                <thead>
+                                    <tr>
+                                        <th>Class Name</th>
+                                        <th>Class Code</th>
+                                        <th>Hex Color</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Forest</td>
+                                        <td>0</td>
+                                        <td>#589400</td>
+                                        <td>Trees and dense vegetation</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Developed</td>
+                                        <td>1</td>
+                                        <td>#FF0000</td>
+                                        <td>Urban areas, buildings, roads</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Water</td>
+                                        <td>2</td>
+                                        <td>#1A11FF</td>
+                                        <td>Rivers, lakes, sea</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Herbaceous</td>
+                                        <td>3</td>
+                                        <td>#D0741E</td>
+                                        <td>Crops, grassland, bare fields</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                        <div class="note">
-                            <p><strong>Why numeric codes?</strong> Classifiers work with numbers, not text. The palette
-                                in your visualization will map these codes back to meaningful colors.</p>
-                        </div>
-                    </li>
+                            <div class="note">
+                                <p><strong>Why numeric codes?</strong> Classifiers work with numbers, not text. The
+                                    palette
+                                    in your visualization will map these codes back to meaningful colors.</p>
+                            </div>
+                        </li>
 
-                    <li>
-                        <h3>Part 3 - Collect Training Points</h3>
-                        <p>Now we'll use the <strong>Geometry Tools</strong> to create points on the Landsat image
-                            representing each land cover class.</p>
+                        <li>
+                            <h3>Part 3 - Collect Training Points</h3>
+                            <p>Now we'll use the <strong>Geometry Tools</strong> to create points on the Landsat image
+                                representing each land cover class.</p>
 
-                        <h4>Step 3a: Create the First Feature Collection</h4>
-                        <ol>
-                            <li>In the <strong>Geometry Tools</strong>, click on the marker (point) option</li>
-                            <li>A geometry import named "geometry" will appear. Click the gear icon to configure it</li>
-                        </ol>
+                            <h4>Step 3a: Create the First Feature Collection</h4>
+                            <ol>
+                                <li>In the <strong>Geometry Tools</strong>, click on the marker (point) option</li>
+                                <li>A geometry import named "geometry" will appear. Click the gear icon to configure it
+                                </li>
+                            </ol>
 
-                        <figure>
-                            <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%206.57.16%20AM.png"
-                                alt="Geometry tools location" loading="lazy">
-                            <figcaption>The Geometry Tools in the Code Editor</figcaption>
-                        </figure>
+                            <figure>
+                                <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%206.57.16%20AM.png"
+                                    alt="Geometry tools location" loading="lazy">
+                                <figcaption>The Geometry Tools in the Code Editor</figcaption>
+                            </figure>
 
-                        <h4>Step 3b: Configure the Feature Collection</h4>
-                        <ol>
-                            <li>Name the import <code>forest</code></li>
-                            <li>Change the import type to <strong>FeatureCollection</strong></li>
-                            <li>Click <strong>+ Property</strong></li>
-                            <li>Name the property <code>class</code> and set its value to <code>0</code></li>
-                            <li>Set the color to <code>#589400</code> (dark green)</li>
-                            <li>Click <strong>OK</strong></li>
-                        </ol>
+                            <h4>Step 3b: Configure the Feature Collection</h4>
+                            <ol>
+                                <li>Name the import <code>forest</code></li>
+                                <li>Change the import type to <strong>FeatureCollection</strong></li>
+                                <li>Click <strong>+ Property</strong></li>
+                                <li>Name the property <code>class</code> and set its value to <code>0</code></li>
+                                <li>Set the color to <code>#589400</code> (dark green)</li>
+                                <li>Click <strong>OK</strong></li>
+                            </ol>
 
-                        <figure>
-                            <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%208.38.15%20AM.png"
-                                alt="Configuring the forest FeatureCollection" loading="lazy">
-                            <figcaption>Configuring the forest FeatureCollection with class property</figcaption>
-                        </figure>
+                            <figure>
+                                <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%208.38.15%20AM.png"
+                                    alt="Configuring the forest FeatureCollection" loading="lazy">
+                                <figcaption>Configuring the forest FeatureCollection with class property</figcaption>
+                            </figure>
 
-                        <div class="note">
-                            <p><strong>About Hexadecimal Colors:</strong> Hex colors use six digits (0-9, A-F) in pairs
-                                for Red, Green, and Blue. For example, <code>#589400</code> has 58 red, 94 green, and 00
-                                blue -
-                                creating a dark green. <code>#FF0000</code> is pure red.</p>
-                        </div>
+                            <div class="note">
+                                <p><strong>About Hexadecimal Colors:</strong> Hex colors use six digits (0-9, A-F) in
+                                    pairs
+                                    for Red, Green, and Blue. For example, <code>#589400</code> has 58 red, 94 green,
+                                    and 00
+                                    blue -
+                                    creating a dark green. <code>#FF0000</code> is pure red.</p>
+                            </div>
 
-                        <h4>Step 3c: Collect Forest Points</h4>
-                        <ol>
-                            <li>Click on <code>forest</code> in the Geometry Imports to activate drawing mode</li>
-                            <li>Click on forested areas in your Landsat image</li>
-                            <li>Collect <strong>at least 25 points</strong></li>
-                            <li>Click <strong>Exit</strong> when finished</li>
-                        </ol>
+                            <h4>Step 3c: Collect Forest Points</h4>
+                            <ol>
+                                <li>Click on <code>forest</code> in the Geometry Imports to activate drawing mode</li>
+                                <li>Click on forested areas in your Landsat image</li>
+                                <li>Collect <strong>at least 25 points</strong></li>
+                                <li>Click <strong>Exit</strong> when finished</li>
+                            </ol>
 
-                        <figure>
-                            <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%207.03.14%20AM.png"
-                                alt="Collected forest points" loading="lazy">
-                            <figcaption>Forest training points collected across the study area</figcaption>
-                        </figure>
+                            <figure>
+                                <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%207.03.14%20AM.png"
+                                    alt="Collected forest points" loading="lazy">
+                                <figcaption>Forest training points collected across the study area</figcaption>
+                            </figure>
 
-                        <h4>Step 3d: Repeat for Other Classes</h4>
-                        <p>Create new layers for each remaining class. For each one:</p>
-                        <ul>
-                            <li><strong>Developed</strong>: class = 1, color = #FF0000, collect over urban areas</li>
-                            <li><strong>Water</strong>: class = 2, color = #1A11FF, collect over the sea and rivers</li>
-                            <li><strong>Herbaceous</strong>: class = 3, color = #D0741E, collect over agricultural
-                                fields</li>
-                        </ul>
+                            <h4>Step 3d: Repeat for Other Classes</h4>
+                            <p>Create new layers for each remaining class. For each one:</p>
+                            <ul>
+                                <li><strong>Developed</strong>: class = 1, color = #FF0000, collect over urban areas
+                                </li>
+                                <li><strong>Water</strong>: class = 2, color = #1A11FF, collect over the sea and rivers
+                                </li>
+                                <li><strong>Herbaceous</strong>: class = 3, color = #D0741E, collect over agricultural
+                                    fields</li>
+                            </ul>
 
-                        <figure>
-                            <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%207.04.22%20AM.png"
-                                alt="Creating new layers" loading="lazy">
-                            <figcaption>Click the "+ new layer" button to create each class</figcaption>
-                        </figure>
+                            <figure>
+                                <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%207.04.22%20AM.png"
+                                    alt="Creating new layers" loading="lazy">
+                                <figcaption>Click the "+ new layer" button to create each class</figcaption>
+                            </figure>
 
-                        <figure>
-                            <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%207.07.00%20AM.png"
-                                alt="All collected training samples" loading="lazy">
-                            <figcaption>All four FeatureCollections with training points</figcaption>
-                        </figure>
+                            <figure>
+                                <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%207.07.00%20AM.png"
+                                    alt="All collected training samples" loading="lazy">
+                                <figcaption>All four FeatureCollections with training points</figcaption>
+                            </figure>
 
-                        <div class="try-it">
-                            <h4>Try It</h4>
-                            <p>Use the satellite basemap to help identify land cover types, but base your point
-                                placement on how areas appear in the Landsat image itself. The classifier will learn
-                                from Landsat spectral values, not the basemap!</p>
-                        </div>
-                    </li>
+                            <div class="try-it">
+                                <h4>Try It</h4>
+                                <p>Use the satellite basemap to help identify land cover types, but base your point
+                                    placement on how areas appear in the Landsat image itself. The classifier will learn
+                                    from Landsat spectral values, not the basemap!</p>
+                            </div>
+                        </li>
 
-                    <li>
-                        <h3>Part 4 - Combine Training Data</h3>
-                        <p>Merge all four FeatureCollections into one combined training dataset:</p>
-                        <pre><code>// Combine training feature collections.
+                        <li>
+                            <h3>Part 4 - Combine Training Data</h3>
+                            <p>Merge all four FeatureCollections into one combined training dataset:</p>
+                            <pre><code>// Combine training feature collections.
 var trainingFeatures = ee.FeatureCollection([
     forest, developed, water, herbaceous
 ]).flatten();
 
 print('Training features:', trainingFeatures);</code></pre>
 
-                        <p><strong>Understanding the code:</strong></p>
-                        <ul>
-                            <li><code>ee.FeatureCollection([...])</code> - Creates a collection of collections</li>
-                            <li><code>.flatten()</code> - Converts nested collections into one flat FeatureCollection
-                            </li>
-                        </ul>
+                            <p><strong>Understanding the code:</strong></p>
+                            <ul>
+                                <li><code>ee.FeatureCollection([...])</code> - Creates a collection of collections</li>
+                                <li><code>.flatten()</code> - Converts nested collections into one flat
+                                    FeatureCollection
+                                </li>
+                            </ul>
 
-                        <p>Verify in the Console that each feature has a <code>class</code> property with values 0-3.
-                        </p>
-                    </li>
+                            <p>Verify in the Console that each feature has a <code>class</code> property with values
+                                0-3.
+                            </p>
+                        </li>
 
-                    <li>
-                        <h3>Part 5 - Extract Spectral Information</h3>
-                        <p>Sample the Landsat band values at each training point location:</p>
-                        <pre><code>// Define prediction bands.
+                        <li>
+                            <h3>Part 5 - Extract Spectral Information</h3>
+                            <p>Sample the Landsat band values at each training point location:</p>
+                            <pre><code>// Define prediction bands.
 var predictionBands = [
     'SR_B1', 'SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7',
     'ST_B10'
@@ -334,34 +330,34 @@ var classifierTraining = Landsat.select(predictionBands)
 
 print('Sampled training data:', classifierTraining);</code></pre>
 
-                        <p><strong>Understanding the code:</strong></p>
-                        <ul>
-                            <li><code>predictionBands</code> - The spectral bands the classifier will use to learn
-                                patterns</li>
-                            <li><code>.sampleRegions()</code> - Extracts pixel values at each point location</li>
-                            <li><code>properties: ['class']</code> - Keeps the class label with each sample</li>
-                            <li><code>scale: 30</code> - Matches Landsat's 30-meter resolution</li>
-                        </ul>
+                            <p><strong>Understanding the code:</strong></p>
+                            <ul>
+                                <li><code>predictionBands</code> - The spectral bands the classifier will use to learn
+                                    patterns</li>
+                                <li><code>.sampleRegions()</code> - Extracts pixel values at each point location</li>
+                                <li><code>properties: ['class']</code> - Keeps the class label with each sample</li>
+                                <li><code>scale: 30</code> - Matches Landsat's 30-meter resolution</li>
+                            </ul>
 
-                        <figure>
-                            <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%208.43.08%20AM.png"
-                                alt="Sampled training data in Console" loading="lazy">
-                            <figcaption>Each feature now has band values AND the class property</figcaption>
-                        </figure>
-                    </li>
+                            <figure>
+                                <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%208.43.08%20AM.png"
+                                    alt="Sampled training data in Console" loading="lazy">
+                                <figcaption>Each feature now has band values AND the class property</figcaption>
+                            </figure>
+                        </li>
 
-                    <li>
-                        <h3>Part 6 - Train a CART Classifier</h3>
-                        <p>CART (Classification and Regression Tree) is a decision tree algorithm that creates
-                            rules based on band values:</p>
+                        <li>
+                            <h3>Part 6 - Train a CART Classifier</h3>
+                            <p>CART (Classification and Regression Tree) is a decision tree algorithm that creates
+                                rules based on band values:</p>
 
-                        <figure>
-                            <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%208.44.22%20AM.png"
-                                alt="Example decision tree" loading="lazy">
-                            <figcaption>A decision tree creates if/then rules to classify pixels</figcaption>
-                        </figure>
+                            <figure>
+                                <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%208.44.22%20AM.png"
+                                    alt="Example decision tree" loading="lazy">
+                                <figcaption>A decision tree creates if/then rules to classify pixels</figcaption>
+                            </figure>
 
-                        <pre><code>//////////////// CART Classifier ///////////////////
+                            <pre><code>//////////////// CART Classifier ///////////////////
 
 // Train a CART Classifier.
 var classifier = ee.Classifier.smileCart().train({
@@ -373,17 +369,17 @@ var classifier = ee.Classifier.smileCart().train({
 // View the decision rules
 print('CART decision tree:', classifier.explain());</code></pre>
 
-                        <figure>
-                            <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%208.48.47%20AM.png"
-                                alt="CART classifier explained" loading="lazy">
-                            <figcaption>The "tree" property shows the decision rules</figcaption>
-                        </figure>
-                    </li>
+                            <figure>
+                                <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%208.48.47%20AM.png"
+                                    alt="CART classifier explained" loading="lazy">
+                                <figcaption>The "tree" property shows the decision rules</figcaption>
+                            </figure>
+                        </li>
 
-                    <li>
-                        <h3>Part 7 - Classify the Image</h3>
-                        <p>Apply the trained classifier to classify every pixel in the Landsat image:</p>
-                        <pre><code>// Classify the Landsat image.
+                        <li>
+                            <h3>Part 7 - Classify the Image</h3>
+                            <p>Apply the trained classifier to classify every pixel in the Landsat image:</p>
+                            <pre><code>// Classify the Landsat image.
 var classified = Landsat.select(predictionBands).classify(classifier);
 
 // Define classification image visualization parameters.
@@ -396,33 +392,34 @@ var classificationVis = {
 // Add the classified image to the map.
 Map.addLayer(classified, classificationVis, 'CART classified');</code></pre>
 
-                        <p><strong>Understanding the palette:</strong> The colors correspond to class values 0–3
-                            in order: Forest (green), Developed (red), Water (blue), Herbaceous (orange).</p>
+                            <p><strong>Understanding the palette:</strong> The colors correspond to class values 0–3
+                                in order: Forest (green), Developed (red), Water (blue), Herbaceous (orange).</p>
 
-                        <figure>
-                            <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%208.51.09%20AM.png"
-                                alt="CART classification result" loading="lazy">
-                            <figcaption>CART classification result for Milan area</figcaption>
-                        </figure>
+                            <figure>
+                                <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%208.51.09%20AM.png"
+                                    alt="CART classification result" loading="lazy">
+                                <figcaption>CART classification result for Milan area</figcaption>
+                            </figure>
 
-                        <div class="try-it">
-                            <h4>Try It</h4>
-                            <p>Toggle between the classified image and the original Landsat layer. Use the layer
-                                transparency slider to compare. Look for areas where the classification seems wrong.</p>
-                        </div>
-                    </li>
+                            <div class="try-it">
+                                <h4>Try It</h4>
+                                <p>Toggle between the classified image and the original Landsat layer. Use the layer
+                                    transparency slider to compare. Look for areas where the classification seems wrong.
+                                </p>
+                            </div>
+                        </li>
 
-                    <li>
-                        <h3>Part 8 - Train a Random Forest Classifier</h3>
-                        <p>Random Forest builds many decision trees and uses voting to improve accuracy:</p>
+                        <li>
+                            <h3>Part 8 - Train a Random Forest Classifier</h3>
+                            <p>Random Forest builds many decision trees and uses voting to improve accuracy:</p>
 
-                        <figure>
-                            <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%208.53.56%20AM.png"
-                                alt="Random Forest diagram" loading="lazy">
-                            <figcaption>Random Forest combines many trees through voting</figcaption>
-                        </figure>
+                            <figure>
+                                <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%208.53.56%20AM.png"
+                                    alt="Random Forest diagram" loading="lazy">
+                                <figcaption>Random Forest combines many trees through voting</figcaption>
+                            </figure>
 
-                        <pre><code>/////////////// Random Forest Classifier /////////////////////
+                            <pre><code>/////////////// Random Forest Classifier /////////////////////
 
 // Train RF classifier.
 var RFclassifier = ee.Classifier.smileRandomForest(50).train({
@@ -437,40 +434,41 @@ var RFclassified = Landsat.select(predictionBands).classify(RFclassifier);
 // Add classified image to the map.
 Map.addLayer(RFclassified, classificationVis, 'RF classified');</code></pre>
 
-                        <p><strong>Understanding the code:</strong></p>
-                        <ul>
-                            <li><code>smileRandomForest(50)</code> - Creates a Random Forest with 50 decision trees</li>
-                            <li>More trees generally = better accuracy, but longer computation</li>
-                            <li>The <code>seed</code> parameter (optional) makes results reproducible</li>
-                        </ul>
+                            <p><strong>Understanding the code:</strong></p>
+                            <ul>
+                                <li><code>smileRandomForest(50)</code> - Creates a Random Forest with 50 decision trees
+                                </li>
+                                <li>More trees generally = better accuracy, but longer computation</li>
+                                <li>The <code>seed</code> parameter (optional) makes results reproducible</li>
+                            </ul>
 
-                        <figure>
-                            <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%208.56.05%20AM.png"
-                                alt="Random Forest classification result" loading="lazy">
-                            <figcaption>Random Forest classification result</figcaption>
-                        </figure>
-                    </li>
+                            <figure>
+                                <img src="../images/canvas/Uploaded%20Media/Screenshot%202023-03-03%20at%208.56.05%20AM.png"
+                                    alt="Random Forest classification result" loading="lazy">
+                                <figcaption>Random Forest classification result</figcaption>
+                            </figure>
+                        </li>
 
-                    <li>
-                        <h3>Part 9 - Compare and Analyze Results</h3>
-                        <p>Inspect both classifications and consider these questions:</p>
-                        <ul>
-                            <li>Which classifier produces smoother results?</li>
-                            <li>Where do you see obvious misclassifications?</li>
-                            <li>Which classes are most often confused with each other?</li>
-                        </ul>
+                        <li>
+                            <h3>Part 9 - Compare and Analyze Results</h3>
+                            <p>Inspect both classifications and consider these questions:</p>
+                            <ul>
+                                <li>Which classifier produces smoother results?</li>
+                                <li>Where do you see obvious misclassifications?</li>
+                                <li>Which classes are most often confused with each other?</li>
+                            </ul>
 
-                        <h4>Ways to Improve Classification:</h4>
-                        <ol>
-                            <li><strong>Collect more training data:</strong> More points = better learning</li>
-                            <li><strong>Tune hyperparameters:</strong> Adjust the number of trees or tree depth</li>
-                            <li><strong>Try other classifiers:</strong> SVM, Gradient Tree Boost, etc.</li>
-                            <li><strong>Distribute samples spatially:</strong> Cover the entire study area</li>
-                            <li><strong>Add spectral indices:</strong> NDVI, NDWI can help separate vegetation from
-                                urban</li>
-                        </ol>
-                    </li>
-                </ol>
+                            <h4>Ways to Improve Classification:</h4>
+                            <ol>
+                                <li><strong>Collect more training data:</strong> More points = better learning</li>
+                                <li><strong>Tune hyperparameters:</strong> Adjust the number of trees or tree depth</li>
+                                <li><strong>Try other classifiers:</strong> SVM, Gradient Tree Boost, etc.</li>
+                                <li><strong>Distribute samples spatially:</strong> Cover the entire study area</li>
+                                <li><strong>Add spectral indices:</strong> NDVI, NDWI can help separate vegetation from
+                                    urban</li>
+                            </ol>
+                        </li>
+                    </ol>
             </section>
 
             <!-- Self-Check Questions -->
@@ -528,7 +526,8 @@ Map.addLayer(RFclassified, classificationVis, 'RF classified');</code></pre>
                     <li><strong>Wrong scale:</strong> Use <code>scale: 30</code> for Landsat, <code>scale: 10</code> for
                         Sentinel-2</li>
                     <li><strong>Forgetting the class property:</strong> Every FeatureCollection must have a
-                        <code>class</code> field</li>
+                        <code>class</code> field
+                    </li>
                     <li><strong>Points only in one area:</strong> Distribute training data across the entire image</li>
                 </ul>
             </section>

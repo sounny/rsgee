@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Learn supervised and unsupervised image classification in Google Earth Engine. Includes Random Forest classifier example and workflow for land cover mapping.">
     <title>Introduction to Image Classification | Remote Sensing Course</title>
     <link rel="stylesheet" href="../../css/style.css">
 </head>
@@ -107,31 +109,18 @@ print('Classes: 0=Water, 1=Vegetation, 2=Urban');</code></pre>
                     <h4>What you should see</h4>
                     <p>A classified map showing water (blue), vegetation (green), and urban (gray) areas.
                         The accuracy depends on training point quality and quantity.</p>
-                </div>
-            </section>
-
-            <section>
-                <h2>The classification workflow</h2>
-                <figure>
-                    <img src="../../images/diagrams/classification-workflow.png" alt="Classification workflow diagram"
-                        loading="lazy">
-                    <figcaption>The four-step classification process in Earth Engine.</figcaption>
-                </figure>
-
-                <h3>Step 1: Prepare your data</h3>
-                <p>Load imagery, apply cloud masks, and select relevant bands. Consider adding spectral
                     indices (NDVI, NDWI) as additional features.</p>
 
-                <h3>Step 2: Collect training samples</h3>
-                <p>Create points or polygons for each class using the geometry tools. More samples = better
-                    classification. Aim for 50+ points per class, distributed across the scene.</p>
+                    <h3>Step 2: Collect training samples</h3>
+                    <p>Create points or polygons for each class using the geometry tools. More samples = better
+                        classification. Aim for 50+ points per class, distributed across the scene.</p>
 
-                <h3>Step 3: Train the classifier</h3>
-                <p>Choose an algorithm and feed it your training data. The classifier learns the spectral
-                    patterns that define each class.</p>
+                    <h3>Step 3: Train the classifier</h3>
+                    <p>Choose an algorithm and feed it your training data. The classifier learns the spectral
+                        patterns that define each class.</p>
 
-                <h3>Step 4: Apply and evaluate</h3>
-                <p>Classify the entire image and assess accuracy using independent validation data.</p>
+                    <h3>Step 4: Apply and evaluate</h3>
+                    <p>Classify the entire image and assess accuracy using independent validation data.</p>
             </section>
 
             <section>

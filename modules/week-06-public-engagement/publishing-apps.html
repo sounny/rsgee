@@ -39,45 +39,33 @@
                 <h3>Why it matters</h3>
                 <p>
                     Apps democratize your analysis. A published app lets stakeholders, policymakers, or the
-                    public explore your work without coding skills or an Earth Engine account.
-                </p>
-            </section>
+                    var map = ui.Map();
+                    map.setCenter(-82.3, 29.6, 10);
 
-            <section>
-                <h2>Quick win: Minimal app template</h2>
-                <p>This is the simplest possible Earth Engine app:</p>
-                <pre><code>// Minimal App: NDVI Explorer
-// Clear the default UI and create app layout
-ui.root.clear();
+                    // Add a simple layer
+                    var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623')
+                    .multiply(0.0000275).add(-0.2);
+                    var ndvi = image.normalizedDifference(['SR_B5', 'SR_B4']);
+                    map.addLayer(ndvi, {min: 0, max: 0.8, palette: ['brown', 'yellow', 'green']}, 'NDVI');
 
-// Create a map
-var map = ui.Map();
-map.setCenter(-82.3, 29.6, 10);
+                    // Create a simple panel
+                    var panel = ui.Panel({
+                    widgets: [
+                    ui.Label('NDVI Explorer', {fontWeight: 'bold', fontSize: '20px'}),
+                    ui.Label('This app displays NDVI for a Landsat 8 scene.')
+                    ],
+                    style: {width: '300px', padding: '20px'}
+                    });
 
-// Add a simple layer
-var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623')
-  .multiply(0.0000275).add(-0.2);
-var ndvi = image.normalizedDifference(['SR_B5', 'SR_B4']);
-map.addLayer(ndvi, {min: 0, max: 0.8, palette: ['brown', 'yellow', 'green']}, 'NDVI');
+                    // Build the app layout
+                    var splitPanel = ui.SplitPanel({
+                    firstPanel: panel,
+                    secondPanel: map,
+                    orientation: 'horizontal',
+                    wipe: false
+                    });
 
-// Create a simple panel
-var panel = ui.Panel({
-  widgets: [
-    ui.Label('NDVI Explorer', {fontWeight: 'bold', fontSize: '20px'}),
-    ui.Label('This app displays NDVI for a Landsat 8 scene.')
-  ],
-  style: {width: '300px', padding: '20px'}
-});
-
-// Build the app layout
-var splitPanel = ui.SplitPanel({
-  firstPanel: panel,
-  secondPanel: map,
-  orientation: 'horizontal',
-  wipe: false
-});
-
-ui.root.add(splitPanel);</code></pre>
+                    ui.root.add(splitPanel);</code></pre>
                 <div class="expected-output">
                     <h4>What you should see</h4>
                     <p>A full-screen app with a sidebar panel on the left and an interactive map on the right.
@@ -104,7 +92,8 @@ ui.root.add(splitPanel);</code></pre>
                         <ul>
                             <li><strong>Name:</strong> Choose a descriptive name (appears in URL)</li>
                             <li><strong>App URL:</strong> Will be
-                                <code>username.users.earthengine.app/view/appname</code></li>
+                                <code>username.users.earthengine.app/view/appname</code>
+                            </li>
                         </ul>
                     </li>
                 </ol>
@@ -262,7 +251,8 @@ ui.root.add(ui.SplitPanel({
                     <li><strong>View analytics:</strong> Currently limited, but you can track via your own URL
                         shortener.</li>
                     <li><strong>Embed:</strong> Use an iframe:
-                        <code>&lt;iframe src="app-url" width="100%" height="600"&gt;&lt;/iframe&gt;</code></li>
+                        <code>&lt;iframe src="app-url" width="100%" height="600"&gt;&lt;/iframe&gt;</code>
+                    </li>
                 </ul>
             </section>
 

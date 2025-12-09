@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Master reducers in Google Earth Engine. Learn reduceRegion, reduceRegions, temporal reductions, and how to combine reducers for efficient spatial and temporal statistics.">
     <title>Reducers and Aggregations | Remote Sensing Course</title>
     <link rel="stylesheet" href="../../css/style.css">
 </head>
@@ -19,8 +21,28 @@
         </header>
 
         <main class="lab-content">
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Explain what a reducer does and when to use one.</li>
+                    <li>Calculate zonal statistics with <code>reduceRegion()</code> and <code>reduceRegions()</code>.
+                    </li>
+                    <li>Create temporal composites using collection reducers.</li>
+                    <li>Combine multiple reducers for efficient multi-statistic outputs.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Reducers are how you turn millions of pixels into actionable numbers: average temperature
+                    over a city, total burned area in a national park, or mean NDVI for each county. Every
+                    real-world analysis project depends on mastering reducers.
+                </p>
+            </section>
+
             <section>
-                <h2>What is a Reducer?</h2>
+                <h2>What Is a Reducer?</h2>
                 <p>A <strong>reducer</strong> is an Earth Engine object that represents a way of aggregating data. It
                     takes multiple values and produces a summary statistic.</p>
                 <p>Common reducers include:</p>
@@ -193,7 +215,7 @@ print('Statistics:', stats);</code></pre>
         </main>
 
         <footer>
-            <p><a href="../../index.html">←Back to Course Home</a></p>
+            <p><a href="../../index.html">← Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>

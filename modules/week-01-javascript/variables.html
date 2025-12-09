@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <meta name="description" content="Learn how to use variables in JavaScript for Google Earth Engine programming.">
     <link rel="stylesheet" href="../../css/style.css">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -31,13 +33,14 @@
 
             <section class="why-it-matters">
                 <h3>Why this matters</h3>
-                <p>Variables are the foundation for every script. In Earth Engine, you store images, geometries, dates, and results in variables so you can reuse them without retyping long expressions.</p>
+                <p>Variables are the foundation for every script. In Earth Engine, you store images, geometries, dates,
+                    and results in variables so you can reuse them without retyping long expressions.</p>
             </section>
 
             <section>
-                <h2>What is a variable-</h2>
+                <h2>What Is a Variable?</h2>
                 <p>A variable is a labeled container for data.</p>
-<pre><code>var city = 'Gainesville';</code></pre>
+                <pre><code>var city = 'Gainesville';</code></pre>
                 <ul>
                     <li><code>var</code>: declare a new variable.</li>
                     <li><code>city</code>: the label you will reference later.</li>
@@ -48,7 +51,7 @@
 
             <section>
                 <h2>Storing and printing values</h2>
-<pre><code>var population = 140398;
+                <pre><code>var population = 140398;
 var latitude = 29.6516;
 var longitude = -82.3248;
 
@@ -67,7 +70,7 @@ print('Lat/Lon:', latitude, longitude);</code></pre>
 
             <section>
                 <h2>Naming variables</h2>
-<pre><code>// Hard to read
+                <pre><code>// Hard to read
 var x = 29.6516;
 var y = -82.3248;
 
@@ -75,7 +78,8 @@ var y = -82.3248;
 var latitude = 29.6516;
 var longitude = -82.3248;
 var zoomLevel = 9;</code></pre>
-                <p>Use camelCase for multiple words (<code>studyArea</code>). Avoid reserved words (like <code>var</code>, <code>function</code>).</p>
+                <p>Use camelCase for multiple words (<code>studyArea</code>). Avoid reserved words (like
+                    <code>var</code>, <code>function</code>).</p>
             </section>
 
             <section class="pro-tips">
@@ -89,13 +93,16 @@ var zoomLevel = 9;</code></pre>
 
             <section class="builds-on">
                 <h4>Important: client vs server</h4>
-                <p>Plain JavaScript variables live in your browser. Earth Engine computations need <code>ee</code> objects (for example, <code>ee.Number(5)</code> instead of <code>5</code> when used in server math). See <a href="client-vs-server.html">Client vs Server</a> for details.</p>
+                <p>Plain JavaScript variables live in your browser. Earth Engine computations need <code>ee</code>
+                    objects (for example, <code>ee.Number(5)</code> instead of <code>5</code> when used in server math).
+                    See <a href="client-vs-server.html">Client vs Server</a> for details.</p>
             </section>
 
             <div class="try-it">
                 <h4>Try it yourself</h4>
                 <ol>
-                    <li>Create <code>myCity</code> as a string and <code>myLatitude</code>/<code>myLongitude</code> as numbers.</li>
+                    <li>Create <code>myCity</code> as a string and <code>myLatitude</code>/<code>myLongitude</code> as
+                        numbers.</li>
                     <li>Print them together in one <code>print</code> call.</li>
                     <li>Wrap the numbers as <code>ee.Number</code> and add 1 using <code>.add()</code>.</li>
                 </ol>
@@ -113,16 +120,18 @@ var zoomLevel = 9;</code></pre>
 
             <section>
                 <h2>Additional resources</h2>
-                <p><a href="https://www.w3schools.com/js/js_variables.asp" target="_blank" rel="noopener">W3Schools: JavaScript Variables</a></p>
+                <p><a href="https://www.w3schools.com/js/js_variables.asp" target="_blank" rel="noopener">W3Schools:
+                        JavaScript Variables</a></p>
             </section>
         </main>
 
         <footer>
-            <p><a href="introduction-to-javascript.html">Previous: Intro to JavaScript</a> | <a href="comments.html">Next: Comments</a></p>
+            <p><a href="introduction-to-javascript.html">Previous: Intro to JavaScript</a> | <a
+                    href="comments.html">Next: Comments</a></p>
             <p><a href="../../index.html">Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>
 </body>
-</html>
 
+</html>

@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Understanding Scale | Remote Sensing Course</title>
+    <meta name="description"
+        content="Master the four types of resolution in remote sensing: spatial, spectral, temporal, and radiometric. Learn why scale matters in Earth Engine, how image pyramids work, and how to avoid common pixel errors.">
+    <title>Understanding Scale in Earth Engine | Remote Sensing Course</title>
     <link rel="stylesheet" href="../../css/style.css">
 </head>
+
 <body>
     <div class="container">
         <nav class="breadcrumb">
@@ -18,115 +22,1121 @@
 
         <main class="lab-content">
             <p>
-                Scale determines the size of pixels used in computations and exports. If you do not set it, Earth Engine
-                guesses from your map zoom-leading to inconsistent results. Always be explicit.
+                <strong>Scale</strong> determines the size of pixels used in computations and exports. If you do not
+                specify it explicitly, Earth Engine will choose a scale based on context—often the current map zoom
+                level—leading to inconsistent and unreproducible results. Understanding scale is fundamental to working
+                effectively with remote sensing data.
             </p>
 
             <section class="learning-objectives">
                 <h3>Learning objectives</h3>
                 <ul>
-                    <li>Define spatial, temporal, and radiometric resolution.</li>
-                    <li>Find a dataset's native resolution.</li>
-                    <li>Set scale in reducers and exports to avoid surprises.</li>
-                    <li>Troubleshoot "too many pixels" errors with scale choices.</li>
+                    <li>Define and distinguish the four types of resolution: <strong>spatial, spectral, temporal, and
+                            radiometric</strong>.</li>
+                    <li>Understand how Earth Engine handles scale using <strong>image pyramids</strong>.</li>
+                    <li>Find a dataset's native resolution using <code>nominalScale()</code>.</li>
+                    <li>Set scale explicitly in reducers and exports to ensure reproducibility.</li>
+                    <li>Troubleshoot "too many pixels" errors with informed scale choices.</li>
+                    <li>Properly combine datasets with different resolutions using resampling.</li>
                 </ul>
             </section>
 
             <section class="why-it-matters">
                 <h3>Why it matters</h3>
                 <p>
-                    Scale controls accuracy, runtime, and cost. A missing scale can change your statistics when you zoom
-                    the map or cause tasks to fail.
+                    Scale controls <strong>accuracy</strong>, <strong>processing time</strong>, and
+                    <strong>cost</strong>. A missing scale parameter can change your statistics when you zoom the map or
+                    cause tasks to fail entirely. Explicitly controlling scale makes your analysis <strong>reproducible
+                        and scientifically sound</strong>, whereas leaving it implicit introduces unintended variability
+                    that undermines your results.
+                </p>
+                <p>
+                    As the <a href="https://developers.google.com/earth-engine/guides/scale" target="_blank">Earth
+                        Engine documentation</a> states: <em>"To get consistent results, always specify a scale."</em>
                 </p>
             </section>
 
+            <!-- ============================================ -->
+            <!-- SECTION: The Four Types of Resolution -->
+            <!-- ============================================ -->
             <section>
-                <h2>Three kinds of resolution</h2>
+                <h2>The four types of resolution</h2>
+                <p>Resolution defines the level of detail your sensor can capture. Remote sensing scientists recognize
+                    <strong>four distinct types of resolution</strong>, each describing a different dimension of data
+                    quality:</p>
+
+                <div class="note" style="margin: 20px 0;">
+                    <p><strong>📚 Academic Note:</strong> These four resolutions are standard in remote sensing
+                        literature. See <a
+                            href="https://www.earthdata.nasa.gov/learn/earth-observation-data-basics/remote-sensing"
+                            target="_blank">NASA Earthdata's Remote Sensing guide</a> for an authoritative reference.
+                    </p>
+                </div>
+
+                <h3>1. Spatial Resolution</h3>
+                <p>
+                    <strong>Spatial resolution</strong> refers to the size of each pixel on the ground, also called the
+                    <em>ground sampling distance</em>. A 30-meter resolution means each pixel represents a 30 × 30 meter
+                    area on Earth's surface.
+                </p>
                 <ul>
-                    <li><strong>Spatial:</strong> pixel size (Landsat 30 m, Sentinel-2 10-60 m, MODIS 250-1000 m).</li>
-                    <li><strong>Temporal:</strong> revisit time (Landsat 16 days, Sentinel-2 5-10 days, Planet daily).</li>
-                    <li><strong>Radiometric:</strong> bit depth (8-bit: 0-255; 16-bit: 0-65,535).</li>
+                    <li><strong>High spatial resolution</strong> (1–10 m): Planet, Sentinel-2 (some bands), commercial
+                        satellites. Best for urban mapping, infrastructure, and fine-scale analysis.</li>
+                    <li><strong>Medium spatial resolution</strong> (10–100 m): Landsat (30 m), Sentinel-2. Workhorse for
+                        regional studies, land cover classification.</li>
+                    <li><strong>Coarse spatial resolution</strong> (100–1000+ m): MODIS (250–1000 m), GOES. Best for
+                        global monitoring, climate studies, daily observations.</li>
                 </ul>
+                <p>
+                    <strong>Key insight:</strong> Smaller pixels (finer resolution) capture more detail but dramatically
+                    increase data volume. A large pixel might mix different land cover types into a single averaged
+                    value—a phenomenon called the <em>mixed pixel problem</em>.
+                </p>
+
+                <h3>2. Temporal Resolution</h3>
+                <p>
+                    <strong>Temporal resolution</strong> is the <em>revisit period</em>—how frequently a satellite
+                    captures imagery of the same location.
+                </p>
+                <ul>
+                    <li><strong>High temporal resolution</strong> (daily or sub-daily): Planet, geostationary satellites
+                        (GOES captures every 5–15 minutes!). Essential for monitoring rapid changes like floods, fires,
+                        or weather.</li>
+                    <li><strong>Medium temporal resolution</strong> (5–16 days): Sentinel-2 (~5 days), Landsat (~16
+                        days). Good balance for agriculture, phenology, change detection.</li>
+                    <li><strong>Low temporal resolution</strong> (monthly or less): Some specialized missions. Useful
+                        when change is slow.</li>
+                </ul>
+                <p>
+                    <strong>Trade-off:</strong> Higher temporal resolution often means coarser spatial resolution.
+                    Geostationary satellites offer near-continuous observation but at kilometer-scale pixels.
+                </p>
+
+                <h3>3. Spectral Resolution</h3>
+                <p>
+                    <strong>Spectral resolution</strong> describes the <em>number and width of wavelength bands</em> the
+                    sensor records. It determines what materials and conditions you can distinguish.
+                </p>
+                <ul>
+                    <li><strong>Panchromatic</strong> (1 broad band): High spatial detail but no color distinction.</li>
+                    <li><strong>Multispectral</strong> (4–12 bands): Landsat (11 bands), Sentinel-2 (13 bands). Enables
+                        vegetation indices, water detection, basic material identification.</li>
+                    <li><strong>Hyperspectral</strong> (100–400+ narrow bands): AVIRIS, PRISMA, EnMAP. Can identify
+                        specific minerals, vegetation species, water quality parameters.</li>
+                </ul>
+                <p>
+                    <strong>Why it matters:</strong> More spectral bands let you distinguish materials that look
+                    identical in RGB. For example, NIR bands reveal vegetation health invisible to the human eye; SWIR
+                    bands detect moisture content and mineral composition.
+                </p>
+
+                <h3>4. Radiometric Resolution</h3>
+                <p>
+                    <strong>Radiometric resolution</strong> is the sensor's ability to distinguish subtle differences in
+                    energy levels—determined by the <em>bit depth</em> of the recorded values.
+                </p>
+                <ul>
+                    <li><strong>8-bit</strong> (256 levels): 0–255. Older sensors, consumer cameras. Limited dynamic
+                        range.</li>
+                    <li><strong>12-bit</strong> (4,096 levels): Landsat 8, Sentinel-2. Much better discrimination of
+                        subtle brightness variations.</li>
+                    <li><strong>16-bit</strong> (65,536 levels): Some scientific instruments. Excellent for detecting
+                        small changes.</li>
+                </ul>
+                <p>
+                    <strong>Practical impact:</strong> Higher radiometric resolution captures subtle reflectance
+                    differences—essential for detecting small changes in water quality, vegetation stress, or
+                    distinguishing shadows from dark objects.
+                </p>
+
+                <div class="vocabulary">
+                    <h3>Key terms summary</h3>
+                    <dl>
+                        <dt>Spatial Resolution</dt>
+                        <dd>Pixel size on the ground (e.g., 30 meters)</dd>
+                        <dt>Temporal Resolution</dt>
+                        <dd>Satellite revisit frequency (e.g., 16 days)</dd>
+                        <dt>Spectral Resolution</dt>
+                        <dd>Number and width of wavelength bands (e.g., 11 bands)</dd>
+                        <dt>Radiometric Resolution</dt>
+                        <dd>Bit depth / intensity levels (e.g., 12-bit = 4096 levels)</dd>
+                    </dl>
+                </div>
             </section>
 
+            <!-- ============================================ -->
+            <!-- Interactive Resolution Explorer Tool -->
+            <!-- ============================================ -->
+            <section class="interactive-tool">
+                <h2>🔬 Interactive Resolution Explorer</h2>
+                <p>Use this tool to visualize how each type of resolution affects your analysis. Click the tabs below to
+                    explore.</p>
+
+                <style>
+                    /* Scoped styles for the interactive widget */
+                    .res-explorer-container {
+                        border: 1px solid var(--border-color, #d0d0d0);
+                        border-radius: 8px;
+                        background-color: var(--bg-primary, #ffffff);
+                        margin: 1.5rem 0;
+                        box-shadow: 0 4px 12px var(--shadow-medium, rgba(0, 0, 0, 0.1));
+                        overflow: hidden;
+                    }
+
+                    .res-tabs {
+                        display: flex;
+                        background-color: var(--bg-tertiary, #e8e8e8);
+                        border-bottom: 2px solid var(--border-color, #d0d0d0);
+                    }
+
+                    .res-tab {
+                        padding: 14px 16px;
+                        cursor: pointer;
+                        flex: 1;
+                        text-align: center;
+                        transition: all 0.3s ease;
+                        font-weight: 500;
+                        font-size: 0.95rem;
+                        color: var(--text-secondary, #666);
+                        border-bottom: 3px solid transparent;
+                        background: transparent;
+                        border-top: none;
+                        border-left: none;
+                        border-right: 1px solid var(--border-color, #d0d0d0);
+                    }
+
+                    .res-tab:last-child {
+                        border-right: none;
+                    }
+
+                    .res-tab:hover {
+                        background-color: var(--bg-secondary, #f5f5f5);
+                        color: var(--text-primary, #333);
+                    }
+
+                    .res-tab.active {
+                        background-color: var(--bg-primary, #fff);
+                        color: var(--accent-color, #4a90a4);
+                        border-bottom: 3px solid var(--accent-color, #4a90a4);
+                        font-weight: 600;
+                    }
+
+                    .res-content {
+                        padding: 25px;
+                        display: none;
+                        min-height: 380px;
+                    }
+
+                    .res-content.active {
+                        display: block;
+                    }
+
+                    .res-content h4 {
+                        margin-top: 0;
+                        color: var(--accent-color, #4a90a4);
+                        font-size: 1.1rem;
+                        margin-bottom: 15px;
+                    }
+
+                    .res-controls {
+                        margin-bottom: 20px;
+                        padding: 15px;
+                        background: var(--bg-secondary, #f5f5f5);
+                        border-radius: 6px;
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        flex-wrap: wrap;
+                    }
+
+                    .res-controls label {
+                        font-weight: 500;
+                        color: var(--text-primary, #333);
+                    }
+
+                    .res-select {
+                        padding: 10px 14px;
+                        font-size: 1rem;
+                        border-radius: 6px;
+                        border: 1px solid var(--border-color, #ccc);
+                        background: var(--bg-primary, #fff);
+                        color: var(--text-primary, #333);
+                        cursor: pointer;
+                        min-width: 200px;
+                    }
+
+                    .res-select:focus {
+                        outline: none;
+                        border-color: var(--accent-color, #4a90a4);
+                        box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.2);
+                    }
+
+                    .spatial-viz-container {
+                        display: flex;
+                        gap: 25px;
+                        flex-wrap: wrap;
+                        align-items: flex-start;
+                    }
+
+                    .spatial-grid-box {
+                        width: 280px;
+                        height: 280px;
+                        background-color: var(--bg-secondary, #f5f5f5);
+                        border: 2px solid var(--text-secondary, #666);
+                        border-radius: 4px;
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .spatial-grid-box::after {
+                        content: '1.5 km × 1.5 km';
+                        position: absolute;
+                        bottom: 5px;
+                        right: 8px;
+                        font-size: 0.7rem;
+                        color: var(--text-muted, #999);
+                        background: rgba(255, 255, 255, 0.85);
+                        padding: 2px 6px;
+                        border-radius: 3px;
+                    }
+
+                    .spatial-stats {
+                        flex: 1;
+                        min-width: 250px;
+                        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+                        padding: 20px;
+                        border-radius: 8px;
+                        border-left: 4px solid var(--accent-color, #4a90a4);
+                    }
+
+                    .spatial-stats h5 {
+                        margin: 0 0 15px 0;
+                        color: #1565c0;
+                        font-size: 1rem;
+                    }
+
+                    .stat-row {
+                        display: flex;
+                        justify-content: space-between;
+                        padding: 8px 0;
+                        border-bottom: 1px solid rgba(33, 150, 243, 0.2);
+                    }
+
+                    .stat-row:last-of-type {
+                        border-bottom: none;
+                    }
+
+                    .stat-label {
+                        color: #0d47a1;
+                    }
+
+                    .stat-value {
+                        font-weight: 600;
+                        color: #1565c0;
+                    }
+
+                    .stat-highlight {
+                        font-size: 2rem;
+                        font-weight: 700;
+                        color: #c62828;
+                        text-align: center;
+                        margin: 15px 0;
+                    }
+
+                    .stat-caption {
+                        font-size: 0.85rem;
+                        color: #0d47a1;
+                        font-style: italic;
+                        margin-top: 12px;
+                        padding-top: 12px;
+                        border-top: 1px dashed rgba(33, 150, 243, 0.3);
+                    }
+
+                    .timeline-wrapper {
+                        background: var(--bg-secondary, #f5f5f5);
+                        padding: 20px;
+                        border-radius: 8px;
+                        margin-top: 15px;
+                    }
+
+                    .timeline-container {
+                        position: relative;
+                        height: 80px;
+                        margin: 30px 0 20px;
+                    }
+
+                    .timeline-track {
+                        position: absolute;
+                        top: 50%;
+                        left: 0;
+                        right: 0;
+                        height: 4px;
+                        background: linear-gradient(90deg, var(--accent-color, #4a90a4) 0%, #81c784 100%);
+                        border-radius: 2px;
+                        transform: translateY(-50%);
+                    }
+
+                    .timeline-marker {
+                        position: absolute;
+                        top: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 24px;
+                        height: 24px;
+                        background-color: var(--accent-color, #4a90a4);
+                        border-radius: 50%;
+                        border: 3px solid white;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+                        transition: all 0.4s ease;
+                        cursor: default;
+                    }
+
+                    .timeline-marker::before {
+                        content: attr(data-day);
+                        position: absolute;
+                        top: -28px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        font-size: 0.75rem;
+                        color: var(--text-secondary, #666);
+                        white-space: nowrap;
+                        background: white;
+                        padding: 2px 6px;
+                        border-radius: 3px;
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                    }
+
+                    .timeline-days {
+                        display: flex;
+                        justify-content: space-between;
+                        color: var(--text-muted, #999);
+                        font-size: 0.85rem;
+                        margin-top: 10px;
+                    }
+
+                    .temporal-summary {
+                        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+                        padding: 15px 20px;
+                        border-radius: 8px;
+                        border-left: 4px solid #4caf50;
+                        margin-top: 20px;
+                    }
+
+                    .temporal-summary p {
+                        margin: 0;
+                        color: #1b5e20;
+                    }
+
+                    .capture-count {
+                        font-weight: 700;
+                        font-size: 1.3rem;
+                        color: #2e7d32;
+                    }
+
+                    .spec-radio-note {
+                        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+                        color: #6d4c00;
+                        padding: 12px 18px;
+                        border-radius: 8px;
+                        margin-bottom: 20px;
+                        font-size: 0.9rem;
+                        border-left: 4px solid #ffc107;
+                    }
+
+                    .compare-container {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                        gap: 20px;
+                    }
+
+                    .sensor-card {
+                        border: 1px solid var(--border-color, #d0d0d0);
+                        padding: 20px;
+                        border-radius: 8px;
+                        background: var(--bg-primary, white);
+                        box-shadow: 0 2px 8px var(--shadow-light, rgba(0, 0, 0, 0.05));
+                    }
+
+                    .sensor-card h5 {
+                        margin: 0 0 15px 0;
+                        color: var(--accent-color, #4a90a4);
+                        font-size: 1.05rem;
+                        padding-bottom: 10px;
+                        border-bottom: 2px solid var(--bg-tertiary, #e8e8e8);
+                    }
+
+                    .sensor-card p {
+                        margin: 10px 0 5px;
+                        font-size: 0.9rem;
+                        color: var(--text-secondary, #666);
+                    }
+
+                    .spectrum-bar {
+                        height: 35px;
+                        margin: 8px 0 15px;
+                        display: flex;
+                        border-radius: 4px;
+                        overflow: hidden;
+                        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+                    }
+
+                    .band {
+                        height: 100%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: 0.7rem;
+                        font-weight: 600;
+                        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                        transition: transform 0.2s ease;
+                    }
+
+                    .band:hover {
+                        transform: scaleY(1.15);
+                    }
+
+                    .gradient-strip {
+                        height: 30px;
+                        margin: 8px 0;
+                        border: 1px solid var(--border-color, #ccc);
+                        border-radius: 4px;
+                    }
+
+                    .bit-label {
+                        font-size: 0.8rem;
+                        color: var(--text-muted, #999);
+                        text-align: center;
+                    }
+
+                    @media (max-width: 768px) {
+                        .res-tabs {
+                            flex-direction: column;
+                        }
+
+                        .res-tab {
+                            border-right: none;
+                            border-bottom: 1px solid var(--border-color, #d0d0d0);
+                        }
+
+                        .res-tab:last-child {
+                            border-bottom: none;
+                        }
+
+                        .spatial-grid-box {
+                            width: 100%;
+                            max-width: 280px;
+                        }
+
+                        .res-controls {
+                            flex-direction: column;
+                            align-items: flex-start;
+                        }
+
+                        .res-select {
+                            width: 100%;
+                        }
+                    }
+                </style>
+
+                <div class="res-explorer-container">
+                    <div class="res-tabs" role="tablist">
+                        <button class="res-tab active" role="tab" aria-selected="true"
+                            onclick="switchResTab('spatial', this)">📐 Spatial</button>
+                        <button class="res-tab" role="tab" aria-selected="false"
+                            onclick="switchResTab('temporal', this)">📅 Temporal</button>
+                        <button class="res-tab" role="tab" aria-selected="false"
+                            onclick="switchResTab('spectral', this)">🌈 Spectral & Radiometric</button>
+                    </div>
+
+                    <!-- SPATIAL TAB -->
+                    <div id="res-spatial" class="res-content active" role="tabpanel">
+                        <h4>Spatial Resolution: How big is a pixel?</h4>
+                        <div class="res-controls">
+                            <label for="spatialSelect">Select a sensor:</label>
+                            <select id="spatialSelect" class="res-select" onchange="updateSpatialViz()">
+                                <option value="1000">MODIS (1000 m)</option>
+                                <option value="500">MODIS (500 m)</option>
+                                <option value="30" selected>Landsat 8/9 (30 m)</option>
+                                <option value="10">Sentinel-2 (10 m)</option>
+                                <option value="3">PlanetScope (3 m)</option>
+                            </select>
+                        </div>
+                        <p>This visualization shows a fixed <strong>1.5 km × 1.5 km</strong> area on the ground. Watch
+                            how the number of pixels changes as resolution gets finer:</p>
+                        <div class="spatial-viz-container">
+                            <div class="spatial-grid-box" id="gridBox"></div>
+                            <div class="spatial-stats">
+                                <h5>📊 Computation Impact</h5>
+                                <div class="stat-row">
+                                    <span class="stat-label">Native Scale:</span>
+                                    <span class="stat-value"><span id="scaleDisplay">30</span> meters</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Pixels per side:</span>
+                                    <span class="stat-value" id="pixelsPerSide">50</span>
+                                </div>
+                                <p style="margin: 15px 0 5px; text-align: center;">Total pixels to process:</p>
+                                <div class="stat-highlight" id="pixelCountDisplay">2,500</div>
+                                <p class="stat-caption">⚠️ Halving pixel size <strong>quadruples</strong> the number of
+                                    pixels. Going from 30m → 10m increases pixels by 9×, not 3×!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TEMPORAL TAB -->
+                    <div id="res-temporal" class="res-content" role="tabpanel">
+                        <h4>Temporal Resolution: How often does the satellite return?</h4>
+                        <div class="res-controls">
+                            <label for="tempSelect">Select a satellite:</label>
+                            <select id="tempSelect" class="res-select" onchange="updateTemporalViz()">
+                                <option value="16">Landsat 8/9 (16 days)</option>
+                                <option value="5" selected>Sentinel-2 (5 days)</option>
+                                <option value="1">Planet Daily</option>
+                            </select>
+                        </div>
+                        <p>See how many images you'd collect over a single month (30 days):</p>
+                        <div class="timeline-wrapper">
+                            <div class="timeline-container" id="timelineViz">
+                                <div class="timeline-track"></div>
+                            </div>
+                            <div class="timeline-days">
+                                <span>Day 1</span>
+                                <span>Day 10</span>
+                                <span>Day 20</span>
+                                <span>Day 30</span>
+                            </div>
+                        </div>
+                        <div class="temporal-summary">
+                            <p><span class="capture-count" id="captureCount">6</span> images captured in 30 days</p>
+                            <p id="tempText" style="margin-top: 8px; font-style: italic;">Sentinel-2's 5-day revisit
+                                balances data volume with frequent monitoring—great for agriculture and change
+                                detection.</p>
+                        </div>
+                    </div>
+
+                    <!-- SPECTRAL/RADIOMETRIC TAB -->
+                    <div id="res-spectral" class="res-content" role="tabpanel">
+                        <h4>Spectral & Radiometric Resolution</h4>
+                        <div class="spec-radio-note">
+                            <strong>💡 Key Distinction:</strong> <em>Spectral resolution</em> = which wavelengths are
+                            captured (how many bands). <em>Radiometric resolution</em> = how sensitively intensity is
+                            measured (bit depth). These are separate concepts but both relate to sensor technology.
+                        </div>
+
+                        <div class="compare-container">
+                            <div class="sensor-card">
+                                <h5>📷 Standard Camera (RGB)</h5>
+                                <p><strong>Spectral:</strong> 3 broad bands</p>
+                                <div class="spectrum-bar">
+                                    <div class="band" style="width: 33%; background: #e53935;">R</div>
+                                    <div class="band" style="width: 34%; background: #43a047;">G</div>
+                                    <div class="band" style="width: 33%; background: #1e88e5;">B</div>
+                                </div>
+                                <p><strong>Radiometric:</strong> 8-bit (256 levels)</p>
+                                <div class="gradient-strip"
+                                    style="background: linear-gradient(to right, #000 0%, #fff 100%);"></div>
+                                <p class="bit-label">Values: 0 → 255</p>
+                            </div>
+
+                            <div class="sensor-card">
+                                <h5>🛰️ Landsat 8 (Multispectral)</h5>
+                                <p><strong>Spectral:</strong> 11 narrow bands</p>
+                                <div class="spectrum-bar">
+                                    <div class="band" style="width: 9%; background: #7b1fa2;" title="Coastal Aerosol">CA
+                                    </div>
+                                    <div class="band" style="width: 9%; background: #1565c0;" title="Blue">B</div>
+                                    <div class="band" style="width: 9%; background: #2e7d32;" title="Green">G</div>
+                                    <div class="band" style="width: 9%; background: #c62828;" title="Red">R</div>
+                                    <div class="band" style="width: 9%; background: #8b0000;" title="NIR">NIR</div>
+                                    <div class="band" style="width: 10%; background: #4a148c;" title="SWIR1">SW1</div>
+                                    <div class="band" style="width: 10%; background: #311b92;" title="SWIR2">SW2</div>
+                                    <div class="band" style="width: 9%; background: #006064;" title="Cirrus">Cir</div>
+                                    <div class="band" style="width: 13%; background: #bf360c;" title="Thermal">TIR</div>
+                                    <div class="band" style="width: 13%; background: #3e2723;" title="Thermal 2">TIR2
+                                    </div>
+                                </div>
+                                <p><strong>Radiometric:</strong> 12-bit (4,096 levels)</p>
+                                <div class="gradient-strip"
+                                    style="background: linear-gradient(to right, #000 0%, #fff 100%);"></div>
+                                <p class="bit-label">Values: 0 → 4,095 (16× more sensitive!)</p>
+                            </div>
+                        </div>
+                        <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+                            <strong>Why does this matter in Earth Engine?</strong> You can check a dataset's spectral
+                            resolution with <code>image.bandNames()</code> to see available bands. More bands enable
+                            more spectral indices and material discrimination.
+                        </p>
+                    </div>
+                </div>
+
+                <script>
+                    function switchResTab(tabId, clickedTab) {
+                        document.querySelectorAll('.res-content').forEach(c => c.classList.remove('active'));
+                        document.querySelectorAll('.res-tab').forEach(t => {
+                            t.classList.remove('active');
+                            t.setAttribute('aria-selected', 'false');
+                        });
+                        document.getElementById('res-' + tabId).classList.add('active');
+                        clickedTab.classList.add('active');
+                        clickedTab.setAttribute('aria-selected', 'true');
+                    }
+
+                    function updateSpatialViz() {
+                        const scale = parseInt(document.getElementById('spatialSelect').value);
+                        const gridBox = document.getElementById('gridBox');
+                        const countDisplay = document.getElementById('pixelCountDisplay');
+                        const scaleDisplay = document.getElementById('scaleDisplay');
+                        const perSideDisplay = document.getElementById('pixelsPerSide');
+                        const areaSide = 1500;
+                        const pixelsPerSide = Math.ceil(areaSide / scale);
+                        const totalPixels = pixelsPerSide * pixelsPerSide;
+
+                        scaleDisplay.innerText = scale;
+                        perSideDisplay.innerText = pixelsPerSide;
+                        countDisplay.innerText = totalPixels.toLocaleString();
+                        gridBox.innerHTML = '';
+
+                        if (totalPixels > 2500) {
+                            const pct = 100 / pixelsPerSide;
+                            gridBox.style.backgroundImage = `linear-gradient(to right, rgba(74, 144, 164, 0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(74, 144, 164, 0.4) 1px, transparent 1px)`;
+                            gridBox.style.backgroundSize = `${pct}% ${pct}%`;
+                            gridBox.style.backgroundColor = "rgba(74, 144, 164, 0.08)";
+                            const note = document.createElement('div');
+                            note.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255,255,255,0.95); padding: 10px 15px; border-radius: 6px; font-size: 0.85rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15);';
+                            note.innerHTML = `<strong>${totalPixels.toLocaleString()}</strong> pixels!<br><span style="font-size: 0.75rem; color: #666;">Grid too dense to draw individually</span>`;
+                            gridBox.appendChild(note);
+                        } else {
+                            gridBox.style.backgroundImage = 'none';
+                            gridBox.style.backgroundColor = 'var(--bg-secondary, #f5f5f5)';
+                            const pixelSizePercent = 100 / pixelsPerSide;
+                            const frag = document.createDocumentFragment();
+                            for (let i = 0; i < totalPixels; i++) {
+                                const d = document.createElement('div');
+                                d.style.cssText = `width: ${pixelSizePercent}%; height: ${pixelSizePercent}%; float: left; box-sizing: border-box; border: 1px solid rgba(74, 144, 164, 0.3); background: rgba(74, 144, 164, 0.15);`;
+                                frag.appendChild(d);
+                            }
+                            gridBox.appendChild(frag);
+                        }
+                    }
+
+                    function updateTemporalViz() {
+                        const interval = parseInt(document.getElementById('tempSelect').value);
+                        const container = document.getElementById('timelineViz');
+                        const text = document.getElementById('tempText');
+                        const countEl = document.getElementById('captureCount');
+                        container.querySelectorAll('.timeline-marker').forEach(m => m.remove());
+                        const totalDays = 30;
+                        let count = 0;
+                        for (let i = 1; i <= totalDays; i += interval) {
+                            const marker = document.createElement('div');
+                            marker.className = 'timeline-marker';
+                            marker.setAttribute('data-day', 'Day ' + i);
+                            marker.style.left = `${((i - 1) / (totalDays - 1)) * 100}%`;
+                            container.appendChild(marker);
+                            count++;
+                        }
+                        countEl.innerText = count;
+                        const messages = {
+                            1: "Daily revisits provide excellent monitoring for rapid events like floods or fires—but generate massive data volumes.",
+                            5: "Sentinel-2's 5-day revisit balances data volume with frequent updates—great for agricultural monitoring and change detection.",
+                            16: "Landsat's 16-day revisit is the historical standard. Cloud cover can result in month-long gaps in usable data."
+                        };
+                        text.innerText = messages[interval] || '';
+                    }
+
+                    document.addEventListener('DOMContentLoaded', function () {
+                        updateSpatialViz();
+                        updateTemporalViz();
+                    });
+                    if (document.readyState !== 'loading') {
+                        updateSpatialViz();
+                        updateTemporalViz();
+                    }
+                </script>
+            </section>
+
+            <!-- ============================================ -->
+            <!-- SECTION: How Earth Engine Handles Scale -->
+            <!-- ============================================ -->
             <section>
-                <h2>Always set scale</h2>
-<pre><code>// reduceRegion: specify scale
+                <h2>How Earth Engine handles scale: Image pyramids</h2>
+                <p>
+                    Understanding <em>why</em> scale matters requires knowing how Earth Engine stores and processes data
+                    internally. This is key to avoiding unexpected results.
+                </p>
+
+                <h3>Image pyramids explained</h3>
+                <p>
+                    Earth Engine stores every image as a <strong>multi-resolution pyramid</strong>. At the base is the
+                    full-resolution (native) data. Above it are progressively coarser aggregated versions—each level has
+                    pixels that represent averages or samples of the level below.
+                </p>
+
+                <figure style="margin: 25px 0; text-align: center;">
+                    <div
+                        style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); padding: 25px; border-radius: 8px; display: inline-block;">
+                        <pre
+                            style="background: transparent; border: none; text-align: left; font-size: 0.85rem; margin: 0;">
+┌───────────────────┐  ← Level 3: Very coarse (e.g., 240m)
+│      1 pixel      │     Aggregated from Level 2
+└───────────────────┘
+        ↑
+┌───┬───┬───┬───┐      ← Level 2: Coarse (e.g., 120m)  
+│   │   │   │   │        Each pixel = 4 from Level 1
+└───┴───┴───┴───┘
+        ↑
+┌─┬─┬─┬─┬─┬─┬─┬─┐      ← Level 1: Medium (e.g., 60m)
+│ │ │ │ │ │ │ │ │        Each pixel = 4 from Level 0
+└─┴─┴─┴─┴─┴─┴─┴─┘
+        ↑
+┌┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┐      ← Level 0: Native resolution (e.g., 30m)
+└┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┘        Original sensor data
+                        </pre>
+                    </div>
+                    <figcaption>Earth Engine's image pyramid: coarser levels are pre-computed aggregations of finer
+                        levels.</figcaption>
+                </figure>
+
+                <h3>What happens when you request data?</h3>
+                <p>
+                    When you run a computation or export, Earth Engine uses the <code>scale</code> parameter to decide
+                    which pyramid level to pull data from:
+                </p>
+                <ul>
+                    <li><strong>Request at native scale (30m for Landsat):</strong> You get actual sensor pixels from
+                        Level 0.</li>
+                    <li><strong>Request at coarser scale (100m):</strong> Earth Engine pulls from a higher pyramid level
+                        with pre-aggregated pixels—faster, but values differ from native.</li>
+                    <li><strong>Request at finer scale (10m on 30m data):</strong> Earth Engine <em>upsamples</em> the
+                        native data using interpolation—no new detail is created, just smoothed pixels.</li>
+                </ul>
+
+                <div class="warning">
+                    <p><strong>⚠️ Critical:</strong> If you don't specify a scale, Earth Engine guesses one—often based
+                        on your current map zoom level in the Code Editor. This means the <em>same code</em> can produce
+                        different results depending on how zoomed in you are!</p>
+                </div>
+
+                <h3>Why the same location can have different values</h3>
+                <p>
+                    Because each pyramid level represents aggregated data, the pixel value at a location can differ
+                    depending on which level is queried. For example, if you run <code>reduceRegion</code> at 10m, 30m,
+                    and 100m for the same point:
+                </p>
+                <ul>
+                    <li>At 10m: Interpolated/upsampled from the 30m native data</li>
+                    <li>At 30m: Actual native sensor value</li>
+                    <li>At 100m: Aggregated value (average of multiple native pixels)</li>
+                </ul>
+                <p>
+                    All three may return different numbers for the same geographic location. This is expected
+                    behavior—not a bug—but it's why <strong>you must be intentional about scale</strong>.
+                </p>
+            </section>
+
+            <!-- ============================================ -->
+            <!-- SECTION: Always Set Scale -->
+            <!-- ============================================ -->
+            <section>
+                <h2>Always set scale explicitly</h2>
+                <p>
+                    According to the <a href="https://developers.google.com/earth-engine/guides/scale"
+                        target="_blank">Earth Engine Developer Guide</a>: <em>"In general, it is best to always specify
+                        scale, crs, and crsTransform when performing reductions or exports."</em>
+                </p>
+
+                <h3>In reducers</h3>
+                <pre><code>// Good: scale explicitly set to match Landsat native resolution
 var stats = image.reduceRegion({
   reducer: ee.Reducer.mean(),
   geometry: roi,
-  scale: 30  // match Landsat native resolution
+  scale: 30,           // Always specify!
+  maxPixels: 1e9       // Optional: raise limit for large regions
 });
+print('Mean reflectance:', stats);</code></pre>
 
-// Export: specify scale
+                <h3>In exports</h3>
+                <pre><code>// Good: export at explicit scale and projection
 Export.image.toDrive({
   image: image,
-  description: 'export_example',
+  description: 'my_export',
   region: roi,
-  scale: 30
+  scale: 30,           // Controls output resolution
+  crs: 'EPSG:32610',   // Optional: specify coordinate system
+  maxPixels: 1e13      // Raise for large exports
 });</code></pre>
+
                 <div class="pro-tips">
                     <h3>Pro tips</h3>
                     <ul>
-                        <li>Use native resolution when possible; coarsen (larger scale) for large regions to avoid timeouts.</li>
-                        <li>Print <code>image.projection()</code> and <code>image.projection().nominalScale()</code> to confirm native scale.</li>
-                        <li>Set <code>maxPixels</code> and <code>bestEffort</code> only when you understand the trade-offs.</li>
+                        <li><strong>Match native resolution when possible</strong>—this uses actual sensor data without
+                            aggregation or interpolation.</li>
+                        <li><strong>Coarsen for large regions:</strong> If processing a country at 10m is too slow, use
+                            30m or 100m. A 3× increase in scale reduces pixels by 9×.</li>
+                        <li><strong>Check native scale programmatically:</strong> Use
+                            <code>image.projection().nominalScale()</code> to verify true resolution.</li>
+                        <li><strong>For multi-band images:</strong> Bands may have different resolutions (e.g.,
+                            Sentinel-2's 10m/20m/60m bands). Select a specific band to check its scale:
+                            <code>image.select('B4').projection().nominalScale()</code>.</li>
                     </ul>
                 </div>
             </section>
 
+            <!-- ============================================ -->
+            <!-- SECTION: Finding Native Resolution -->
+            <!-- ============================================ -->
             <section class="try-it">
-                <h4>Try it: inspect native scale</h4>
-<pre><code>var l8 = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623');
-print('Projection', l8.projection());
-print('Native scale (m)', l8.projection().nominalScale());</code></pre>
-                <p>Compare with Sentinel-2 and MODIS to see different scales.</p>
+                <h4>Try it: Inspect native scale</h4>
+                <pre><code>// Landsat 8 Surface Reflectance
+var l8 = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623');
+print('Landsat 8 projection:', l8.projection());
+print('Landsat 8 native scale (m):', l8.projection().nominalScale());
+
+// Sentinel-2
+var s2 = ee.Image('COPERNICUS/S2_SR_HARMONIZED/20230601T184921_20230601T185933_T10SEG');
+print('Sentinel-2 B4 (Red) scale:', s2.select('B4').projection().nominalScale());
+print('Sentinel-2 B5 (Red Edge) scale:', s2.select('B5').projection().nominalScale());
+
+// MODIS
+var modis = ee.Image('MODIS/061/MOD09GA/2023_06_01');
+print('MODIS sur_refl_b01 scale:', modis.select('sur_refl_b01').projection().nominalScale());
+
+// Count spectral bands
+print('Landsat 8 band count:', l8.bandNames().length());
+print('Sentinel-2 band count:', s2.bandNames().length());</code></pre>
+                <p><strong>What to notice:</strong> Landsat returns ~30m, Sentinel-2 bands vary (10m, 20m, 60m depending
+                    on band), MODIS returns 500m or 1000m. Sentinel-2 has 13 bands vs. Landsat's 11—higher spectral
+                    resolution!</p>
             </section>
 
+            <!-- ============================================ -->
+            <!-- SECTION: Handling "Too Many Pixels" -->
+            <!-- ============================================ -->
+            <section>
+                <h2>Handling "too many pixels" errors</h2>
+                <p>
+                    Earth Engine limits computations to prevent runaway processing. The default limit for
+                    <code>reduceRegion</code> is about <strong>10 million pixels</strong>. For context:
+                </p>
+                <ul>
+                    <li>A 1° × 1° area (~12,000 km²) at 30m = <strong>~13 million pixels</strong> → exceeds default!
+                    </li>
+                    <li>Same area at 100m = <strong>~1.2 million pixels</strong> → easily within limits</li>
+                    <li>Same area at 500m = <strong>~48,000 pixels</strong> → very fast</li>
+                </ul>
+
+                <pre><code>// Strategy: Coarsen scale first, then optionally raise limits
+var stats = image.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: largeArea,
+  scale: 100,          // ← First line of defense: coarser scale
+  maxPixels: 1e9,      // ← Second: raise the limit if needed
+  bestEffort: true     // ← Last resort: auto-coarsen if still too many
+});</code></pre>
+
+                <div class="note">
+                    <h4>Understanding <code>maxPixels</code> and <code>bestEffort</code></h4>
+                    <ul>
+                        <li><strong><code>maxPixels</code></strong>: Sets the maximum number of pixels Earth Engine will
+                            process. Default is ~10⁸. Raising it allows larger computations but takes more
+                            time/resources.</li>
+                        <li><strong><code>bestEffort: true</code></strong>: If the computation would exceed
+                            <code>maxPixels</code>, Earth Engine automatically coarsens the resolution until it fits.
+                            <em>Warning:</em> This changes your actual analysis scale silently! You may get 200m results
+                            when you asked for 30m. Use with caution.</li>
+                    </ul>
+                    <p><strong>Recommendation:</strong> Prefer explicitly choosing a coarser scale over relying on
+                        <code>bestEffort</code>. That way you control exactly what resolution you're analyzing.</p>
+                </div>
+            </section>
+
+            <!-- ============================================ -->
+            <!-- SECTION: Mixing Datasets and Resampling -->
+            <!-- ============================================ -->
+            <section>
+                <h2>Mixing datasets with different resolutions</h2>
+                <p>
+                    Real projects often combine data from multiple sensors—Landsat with Sentinel, optical with
+                    elevation, etc. These datasets have different native resolutions and projections. Here's how to
+                    handle them properly.
+                </p>
+
+                <h3>The problem</h3>
+                <p>
+                    When you combine images with different resolutions (e.g., Sentinel-2 at 10m + Landsat at 30m), Earth
+                    Engine must <strong>resample</strong> one to match the other. By default, it uses
+                    <strong>nearest-neighbor</strong> resampling, which can produce blocky artifacts.
+                </p>
+
+                <h3>Resampling methods</h3>
+                <ul>
+                    <li><strong>Nearest neighbor</strong> (default): Takes value from closest pixel. Fast, preserves
+                        exact values. Best for <em>categorical data</em> (land cover classes).</li>
+                    <li><strong>Bilinear</strong>: Averages 4 nearest pixels. Smoother result. Best for <em>continuous
+                            data</em> (reflectance, temperature, elevation).</li>
+                    <li><strong>Bicubic</strong>: Averages 16 nearest pixels. Smoothest but slowest. Good for
+                        <em>elevation data</em>.</li>
+                </ul>
+
+                <pre><code>// Example: Resampling a DEM to match Landsat before combining
+var dem = ee.Image('USGS/SRTMGL1_003');  // 30m but different projection
+var landsat = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623');
+
+// Resample DEM using bilinear for smooth elevation
+var demResampled = dem
+  .resample('bilinear')
+  .reproject({
+    crs: landsat.projection(),
+    scale: 30
+  });
+
+// Now safe to combine
+var combined = landsat.addBands(demResampled.rename('elevation'));</code></pre>
+
+                <div class="warning">
+                    <p><strong>⚠️ Caution with <code>reproject()</code>:</strong> Explicit reprojection forces immediate
+                        computation and can be slow for large areas. When possible, let Earth Engine handle reprojection
+                        implicitly by specifying <code>scale</code> and <code>crs</code> in your final reduction or
+                        export.</p>
+                </div>
+
+                <h3>Choosing an analysis scale when mixing</h3>
+                <p>When combining Sentinel-2 (10m) with Landsat (30m):</p>
+                <ul>
+                    <li><strong>Analyze at 30m:</strong> Sentinel-2 gets downsampled (averaged). You lose some detail
+                        but both datasets contribute equally weighted information.</li>
+                    <li><strong>Analyze at 10m:</strong> Landsat gets upsampled (interpolated). The 10m pixels from
+                        Landsat are just smoothed versions of 30m data—no new detail is created.</li>
+                </ul>
+                <p><strong>Rule of thumb:</strong> Use the <em>coarsest</em> native resolution of your inputs as your
+                    analysis scale, unless you have a specific reason to need finer resolution from one source.</p>
+            </section>
+
+            <!-- ============================================ -->
+            <!-- SECTION: Common Mistakes -->
+            <!-- ============================================ -->
             <section class="common-mistakes">
                 <h3>Common mistakes</h3>
                 <ul>
-                    <li>Letting zoom level dictate scale (results change when you pan/zoom).</li>
-                    <li>Using a finer scale than native and expecting new detail (upsampling adds no new information).</li>
-                    <li>Ignoring projection differences when mixing datasets-reproject or use <code>resample</code> carefully.</li>
+                    <li><strong>Letting zoom level dictate scale:</strong> Results change when you pan/zoom the map.
+                        Always set <code>scale</code> explicitly.</li>
+                    <li><strong>Expecting new detail from upsampling:</strong> Requesting 10m scale on 30m data just
+                        interpolates—it cannot reveal features smaller than 30m.</li>
+                    <li><strong>Ignoring projection differences:</strong> Mixing datasets without considering
+                        projections can cause misalignment. Use <code>resample()</code> and explicit <code>crs</code>.
+                    </li>
+                    <li><strong>Using nearest neighbor on continuous data:</strong> This creates blocky artifacts. Use
+                        <code>resample('bilinear')</code> for reflectance, temperature, or elevation.</li>
+                    <li><strong>Trusting <code>bestEffort</code> blindly:</strong> It silently changes your analysis
+                        resolution. Know what scale you're actually getting.</li>
                 </ul>
             </section>
 
-            <section>
-                <h2>Handling "too many pixels"</h2>
-<pre><code>var stats = image.reduceRegion({
-  reducer: ee.Reducer.mean(),
-  geometry: largeArea,
-  scale: 100,      // coarser to reduce pixels
-  maxPixels: 1e9,
-  bestEffort: true
-});</code></pre>
-                <p>Coarsen scale first; raising <code>maxPixels</code> is secondary.</p>
+            <!-- ============================================ -->
+            <!-- SECTION: Case Study -->
+            <!-- ============================================ -->
+            <section class="note"
+                style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-left: 5px solid #4caf50;">
+                <h3>📋 Case study: Forest cover calculation gone wrong</h3>
+                <p>
+                    <strong>Scenario:</strong> A student tried to calculate forest cover percentage for Brazil using
+                    Sentinel-2 at 10m resolution. The computation timed out after 2 hours.
+                </p>
+                <p>
+                    <strong>Analysis:</strong> Brazil is ~8.5 million km². At 10m resolution, that's approximately
+                    <strong>85 trillion pixels</strong>—far beyond any reasonable limit!
+                </p>
+                <p>
+                    <strong>Solution:</strong> The student changed to 100m resolution (still plenty of detail for
+                    national-scale analysis). Pixel count dropped to ~850 billion—still large but manageable with
+                    <code>maxPixels: 1e12</code> and tiled exports.
+                </p>
+                <p>
+                    <strong>Trade-off:</strong> At 100m, small forest patches under ~1 hectare might be missed, but for
+                    a national forest inventory, this is acceptable. The analysis completed in 15 minutes.
+                </p>
+                <p>
+                    <strong>Lesson:</strong> Match your scale to your analysis goal. Continental analyses don't need
+                    meter-level detail!
+                </p>
             </section>
 
+            <!-- ============================================ -->
+            <!-- SECTION: Self-Check -->
+            <!-- ============================================ -->
             <section class="self-check">
                 <h3>Quick self-check</h3>
                 <ol>
-                    <li>Where do you set scale for a reducer?</li>
-                    <li>What does <code>nominalScale()</code> return?</li>
-                    <li>Why does upsampling not add detail?</li>
+                    <li>Name the four types of resolution in remote sensing and give a one-sentence definition of each.
+                    </li>
+                    <li>What does <code>image.projection().nominalScale()</code> return?</li>
+                    <li>Why might the same <code>reduceRegion</code> give different results at different zoom levels if
+                        you don't set <code>scale</code>?</li>
+                    <li>True or False: Using a 5m scale on 30m Landsat imagery will reveal finer details not visible at
+                        30m.
+                        <details>
+                            <summary>Reveal answer</summary>
+                            <p><strong>False.</strong> Upsampling cannot add information that wasn't captured by the
+                                sensor. You'll just get interpolated (smoothed) values.</p>
+                        </details>
+                    </li>
+                    <li>When combining Sentinel-2 (10m) with MODIS (500m), what analysis scale would you recommend and
+                        why?</li>
+                    <li>What's the difference between spectral and radiometric resolution?
+                        <details>
+                            <summary>Reveal answer</summary>
+                            <p><strong>Spectral:</strong> Number and width of wavelength bands (e.g., 11 bands).
+                                <strong>Radiometric:</strong> Bit depth / intensity levels (e.g., 12-bit = 4096 levels).
+                                Spectral = "which colors," Radiometric = "how precisely."</p>
+                        </details>
+                    </li>
                 </ol>
             </section>
 
+            <!-- ============================================ -->
+            <!-- SECTION: Next Steps -->
+            <!-- ============================================ -->
             <section>
                 <h2>Next steps</h2>
                 <ul>
-                    <li>Run the same reducer at 10 m, 30 m, and 100 m; compare runtime and results.</li>
-                    <li>Practice reprojecting one dataset to match another before combining them.</li>
-                    <li>Apply explicit scale in exports for reproducible outputs.</li>
+                    <li><strong>Experiment with scale:</strong> Run the same reducer at 10m, 30m, 100m, and 500m.
+                        Compare runtime and results.</li>
+                    <li><strong>Compare resampling methods:</strong> Visualize DEM data resampled with nearest,
+                        bilinear, and bicubic. Note the differences.</li>
+                    <li><strong>Explore band resolutions:</strong> Use <code>nominalScale()</code> on each band of a
+                        Sentinel-2 image. Which bands are 10m? 20m? 60m?</li>
+                    <li><strong>Practice exports:</strong> Export a classified image with explicit <code>scale</code>
+                        and <code>crs</code> for reproducible results.</li>
+                </ul>
+            </section>
+
+            <!-- ============================================ -->
+            <!-- SECTION: Further Reading -->
+            <!-- ============================================ -->
+            <section>
+                <h2>📚 Further reading</h2>
+                <ul>
+                    <li><a href="https://developers.google.com/earth-engine/guides/scale" target="_blank">Google Earth
+                            Engine Guide: Scale</a> — Official documentation on how Earth Engine handles scale</li>
+                    <li><a href="https://developers.google.com/earth-engine/guides/resample" target="_blank">Google
+                            Earth Engine Guide: Resampling and Reducing Resolution</a> — How to control interpolation
+                    </li>
+                    <li><a href="https://www.earthdata.nasa.gov/learn/earth-observation-data-basics/remote-sensing"
+                            target="_blank">NASA Earthdata: Remote Sensing Basics</a> — Authoritative introduction to
+                        the four resolutions</li>
+                    <li><a href="https://pangeography.com/types-of-resolution-in-remote-sensing/" target="_blank">Pan
+                            Geography: Types of Resolution</a> — Clear explanations with examples</li>
                 </ul>
             </section>
         </main>
 
         <footer>
+            <p><a href="image-collections.html">← Image Collections</a> | <a href="cloud-masking.html">Cloud Masking
+                    →</a></p>
             <p><a href="../../index.html">Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>
 </body>
+
 </html>

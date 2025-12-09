@@ -22,7 +22,7 @@
       </figure>
       <p>In this final step, we will perform that trend analysis. To do this, we must add a date time stamp to have the appropriate X value (time) for our Y value (Snow cover frequency).</p>
       <figure>
-        <img src="../../images/global-snow/SCFgraph%20(1).png" alt="Snow Cover Frequency graph" loading="lazy">
+        <img src="../../images/global-snow/scf-graph.png" alt="Snow Cover Frequency graph" loading="lazy">
       </figure>
       <p>To add the date, we will also encompass all the other functions up to this point as well, because we need to format the newly created image collection correctly for the linearFit reducer. We will, therefore, create 3 arrays. One will contain the start dates, one the end dates and the other will be left blank. We will then iterate through the arrays in a for loop, using our previously created functions to calculate snow cover frequency. We will then use the data to create a band of constant value and add to that the snow cover frequency. The code to do this appears as follows:</p>
       <figure>
@@ -47,7 +47,7 @@ Map.addLayer(WaterYearSCFImages);
       </p>
       <p>This can be complicated to follow, so understand what we just did. If necessary, you can hand it a single set of dates and examine a single image in the collection. Once you are satisfied you understand what we just did, we will then apply the linear fit reducer. This call looks like such:</p>
       <figure>
-        <img src="../../images/global-snow/Capture%20(1).png" alt="Linear fit reducer code" loading="lazy">
+        <img src="../../images/global-snow/capture.jpg" alt="Linear fit reducer code" loading="lazy">
       </figure>
       <p>
         <a href="https://code.earthengine.google.com/9335f4e9c136231837f320a82f234b7d" target="_blank">Earth Engine Code Example</a>

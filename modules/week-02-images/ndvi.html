@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Learn to calculate NDVI (Normalized Difference Vegetation Index) in Google Earth Engine. Includes Landsat 8 code examples, value interpretation, and common mistakes.">
     <title>NDVI | Remote Sensing Course</title>
     <link rel="stylesheet" href="../../css/style.css">
 </head>
@@ -95,6 +97,21 @@ print('NDVI stats', ndvi.reduceRegion({
                     <li>Interpreting cloudy pixels as low NDVI; mask first.</li>
                     <li>Comparing NDVI across sensors without consistent preprocessing.</li>
                 </ul>
+            </section>
+
+            <section class="real-world-application"
+                style="background-color: #f0f7f0; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0;">
+                <h3>🌍 Real-World Application</h3>
+                <p>
+                    <strong>Agricultural Monitoring:</strong> The USDA uses NDVI from satellites to monitor
+                    crop health across millions of acres. Farmers can detect drought stress, pest damage, or
+                    nutrient deficiencies weeks before visible symptoms appear—saving crops and reducing costs.
+                </p>
+                <p>
+                    <strong>Deforestation Tracking:</strong> Brazil's PRODES program uses NDVI time series
+                    to detect illegal deforestation in the Amazon, triggering enforcement actions within days
+                    of clearing.
+                </p>
             </section>
 
             <section class="self-check">

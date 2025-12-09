@@ -33,7 +33,7 @@
       <li>Using gradient to further isolate the centerline pixel having local minimal gradient values.</li>
       <li>Cleaning the raw centerline by removing spurious centerlines.</li>
     </ol>
-    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 10.49.35?AM.png"
+    <img src="../../images/river-morphology/river-morph-10-49-35.png"
       alt="Steps extracting river centerline" loading="lazy"
       style="display: block; margin-left: auto; margin-right: auto;">
     <p><em>Figure: Steps extracting river centerline: (a) distance transform of a river mask; (b) gradient of the
@@ -118,7 +118,7 @@ var angleVis = {
 };
 Map.addLayer(rpj(angle), angleVis, 'cross-sectional directions', false);
 </code></pre>
-    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 10.54.47?AM.png" alt="Cross-sectional directions"
+    <img src="../../images/river-morphology/river-morph-10-54-47.png" alt="Cross-sectional directions"
       loading="lazy">
     <h2>Quantify River Widths</h2>
     <p>To estimate river width, we will be using the RWC function <code>rwGen_waterMask</code>. This function can take
@@ -204,7 +204,7 @@ waterMask = ee.Image(waterMask.rename(['waterMask']).setMulti({
 var widths = rwc(waterMask);
 print('example width output', widths.first());
 </code></pre>
-    <img src="../../images/river-morphology/Screenshot 2023-10-26 at 11.00.24?AM.png" alt="River width results"
+    <img src="../../images/river-morphology/river-morph-11-00-24.png" alt="River width results"
       loading="lazy">
     <nav class="series-nav">
       <a href="part-1-creating-and-analyzing-a-single-river-mask.html">&#8592; Part 1</a> |

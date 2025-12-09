@@ -85,7 +85,7 @@ Map.addLayer(ee.Image.constant(0), {
 }, 'bg', false);
 Map.addLayer(waterMask, {}, 'water mask', false);
 </code></pre>
-        <img src="../../images/river-morphology/Screenshot 2023-10-26 at 10.19.28?AM.png" alt="screenshot of the result"
+        <img src="../../images/river-morphology/river-morph-10-19-28.png" alt="screenshot of the result"
             loading="lazy">
         <p>Next, we clean up the water mask by filling in small gaps by performing a closing operation (dilation
             followed by erosion). Areas of non-water pixels inside surface water bodies in the water mask may represent
@@ -113,13 +113,13 @@ Map.addLayer(rpj(filled), {
     max: 1
 }, 'filled water mask', false);
 </code></pre>
-        <img src="../../images/river-morphology/Screenshot 2023-10-26 at 10.20.56?AM.png" alt="Filled water mask"
+        <img src="../../images/river-morphology/river-morph-10-20-56.png" alt="Filled water mask"
             loading="lazy">
         <p>We forced reprojection of the map layer using the helper function <code>rpj</code>. This means we must be
             careful to keep our domain small enough to be processed at the set scale when calculating on the fly in the
             Code Editor; otherwise, we will run out of memory. The reprojection may not be necessary when exporting the
             output using a task.</p>
-        <img src="../../images/river-morphology/Screenshot 2023-10-26 at 10.09.57?AM.png"
+        <img src="../../images/river-morphology/river-morph-10-09-57.png"
             alt="concepts of the different masks" loading="lazy">
         <p>In the following step, we extract water bodies in the water mask corresponding to rivers. We will define a
             river mask (Figure D) to be pixels connected to the river centerline according to the filled water mask. The
@@ -164,7 +164,7 @@ Map.addLayer(rpj(costmap), {
 Map.addLayer(rpj(rivermask), {}, 'rivermask', false);
 Map.addLayer(rpj(channelmask), {}, 'channelmask', false);
 </code></pre>
-        <img src="../../images/river-morphology/Screenshot 2023-10-26 at 10.22.50?AM.png" alt="River mask result"
+        <img src="../../images/river-morphology/river-morph-10-22-50.png" alt="River mask result"
             loading="lazy">
         <p>Your code up to this point should look like this:</p>
         <pre><code>var aoi =
