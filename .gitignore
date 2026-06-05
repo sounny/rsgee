@@ -1,0 +1,12 @@
+# Audit and working notes (not part of the textbook)
+references/audit/
+audit_notes/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~

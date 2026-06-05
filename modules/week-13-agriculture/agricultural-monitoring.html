@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Learn crop monitoring with EVI time series, phenology curves, and the USDA Cropland Data Layer in Google Earth Engine.">
+  <title>Agricultural Monitoring | Remote Sensing Course</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<body>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Agriculture
+    </nav>
+
+    <header class="lab-header">
+      <h1>Agricultural Monitoring with EVI and Phenology</h1>
+    </header>
+
+    <main class="lab-content">
+      <p>Satellites observe farmland repeatedly throughout the growing season, capturing the rhythm of crop growth from planting through harvest. In this module, you will learn to track that rhythm using the Enhanced Vegetation Index (EVI) and interpret phenology curves that reveal what is growing, when it peaks, and how different crops behave over time.</p>
+
+      <section class="learning-objectives">
+        <h3>Learning objectives</h3>
+        <ul>
+          <li>Calculate EVI for crop monitoring using the <code>.expression()</code> method</li>
+          <li>Build phenology curves from time series data using <code>ui.Chart.image.series()</code></li>
+          <li>Distinguish crop types by their temporal signatures</li>
+          <li>Use the USDA Cropland Data Layer (CDL) to identify field-level crop types</li>
+        </ul>
+      </section>
+
+      <section class="why-it-matters">
+        <h3>Why it matters</h3>
+        <p>Roughly 800 million people worldwide face food insecurity, and that number rises in years of drought or flooding. Satellite-based crop monitoring supports <strong>food security</strong> by tracking crop health across entire regions without setting foot in a field. Governments use these data for crop insurance programs. Agronomists use them for precision agriculture. Commodity traders use them to forecast yields. The techniques in this module are the same ones powering the USDA's CropScape and NASA's GLAM systems.</p>
+      </section>
+
+      <section class="vocabulary">
+        <h3>Key vocabulary</h3>
+        <dl>
+          <dt>EVI (Enhanced Vegetation Index)</dt>
+          <dd>A vegetation index that improves on NDVI by correcting for atmospheric and soil background effects. It uses the blue band in addition to NIR and red.</dd>
+
+          <dt>Phenology</dt>
+          <dd>The study of recurring biological events in relation to climate and season, such as green-up, flowering, and leaf drop in crops.</dd>
+
+          <dt>Time series</dt>
+          <dd>A sequence of observations recorded at regular intervals over time. In remote sensing, this means repeated satellite images of the same location.</dd>
+
+          <dt>Cropland Data Layer (CDL)</dt>
+          <dd>A USDA-produced annual map of crop types across the United States, created from satellite imagery at 30-meter resolution.</dd>
+
+          <dt>Growing season</dt>
+          <dd>The period between planting and harvest when a crop is actively growing, visible as a rise and fall in vegetation index values.</dd>
+        </dl>
+      </section>
+
+      <!-- Quick Win -->
+      <section>
+        <h2>Quick Win: Chart EVI over a Growing Season</h2>
+        <p>This script charts MODIS EVI for an agricultural point in central Iowa across the 2023 growing season. You will see the characteristic rise, peak, and decline of crop growth.</p>
+<pre><code>// Define an agricultural point in central Iowa
+var point = ee.Geometry.Point([-93.5, 42.0]);
+
+// Load MODIS 16-day EVI (1 km resolution)
+var modisEVI = ee.ImageCollection('MODIS/061/MOD13A2')
+  .filterDate('2023-01-01', '2023-12-31')
+  .select('EVI');
+
+// Scale EVI values (MODIS stores EVI * 10000)
+var eviScaled = modisEVI.map(function(image) {
+  return image.multiply(0.0001)
+    .copyProperties(image, ['system:time_start']);
+});
+
+// Create the phenology chart
+var chart = ui.Chart.image.series(eviScaled, point, ee.Reducer.mean(), 1000)
+  .setOptions({
+    title: 'MODIS EVI Phenology - Iowa Cropland (2023)',
+    vAxis: {title: 'EVI', viewWindow: {min: 0, max: 1}},
+    hAxis: {title: 'Date'},
+    lineWidth: 2,
+    pointSize: 4
+  });
+print(chart);
+Map.centerObject(point, 10);</code></pre>
+        <div class="expected-output">
+          <h4>What you should see</h4>
+          <p>A line chart showing low EVI values (0.1 to 0.2) during winter, a rapid increase starting in May or June (green-up), a peak near 0.7 to 0.9 in July or August, and a sharp decline through September and October (senescence). This "bell curve" shape is the phenological signature of a summer crop like corn or soybean.</p>
+        </div>
+      </section>
+
+      <!-- Section 1 -->
+      <section>
+        <h2>Why Agricultural Monitoring Matters</h2>
+        <p>Traditional crop surveys require field agents visiting farms, counting plants, and estimating yields. This approach is slow, expensive, and limited in coverage. Satellites solve this by observing millions of hectares every few days.</p>
+        <p>Agricultural remote sensing supports four major applications:</p>
+        <ul>
+          <li><strong>Food security:</strong> Organizations like the USDA and FAO monitor global crop conditions to anticipate shortages before they become crises.</li>
+          <li><strong>Precision agriculture:</strong> Farmers use vegetation maps to identify stressed areas within fields, enabling targeted irrigation and fertilization.</li>
+          <li><strong>Crop insurance:</strong> Insurance programs use satellite data to verify crop losses and process claims more efficiently than on-site inspection.</li>
+          <li><strong>Yield estimation:</strong> Peak vegetation greenness correlates with final yield, allowing harvest forecasts months before crops are harvested.</li>
+        </ul>
+        <p>The key to all of these applications is measuring how green crops are over time. That is exactly what vegetation indices like EVI provide.</p>
+      </section>
+
+      <!-- Section 2 -->
+      <section>
+        <h2>EVI vs NDVI</h2>
+        <p>You already know NDVI, which uses only the NIR and red bands. EVI adds the blue band and applies correction coefficients that reduce two common problems in agricultural monitoring.</p>
+        <p><strong>The EVI formula:</strong></p>
+<pre><code>EVI = 2.5 * ((NIR - RED) / (NIR + 6*RED - 7.5*BLUE + 1))</code></pre>
+        <p>Why does this matter for agriculture?</p>
+        <ul>
+          <li><strong>Soil background:</strong> In early growth stages, when crop cover is sparse, bare soil between rows strongly influences NDVI. The EVI correction coefficients reduce this soil signal, giving you a cleaner measure of actual plant greenness.</li>
+          <li><strong>Saturation:</strong> NDVI approaches a maximum of about 0.9 even as vegetation continues to thicken. EVI remains more sensitive at high biomass levels, which is critical for distinguishing a good corn crop from an excellent one.</li>
+          <li><strong>Atmospheric effects:</strong> Haze, smoke, and aerosols scatter light and affect the red band. EVI's blue-band correction compensates for these atmospheric distortions.</li>
+        </ul>
+        <p>Here is how to calculate EVI from Sentinel-2 imagery using <code>.expression()</code>:</p>
+<pre><code>// Load Sentinel-2 SR and filter
+var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+  .filterDate('2023-06-01', '2023-08-31')
+  .filterBounds(ee.Geometry.Point([-93.5, 42.0]))
+  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20))
+  .median();
+
+// Scale reflectance values
+var scaled = s2.divide(10000);
+
+// Calculate EVI using .expression()
+var evi = scaled.expression(
+  '2.5 * ((NIR - RED) / (NIR + 6 * RED - 7.5 * BLUE + 1))', {
+    'NIR': scaled.select('B8'),
+    'RED': scaled.select('B4'),
+    'BLUE': scaled.select('B2')
+  }).rename('EVI');
+
+Map.addLayer(evi, {min: 0, max: 0.8, palette: ['brown', 'yellow', 'green']}, 'EVI');
+Map.centerObject(ee.Geometry.Point([-93.5, 42.0]), 12);</code></pre>
+      </section>
+
+      <!-- Section 3 -->
+      <section>
+        <h2>Building Phenology Curves</h2>
+        <p>A phenology curve plots a vegetation index over time for a specific location. The shape of this curve tells you about the crop's life cycle. For a typical summer crop in the US Midwest, the curve follows a predictable pattern:</p>
+        <ol>
+          <li><strong>Dormancy (January to April):</strong> Low EVI values because fields are bare or covered in crop residue.</li>
+          <li><strong>Green-up (May to June):</strong> EVI rises rapidly as crops emerge and begin growing.</li>
+          <li><strong>Peak (July to August):</strong> Maximum greenness, when the crop canopy is fully developed.</li>
+          <li><strong>Senescence (September to October):</strong> EVI declines as crops mature, dry down, and are harvested.</li>
+        </ol>
+        <p>MODIS is ideal for phenology because it captures images every 16 days at a consistent scale. The <code>MOD13A2</code> product provides pre-calculated EVI at 1 km resolution, removing the need to compute it yourself.</p>
+<pre><code>// Build a multi-year phenology comparison
+var point = ee.Geometry.Point([-93.5, 42.0]);
+
+// Load three years of MODIS EVI
+var evi2021 = ee.ImageCollection('MODIS/061/MOD13A2')
+  .filterDate('2021-01-01', '2021-12-31').select('EVI');
+var evi2022 = ee.ImageCollection('MODIS/061/MOD13A2')
+  .filterDate('2022-01-01', '2022-12-31').select('EVI');
+var evi2023 = ee.ImageCollection('MODIS/061/MOD13A2')
+  .filterDate('2023-01-01', '2023-12-31').select('EVI');
+
+// Chart one year as a starting point
+var chart = ui.Chart.image.series(
+  evi2023.map(function(img) {
+    return img.multiply(0.0001).copyProperties(img, ['system:time_start']);
+  }), point, ee.Reducer.mean(), 1000)
+  .setOptions({
+    title: 'Crop Phenology - Central Iowa (2023)',
+    vAxis: {title: 'EVI'},
+    hAxis: {title: 'Date'},
+    lineWidth: 2, pointSize: 4
+  });
+print(chart);</code></pre>
+      </section>
+
+      <!-- Section 4 -->
+      <section>
+        <h2>The USDA Cropland Data Layer</h2>
+        <p>Before you can compare crop phenology, you need to know what crop is growing in each field. The USDA Cropland Data Layer (CDL) answers this question. Published annually at 30-meter resolution, it classifies every agricultural pixel in the continental United States into specific crop types: corn, soybeans, wheat, cotton, rice, and dozens more.</p>
+<pre><code>// Load the 2023 Cropland Data Layer
+var cdl = ee.ImageCollection('USDA/NASS/CDL')
+  .filter(ee.Filter.eq('system:index', '2023'))
+  .first()
+  .select('cropland');
+
+// CDL comes with its own color palette built in
+Map.addLayer(cdl, {}, 'Cropland Data Layer 2023');
+Map.centerObject(ee.Geometry.Point([-93.5, 42.0]), 11);
+
+// Print the crop type at a specific point
+var cropType = cdl.reduceRegion({
+  reducer: ee.Reducer.first(),
+  geometry: ee.Geometry.Point([-93.5, 42.0]),
+  scale: 30
+});
+print('Crop type code:', cropType);</code></pre>
+        <p>Common CDL class codes include:</p>
+        <ul>
+          <li><strong>1:</strong> Corn</li>
+          <li><strong>5:</strong> Soybeans</li>
+          <li><strong>24:</strong> Winter wheat</li>
+          <li><strong>2:</strong> Cotton</li>
+          <li><strong>176:</strong> Grassland/Pasture</li>
+        </ul>
+        <div class="expected-output">
+          <h4>What you should see</h4>
+          <p>A colorful map of crop types across Iowa, with bright yellow for corn, dark green for soybeans, and brown tones for harvested or bare fields. Individual field boundaries are clearly visible at zoom level 13 or higher.</p>
+        </div>
+      </section>
+
+      <!-- Section 5 -->
+      <section>
+        <h2>Comparing Crop Types</h2>
+        <p>Different crops have different phenological signatures. Corn, soybeans, and winter wheat each trace a unique curve through the growing season. By comparing these curves, you can identify crops even without ground truth data.</p>
+        <ul>
+          <li><strong>Corn:</strong> Peaks early (mid-July), reaches the highest EVI values (0.8 to 0.9), and senesces rapidly in September.</li>
+          <li><strong>Soybeans:</strong> Peaks about two weeks later than corn (late July to early August), reaches slightly lower EVI values, and senesces more gradually.</li>
+          <li><strong>Winter wheat:</strong> Shows a completely different pattern. It greens up in early spring (March to April), peaks in May, and is harvested by late June, well before summer crops reach their maximum.</li>
+        </ul>
+<pre><code>// Compare phenology for three crop types
+// Use CDL to locate sample points for each crop
+var cornPoint = ee.Geometry.Point([-93.50, 42.00]);
+var soyPoint = ee.Geometry.Point([-93.45, 42.05]);
+var wheatPoint = ee.Geometry.Point([-97.50, 38.80]); // Kansas for winter wheat
+
+// Load MODIS EVI for 2023
+var modisEVI = ee.ImageCollection('MODIS/061/MOD13A2')
+  .filterDate('2023-01-01', '2023-12-31')
+  .select('EVI')
+  .map(function(img) {
+    return img.multiply(0.0001).copyProperties(img, ['system:time_start']);
+  });
+
+// Create a FeatureCollection of crop sample points
+var cropPoints = ee.FeatureCollection([
+  ee.Feature(cornPoint, {label: 'Corn'}),
+  ee.Feature(soyPoint, {label: 'Soybean'}),
+  ee.Feature(wheatPoint, {label: 'Winter Wheat'})
+]);
+
+// Chart EVI for all three crop types
+var chart = ui.Chart.image.seriesByRegion(
+  modisEVI, cropPoints, ee.Reducer.mean(), 'EVI', 1000, 'system:time_start', 'label')
+  .setOptions({
+    title: 'Crop Phenology Comparison (2023)',
+    vAxis: {title: 'EVI', viewWindow: {min: 0, max: 1}},
+    hAxis: {title: 'Date'},
+    lineWidth: 2
+  });
+print(chart);</code></pre>
+        <div class="expected-output">
+          <h4>What you should see</h4>
+          <p>Three distinct curves on the same chart. Winter wheat peaks first (May), followed by corn (mid-July), then soybeans (late July). The timing and shape differences are clear enough to distinguish these crops from their phenological fingerprints alone.</p>
+        </div>
+      </section>
+
+      <section class="pro-tips">
+        <h3>Pro tips</h3>
+        <ul>
+          <li><strong>Use MODIS for phenology:</strong> Its 16-day revisit and pre-computed EVI product (<code>MOD13A2</code>) make it the standard for time series analysis. Use Sentinel-2 or Landsat when you need field-level spatial detail.</li>
+          <li><strong>Check CDL accuracy:</strong> The CDL is about 85 to 95% accurate for major crops. Verify your sample points by comparing CDL values with known field locations.</li>
+          <li><strong>Scale matters:</strong> MODIS pixels (1 km) often contain multiple fields. Choose points in the center of large, uniform fields to minimize mixing.</li>
+          <li><strong>Cloudy composites:</strong> MODIS EVI composites already apply quality filtering, but you may still see dips from residual cloud contamination. Look for the overall curve shape rather than individual data points.</li>
+        </ul>
+      </section>
+
+      <div class="try-it">
+        <h4>Try it: Chart phenology for a Texas cotton field</h4>
+        <p>Cotton is one of Texas's most important crops. Modify the code above to chart EVI phenology for a cotton-growing area in the Texas Panhandle or South Plains.</p>
+<pre><code>// Texas cotton field (Lubbock area)
+var cottonPoint = ee.Geometry.Point([-101.85, 33.55]);
+
+// Load MODIS EVI for 2023
+var modisEVI = ee.ImageCollection('MODIS/061/MOD13A2')
+  .filterDate('2023-01-01', '2023-12-31')
+  .select('EVI')
+  .map(function(img) {
+    return img.multiply(0.0001).copyProperties(img, ['system:time_start']);
+  });
+
+// Chart the phenology
+var chart = ui.Chart.image.series(modisEVI, cottonPoint, ee.Reducer.mean(), 1000)
+  .setOptions({
+    title: 'Cotton Phenology - Lubbock, TX (2023)',
+    vAxis: {title: 'EVI'},
+    hAxis: {title: 'Date'},
+    lineWidth: 2, pointSize: 4
+  });
+print(chart);
+Map.centerObject(cottonPoint, 11);</code></pre>
+        <p>Compare the cotton phenology to corn and soybeans. Cotton typically greens up later (June) and peaks in August, with lower overall EVI values due to its sparser canopy.</p>
+      </div>
+
+      <section class="common-mistakes">
+        <h3>Common mistakes</h3>
+        <ul>
+          <li><strong>Forgetting to scale MODIS EVI:</strong> Raw MODIS EVI values are stored multiplied by 10000. Always apply <code>.multiply(0.0001)</code> to get values in the 0 to 1 range.</li>
+          <li><strong>Confusing CDL year formats:</strong> CDL uses the <code>system:index</code> property as a string (e.g., <code>'2023'</code>), not a date filter. Use <code>ee.Filter.eq('system:index', '2023')</code>.</li>
+          <li><strong>Placing sample points on field edges:</strong> Mixed pixels at field boundaries blend signals from adjacent fields or roads. Place your point well inside a field.</li>
+          <li><strong>Using NDVI when EVI is better:</strong> For dense crop canopies (corn, sugarcane), NDVI saturates and cannot distinguish moderate from high biomass. EVI remains sensitive.</li>
+        </ul>
+      </section>
+
+      <section class="self-check">
+        <h3>Quick self-check</h3>
+        <ol>
+          <li>What three bands does the EVI formula use, and why is the blue band included?</li>
+          <li>How does the phenology curve for winter wheat differ from that of corn?</li>
+          <li>Why is MODIS preferred over Landsat for phenology analysis?</li>
+          <li>What CDL class code represents corn? What code represents soybeans?</li>
+          <li>Name two advantages EVI has over NDVI for agricultural monitoring.</li>
+        </ol>
+      </section>
+
+      <section class="builds-on">
+        <h3>Going deeper</h3>
+        <p>This module introduces crop phenology monitoring at a foundational level. For advanced techniques including sub-pixel crop area estimation, multi-temporal classification, and large-scale agricultural assessments, see:</p>
+        <ul>
+          <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter A1.1: Agricultural Environments</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Next Steps</h2>
+        <ul>
+          <li><a href="../../labs/lab-25-agriculture.html">Lab 25: Agricultural Monitoring</a> - Build phenology curves and compare crop types hands-on</li>
+          <li><a href="../week-14-urban/urban-analysis.html">Urban Analysis</a> - Apply remote sensing techniques to built environments</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <p><a href="../../index.html">Back to Course Home</a></p>
+      <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+    </footer>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Lab 21: Map wildfire burn severity using dNBR change detection with Landsat 8 imagery in Google Earth Engine.">
+    <title>Lab 21 - Change Detection: Mapping Burn Severity | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 21
+        </nav>
+
+        <header class="lab-header">
+            <h1>Lab 21 - Change Detection: Mapping Burn Severity</h1>
+            <p><em><strong>Objective: Map burn severity for the 2021 Caldor Fire using before-after NBR differencing with Landsat 8.</strong></em></p>
+        </header>
+
+        <main class="lab-content">
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Build cloud-masked median composites for pre-fire and post-fire periods.</li>
+                    <li>Calculate NBR for both composites using Landsat 8 bands.</li>
+                    <li>Compute dNBR and classify burn severity using USGS thresholds.</li>
+                    <li>Calculate the total burned area in hectares.</li>
+                    <li>Interpret a classified burn severity map.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Wildfire burn severity maps are used by emergency response teams, ecologists, and land
+                    managers to prioritize recovery efforts. The USGS Burned Area Emergency Response (BAER)
+                    program relies on dNBR maps to identify areas at risk of erosion, flooding, and habitat
+                    loss. In this lab, you will produce the same type of map that professionals use in the field.
+                </p>
+            </section>
+
+            <section>
+                <h2>Before You Start</h2>
+                <ul>
+                    <li><strong>Prerequisites:</strong> Spectral Indices module, Cloud Masking module, Change Detection module.</li>
+                    <li><strong>Estimated time:</strong> 45 minutes</li>
+                    <li><strong>You will need:</strong> GEE Code Editor access</li>
+                </ul>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key terms</h3>
+                <dl>
+                    <dt>dNBR</dt>
+                    <dd>Differenced Normalized Burn Ratio: pre-fire NBR minus post-fire NBR. Positive values indicate burned areas.</dd>
+                    <dt>Burn severity</dt>
+                    <dd>A classification of how intensely a fire affected vegetation and soil, ranging from unburned to high severity.</dd>
+                    <dt>Change detection</dt>
+                    <dd>Comparing images from two different dates to identify where and how the landscape has changed.</dd>
+                    <dt>Before-after analysis</dt>
+                    <dd>A change detection approach that uses one pre-event and one post-event image to quantify change.</dd>
+                </dl>
+            </section>
+
+            <!-- Lab Steps -->
+            <section>
+                <h2>Lab Instructions</h2>
+                <p>
+                    The 2021 Caldor Fire burned over 221,000 acres in El Dorado County, California, threatening
+                    the Lake Tahoe basin. You will map its burn severity using Landsat 8 imagery.
+                </p>
+
+                <h3>Part 1 - Load pre-fire imagery</h3>
+                <p>
+                    Start by creating a cloud-masked median composite of Landsat 8 imagery from before
+                    the fire. The Caldor Fire started in mid-August 2021, so use May through July for the
+                    pre-fire period.
+                </p>
+<pre><code>// Cloud masking function for Landsat 8 SR
+function maskL8sr(image) {
+  var qaMask = image.select('QA_PIXEL').bitwiseAnd(1 << 3).eq(0)
+      .and(image.select('QA_PIXEL').bitwiseAnd(1 << 4).eq(0));
+  return image.updateMask(qaMask)
+      .multiply(0.0000275).add(-0.2);
+}
+
+// Define the study area (Caldor Fire region)
+var fireArea = ee.Geometry.Point([-120.5, 38.7]);
+var studyRegion = fireArea.buffer(25000); // 25 km buffer
+
+// Load pre-fire imagery (May - July 2021)
+var preFire = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2021-05-01', '2021-07-31')
+  .filterBounds(studyRegion)
+  .filter(ee.Filter.lt('CLOUD_COVER', 20))
+  .map(maskL8sr)
+  .median();
+
+print('Pre-fire composite created');
+Map.centerObject(studyRegion, 11);
+Map.addLayer(preFire, {
+  bands: ['SR_B4', 'SR_B3', 'SR_B2'],
+  min: 0, max: 0.3
+}, 'Pre-fire True Color');</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li><code>maskL8sr()</code> removes cloud and shadow pixels using the QA_PIXEL band, then applies the scale/offset correction.</li>
+                    <li><code>.buffer(25000)</code> creates a 25 km radius around the center point to capture the full fire perimeter.</li>
+                    <li><code>.median()</code> combines multiple images into a single cloud-free composite.</li>
+                </ul>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A true color image of the Sierra Nevada foothills showing green forested terrain before the fire.</p>
+                </div>
+            </section>
+
+            <section>
+                <h3>Part 2 - Load post-fire imagery</h3>
+                <p>
+                    Now load imagery from after the fire was contained. The Caldor Fire was fully contained
+                    in October 2021. Use October through December for the post-fire period.
+                </p>
+<pre><code>// Load post-fire imagery (October - December 2021)
+var postFire = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2021-10-01', '2021-12-31')
+  .filterBounds(studyRegion)
+  .filter(ee.Filter.lt('CLOUD_COVER', 20))
+  .map(maskL8sr)
+  .median();
+
+Map.addLayer(postFire, {
+  bands: ['SR_B4', 'SR_B3', 'SR_B2'],
+  min: 0, max: 0.3
+}, 'Post-fire True Color');</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li>The post-fire composite uses the same cloud masking and compositing approach as the pre-fire composite.</li>
+                    <li>Toggle between the pre-fire and post-fire layers in the Layers panel to visually compare the two scenes.</li>
+                </ul>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        A true color image showing brown and dark areas where the fire burned, contrasting
+                        with the surrounding green forest.
+                    </p>
+                </div>
+            </section>
+
+            <section>
+                <h3>Part 3 - Calculate NBR for both dates</h3>
+                <p>
+                    The Normalized Burn Ratio uses NIR (Band 5) and SWIR (Band 7) to detect burn conditions.
+                    Healthy vegetation has high NIR and low SWIR; burned areas have the opposite.
+                </p>
+<pre><code>// Calculate NBR for pre-fire composite
+// NBR = (NIR - SWIR2) / (NIR + SWIR2)
+var preNBR = preFire.normalizedDifference(['SR_B5', 'SR_B7']).rename('preNBR');
+
+// Calculate NBR for post-fire composite
+var postNBR = postFire.normalizedDifference(['SR_B5', 'SR_B7']).rename('postNBR');
+
+// Visualize NBR images
+Map.addLayer(preNBR, {min: -1, max: 1,
+  palette: ['red', 'yellow', 'green']}, 'Pre-fire NBR');
+Map.addLayer(postNBR, {min: -1, max: 1,
+  palette: ['red', 'yellow', 'green']}, 'Post-fire NBR');</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li><code>.normalizedDifference(['SR_B5', 'SR_B7'])</code> computes (B5 - B7) / (B5 + B7), which is the standard NBR formula.</li>
+                    <li>Pre-fire NBR should be high (green) in forested areas. Post-fire NBR should drop sharply (red) where the fire burned.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h3>Part 4 - Compute dNBR</h3>
+                <p>
+                    Subtract the post-fire NBR from the pre-fire NBR. This produces the differenced NBR,
+                    where high positive values indicate severe burns and values near zero indicate no change.
+                </p>
+<pre><code>// Compute dNBR (pre minus post)
+var dNBR = preNBR.subtract(postNBR).rename('dNBR');
+
+// Clip to study region
+dNBR = dNBR.clip(studyRegion);
+
+// Display the continuous dNBR
+Map.addLayer(dNBR, {
+  min: -0.5, max: 1.3,
+  palette: ['green', 'lightyellow', 'yellow', 'orange', 'red', 'darkred']
+}, 'dNBR');
+
+// Print dNBR statistics
+print('dNBR statistics:', dNBR.reduceRegion({
+  reducer: ee.Reducer.minMax(),
+  geometry: studyRegion,
+  scale: 30,
+  maxPixels: 1e9
+}));</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li><code>preNBR.subtract(postNBR)</code> computes the difference. Where fire burned, post-fire NBR is much lower than pre-fire NBR, producing a large positive dNBR value.</li>
+                    <li><code>.clip(studyRegion)</code> restricts the output to our area of interest.</li>
+                </ul>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        A continuous dNBR map with the fire perimeter clearly visible in warm colors (orange to dark red).
+                        Surrounding unburned areas should appear green or light yellow.
+                    </p>
+                </div>
+            </section>
+
+            <section>
+                <h3>Part 5 - Classify burn severity</h3>
+                <p>
+                    Apply the standard USGS burn severity thresholds to create a classified map. Each pixel
+                    will be assigned to one of seven severity classes.
+                </p>
+<pre><code>// Classify dNBR into USGS burn severity categories
+var burnSeverity = ee.Image(0)
+  .where(dNBR.lt(-0.25), 1)                           // Enhanced regrowth (high)
+  .where(dNBR.gte(-0.25).and(dNBR.lt(-0.1)), 2)       // Enhanced regrowth (low)
+  .where(dNBR.gte(-0.1).and(dNBR.lt(0.1)), 3)         // Unburned
+  .where(dNBR.gte(0.1).and(dNBR.lt(0.27)), 4)         // Low severity
+  .where(dNBR.gte(0.27).and(dNBR.lt(0.44)), 5)        // Moderate-low severity
+  .where(dNBR.gte(0.44).and(dNBR.lt(0.66)), 6)        // Moderate-high severity
+  .where(dNBR.gte(0.66), 7)                            // High severity
+  .clip(studyRegion)
+  .selfMask();
+
+// Display classified map
+Map.addLayer(burnSeverity, {
+  min: 1, max: 7,
+  palette: [
+    '#38a800',   // 1 - Enhanced regrowth (high)
+    '#6fc400',   // 2 - Enhanced regrowth (low)
+    '#ffffbe',   // 3 - Unburned
+    '#ffff00',   // 4 - Low severity
+    '#ffaa00',   // 5 - Moderate-low severity
+    '#ff5500',   // 6 - Moderate-high severity
+    '#e60000'    // 7 - High severity
+  ]
+}, 'Burn Severity Classes');</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li><code>ee.Image(0)</code> creates a blank image that serves as the starting canvas for classification.</li>
+                    <li><code>.where(condition, value)</code> sets pixels to a class value wherever the condition is true.</li>
+                    <li><code>.selfMask()</code> removes pixels with a value of 0 (any that were not classified).</li>
+                    <li>The palette assigns a color gradient from green (regrowth) through yellow (unburned) to red (high severity).</li>
+                </ul>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        A classified map with distinct color bands. The fire perimeter should be clearly
+                        outlined, with red areas in the fire's core and yellow/orange at the edges where
+                        the fire burned less intensely.
+                    </p>
+                </div>
+            </section>
+
+            <section>
+                <h3>Part 6 - Calculate burned area</h3>
+                <p>
+                    Finally, calculate the total area burned in each severity class. This is the type of
+                    summary statistic that appears in fire damage reports.
+                </p>
+<pre><code>// Calculate area for each burn class (in hectares)
+// Focus on classes 4-7 (actual burn, not regrowth or unburned)
+var burnedMask = burnSeverity.gte(4);
+var burnedArea = burnedMask.multiply(ee.Image.pixelArea());
+
+var totalBurned = burnedArea.reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: studyRegion,
+  scale: 30,
+  maxPixels: 1e9
+});
+
+print('Total burned area (hectares):',
+  ee.Number(totalBurned.get('constant')).divide(10000));
+
+// Calculate high-severity area specifically (class 7)
+var highSeverityMask = burnSeverity.eq(7);
+var highArea = highSeverityMask.multiply(ee.Image.pixelArea());
+
+var highTotal = highArea.reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: studyRegion,
+  scale: 30,
+  maxPixels: 1e9
+});
+
+print('High severity area (hectares):',
+  ee.Number(highTotal.get('constant')).divide(10000));</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li><code>ee.Image.pixelArea()</code> creates an image where each pixel's value is its area in square meters.</li>
+                    <li>Multiplying by the binary mask keeps only the pixels of interest.</li>
+                    <li><code>ee.Reducer.sum()</code> adds up all the pixel areas.</li>
+                    <li>Dividing by 10,000 converts from square meters to hectares.</li>
+                </ul>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        The console will print the total burned area and the high-severity area in hectares.
+                        The Caldor Fire's official burned area was approximately 89,000 hectares (221,835 acres).
+                        Your result may differ depending on your study region and cloud masking.
+                    </p>
+                </div>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>Why do we subtract post-fire NBR from pre-fire NBR (and not the reverse)?</li>
+                    <li>What would happen to your dNBR results if you forgot to apply cloud masking?</li>
+                    <li>A pixel has a dNBR of 0.35. What severity class does it belong to?</li>
+                    <li>Why is it important to use imagery from after the fire is fully contained (not while it is still burning)?</li>
+                </ol>
+            </section>
+
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <div class="issue">
+                    <strong>Problem: The map shows no data or is mostly masked</strong>
+                    <p><strong>Solution:</strong> Check that your date range and location are correct. Print
+                    <code>collection.size()</code> to verify images exist. Try relaxing the CLOUD_COVER filter
+                    to 40 if too few images pass the filter.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: The dNBR map has strange stripes or artifacts</strong>
+                    <p><strong>Solution:</strong> This usually means one of your composites has gaps from cloud
+                    masking. Widen your date range to include more images, or reduce the cloud cover threshold.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Burned area is much larger or smaller than expected</strong>
+                    <p><strong>Solution:</strong> Verify your buffer distance and check the dNBR thresholds. If your
+                    study region extends far beyond the fire, the area calculation will include unburned pixels
+                    that happen to have low dNBR values from other causes.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: "Image.subtract: No band named 'preNBR'" error</strong>
+                    <p><strong>Solution:</strong> Make sure you used <code>.rename('preNBR')</code> and
+                    <code>.rename('postNBR')</code> when computing the NBR images.</p>
+                </div>
+            </section>
+
+            <section class="key-concepts">
+                <h3>Key Takeaways</h3>
+                <ul>
+                    <li>dNBR (pre minus post) is the standard index for mapping wildfire burn severity.</li>
+                    <li>NBR uses NIR (SR_B5) and SWIR (SR_B7), which are highly sensitive to burn conditions.</li>
+                    <li>USGS severity thresholds provide a standardized classification framework used worldwide.</li>
+                    <li>Cloud masking is critical: unmasked clouds produce false change signals.</li>
+                    <li><code>ee.Image.pixelArea()</code> combined with <code>ee.Reducer.sum()</code> calculates geographic area from classified maps.</li>
+                </ul>
+            </section>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Forgetting to apply <code>.multiply(0.0000275).add(-0.2)</code> before computing indices.</li>
+                    <li>Using pre-fire dates that overlap with the fire event itself.</li>
+                    <li>Setting the buffer too small and clipping off part of the fire perimeter.</li>
+                    <li>Not specifying <code>maxPixels: 1e9</code> in <code>reduceRegion()</code>, which causes errors on large areas.</li>
+                </ul>
+            </section>
+
+            <section class="pro-tips">
+                <h3>Pro tips</h3>
+                <ul>
+                    <li>Toggle the pre-fire and post-fire true color layers to visually confirm the fire location before running the full analysis.</li>
+                    <li>Use the Inspector tool to click on specific pixels and check their dNBR values.</li>
+                    <li>Add the USGS MTBS (Monitoring Trends in Burn Severity) dataset to compare your results with official burn perimeters.</li>
+                    <li>Export your classified map as a GeoTIFF for use in ArcGIS Pro or QGIS.</li>
+                </ul>
+            </section>
+
+            <section id="submission">
+                <div class="submission-box">
+                    <h3>📋 Lab Submission</h3>
+                    <p><strong>Subject:</strong> <code>Lab 21 - Change Detection - [Your Name]</code></p>
+                    <p><strong>Include in your submission:</strong></p>
+                    <ul>
+                        <li>Shareable GEE script link (click "Get Link" in the Code Editor)</li>
+                        <li>Screenshot of your classified burn severity map</li>
+                        <li>Total burned area (hectares) printed in your console</li>
+                        <li><strong>Question 1:</strong> Which burn severity class covers the largest area in your map, and what might explain this pattern?</li>
+                        <li><strong>Question 2:</strong> How would your results change if you used imagery from the same season in two different years (for example, summer 2020 vs. summer 2022) instead of the pre-fire and post-fire approach? What are the advantages and disadvantages?</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../index.html">← Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+
+</html>

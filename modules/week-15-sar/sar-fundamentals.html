@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Introduction to Synthetic Aperture Radar (SAR) and flood mapping with Sentinel-1 in Google Earth Engine.">
+    <title>SAR Fundamentals | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; SAR
+        </nav>
+
+        <header class="lab-header">
+            <h1>SAR Fundamentals: Radar Remote Sensing</h1>
+        </header>
+
+        <main class="lab-content">
+            <p>
+                Every module so far has used <strong>optical</strong> sensors that record reflected sunlight. But what
+                happens when it is cloudy, dark, or smoky? Optical sensors are blind. Synthetic Aperture Radar (SAR)
+                solves this problem by sending its own microwave pulses and recording the echoes, making it the only
+                satellite technology that works <strong>day or night, rain or shine</strong>. In this module you will
+                learn what SAR is, how to use Sentinel-1 data in Google Earth Engine, and how to map floods with radar.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Explain how SAR differs from optical remote sensing (active vs. passive).</li>
+                    <li>Load and filter Sentinel-1 GRD imagery in Google Earth Engine.</li>
+                    <li>Interpret VV and VH polarization and understand backscatter.</li>
+                    <li>Apply speckle filtering to reduce radar noise.</li>
+                    <li>Map flood extent using before-after SAR change detection.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Floods, the world's most costly natural disaster, almost always happen under heavy cloud cover.
+                    Optical satellites like Landsat and Sentinel-2 cannot see through clouds. SAR penetrates clouds,
+                    smoke, and darkness, making it indispensable for emergency flood mapping, deforestation monitoring
+                    under persistent tropical cloud cover, oil spill detection, and sea ice tracking.
+                </p>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key vocabulary</h3>
+                <dl>
+                    <dt>SAR</dt>
+                    <dd>Synthetic Aperture Radar. An active sensor that emits microwave pulses and records the
+                        returning echoes (backscatter) to create images.</dd>
+
+                    <dt>Backscatter</dt>
+                    <dd>The portion of the emitted radar signal that bounces back to the sensor. Measured in
+                        decibels (dB). Rough surfaces scatter more; smooth surfaces (like water) scatter less.</dd>
+
+                    <dt>Polarization</dt>
+                    <dd>The orientation of the transmitted and received radar wave. VV = vertical transmit,
+                        vertical receive. VH = vertical transmit, horizontal receive. Different polarizations
+                        respond differently to surface structure.</dd>
+
+                    <dt>Speckle</dt>
+                    <dd>Grainy "salt-and-pepper" noise inherent in SAR images, caused by constructive and
+                        destructive interference of radar waves. Must be filtered before analysis.</dd>
+
+                    <dt>GRD</dt>
+                    <dd>Ground Range Detected. A Sentinel-1 product that has been projected to ground range
+                        and is ready for analysis. This is the product you will use in GEE.</dd>
+
+                    <dt>C-band</dt>
+                    <dd>The microwave frequency band used by Sentinel-1 (~5.4 GHz, ~5.6 cm wavelength).
+                        Sensitive to surface roughness, vegetation structure, and moisture.</dd>
+                </dl>
+            </section>
+
+            <!-- Quick Win -->
+            <section>
+                <h2>Quick Win: Your First SAR Image</h2>
+                <p>
+                    Let's load a Sentinel-1 image over Houston, Texas, and see what the world looks like in radar.
+                    Unlike optical images, SAR images are grayscale, and they look "grainy" because of speckle noise.
+                </p>
+<pre><code>// Load a Sentinel-1 GRD image over Houston, TX
+var houston = ee.Geometry.Point([-95.37, 29.76]);
+
+var s1 = ee.ImageCollection('COPERNICUS/S1_GRD')
+  .filterBounds(houston)
+  .filterDate('2023-06-01', '2023-06-30')
+  .filter(ee.Filter.eq('instrumentMode', 'IW'))
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))
+  .filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING'))
+  .first();
+
+Map.centerObject(houston, 10);
+Map.addLayer(s1.select('VV'), {min: -25, max: 0}, 'VV polarization');
+Map.addLayer(s1.select('VH'), {min: -30, max: -5}, 'VH polarization');</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        A grayscale image where cities and forests appear bright (high backscatter from rough
+                        surfaces) and water bodies appear very dark (smooth surfaces reflect radar away from the
+                        sensor). You will also notice the characteristic "grainy" speckle texture.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Section 1: Active vs Passive -->
+            <section>
+                <h2>Active vs. Passive Sensors</h2>
+                <p>
+                    All the sensors you have used so far (Landsat, Sentinel-2, MODIS) are <strong>passive</strong>
+                    sensors. They record energy from the sun that is reflected by the Earth's surface. They only
+                    work during the day, and clouds block the signal.
+                </p>
+                <p>
+                    SAR is an <strong>active</strong> sensor. It carries its own energy source: a radar transmitter
+                    that sends microwave pulses toward the ground. The sensor then records the returning echoes
+                    (backscatter). Because microwaves pass through clouds, SAR works in any weather and at any time
+                    of day.
+                </p>
+
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Optical (Passive)</th>
+                            <th>SAR (Active)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Energy source</td><td>Sun</td><td>Onboard transmitter</td></tr>
+                        <tr><td>Wavelength</td><td>Visible, NIR, SWIR (0.4 to 2.5 &mu;m)</td><td>Microwave (cm to m)</td></tr>
+                        <tr><td>Day/Night</td><td>Day only</td><td>Both</td></tr>
+                        <tr><td>Cloud penetration</td><td>No</td><td>Yes</td></tr>
+                        <tr><td>What it measures</td><td>Surface reflectance</td><td>Surface roughness, moisture, structure</td></tr>
+                        <tr><td>Image appearance</td><td>Color composites</td><td>Grayscale (backscatter intensity)</td></tr>
+                        <tr><td>Noise type</td><td>Haze, clouds</td><td>Speckle</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="pro-tips">
+                    <h3>The key insight</h3>
+                    <p>
+                        Optical sensors tell you <em>what color</em> the surface is. SAR tells you
+                        <em>how rough and how wet</em> the surface is. They are complementary, not competing.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Section 2: Sentinel-1 in GEE -->
+            <section>
+                <h2>Sentinel-1 in Google Earth Engine</h2>
+                <p>
+                    Sentinel-1 is a constellation of two C-band SAR satellites operated by the European Space Agency
+                    (ESA). In GEE, you access it through
+                    <code>ee.ImageCollection('COPERNICUS/S1_GRD')</code>. The data is provided in decibels (dB),
+                    which is a logarithmic scale where:
+                </p>
+                <ul>
+                    <li><strong>High values (near 0 dB):</strong> Strong backscatter (rough surfaces, buildings, vegetation).</li>
+                    <li><strong>Low values (below -20 dB):</strong> Weak backscatter (smooth surfaces, calm water).</li>
+                </ul>
+
+                <h3>Essential filters for Sentinel-1</h3>
+                <p>
+                    Unlike Landsat, Sentinel-1 requires several metadata filters to get consistent results. Always apply
+                    all of these:
+                </p>
+<pre><code>// Standard Sentinel-1 filtering template
+var s1Collection = ee.ImageCollection('COPERNICUS/S1_GRD')
+  .filterBounds(myPoint)
+  .filterDate('2023-01-01', '2023-12-31')
+  // IW mode = standard land imaging mode
+  .filter(ee.Filter.eq('instrumentMode', 'IW'))
+  // Require both VV and VH polarizations
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))
+  // Pick one orbit direction for consistency
+  .filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING'));
+
+print('Number of images:', s1Collection.size());</code></pre>
+
+                <div class="common-mistakes">
+                    <h3>Common mistakes with Sentinel-1</h3>
+                    <ul>
+                        <li><strong>Missing instrument mode filter:</strong> Sentinel-1 has multiple modes (IW, EW, SM).
+                            Always filter to <code>'IW'</code> for land applications.</li>
+                        <li><strong>Mixing orbit directions:</strong> Ascending and descending passes view the surface
+                            from different angles, producing different backscatter values. Pick one.</li>
+                        <li><strong>Wrong visualization range:</strong> SAR values are in dB (negative numbers). Use
+                            <code>{min: -25, max: 0}</code> for VV and <code>{min: -30, max: -5}</code> for VH.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section 3: Polarization -->
+            <section>
+                <h2>Understanding Polarization: VV vs. VH</h2>
+                <p>
+                    Sentinel-1 transmits radar pulses in the vertical (V) direction and records echoes in both
+                    vertical (V) and horizontal (H) directions. This gives you two polarization bands:
+                </p>
+                <ul>
+                    <li><strong>VV (co-polarization):</strong> Transmitted V, received V. Sensitive to surface roughness
+                        and soil moisture. Water appears very dark.</li>
+                    <li><strong>VH (cross-polarization):</strong> Transmitted V, received H. Sensitive to volume
+                        scattering (vegetation canopy structure). Forests appear brighter in VH than bare soil.</li>
+                </ul>
+
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Surface</th>
+                            <th>VV (dB)</th>
+                            <th>VH (dB)</th>
+                            <th>Why</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Calm water</td><td>-25 to -20</td><td>-35 to -28</td><td>Smooth surface reflects radar away (specular reflection)</td></tr>
+                        <tr><td>Urban</td><td>-5 to 0</td><td>-15 to -8</td><td>Buildings create strong corner reflectors</td></tr>
+                        <tr><td>Forest</td><td>-10 to -5</td><td>-15 to -10</td><td>Canopy scatters in multiple directions (volume scattering)</td></tr>
+                        <tr><td>Bare soil</td><td>-15 to -8</td><td>-25 to -18</td><td>Moderate roughness, little volume scattering</td></tr>
+                        <tr><td>Flooded vegetation</td><td>-5 to 0</td><td>-12 to -8</td><td>Double-bounce between water surface and tree trunks</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="pro-tips">
+                    <h3>Pro tip: false-color SAR composites</h3>
+                    <p>
+                        You can create a color composite from SAR data by assigning VV to red, VH to green, and
+                        VV/VH ratio to blue. This makes water appear dark, urban areas appear bright magenta,
+                        and vegetation appears green.
+                    </p>
+                </div>
+
+<pre><code>// SAR false-color composite
+var vv = s1.select('VV');
+var vh = s1.select('VH');
+var ratio = vv.divide(vh).rename('VV_VH_ratio');
+
+var sarComposite = vv.addBands(vh).addBands(ratio);
+Map.addLayer(sarComposite, {
+  min: [-25, -30, 0.3],
+  max: [0, -5, 1.5]
+}, 'SAR Composite (VV, VH, ratio)');</code></pre>
+            </section>
+
+            <!-- Section 4: Speckle Filtering -->
+            <section>
+                <h2>Speckle Filtering</h2>
+                <p>
+                    SAR images have a characteristic grainy texture called <strong>speckle</strong>. Speckle is not
+                    random sensor noise; it is caused by the constructive and destructive interference of radar
+                    waves reflecting from many small scatterers within a single pixel. However, for most analysis
+                    purposes, speckle must be reduced.
+                </p>
+                <p>
+                    The simplest speckle reduction technique is <strong>spatial averaging</strong> using a focal
+                    (neighborhood) filter. A common choice is a 3x3 or 5x5 pixel mean or median filter.
+                </p>
+
+<pre><code>// Simple speckle filtering using a focal mean
+var vvSmooth = s1.select('VV').focal_mean({
+  radius: 50,
+  kernelType: 'circle',
+  units: 'meters'
+});
+
+Map.addLayer(s1.select('VV'), {min: -25, max: 0}, 'VV (original)');
+Map.addLayer(vvSmooth, {min: -25, max: 0}, 'VV (speckle filtered)');</code></pre>
+
+                <p>
+                    Another approach is <strong>temporal averaging</strong>: take the median of multiple SAR images
+                    from the same orbit over several weeks. This reduces speckle without blurring spatial details.
+                </p>
+
+<pre><code>// Temporal speckle reduction using multi-image median
+var s1Median = s1Collection
+  .select(['VV', 'VH'])
+  .median();
+
+Map.addLayer(s1Median.select('VV'), {min: -25, max: 0}, 'VV (temporal median)');</code></pre>
+
+                <div class="pro-tips">
+                    <h3>Which filter to use?</h3>
+                    <ul>
+                        <li><strong>Focal mean/median (spatial):</strong> Quick and easy, but blurs edges.</li>
+                        <li><strong>Temporal median:</strong> Preserves edges better, but requires multiple images and
+                            assumes no change during the time window.</li>
+                        <li>For flood mapping (where change is the signal), use the temporal median for the
+                            "before" baseline, but do NOT temporally average the "during flood" image.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section 5: Flood Mapping with SAR -->
+            <section>
+                <h2>Flood Mapping with SAR</h2>
+                <p>
+                    Flood mapping is the most widely used SAR application. The logic is simple: water is smooth,
+                    smooth surfaces produce very low backscatter, so flooded areas appear much darker than
+                    surrounding land. By comparing a "before" image with a "during flood" image, you can identify
+                    newly inundated areas.
+                </p>
+
+                <h3>Case Study: 2017 Hurricane Harvey, Houston</h3>
+                <p>
+                    Hurricane Harvey dumped over 60 inches of rain on Houston in August 2017, causing catastrophic
+                    flooding. Optical satellites could not see through the storm clouds, but Sentinel-1 mapped the
+                    flood extent clearly.
+                </p>
+
+<pre><code>// Flood mapping: Hurricane Harvey, Houston TX, August 2017
+var houston = ee.Geometry.Point([-95.37, 29.76]);
+
+// Standard Sentinel-1 filters
+var s1Filters = function(col) {
+  return col
+    .filter(ee.Filter.eq('instrumentMode', 'IW'))
+    .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
+    .filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING'));
+};
+
+// Before: June 2017 (dry baseline, temporal median to reduce speckle)
+var before = s1Filters(ee.ImageCollection('COPERNICUS/S1_GRD')
+  .filterBounds(houston)
+  .filterDate('2017-06-01', '2017-06-30'))
+  .select('VV')
+  .median();
+
+// During: August 30, 2017 (peak flooding, single image)
+var during = s1Filters(ee.ImageCollection('COPERNICUS/S1_GRD')
+  .filterBounds(houston)
+  .filterDate('2017-08-29', '2017-09-05'))
+  .select('VV')
+  .mosaic();
+
+// Change detection: pixels where backscatter dropped significantly
+var difference = before.subtract(during);
+
+// Threshold: areas where backscatter dropped by more than 3 dB are flooded
+var floodMask = difference.gt(3);
+
+Map.centerObject(houston, 10);
+Map.addLayer(before, {min: -25, max: 0}, 'Before (June 2017)');
+Map.addLayer(during, {min: -25, max: 0}, 'During flood (Aug 2017)');
+Map.addLayer(floodMask.selfMask(), {palette: ['cyan']}, 'Flood extent');
+
+// Calculate flooded area in km²
+var floodArea = floodMask.multiply(ee.Image.pixelArea()).reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: houston.buffer(50000),
+  scale: 10,
+  maxPixels: 1e9
+});
+var areaKm2 = ee.Number(floodArea.get('VV')).divide(1e6);
+print('Estimated flood extent (km²):', areaKm2);</code></pre>
+
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        The "Before" image shows Houston with bright urban areas and dark water bodies (rivers,
+                        reservoirs). The "During flood" image shows large dark areas where neighborhoods and
+                        roads were inundated. The flood mask highlights these areas in cyan. You should see
+                        extensive flooding along Buffalo Bayou, Addicks and Barker reservoirs, and surrounding
+                        residential areas.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Section 6: SAR Limitations -->
+            <section>
+                <h2>Limitations of SAR</h2>
+                <p>
+                    SAR is powerful, but it has its own challenges:
+                </p>
+                <ul>
+                    <li><strong>Speckle noise:</strong> All SAR images require noise reduction before analysis.</li>
+                    <li><strong>Geometric distortion:</strong> Radar images are acquired at an angle, causing
+                        foreshortening, layover, and shadow effects in mountainous terrain.</li>
+                    <li><strong>Interpretation difficulty:</strong> SAR images look very different from optical
+                        images. Bright does not mean "light colored"; it means "rough" or "structured."</li>
+                    <li><strong>Wind roughening:</strong> Ocean and lake surfaces roughened by wind produce higher
+                        backscatter and can be confused with land.</li>
+                    <li><strong>No spectral indices:</strong> You cannot calculate NDVI, NDWI, or other spectral
+                        indices from SAR data. SAR and optical data are complementary.</li>
+                </ul>
+            </section>
+
+            <section class="try-it">
+                <h4>Try it: Map a different flood</h4>
+                <p>
+                    Find a recent flood event (search "recent floods" in the news). Load Sentinel-1 data
+                    for the area using a before date (1 month prior) and a during date (within days of the
+                    flood). Apply the same change detection approach with a 3 dB threshold. How does the
+                    flood extent compare to news reports?
+                </p>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>Why can SAR see through clouds but optical sensors cannot?</li>
+                    <li>What does low backscatter (dark areas in SAR images) typically indicate?</li>
+                    <li>Name the two polarization bands available from Sentinel-1 in IW mode.</li>
+                    <li>Why do you need to filter Sentinel-1 by <code>instrumentMode</code> and <code>orbitProperties_pass</code>?</li>
+                    <li>In SAR flood mapping, why do you subtract the "during" image from the "before" image?</li>
+                </ol>
+            </section>
+
+            <!-- EEFA Bridge -->
+            <section class="builds-on">
+                <h3>Going deeper</h3>
+                <p>This module provides an introduction to SAR concepts. For advanced radar techniques, see:</p>
+                <ul>
+                    <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter F3.1: SAR Basics</li>
+                    <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter A3.7: Monitoring Floods and Droughts with SAR</li>
+                    <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter F3.2: Interpreting SAR Images</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Next Steps</h2>
+                <ul>
+                    <li><a href="../../labs/lab-27-sar-flood-mapping.html">Lab 27: SAR Flood Mapping</a> - Apply SAR
+                        change detection to independently map a flood event.</li>
+                    <li><a href="../supplementary/gee-best-practices.html">GEE Best Practices</a> - Optimize your
+                        scripts for large-scale SAR processing.</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Lab 25: Build crop phenology curves from MODIS EVI time series and compare corn, soybean, and wheat growth patterns using the USDA Cropland Data Layer.">
+  <title>Lab 25 - Agricultural Monitoring | Remote Sensing Course</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 25
+    </nav>
+
+    <header class="lab-header">
+      <h1>Lab 25 - Agricultural Monitoring</h1>
+      <p><em><strong>Objective: Monitor crop phenology using EVI time series and the USDA Cropland Data Layer to compare growing patterns across crop types.</strong></em></p>
+    </header>
+
+    <main class="lab-content">
+
+      <section class="learning-objectives">
+        <h3>Learning objectives</h3>
+        <ul>
+          <li>Load and visualize the USDA Cropland Data Layer to identify crop types</li>
+          <li>Select sample points for different crops using CDL class codes</li>
+          <li>Build MODIS EVI time series for an entire growing season</li>
+          <li>Create and interpret phenology charts for corn, soybean, and wheat</li>
+          <li>Compare phenological timing across crop types</li>
+          <li>Calculate peak EVI and estimate growing season length</li>
+        </ul>
+      </section>
+
+      <section class="why-it-matters">
+        <h3>Why it matters</h3>
+        <p>Every crop follows a distinct growth rhythm. Corn peaks early and high; soybeans peak later and lower; winter wheat follows an entirely different calendar. By charting these patterns with satellite data, agricultural analysts can monitor crop health across millions of hectares, detect drought stress weeks before it is visible on the ground, and forecast yields months before harvest. In this lab, you will build the same type of phenology analysis used by the USDA and international food security organizations.</p>
+      </section>
+
+      <section>
+        <h2>Before You Start</h2>
+        <ul>
+          <li><strong>Prerequisites:</strong> Time Series Charting module, Agricultural Monitoring module</li>
+          <li><strong>Estimated time:</strong> 40 minutes</li>
+          <li><strong>You will need:</strong> GEE Code Editor access</li>
+        </ul>
+      </section>
+
+      <section class="vocabulary">
+        <h3>Key terms</h3>
+        <dl>
+          <dt>CDL (Cropland Data Layer)</dt>
+          <dd>Annual 30-meter crop type map for the US, produced by the USDA National Agricultural Statistics Service.</dd>
+
+          <dt>Phenology curve</dt>
+          <dd>A graph of vegetation greenness over time that reveals planting, growth, peak, and harvest dates.</dd>
+
+          <dt>Green-up</dt>
+          <dd>The period of rapid increase in vegetation index values as a crop emerges and grows.</dd>
+
+          <dt>Senescence</dt>
+          <dd>The decline in greenness as a crop matures, dries, and approaches harvest.</dd>
+
+          <dt>Peak EVI</dt>
+          <dd>The maximum EVI value reached during the growing season, which correlates with crop vigor and potential yield.</dd>
+        </dl>
+      </section>
+
+      <!-- Part 1 -->
+      <section>
+        <h2>Lab Instructions</h2>
+
+        <h3>Part 1 - Load the USDA Cropland Data Layer</h3>
+        <p>Start by loading the 2023 CDL to see what crops are planted across central Iowa. The CDL uses numeric codes for each crop type, and it includes a built-in color palette.</p>
+<pre><code>// ===== PART 1: Load the Cropland Data Layer =====
+
+// Define study area in central Iowa
+var studyArea = ee.Geometry.Point([-93.5, 42.0]);
+
+// Load CDL for 2023
+var cdl = ee.ImageCollection('USDA/NASS/CDL')
+  .filter(ee.Filter.eq('system:index', '2023'))
+  .first()
+  .select('cropland');
+
+// Add CDL to map (uses built-in palette)
+Map.addLayer(cdl, {}, 'Cropland Data Layer 2023');
+Map.centerObject(studyArea, 12);
+
+// Print crop class names for reference
+print('CDL loaded - Key codes: 1=Corn, 5=Soybeans, 24=Winter Wheat');</code></pre>
+        <p><strong>Understanding the code:</strong></p>
+        <ul>
+          <li><code>ee.Filter.eq('system:index', '2023')</code> - selects the 2023 CDL by its index property (a string, not a date)</li>
+          <li><code>.select('cropland')</code> - extracts the crop classification band</li>
+        </ul>
+        <div class="expected-output">
+          <h4>What you should see</h4>
+          <p>A colorful field-level map of crop types. In central Iowa, you will see a patchwork dominated by yellow (corn) and green (soybeans), the two crops that together cover over 80% of Iowa's farmland.</p>
+        </div>
+      </section>
+
+      <!-- Part 2 -->
+      <section>
+        <h3>Part 2 - Select sample points for each crop</h3>
+        <p>Now use the CDL to place sample points in fields of known crop type. The key is to choose points in the center of large, uniform fields to avoid mixed pixels.</p>
+<pre><code>// ===== PART 2: Define crop sample points =====
+
+// Corn field in central Iowa (CDL code 1)
+var cornPoint = ee.Geometry.Point([-93.50, 42.00]);
+
+// Soybean field nearby (CDL code 5)
+var soyPoint = ee.Geometry.Point([-93.45, 42.05]);
+
+// Winter wheat in central Kansas (CDL code 24)
+var wheatPoint = ee.Geometry.Point([-97.50, 38.80]);
+
+// Verify crop types at each point
+var cornType = cdl.reduceRegion({
+  reducer: ee.Reducer.first(),
+  geometry: cornPoint,
+  scale: 30
+});
+var soyType = cdl.reduceRegion({
+  reducer: ee.Reducer.first(),
+  geometry: soyPoint,
+  scale: 30
+});
+
+print('Corn point crop code:', cornType);
+print('Soybean point crop code:', soyType);
+
+// Add points to map
+Map.addLayer(cornPoint, {color: 'yellow'}, 'Corn Sample');
+Map.addLayer(soyPoint, {color: 'green'}, 'Soybean Sample');
+Map.addLayer(wheatPoint, {color: 'orange'}, 'Wheat Sample');</code></pre>
+        <p><strong>Understanding the code:</strong></p>
+        <ul>
+          <li><code>ee.Reducer.first()</code> - extracts the pixel value at the exact point location</li>
+          <li>Verify the printed values: corn should print <code>1</code>, soybeans should print <code>5</code></li>
+          <li>If the values do not match, use the Inspector tool to click on corn and soybean fields and update coordinates</li>
+        </ul>
+      </section>
+
+      <!-- Part 3 -->
+      <section>
+        <h3>Part 3 - Build a MODIS EVI time series</h3>
+        <p>Load the full year of MODIS EVI data and apply the scale factor. MODIS MOD13A2 provides 16-day composites at 1 km resolution with pre-computed EVI values.</p>
+<pre><code>// ===== PART 3: Prepare MODIS EVI time series =====
+
+// Load MODIS 16-day EVI for 2023
+var modisEVI = ee.ImageCollection('MODIS/061/MOD13A2')
+  .filterDate('2023-01-01', '2023-12-31')
+  .select('EVI');
+
+// Scale EVI values (MODIS stores EVI * 10000)
+var eviScaled = modisEVI.map(function(image) {
+  return image.multiply(0.0001)
+    .copyProperties(image, ['system:time_start']);
+});
+
+// Check how many images we have
+print('Number of MODIS EVI images:', eviScaled.size());
+print('Date range:', eviScaled.first().get('system:time_start'));</code></pre>
+        <p><strong>Understanding the code:</strong></p>
+        <ul>
+          <li><code>.multiply(0.0001)</code> - converts raw MODIS EVI (stored as integers) to the standard 0 to 1 range</li>
+          <li><code>.copyProperties(image, ['system:time_start'])</code> - preserves the timestamp so charts display correct dates on the x-axis</li>
+          <li>You should see approximately 23 images (one every 16 days for a full year)</li>
+        </ul>
+      </section>
+
+      <!-- Part 4 -->
+      <section>
+        <h3>Part 4 - Create phenology charts</h3>
+        <p>Chart EVI over time for all three crop types on a single graph. This comparison reveals how each crop's growing season differs in timing, intensity, and duration.</p>
+<pre><code>// ===== PART 4: Create phenology charts =====
+
+// Create a FeatureCollection with labeled crop points
+var cropPoints = ee.FeatureCollection([
+  ee.Feature(cornPoint, {label: 'Corn'}),
+  ee.Feature(soyPoint, {label: 'Soybean'}),
+  ee.Feature(wheatPoint, {label: 'Winter Wheat'})
+]);
+
+// Chart EVI for all three crops
+var phenologyChart = ui.Chart.image.seriesByRegion(
+  eviScaled, cropPoints, ee.Reducer.mean(), 'EVI', 1000,
+  'system:time_start', 'label')
+  .setChartType('LineChart')
+  .setOptions({
+    title: 'Crop Phenology Comparison (2023)',
+    vAxis: {
+      title: 'EVI',
+      viewWindow: {min: 0, max: 1}
+    },
+    hAxis: {title: 'Date'},
+    lineWidth: 2,
+    pointSize: 4,
+    series: {
+      0: {color: '#FFD700'}, // Corn - gold
+      1: {color: '#228B22'}, // Soybean - green
+      2: {color: '#D2691E'}  // Wheat - brown
+    }
+  });
+print(phenologyChart);
+
+// Also chart corn individually for a closer look
+var cornChart = ui.Chart.image.series(eviScaled, cornPoint, ee.Reducer.mean(), 1000)
+  .setOptions({
+    title: 'Corn Phenology - Central Iowa (2023)',
+    vAxis: {title: 'EVI', viewWindow: {min: 0, max: 1}},
+    hAxis: {title: 'Date'},
+    lineWidth: 2, pointSize: 4,
+    colors: ['#FFD700']
+  });
+print(cornChart);</code></pre>
+        <div class="expected-output">
+          <h4>What you should see</h4>
+          <p>A chart with three distinct curves. Winter wheat (brown) peaks first around May, then declines rapidly as it is harvested in June. Corn (gold) rises steeply in June and peaks in mid-July at the highest EVI values (0.7 to 0.9). Soybeans (green) follow corn by roughly two weeks, peaking in late July at slightly lower values. The individual corn chart shows a smooth bell curve that is the textbook signature of a healthy summer crop.</p>
+        </div>
+      </section>
+
+      <!-- Part 5 -->
+      <section>
+        <h3>Part 5 - Compare phenology patterns</h3>
+        <p>Now analyze the timing differences between crops. Identify when each crop greens up, peaks, and senesces. This information is critical for crop identification and yield forecasting.</p>
+<pre><code>// ===== PART 5: Analyze phenology timing =====
+
+// Create individual charts to study timing more closely
+// Corn phenology
+var cornSeries = ui.Chart.image.series(eviScaled, cornPoint, ee.Reducer.mean(), 1000)
+  .setOptions({
+    title: 'Corn Phenology Detail',
+    vAxis: {title: 'EVI'},
+    hAxis: {title: 'Date'},
+    lineWidth: 2, pointSize: 5,
+    colors: ['#FFD700'],
+    trendlines: {0: {type: 'polynomial', degree: 5, color: 'gray'}}
+  });
+print(cornSeries);
+
+// Soybean phenology
+var soySeries = ui.Chart.image.series(eviScaled, soyPoint, ee.Reducer.mean(), 1000)
+  .setOptions({
+    title: 'Soybean Phenology Detail',
+    vAxis: {title: 'EVI'},
+    hAxis: {title: 'Date'},
+    lineWidth: 2, pointSize: 5,
+    colors: ['#228B22'],
+    trendlines: {0: {type: 'polynomial', degree: 5, color: 'gray'}}
+  });
+print(soySeries);
+
+// Print interpretation guide
+print('--- Phenology Interpretation Guide ---');
+print('Corn: Green-up ~May, Peak ~mid-July, Senescence ~Sep');
+print('Soybean: Green-up ~June, Peak ~late July, Senescence ~Oct');
+print('Winter Wheat: Green-up ~Mar, Peak ~May, Harvest ~June');</code></pre>
+        <p><strong>What to look for:</strong></p>
+        <ul>
+          <li><strong>Green-up date:</strong> When does EVI first rise above 0.3? This indicates crop emergence.</li>
+          <li><strong>Peak date:</strong> What date shows the highest EVI value? This is maximum canopy development.</li>
+          <li><strong>Senescence:</strong> When does EVI drop back below 0.3? This coincides with maturity and harvest.</li>
+          <li><strong>Growing season length:</strong> Count the days between green-up and senescence.</li>
+        </ul>
+      </section>
+
+      <!-- Part 6 -->
+      <section>
+        <h3>Part 6 - Calculate peak EVI and growing season length</h3>
+        <p>Extract quantitative metrics from the time series. Peak EVI correlates with crop vigor, while growing season length varies by crop type and latitude.</p>
+<pre><code>// ===== PART 6: Quantitative phenology metrics =====
+
+// Calculate peak (maximum) EVI for each crop point
+var peakCorn = eviScaled.max().reduceRegion({
+  reducer: ee.Reducer.first(),
+  geometry: cornPoint,
+  scale: 1000
+});
+
+var peakSoy = eviScaled.max().reduceRegion({
+  reducer: ee.Reducer.first(),
+  geometry: soyPoint,
+  scale: 1000
+});
+
+var peakWheat = eviScaled.max().reduceRegion({
+  reducer: ee.Reducer.first(),
+  geometry: wheatPoint,
+  scale: 1000
+});
+
+print('Peak EVI - Corn:', peakCorn);
+print('Peak EVI - Soybean:', peakSoy);
+print('Peak EVI - Winter Wheat:', peakWheat);
+
+// Calculate growing season length using a threshold approach
+// Count the number of 16-day periods where EVI > 0.3
+var growingCorn = eviScaled.map(function(img) {
+  return img.gt(0.3).copyProperties(img, ['system:time_start']);
+}).sum().reduceRegion({
+  reducer: ee.Reducer.first(),
+  geometry: cornPoint,
+  scale: 1000
+});
+
+var growingSoy = eviScaled.map(function(img) {
+  return img.gt(0.3).copyProperties(img, ['system:time_start']);
+}).sum().reduceRegion({
+  reducer: ee.Reducer.first(),
+  geometry: soyPoint,
+  scale: 1000
+});
+
+var growingWheat = eviScaled.map(function(img) {
+  return img.gt(0.3).copyProperties(img, ['system:time_start']);
+}).sum().reduceRegion({
+  reducer: ee.Reducer.first(),
+  geometry: wheatPoint,
+  scale: 1000
+});
+
+// Each count * 16 days = approximate growing season length
+print('Growing season (16-day periods above 0.3 EVI):');
+print('  Corn:', growingCorn);
+print('  Soybean:', growingSoy);
+print('  Winter Wheat:', growingWheat);
+print('Multiply count by 16 to get approximate days');</code></pre>
+        <div class="expected-output">
+          <h4>What you should see</h4>
+          <p>Peak EVI values of approximately 0.7 to 0.9 for corn, 0.6 to 0.8 for soybeans, and 0.5 to 0.7 for winter wheat. The growing season count (periods with EVI above 0.3) should show corn and soybeans at roughly 8 to 10 periods (128 to 160 days), and winter wheat at 5 to 7 periods (80 to 112 days) because of its shorter active growth phase.</p>
+        </div>
+      </section>
+
+      <div class="try-it">
+        <h4>Try it: Add a fourth crop</h4>
+        <p>Using the CDL, find a cotton field in Texas (CDL code 2) or a rice field in Arkansas (CDL code 3). Add it to your <code>cropPoints</code> FeatureCollection and regenerate the phenology chart. How does its curve differ from the Midwest crops?</p>
+      </div>
+
+      <section class="self-check">
+        <h3>Quick self-check</h3>
+        <ol>
+          <li>Why is MODIS (1 km) used for phenology instead of Landsat (30 m) or Sentinel-2 (10 m)?</li>
+          <li>What CDL code represents corn? What code represents soybeans?</li>
+          <li>How does winter wheat's phenology differ from corn's in terms of timing?</li>
+          <li>Why do we multiply the MODIS EVI values by 0.0001?</li>
+          <li>What does it mean when a crop has a higher peak EVI than another crop?</li>
+        </ol>
+      </section>
+
+      <section class="troubleshooting">
+        <h3>Troubleshooting</h3>
+        <div class="issue">
+          <strong>Problem: Chart shows no data or all zeros</strong>
+          <p><strong>Solution:</strong> Make sure you applied <code>.multiply(0.0001)</code> to scale the EVI values. Also verify your point falls on land by checking the map.</p>
+        </div>
+        <div class="issue">
+          <strong>Problem: CDL prints an unexpected crop code</strong>
+          <p><strong>Solution:</strong> Use the Inspector tool to click on fields and find points that match your target crop. Crop rotations mean last year's corn field may be soybeans this year.</p>
+        </div>
+        <div class="issue">
+          <strong>Problem: Winter wheat chart looks flat</strong>
+          <p><strong>Solution:</strong> Make sure your wheat point is in a winter wheat region (Kansas, Oklahoma) and not in Iowa. The CDL code for winter wheat is 24; spring wheat is 23.</p>
+        </div>
+      </section>
+
+      <section class="key-concepts">
+        <h3>Key Takeaways</h3>
+        <ul>
+          <li>The USDA Cropland Data Layer provides annual, field-level crop identification at 30-meter resolution across the US</li>
+          <li>MODIS EVI time series reveal crop phenology (green-up, peak, senescence) at 16-day intervals</li>
+          <li>Different crops produce distinct phenological signatures that can be used for crop identification</li>
+          <li>Peak EVI correlates with crop vigor and yield potential</li>
+          <li>Growing season length varies by crop type, latitude, and climate conditions</li>
+        </ul>
+      </section>
+
+      <section class="common-mistakes">
+        <h3>Common mistakes</h3>
+        <ul>
+          <li><strong>Not copying properties:</strong> Forgetting <code>.copyProperties(image, ['system:time_start'])</code> causes charts to show no dates on the x-axis.</li>
+          <li><strong>Wrong CDL filter syntax:</strong> CDL uses <code>ee.Filter.eq('system:index', '2023')</code>, not <code>.filterDate()</code>.</li>
+          <li><strong>Placing points on field boundaries:</strong> MODIS pixels are 1 km. A point near a field edge mixes signals from multiple fields, producing a blurred phenology curve.</li>
+        </ul>
+      </section>
+
+      <section class="pro-tips">
+        <h3>Pro tips</h3>
+        <ul>
+          <li>Add <code>trendlines</code> to your chart options to fit a smooth curve through noisy data points</li>
+          <li>Export your chart data to CSV for further analysis in Excel or R by clicking the chart's download button</li>
+          <li>Use <code>.filterDate()</code> with a narrower range (April to November) to zoom in on the growing season and reduce chart clutter</li>
+        </ul>
+      </section>
+
+      <section id="submission">
+        <div class="submission-box">
+          <h3>📋 Lab Submission</h3>
+          <p><strong>Subject:</strong> <code>Lab 25 - Agricultural Monitoring - [Your Name]</code></p>
+          <p><strong>Include in your submission:</strong></p>
+          <ul>
+            <li>Shareable GEE script link</li>
+            <li>Screenshot of your three-crop phenology comparison chart</li>
+            <li>Comparison table (fill in from your results):</li>
+          </ul>
+          <table>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Corn</th>
+                <th>Soybean</th>
+                <th>Winter Wheat</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Peak EVI</td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Peak date (approx.)</td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Green-up date</td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Growing season (days)</td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <ul>
+            <li><strong>Question 1:</strong> A farmer in Iowa tells you their crop peaked in mid-July with a very high EVI. Based on your analysis, which crop is most likely growing in that field? Explain your reasoning.</li>
+            <li><strong>Question 2:</strong> Why would a phenology curve with a lower-than-expected peak EVI be a cause for concern in a crop monitoring system? What factors could cause this?</li>
+          </ul>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      <p><a href="../index.html">← Back to Course Home</a></p>
+      <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+    </footer>
+  </div>
+</body>
+
+</html>

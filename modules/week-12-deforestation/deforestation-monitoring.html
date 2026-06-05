@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Learn to map deforestation and forest change using the Hansen Global Forest Change dataset in Google Earth Engine.">
+    <title>Deforestation & Forest Monitoring | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Deforestation
+        </nav>
+
+        <header class="lab-header">
+            <h1>Deforestation & Forest Monitoring</h1>
+        </header>
+
+        <main class="lab-content">
+            <p>
+                Tropical forests store roughly 250 billion tons of carbon and harbor over half of the world's
+                terrestrial species. Yet every year, millions of hectares of forest are cleared for agriculture,
+                logging, and development. In this module you will learn to use the Hansen Global Forest Change
+                dataset to map, measure, and chart forest loss at any scale.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Load and explore the Hansen Global Forest Change (GFC) dataset.</li>
+                    <li>Map tree cover, forest loss, and forest gain.</li>
+                    <li>Calculate forest loss area in hectares and square kilometers.</li>
+                    <li>Create a deforestation time series chart grouped by year.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Deforestation is the second-largest source of anthropogenic greenhouse gas emissions after fossil
+                    fuels. It destroys biodiversity, displaces indigenous communities, disrupts water cycles, and
+                    degrades soils. Satellite-based monitoring is the only practical way to track forest loss across
+                    entire countries and continents in near-real time.
+                </p>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key vocabulary</h3>
+                <dl>
+                    <dt>Hansen GFC</dt>
+                    <dd>The Global Forest Change dataset produced by the University of Maryland (Hansen et al., 2013).
+                        Updated annually using Landsat imagery at 30-meter resolution.</dd>
+
+                    <dt>Tree cover (treecover2000)</dt>
+                    <dd>Percentage canopy cover for the year 2000. Values range from 0 (no trees) to 100 (complete canopy closure).</dd>
+
+                    <dt>Loss</dt>
+                    <dd>A binary band indicating whether a pixel experienced forest loss during the study period (1 = loss, 0 = no loss).</dd>
+
+                    <dt>Loss year (lossyear)</dt>
+                    <dd>The year in which forest loss occurred, encoded as years since 2000 (1 = 2001, 23 = 2023).</dd>
+
+                    <dt>Gain</dt>
+                    <dd>A binary band indicating forest gain between 2000 and 2012 (1 = gain, 0 = no gain). This band has
+                        not been updated since the original publication.</dd>
+                </dl>
+            </section>
+
+            <!-- Quick Win -->
+            <section>
+                <h2>Quick Win: Forest Loss in Rondonia, Brazil</h2>
+                <p>
+                    The state of Rondonia in the Brazilian Amazon is one of the most actively deforested regions on
+                    Earth. "Fishbone" deforestation patterns, where roads branch outward from highways into intact
+                    forest, are clearly visible from space. Let's map the damage.
+                </p>
+<pre><code>// Visualize forest loss in Rondonia, Brazil
+var rondonia = ee.Geometry.Point([-62.0, -10.5]);
+
+// Load the Hansen Global Forest Change dataset
+var gfc = ee.Image('UMD/hansen/global_forest_change_2023_v1_11');
+
+// Tree cover in 2000 (green gradient)
+var treeCover = gfc.select('treecover2000');
+Map.addLayer(treeCover, {min: 0, max: 100, palette: ['black', '076B07', '0FA00F']}, 'Tree Cover 2000');
+
+// Forest loss (red overlay)
+var loss = gfc.select('loss');
+Map.addLayer(loss.selfMask(), {palette: ['FF0000']}, 'Forest Loss');
+
+// Loss year (rainbow palette showing when loss occurred)
+var lossYear = gfc.select('lossyear');
+Map.addLayer(lossYear.selfMask(), {
+  min: 1, max: 23,
+  palette: ['FFFF00', 'FF8800', 'FF0000', 'FF00FF', '0000FF']
+}, 'Loss Year (2001-2023)');
+
+Map.centerObject(rondonia, 9);</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        Three layers: a green tree cover base map showing dense forest in 2000, a red loss overlay
+                        revealing the fishbone deforestation pattern, and a rainbow loss year layer where yellow
+                        indicates early deforestation (2001) and blue indicates recent deforestation (2023). Toggle
+                        layers to see how deforestation has expanded over time.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Section 1: Global Deforestation -->
+            <section>
+                <h2>Global Deforestation</h2>
+                <p>
+                    Between 2001 and 2023, the world lost approximately 450 million hectares of tree cover, an area
+                    larger than the European Union. The drivers vary by region: industrial agriculture in Southeast Asia
+                    and Latin America, subsistence farming in Central Africa, and wildfire in boreal forests.
+                </p>
+                <ul>
+                    <li><strong>Carbon emissions:</strong> Tropical deforestation releases roughly 4.8 billion tons
+                        of CO₂ annually.</li>
+                    <li><strong>Biodiversity:</strong> Tropical forests harbor an estimated 50-80% of terrestrial species.
+                        Forest loss directly threatens extinction.</li>
+                    <li><strong>Indigenous communities:</strong> Over 370 million indigenous people worldwide depend on
+                        forests for their livelihoods and cultural identity.</li>
+                    <li><strong>Water cycles:</strong> Forests regulate rainfall patterns. Large-scale deforestation in
+                        the Amazon is linked to reduced rainfall in Brazil's agricultural heartland.</li>
+                </ul>
+            </section>
+
+            <!-- Section 2: The Hansen Dataset -->
+            <section>
+                <h2>The Hansen Dataset</h2>
+                <p>
+                    The Hansen Global Forest Change dataset was first published in 2013 by a team led by Matthew Hansen
+                    at the University of Maryland. It uses Landsat imagery at 30-meter resolution and is updated annually.
+                    The dataset defines "tree cover" as canopy closure for vegetation taller than 5 meters.
+                </p>
+
+<pre><code>// Explore the dataset bands
+var gfc = ee.Image('UMD/hansen/global_forest_change_2023_v1_11');
+print('GFC band names:', gfc.bandNames());
+// Bands: treecover2000, loss, gain, lossyear, first_b30,
+//        first_b40, first_b50, first_b70, last_b30, last_b40,
+//        last_b50, last_b70, datamask</code></pre>
+
+                <p>The key layers you will use most often:</p>
+                <ul>
+                    <li><code>treecover2000</code>: Tree canopy cover percentage in the year 2000 (0 to 100).</li>
+                    <li><code>loss</code>: Binary forest loss mask (1 = loss occurred at some point from 2001 to 2023).</li>
+                    <li><code>lossyear</code>: Year of loss encoded as years since 2000 (1 = 2001, 23 = 2023).</li>
+                    <li><code>gain</code>: Binary forest gain from 2000 to 2012 (not updated annually).</li>
+                    <li><code>datamask</code>: Distinguishes mapped land (1) from water (2) and no data (0).</li>
+                </ul>
+
+                <div class="common-mistakes">
+                    <h3>Common mistakes</h3>
+                    <ul>
+                        <li>The dataset defines "tree cover" as any vegetation taller than 5 meters. This includes
+                            plantations and orchards, not just natural forest.</li>
+                        <li><code>lossyear</code> values are years since 2000, not calendar years.
+                            Value 15 means 2015, not year 15.</li>
+                        <li>The <code>gain</code> band only covers 2000 to 2012 and has not been updated.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section 3: Mapping Tree Cover -->
+            <section>
+                <h2>Mapping Tree Cover</h2>
+                <p>
+                    The <code>treecover2000</code> band provides a continuous measure of canopy closure. To create
+                    a forest/non-forest map, you apply a threshold. A common choice is 50% canopy cover, but the
+                    appropriate threshold depends on the forest definition used in your study area.
+                </p>
+
+<pre><code>// Create a forest mask using a 50% canopy threshold
+var treeCover = gfc.select('treecover2000');
+var forest2000 = treeCover.gte(50);
+
+Map.addLayer(treeCover, {
+  min: 0, max: 100,
+  palette: ['FFFFCC', '006600']
+}, 'Tree Cover (continuous)');
+
+Map.addLayer(forest2000.selfMask(), {
+  palette: ['006600']
+}, 'Forest > 50% (binary)');</code></pre>
+
+                <div class="pro-tips">
+                    <h3>Pro tips</h3>
+                    <ul>
+                        <li>The UN FAO uses a 10% canopy cover threshold for "forest." Brazil's official definition uses 80%.</li>
+                        <li>Always state your threshold when reporting results. The threshold choice significantly
+                            affects the final area calculation.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section 4: Mapping Forest Loss -->
+            <section>
+                <h2>Mapping Forest Loss</h2>
+                <p>
+                    The <code>loss</code> band is a binary mask showing whether any loss occurred at a pixel from
+                    2001 to 2023. The <code>lossyear</code> band adds temporal resolution by recording when
+                    the loss happened. Together, they let you both map and date deforestation.
+                </p>
+
+<pre><code>// Map loss within forests (only pixels that had > 50% cover in 2000)
+var loss = gfc.select('loss');
+var lossYear = gfc.select('lossyear');
+
+// Loss only within original forest
+var forestLoss = loss.and(forest2000);
+
+Map.addLayer(forestLoss.selfMask(), {palette: ['FF0000']}, 'Forest Loss (>50% baseline)');
+
+// Show loss by year with a color ramp
+Map.addLayer(lossYear.updateMask(forestLoss), {
+  min: 1, max: 23,
+  palette: ['#FFFFB2', '#FECC5C', '#FD8D3C', '#F03B20', '#BD0026']
+}, 'Loss Year (2001-2023)');</code></pre>
+
+                <div class="try-it">
+                    <h4>Try it: Isolate a single year</h4>
+                    <p>
+                        Create a map showing only the forest loss that occurred in 2020. Use
+                        <code>lossYear.eq(20)</code> to create a mask for that year. How does 2020 loss
+                        compare to 2010 (<code>lossYear.eq(10)</code>)?
+                    </p>
+<pre><code>// Loss in 2020 only
+var loss2020 = lossYear.eq(20).and(forest2000);
+Map.addLayer(loss2020.selfMask(), {palette: ['orange']}, 'Loss in 2020');</code></pre>
+                </div>
+            </section>
+
+            <!-- Section 5: Calculating Loss Area -->
+            <section>
+                <h2>Calculating Loss Area</h2>
+                <p>
+                    To measure deforestation in physical units, multiply the loss mask by
+                    <code>ee.Image.pixelArea()</code> and sum the result over your region of interest.
+                </p>
+
+<pre><code>// Calculate total forest loss area in hectares
+var roi = ee.Geometry.Rectangle([-64, -12, -60, -8]); // Rondonia region
+
+var forestLoss = gfc.select('loss').and(treeCover.gte(50));
+var lossArea = forestLoss.multiply(ee.Image.pixelArea());
+
+var totalLoss = lossArea.reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: roi,
+  scale: 30,
+  maxPixels: 1e9
+});
+
+// Convert m² to hectares (1 hectare = 10,000 m²)
+var lossHectares = ee.Number(totalLoss.get('loss')).divide(1e4);
+print('Total forest loss (hectares):', lossHectares);
+print('Total forest loss (km²):', lossHectares.divide(100));</code></pre>
+            </section>
+
+            <!-- Section 6: Charting Annual Loss -->
+            <section>
+                <h2>Charting Annual Loss</h2>
+                <p>
+                    A time series chart reveals trends in deforestation over time. You can group the loss area
+                    by <code>lossyear</code> to create an annual bar chart. This requires creating an image with
+                    loss year as one band and pixel area as another, then using a grouped reducer.
+                </p>
+
+<pre><code>// Create annual deforestation chart
+var roi = ee.Geometry.Rectangle([-64, -12, -60, -8]);
+var lossYear = gfc.select('lossyear');
+var forest2000 = gfc.select('treecover2000').gte(50);
+
+// Build an image with loss year and area
+var lossAreaImage = ee.Image.pixelArea()
+  .addBands(lossYear)
+  .updateMask(gfc.select('loss').and(forest2000));
+
+// Group by loss year
+var stats = lossAreaImage.reduceRegion({
+  reducer: ee.Reducer.sum().group({
+    groupField: 1,
+    groupName: 'year'
+  }),
+  geometry: roi,
+  scale: 30,
+  maxPixels: 1e9
+});
+
+// Convert to a feature collection for charting
+var groups = ee.List(stats.get('groups'));
+var chartData = groups.map(function(item) {
+  var dict = ee.Dictionary(item);
+  var year = ee.Number(dict.get('year')).add(2000);
+  var areaHa = ee.Number(dict.get('sum')).divide(1e4);
+  return ee.Feature(null, {year: year, area_ha: areaHa});
+});
+var fc = ee.FeatureCollection(chartData);
+
+// Create the chart
+var chart = ui.Chart.feature.byFeature(fc, 'year', 'area_ha')
+  .setChartType('ColumnChart')
+  .setOptions({
+    title: 'Annual Forest Loss in Rondonia (2001-2023)',
+    hAxis: {title: 'Year'},
+    vAxis: {title: 'Forest Loss (hectares)'},
+    colors: ['#CC0000']
+  });
+print(chart);</code></pre>
+
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        A bar chart in the Console showing annual deforestation in hectares from 2001 to 2023.
+                        You should see variation year to year, with certain years showing deforestation spikes
+                        that may correspond to policy changes or enforcement gaps.
+                    </p>
+                </div>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What does a <code>lossyear</code> value of 18 mean?</li>
+                    <li>Why should you apply a tree cover threshold before analyzing the loss band?</li>
+                    <li>How do you convert pixel area from square meters to hectares?</li>
+                    <li>Why is the <code>gain</code> band less useful than the <code>loss</code> band for recent analysis?</li>
+                    <li>What is the spatial resolution of the Hansen dataset?</li>
+                </ol>
+            </section>
+
+            <!-- EEFA Bridge -->
+            <section class="builds-on">
+                <h3>Going deeper</h3>
+                <p>This module introduces forest monitoring at a foundational level. For advanced techniques, see:</p>
+                <ul>
+                    <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter A3.4: Forest Degradation and Canopy Disturbance</li>
+                    <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter A3.5: Deforestation Mapping Using Multi-Sensor Data</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Next Steps</h2>
+                <ul>
+                    <li><a href="../../labs/lab-24-deforestation.html">Lab 24: Deforestation Analysis</a> - Apply
+                        the Hansen dataset to analyze deforestation patterns and create annual loss charts.</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explore the JRC Global Surface Water dataset to analyze water occurrence, transitions, and long-term changes in Google Earth Engine.">
+    <title>JRC Global Surface Water | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Hydrology
+        </nav>
+
+        <header class="lab-header">
+            <h1>JRC Global Surface Water</h1>
+        </header>
+
+        <main class="lab-content">
+            <p>
+                The previous module showed you how to map water from a single satellite image. But what if you want to
+                know how water has changed over the past 40 years? The JRC Global Surface Water dataset, produced by the
+                European Commission's Joint Research Centre, answers exactly that question using the entire Landsat archive.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Load and use the JRC Global Surface Water occurrence layer.</li>
+                    <li>Interpret water seasonality and transition classes.</li>
+                    <li>Visualize long-term changes in surface water extent.</li>
+                    <li>Understand the structure and layers of the JRC GSW dataset.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Some of the most dramatic environmental changes on Earth involve water. The Aral Sea has lost over
+                    90% of its volume. Lake Chad has shrunk by 90% since the 1960s. Meanwhile, new reservoirs and
+                    glacial lakes are appearing. The JRC dataset lets you quantify these changes at 30-meter resolution,
+                    globally, using a consistent methodology.
+                </p>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key vocabulary</h3>
+                <dl>
+                    <dt>Water occurrence</dt>
+                    <dd>The percentage of time a pixel has been covered by water between 1984 and the present. A value
+                        of 100 means permanent water; 50 means water half the time.</dd>
+
+                    <dt>Water transition</dt>
+                    <dd>A classification of how water presence has changed between the first and last periods of
+                        observation (e.g., permanent, seasonal, new permanent, lost permanent).</dd>
+
+                    <dt>Seasonality</dt>
+                    <dd>The number of months per year that a pixel is typically covered by water.</dd>
+
+                    <dt>Maximum extent</dt>
+                    <dd>A binary layer showing every pixel that was detected as water at least once during the
+                        entire observation period.</dd>
+
+                    <dt>JRC GSW</dt>
+                    <dd>Joint Research Centre Global Surface Water dataset, version 1.4. Derived from over 4.7
+                        million Landsat scenes spanning 1984 to present.</dd>
+                </dl>
+            </section>
+
+            <!-- Quick Win -->
+            <section>
+                <h2>Quick Win: The Aral Sea's Disappearance</h2>
+                <p>
+                    The Aral Sea, once the world's fourth-largest lake, has experienced one of the most dramatic
+                    water body changes in modern history. Let's visualize its water occurrence to see the full
+                    extent of this environmental catastrophe.
+                </p>
+<pre><code>// Visualize water occurrence for the Aral Sea
+var aral = ee.Geometry.Point([59.0, 44.5]);
+
+// Load the JRC Global Surface Water dataset
+var gsw = ee.Image('JRC/GSW1_4/GlobalSurfaceWater');
+
+// Select the occurrence band
+var occurrence = gsw.select('occurrence');
+
+// Visualize with a blue gradient palette
+Map.centerObject(aral, 7);
+Map.addLayer(occurrence, {
+  min: 0,
+  max: 100,
+  palette: ['ffffff', 'ffbbbb', 'ff0000', '0000ff']
+}, 'Water Occurrence (%)');
+
+print('JRC GSW band names:', gsw.bandNames());</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        A striking map of the Aral Sea showing the original lake outline in light red (water present
+                        only a small percentage of the time) with a tiny remnant of deep blue in the north (areas
+                        still covered by water most of the time). The contrast between the vast historical extent
+                        and the tiny remaining water body is immediately visible.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Section 1: The JRC GSW Dataset -->
+            <section>
+                <h2>The JRC Global Surface Water Dataset</h2>
+                <p>
+                    The JRC GSW dataset was created by analyzing over 4.7 million Landsat satellite images from
+                    1984 to the present. For every 30-meter pixel on Earth, the dataset records when water was
+                    present and when it was absent. This produces several derived layers, each capturing a different
+                    aspect of water dynamics.
+                </p>
+                <p>
+                    The dataset is stored as a single <code>ee.Image</code> with multiple bands. You do not need
+                    to filter dates or create composites because the JRC team has already done that work across the
+                    entire Landsat archive.
+                </p>
+
+<pre><code>// Load the dataset and explore its bands
+var gsw = ee.Image('JRC/GSW1_4/GlobalSurfaceWater');
+print('Available bands:', gsw.bandNames());
+// Bands: occurrence, change_abs, change_norm, seasonality,
+//        recurrence, transition, max_extent</code></pre>
+
+                <div class="pro-tips">
+                    <h3>Dataset layers at a glance</h3>
+                    <ul>
+                        <li><code>occurrence</code>: Percentage of time water was detected (0 to 100).</li>
+                        <li><code>seasonality</code>: Number of months water is present per year (0 to 12).</li>
+                        <li><code>transition</code>: Categorical change classes (permanent, seasonal, new, lost).</li>
+                        <li><code>max_extent</code>: Binary mask of all pixels ever detected as water.</li>
+                        <li><code>change_abs</code>: Absolute change in water occurrence between periods.</li>
+                        <li><code>recurrence</code>: How frequently water returns to a location.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section 2: Water Occurrence -->
+            <section>
+                <h2>Water Occurrence</h2>
+                <p>
+                    The occurrence band is the most intuitive layer. It shows the percentage of valid observations
+                    (cloud-free Landsat scenes) in which a pixel was classified as water. Permanent lakes and rivers
+                    will have values close to 100%. Seasonally flooded areas will have intermediate values.
+                    Areas that were once water but have since dried up will have low values.
+                </p>
+
+<pre><code>// Map occurrence with descriptive classes
+var occurrence = gsw.select('occurrence');
+
+// Permanent water: occurrence > 75%
+var permanent = occurrence.gte(75);
+
+// Seasonal water: occurrence between 25% and 75%
+var seasonal = occurrence.gte(25).and(occurrence.lt(75));
+
+// Ephemeral water: occurrence between 1% and 25%
+var ephemeral = occurrence.gte(1).and(occurrence.lt(25));
+
+Map.addLayer(permanent.selfMask(), {palette: ['0000CC']}, 'Permanent Water');
+Map.addLayer(seasonal.selfMask(), {palette: ['00CCFF']}, 'Seasonal Water');
+Map.addLayer(ephemeral.selfMask(), {palette: ['FFAAAA']}, 'Ephemeral Water');</code></pre>
+
+                <div class="try-it">
+                    <h4>Try it: Explore occurrence values</h4>
+                    <p>
+                        Use the Inspector tool to click on different parts of the Aral Sea occurrence layer. What
+                        values do you see in the former lake bed versus the remaining water? Navigate to a river
+                        near you and check its floodplain. Can you identify the main channel (high occurrence)
+                        versus the flood-prone areas (low occurrence)?
+                    </p>
+                </div>
+            </section>
+
+            <!-- Section 3: Water Transitions -->
+            <section>
+                <h2>Water Transitions</h2>
+                <p>
+                    The transition band classifies each pixel into categories based on how its water status changed
+                    between the first and last observation periods. This is the fastest way to identify where water
+                    has been permanently lost, where new water has appeared, and where seasonal patterns have shifted.
+                </p>
+
+<pre><code>// Visualize water transitions
+var transition = gsw.select('transition');
+
+// Official JRC transition class palette
+Map.addLayer(transition, {
+  min: 0,
+  max: 10,
+  palette: [
+    'ffffff', // 0: No change
+    '0000ff', // 1: Permanent
+    '22b14c', // 2: New permanent
+    'd1102d', // 3: Lost permanent
+    '99d9ea', // 4: Seasonal
+    'b5e61d', // 5: New seasonal
+    'e6a1aa', // 6: Lost seasonal
+    'ff7f27', // 7: Seasonal to permanent
+    'ffc90e', // 8: Permanent to seasonal
+    '7f7f7f', // 9: Ephemeral permanent
+    'c3c3c3'  // 10: Ephemeral seasonal
+  ]
+}, 'Water Transitions');</code></pre>
+
+                <p>Key transition classes to look for:</p>
+                <ul>
+                    <li><strong>Permanent (1):</strong> Water that has been present throughout the entire period.</li>
+                    <li><strong>New permanent (2):</strong> Areas that became permanently covered by water (e.g., new reservoirs).</li>
+                    <li><strong>Lost permanent (3):</strong> Areas that were once permanent water but have dried up.</li>
+                    <li><strong>Seasonal (4):</strong> Areas that consistently show seasonal water patterns.</li>
+                    <li><strong>Permanent to seasonal (8):</strong> Previously permanent water that now appears only part of the year.</li>
+                </ul>
+
+                <div class="common-mistakes">
+                    <h3>Common mistakes</h3>
+                    <ul>
+                        <li>The transition values are categorical codes, not continuous data. Do not compute averages or
+                            apply <code>.gt()</code> on them.</li>
+                        <li>Use <code>.eq()</code> to select specific transition classes (e.g., <code>transition.eq(3)</code>
+                            for lost permanent water).</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section 4: Seasonal Water -->
+            <section>
+                <h2>Seasonal Water</h2>
+                <p>
+                    The seasonality band records the number of months per year that a pixel is typically covered by water.
+                    A value of 12 indicates year-round water; a value of 3 means the pixel is wet for roughly one quarter
+                    of the year.
+                </p>
+
+<pre><code>// Visualize water seasonality
+var seasonality = gsw.select('seasonality');
+
+Map.addLayer(seasonality, {
+  min: 1,
+  max: 12,
+  palette: ['FFE4B5', 'FFA500', 'FF4500', '8B0000', '4169E1', '00008B']
+}, 'Seasonality (months/year)');
+
+print('Seasonality range:', seasonality.reduceRegion({
+  reducer: ee.Reducer.minMax(),
+  geometry: aral.buffer(200000),
+  scale: 30,
+  maxPixels: 1e9
+}));</code></pre>
+
+                <p>
+                    Seasonality maps are particularly useful for understanding monsoon flooding, snowmelt cycles,
+                    and irrigation patterns. In arid regions, you will see reservoirs with high seasonality values
+                    (water year-round) surrounded by areas with low values (wet only after seasonal rains).
+                </p>
+            </section>
+
+            <!-- Section 5: Tracking Change -->
+            <section>
+                <h2>Tracking Change: Historical vs. Current Water Extent</h2>
+                <p>
+                    The <code>max_extent</code> band records every pixel that was ever detected as water. By comparing
+                    this historical maximum with a current water mask, you can measure how much water has been lost.
+                </p>
+
+<pre><code>// Compare historical maximum with current water
+var maxExtent = gsw.select('max_extent');
+var currentWater = occurrence.gte(75); // Pixels currently permanent water
+
+// Areas of water loss: was water historically but not currently
+var waterLoss = maxExtent.eq(1).and(currentWater.eq(0));
+
+Map.addLayer(maxExtent.selfMask(), {palette: ['AADDFF']}, 'Historical Maximum Extent');
+Map.addLayer(currentWater.selfMask(), {palette: ['0000CC']}, 'Current Permanent Water');
+Map.addLayer(waterLoss.selfMask(), {palette: ['FF0000']}, 'Water Loss');
+
+// Calculate lost area in km²
+var lostArea = waterLoss.multiply(ee.Image.pixelArea()).reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: aral.buffer(200000),
+  scale: 30,
+  maxPixels: 1e9
+});
+print('Water loss area (km²):', ee.Number(lostArea.get('max_extent')).divide(1e6));</code></pre>
+
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        Three overlapping layers around the Aral Sea. The pale blue historical extent shows the
+                        original lake boundary. The dark blue current water shows the small remaining lake.
+                        The red water loss layer fills the vast gap between them, illustrating the scale of
+                        the Aral Sea's retreat.
+                    </p>
+                </div>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>How many Landsat scenes were used to create the JRC GSW dataset?</li>
+                    <li>What does an occurrence value of 50 mean?</li>
+                    <li>Which transition class code represents water that has been permanently lost?</li>
+                    <li>If a pixel has a seasonality value of 4, how many months per year does it typically have water?</li>
+                    <li>How would you identify areas where new reservoirs were built?</li>
+                </ol>
+            </section>
+
+            <!-- EEFA Bridge -->
+            <section class="builds-on">
+                <h3>Going deeper</h3>
+                <p>This module introduces the JRC GSW dataset at a foundational level. For advanced techniques, see:</p>
+                <ul>
+                    <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter A2.3: Surface Water Mapping</li>
+                    <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter A2.5: Water Balance and Drought</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Next Steps</h2>
+                <ul>
+                    <li><a href="../../labs/lab-23-water-mapping.html">Lab 23: Water Mapping</a> - Apply MNDWI and
+                        JRC GSW to map and compare water extent at Lake Mead.</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+</html>

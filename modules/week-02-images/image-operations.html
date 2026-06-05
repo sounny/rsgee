@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Learn the difference between ee.Image and ee.ImageCollection, and master core image operations in Google Earth Engine.">
+    <title>Image Operations | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 2
+        </nav>
+
+        <header class="lab-header">
+            <h1>Image Operations</h1>
+        </header>
+
+        <main class="lab-content">
+            <p>
+                Every GEE analysis starts with loading and manipulating images. Before you can compute indices,
+                classify land cover, or detect change, you need to understand the building blocks: how a single
+                image differs from a collection, how to select bands, clip to a region, and attach computed layers.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Distinguish <code>ee.Image</code> from <code>ee.ImageCollection</code> and know when to use each.</li>
+                    <li>Use <code>.clip()</code>, <code>.mosaic()</code>, <code>.select()</code>, and <code>.addBands()</code> for core image manipulation.</li>
+                    <li>Read image metadata and properties using <code>.get()</code>, <code>.propertyNames()</code>, and <code>.bandNames()</code>.</li>
+                    <li>Understand band structure, projections, and how images store multi-layer data.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Confusing an Image with an ImageCollection is one of the most common beginner errors. It leads
+                    to cryptic error messages and unexpected results. Understanding the distinction, along with
+                    core operations like band selection and clipping, gives you a reliable foundation for every
+                    analysis you will build in this course.
+                </p>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key vocabulary</h3>
+                <dl>
+                    <dt>ee.Image</dt>
+                    <dd>A single raster image composed of one or more bands. Think of it as a single photograph with multiple color channels.</dd>
+                    <dt>ee.ImageCollection</dt>
+                    <dd>An ordered stack of images, typically organized by acquisition date. Think of it as a photo album.</dd>
+                    <dt>Band</dt>
+                    <dd>One layer of data within an image. Each band stores values for a specific wavelength, index, or measurement.</dd>
+                    <dt>Metadata</dt>
+                    <dd>Properties attached to an image (acquisition date, cloud cover, sensor ID) that describe the data without being pixel values.</dd>
+                </dl>
+            </section>
+
+            <!-- Quick Win -->
+            <section>
+                <h2>Quick win: load, select, clip, and add NDVI</h2>
+                <p>
+                    This script loads a single Landsat 8 image over San Francisco, selects the visible bands,
+                    clips it to a county boundary, and adds a computed NDVI band. You will use all four core
+                    operations in under 20 lines.
+                </p>
+<pre><code>// Load a specific Landsat 8 image by ID
+var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20230715');
+
+// Apply scale factors for surface reflectance
+var scaled = image.select('SR_B.*').multiply(0.0000275).add(-0.2);
+
+// Select RGB bands for display
+var rgb = scaled.select(['SR_B4', 'SR_B3', 'SR_B2']);
+
+// Clip to San Francisco County
+var sfCounty = ee.FeatureCollection('TIGER/2018/Counties')
+  .filter(ee.Filter.eq('NAME', 'San Francisco')).first().geometry();
+var clipped = rgb.clip(sfCounty);
+
+// Compute and add NDVI
+var ndvi = scaled.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI');
+var withNDVI = clipped.addBands(ndvi.clip(sfCounty));
+
+// Display results
+Map.centerObject(sfCounty, 12);
+Map.addLayer(clipped, {min: 0, max: 0.3}, 'RGB');
+Map.addLayer(withNDVI.select('NDVI'), {min: 0, max: 0.8, palette: ['brown', 'yellow', 'green']}, 'NDVI');</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        A true-color image of San Francisco clipped to the county boundary, plus an NDVI layer
+                        showing green areas (parks, Presidio) in bright green and urban areas in brown/yellow.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Section 1: Image vs ImageCollection -->
+            <section>
+                <h2>Image vs. ImageCollection</h2>
+                <p>
+                    An <code>ee.Image</code> is a single photograph: one acquisition, one date, one set of bands.
+                    An <code>ee.ImageCollection</code> is a photo album: many images grouped together, usually by
+                    sensor and time. The analogy is simple but critical, because functions that work on one type
+                    often do not work on the other.
+                </p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th><code>ee.Image</code></th>
+                            <th><code>ee.ImageCollection</code></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>What it holds</td>
+                            <td>One raster (one date, one scene)</td>
+                            <td>Many rasters (many dates or scenes)</td>
+                        </tr>
+                        <tr>
+                            <td>How to load</td>
+                            <td><code>ee.Image('ID')</code></td>
+                            <td><code>ee.ImageCollection('ID')</code></td>
+                        </tr>
+                        <tr>
+                            <td>Common operations</td>
+                            <td><code>.select()</code>, <code>.clip()</code>, <code>.addBands()</code></td>
+                            <td><code>.filterDate()</code>, <code>.map()</code>, <code>.median()</code></td>
+                        </tr>
+                        <tr>
+                            <td>Extract one image</td>
+                            <td>Already is one</td>
+                            <td><code>.first()</code>, <code>.sort().first()</code></td>
+                        </tr>
+                        <tr>
+                            <td>Combine into one</td>
+                            <td>N/A</td>
+                            <td><code>.median()</code>, <code>.mosaic()</code>, <code>.mean()</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>
+                    <strong>Key rule:</strong> If you loaded with <code>ee.ImageCollection()</code>, you must
+                    reduce or extract before you can use single-image operations like <code>.clip()</code> or
+                    <code>.normalizedDifference()</code>.
+                </p>
+            </section>
+
+            <!-- Section 2: Exploring an Image -->
+            <section>
+                <h2>Exploring an Image</h2>
+                <p>
+                    Before processing, inspect what you have. GEE images carry rich metadata and band information
+                    that tells you exactly what data is available.
+                </p>
+<pre><code>var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20230715');
+
+// What bands does this image have?
+print('Band names:', image.bandNames());
+
+// What properties (metadata) are available?
+print('Property names:', image.propertyNames());
+
+// Read specific properties
+print('Cloud cover:', image.get('CLOUD_COVER'));
+print('Acquisition date:', image.date().format('YYYY-MM-dd'));
+print('Sensor ID:', image.get('SENSOR_ID'));
+
+// Check the projection and scale of a band
+print('B4 projection:', image.select('SR_B4').projection());
+print('B4 scale (meters):', image.select('SR_B4').projection().nominalScale());</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        The console shows a list of band names (SR_B1 through SR_B7, plus thermal and QA bands),
+                        a long list of metadata properties, the cloud cover percentage, the date (2023-07-15),
+                        and the native scale of 30 meters for the visible bands.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Section 3: Selecting Bands -->
+            <section>
+                <h2>Selecting Bands</h2>
+                <p>
+                    Most images contain more bands than you need. The <code>.select()</code> method extracts only
+                    the bands you want, which keeps your scripts efficient and avoids confusion.
+                </p>
+<pre><code>var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20230715');
+
+// Select by exact name (most common)
+var rgb = image.select(['SR_B4', 'SR_B3', 'SR_B2']);
+print('RGB band count:', rgb.bandNames().size()); // 3
+
+// Select by pattern (regular expression)
+var allSR = image.select('SR_B.*');
+print('All SR bands:', allSR.bandNames()); // SR_B1 through SR_B7
+
+// Select by index (0-based)
+var firstTwo = image.select([0, 1]);
+print('First two bands:', firstTwo.bandNames());
+
+// Select and rename in one step
+var renamed = image.select(['SR_B5', 'SR_B4'], ['NIR', 'RED']);
+print('Renamed bands:', renamed.bandNames()); // NIR, RED</code></pre>
+                <p>
+                    <strong>Best practice:</strong> Select by name, not by index. Band order can change between
+                    datasets, but names are consistent within a collection.
+                </p>
+            </section>
+
+            <!-- Section 4: Clipping to a Region -->
+            <section>
+                <h2>Clipping to a Region</h2>
+                <p>
+                    The <code>.clip()</code> method masks an image to a geometry or feature boundary. Pixels
+                    outside the boundary become transparent. This is useful for focusing on a study area and
+                    for clean map displays.
+                </p>
+<pre><code>// Clip to a simple geometry
+var roi = ee.Geometry.Rectangle([-122.5, 37.6, -122.3, 37.8]);
+var clipped = image.clip(roi);
+
+// Clip to a feature from a FeatureCollection
+var state = ee.FeatureCollection('TIGER/2018/States')
+  .filter(ee.Filter.eq('NAME', 'California')).first();
+var clippedToState = image.clip(state.geometry());
+
+Map.addLayer(clippedToState.select(['SR_B4', 'SR_B3', 'SR_B2'])
+  .multiply(0.0000275).add(-0.2),
+  {min: 0, max: 0.3}, 'California');</code></pre>
+                <p>
+                    <strong>Performance note:</strong> Clipping is computationally expensive on large or complex
+                    geometries. For analysis (reducers, exports), prefer <code>.filterBounds()</code> on the
+                    collection and specify the geometry in <code>reduceRegion()</code> instead of clipping first.
+                    Save <code>.clip()</code> for display purposes.
+                </p>
+            </section>
+
+            <!-- Section 5: Mosaicking Images -->
+            <section>
+                <h2>Mosaicking Images</h2>
+                <p>
+                    When your study area spans multiple satellite scenes, <code>.mosaic()</code> stitches them into
+                    a single seamless image. The last image in the collection "wins" where scenes overlap, so sort
+                    order matters.
+                </p>
+<pre><code>// Create a mosaic from multiple Landsat scenes
+var collection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2023-07-01', '2023-07-31')
+  .filterBounds(ee.Geometry.Point([-122.4, 37.7]))
+  .filter(ee.Filter.lt('CLOUD_COVER', 15));
+
+// Sort by cloud cover so cleanest image is on top
+var mosaic = collection.sort('CLOUD_COVER').mosaic();
+
+// Apply scale factors
+var scaled = mosaic.select('SR_B.*').multiply(0.0000275).add(-0.2);
+
+Map.setCenter(-122.4, 37.7, 8);
+Map.addLayer(scaled, {bands: ['SR_B4', 'SR_B3', 'SR_B2'], min: 0, max: 0.3}, 'Mosaic');</code></pre>
+                <p>
+                    For a statistically robust composite (better cloud removal), use <code>.median()</code> or
+                    <code>.mean()</code> instead of <code>.mosaic()</code>. Mosaicking is best when you want speed
+                    or need to preserve the original pixel values from a specific scene.
+                </p>
+            </section>
+
+            <!-- Section 6: Adding Bands -->
+            <section>
+                <h2>Adding Bands</h2>
+                <p>
+                    The <code>.addBands()</code> method attaches new layers to an existing image. This is how you
+                    include computed indices (NDVI, NDWI), elevation data, or any derived layer alongside the
+                    original bands.
+                </p>
+<pre><code>var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20230715');
+var scaled = image.select('SR_B.*').multiply(0.0000275).add(-0.2);
+
+// Compute NDVI and NDWI
+var ndvi = scaled.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI');
+var ndwi = scaled.normalizedDifference(['SR_B3', 'SR_B5']).rename('NDWI');
+
+// Add both to the original image
+var enriched = scaled.addBands(ndvi).addBands(ndwi);
+print('Enriched band names:', enriched.bandNames());
+// SR_B1, SR_B2, ..., SR_B7, NDVI, NDWI
+
+// Add elevation from a different source
+var dem = ee.Image('USGS/SRTMGL1_003').rename('elevation');
+var withElevation = enriched.addBands(dem);
+print('With elevation:', withElevation.bandNames());</code></pre>
+                <p>
+                    By default, <code>.addBands()</code> keeps all bands. If the new band has the same name as an
+                    existing one, you can use <code>.addBands(newBand, null, true)</code> to overwrite the existing
+                    band.
+                </p>
+            </section>
+
+            <!-- Section 7: Image Metadata -->
+            <section>
+                <h2>Image Metadata</h2>
+                <p>
+                    Metadata properties tell you when, where, and how an image was captured. This information is
+                    essential for quality control, filtering, and documentation.
+                </p>
+<pre><code>var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20230715');
+
+// Key metadata fields for Landsat 8
+print('Date acquired:', image.get('DATE_ACQUIRED'));
+print('Cloud cover (%):', image.get('CLOUD_COVER'));
+print('Cloud cover (land):', image.get('CLOUD_COVER_LAND'));
+print('Sun elevation:', image.get('SUN_ELEVATION'));
+print('WRS Path:', image.get('WRS_PATH'));
+print('WRS Row:', image.get('WRS_ROW'));
+
+// The system timestamp (milliseconds since epoch)
+print('System time:', image.get('system:time_start'));
+print('Formatted date:', image.date().format('YYYY-MM-dd'));
+
+// Image footprint geometry
+var footprint = image.geometry();
+Map.addLayer(footprint, {color: 'blue'}, 'Image footprint');
+Map.centerObject(footprint, 7);</code></pre>
+                <p>
+                    Use <code>.getInfo()</code> sparingly. It forces a synchronous server call, which blocks your
+                    script. For display purposes, <code>print()</code> is asynchronous and much safer.
+                </p>
+            </section>
+
+            <section class="pro-tips">
+                <h3>Pro tips</h3>
+                <ul>
+                    <li><strong>Always check band names first.</strong> Different collections use different naming conventions. Landsat 8 SR uses <code>SR_B4</code>, while Sentinel-2 uses <code>B4</code>.</li>
+                    <li><strong>Select early.</strong> Drop unneeded bands at the start of your script. Fewer bands means less memory and faster processing.</li>
+                    <li><strong>Use <code>print()</code> instead of <code>.getInfo()</code></strong> for inspection. The <code>.getInfo()</code> method blocks execution and can time out on large objects.</li>
+                    <li><strong>Clip only for display.</strong> For analysis, pass the geometry to <code>reduceRegion()</code> or <code>Export</code> instead of clipping the image.</li>
+                </ul>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: build a multi-index image</h4>
+                <p>
+                    Load a Sentinel-2 image, apply scale factors (<code>.divide(10000)</code>), compute NDVI and
+                    EVI, and add both as new bands. Print the final band list to verify.
+                </p>
+<pre><code>// Starter code
+var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+  .filterBounds(ee.Geometry.Point([-122.4, 37.7]))
+  .filterDate('2023-07-01', '2023-08-01')
+  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10))
+  .first();
+
+var scaled = s2.select(['B2', 'B3', 'B4', 'B8']).divide(10000);
+
+// YOUR CODE HERE:
+// 1. Compute NDVI: (B8 - B4) / (B8 + B4)
+// 2. Compute EVI: 2.5 * (B8 - B4) / (B8 + 6*B4 - 7.5*B2 + 1)
+// 3. Add both bands to the scaled image
+// 4. Print the final band names</code></pre>
+            </div>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li><strong>Calling <code>.clip()</code> on an ImageCollection.</strong> Collections do not have a <code>.clip()</code> method. Either extract a single image first, or use <code>.map()</code> to clip each image in the collection.</li>
+                    <li><strong>Forgetting scale factors.</strong> Landsat 8/9 SR values are stored as integers. Always apply <code>.multiply(0.0000275).add(-0.2)</code> before analysis or display.</li>
+                    <li><strong>Selecting bands by index.</strong> Band order can differ across images in a collection. Always select by name.</li>
+                    <li><strong>Using <code>.mosaic()</code> without sorting.</strong> The last image wins in overlap zones. If you do not sort by quality, a cloudy image could end up on top.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What is the key difference between <code>ee.Image</code> and <code>ee.ImageCollection</code>?</li>
+                    <li>How do you extract a single image from a collection?</li>
+                    <li>Why should you avoid clipping for analysis workflows?</li>
+                    <li>What does <code>.addBands()</code> return: a new image, or does it modify the original?</li>
+                    <li>How would you find the native resolution of a Landsat band?</li>
+                </ol>
+            </section>
+
+            <section class="builds-on">
+                <h3>Going deeper</h3>
+                <p>
+                    This module covers the essential image operations you will use in every GEE script. For a
+                    deeper exploration of image structure, visualization, and manipulation, see:
+                </p>
+                <ul>
+                    <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter F1.1: Exploring Images</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Next Steps</h2>
+                <ul>
+                    <li><a href="band-arithmetic.html">Band Arithmetic</a> - perform mathematical operations between bands.</li>
+                    <li><a href="ndvi.html">NDVI</a> - compute and interpret the Normalized Difference Vegetation Index.</li>
+                    <li><a href="cloud-masking.html">Cloud Masking</a> - remove cloud-contaminated pixels before analysis.</li>
+                    <li><a href="image-collections.html">Image Collections</a> - filter, sort, and composite multi-image stacks.</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+</html>

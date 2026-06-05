@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Lab 26: Map and quantify urban expansion in Houston using NDBI, VIIRS nighttime lights, and combined spectral index classification.">
+  <title>Lab 26 - Urban Analysis | Remote Sensing Course</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 26
+    </nav>
+
+    <header class="lab-header">
+      <h1>Lab 26 - Urban Analysis</h1>
+      <p><em><strong>Objective: Map and quantify urban expansion in Houston using built-up indices, nighttime lights, and area statistics.</strong></em></p>
+    </header>
+
+    <main class="lab-content">
+
+      <section class="learning-objectives">
+        <h3>Learning objectives</h3>
+        <ul>
+          <li>Calculate NDBI from Landsat 8 to identify built-up areas</li>
+          <li>Apply thresholds to create an urban mask</li>
+          <li>Visualize urban footprints with VIIRS nighttime lights</li>
+          <li>Compare nighttime lights across time to detect urban growth</li>
+          <li>Calculate urban area statistics using <code>ee.Image.pixelArea()</code></li>
+          <li>Build a combined NDVI-NDBI-NDWI classification for urban land use mapping</li>
+        </ul>
+      </section>
+
+      <section class="why-it-matters">
+        <h3>Why it matters</h3>
+        <p>Houston is one of the fastest-growing metropolitan areas in the United States, adding over one million residents between 2010 and 2023. This growth transforms agricultural land and wetlands into subdivisions, highways, and commercial centers. Tracking this expansion with satellite data helps planners manage infrastructure, assess flood risk in a city historically vulnerable to hurricanes, and protect remaining green spaces. The techniques you practice in this lab apply to any rapidly urbanizing city in the world.</p>
+      </section>
+
+      <section>
+        <h2>Before You Start</h2>
+        <ul>
+          <li><strong>Prerequisites:</strong> Spectral Indices module, Urban Analysis module</li>
+          <li><strong>Estimated time:</strong> 45 minutes</li>
+          <li><strong>You will need:</strong> GEE Code Editor access</li>
+        </ul>
+      </section>
+
+      <section class="vocabulary">
+        <h3>Key terms</h3>
+        <dl>
+          <dt>NDBI</dt>
+          <dd>Normalized Difference Built-up Index: (SWIR1 - NIR) / (SWIR1 + NIR). Highlights impervious surfaces.</dd>
+
+          <dt>Urban mask</dt>
+          <dd>A binary image where 1 indicates built-up pixels and 0 indicates non-built-up pixels, created by thresholding an index.</dd>
+
+          <dt>VIIRS DNB</dt>
+          <dd>Visible Infrared Imaging Radiometer Suite Day/Night Band, measuring nighttime light radiance in nanoWatts per square centimeter per steradian.</dd>
+
+          <dt>Pixel area</dt>
+          <dd>The ground area represented by each pixel, calculated with <code>ee.Image.pixelArea()</code> in square meters.</dd>
+        </dl>
+      </section>
+
+      <!-- Part 1 -->
+      <section>
+        <h2>Lab Instructions</h2>
+
+        <h3>Part 1 - Calculate NDBI for Houston</h3>
+        <p>Load Landsat 8 imagery, apply the scale factors, and calculate NDBI to highlight built-up surfaces across the Houston metropolitan area.</p>
+<pre><code>// ===== PART 1: Calculate NDBI =====
+
+// Define the Houston metro study area
+var houstonCenter = ee.Geometry.Point([-95.37, 29.76]);
+var roi = ee.Geometry.Rectangle([-95.8, 29.5, -95.0, 30.0]);
+
+// Load Landsat 8 SR, summer 2023
+var l8 = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2023-06-01', '2023-08-31')
+  .filterBounds(roi)
+  .filter(ee.Filter.lt('CLOUD_COVER', 20))
+  .median();
+
+// Apply Landsat Collection 2 scale factors
+var scaled = l8.multiply(0.0000275).add(-0.2);
+
+// Calculate NDBI = (SWIR1 - NIR) / (SWIR1 + NIR)
+// Landsat 8: SWIR1 = SR_B6, NIR = SR_B5
+var ndbi = scaled.normalizedDifference(['SR_B6', 'SR_B5']).rename('NDBI');
+
+// Visualize NDBI
+Map.addLayer(ndbi.clip(roi), {
+  min: -0.5, max: 0.5,
+  palette: ['blue', 'white', 'red']
+}, 'NDBI - Houston');
+Map.centerObject(houstonCenter, 10);
+print('NDBI range: -1 (vegetation) to +1 (built-up)');</code></pre>
+        <p><strong>Understanding the code:</strong></p>
+        <ul>
+          <li><code>.normalizedDifference(['SR_B6', 'SR_B5'])</code> - computes (B6 - B5) / (B6 + B5), which is the NDBI formula</li>
+          <li><code>.multiply(0.0000275).add(-0.2)</code> - required scale/offset for Landsat Collection 2 surface reflectance</li>
+          <li>Red pixels have high NDBI (built-up); blue pixels have low NDBI (vegetation)</li>
+        </ul>
+        <div class="expected-output">
+          <h4>What you should see</h4>
+          <p>A map of the Houston metro area where downtown, the Energy Corridor, and major highway interchanges appear in red. Residential neighborhoods appear in lighter tones. Buffalo Bayou, parks, and surrounding agricultural areas appear blue.</p>
+        </div>
+      </section>
+
+      <!-- Part 2 -->
+      <section>
+        <h3>Part 2 - Create an urban mask</h3>
+        <p>Apply a threshold to the NDBI image to create a binary map of built-up versus non-built-up areas.</p>
+<pre><code>// ===== PART 2: Threshold NDBI to create urban mask =====
+
+// Pixels with NDBI > 0 are classified as built-up
+var urbanMask = ndbi.gt(0).rename('urban');
+
+// Self-mask to show only built-up pixels
+Map.addLayer(urbanMask.selfMask().clip(roi), {
+  palette: ['red']
+}, 'Urban Mask (NDBI > 0)');
+
+// Also try a stricter threshold
+var urbanStrict = ndbi.gt(0.1).rename('urban_strict');
+Map.addLayer(urbanStrict.selfMask().clip(roi), {
+  palette: ['darkred']
+}, 'Urban Mask (NDBI > 0.1)');
+
+print('Compare the two thresholds by toggling layers on/off');</code></pre>
+        <p><strong>Understanding the code:</strong></p>
+        <ul>
+          <li><code>.gt(0)</code> - creates a binary image where 1 = NDBI above threshold, 0 = below</li>
+          <li><code>.selfMask()</code> - makes 0 pixels transparent so only built-up areas are visible</li>
+          <li>A threshold of 0 captures most built-up areas but may include some bare soil; 0.1 is stricter but may miss low-density residential areas</li>
+        </ul>
+      </section>
+
+      <!-- Part 3 -->
+      <section>
+        <h3>Part 3 - Visualize nighttime lights</h3>
+        <p>Load VIIRS monthly nighttime lights to see Houston's urban footprint from a completely different perspective. Nighttime lights reveal economic activity and population density patterns.</p>
+<pre><code>// ===== PART 3: VIIRS Nighttime Lights =====
+
+// Load VIIRS monthly composite for June 2023
+var ntl2023 = ee.ImageCollection('NOAA/VIIRS/DNB/MONTHLY_V1/VCMSLCFG')
+  .filterDate('2023-06-01', '2023-06-30')
+  .first()
+  .select('avg_rad');
+
+// Visualize with a night-sky color palette
+Map.addLayer(ntl2023.clip(roi), {
+  min: 0, max: 80,
+  palette: ['black', 'navy', 'blue', 'purple', 'magenta', 'orange', 'yellow', 'white']
+}, 'Nighttime Lights - 2023');
+
+// Print statistics
+var ntlStats = ntl2023.reduceRegion({
+  reducer: ee.Reducer.minMax(),
+  geometry: roi,
+  scale: 500,
+  maxPixels: 1e9
+});
+print('Nighttime light range (nW/cm2/sr):', ntlStats);</code></pre>
+        <div class="expected-output">
+          <h4>What you should see</h4>
+          <p>A dark background with Houston glowing brightly. The urban core (downtown, Galleria, Medical Center) appears white or yellow, surrounded by concentric rings of decreasing brightness. Highway corridors (I-10, I-45, US-290) are visible as bright lines radiating outward.</p>
+        </div>
+      </section>
+
+      <!-- Part 4 -->
+      <section>
+        <h3>Part 4 - Compare nighttime lights between 2014 and 2023</h3>
+        <p>Load nighttime lights from 2014 and subtract from 2023 to map where urban growth has occurred over the past decade.</p>
+<pre><code>// ===== PART 4: Nighttime Light Change Detection =====
+
+// Load 2014 nighttime lights
+var ntl2014 = ee.ImageCollection('NOAA/VIIRS/DNB/MONTHLY_V1/VCMSLCFG')
+  .filterDate('2014-06-01', '2014-06-30')
+  .first()
+  .select('avg_rad');
+
+// Calculate change (positive = brighter = growth)
+var ntlChange = ntl2023.subtract(ntl2014).rename('NTL_Change');
+
+// Visualize change
+Map.addLayer(ntlChange.clip(roi), {
+  min: -10, max: 40,
+  palette: ['blue', 'lightblue', 'white', 'orange', 'red']
+}, 'NTL Change (2014-2023)');
+
+// Add side-by-side comparison layers
+Map.addLayer(ntl2014.clip(roi), {
+  min: 0, max: 80,
+  palette: ['black', 'yellow', 'white']
+}, 'NTL 2014');
+
+Map.addLayer(ntl2023.clip(roi), {
+  min: 0, max: 80,
+  palette: ['black', 'yellow', 'white']
+}, 'NTL 2023');
+
+print('Red = areas that became brighter (urban growth)');
+print('Blue = areas that became dimmer (rare in growing cities)');</code></pre>
+        <div class="expected-output">
+          <h4>What you should see</h4>
+          <p>A change map showing red and orange tones in areas of new development, particularly along the Katy Freeway (I-10 west), in Cypress, in the Sugar Land area, and north of The Woodlands. The urban core shows modest change because it was already bright in 2014.</p>
+        </div>
+      </section>
+
+      <!-- Part 5 -->
+      <section>
+        <h3>Part 5 - Calculate urban area statistics</h3>
+        <p>Quantify the urban footprint by calculating the total area of built-up pixels. Compare the area between 2014 and 2023 using nighttime light thresholds.</p>
+<pre><code>// ===== PART 5: Urban Area Statistics =====
+
+// Define "urban" as nighttime light radiance > 5 nW/cm2/sr
+var urban2014 = ntl2014.gt(5).rename('urban_2014');
+var urban2023 = ntl2023.gt(5).rename('urban_2023');
+
+// Calculate area of urban pixels using pixelArea()
+var urbanArea2014 = urban2014.multiply(ee.Image.pixelArea())
+  .reduceRegion({
+    reducer: ee.Reducer.sum(),
+    geometry: roi,
+    scale: 500,
+    maxPixels: 1e9
+  });
+
+var urbanArea2023 = urban2023.multiply(ee.Image.pixelArea())
+  .reduceRegion({
+    reducer: ee.Reducer.sum(),
+    geometry: roi,
+    scale: 500,
+    maxPixels: 1e9
+  });
+
+// Print results (values are in square meters)
+print('=== Urban Area Statistics ===');
+print('Urban area 2014 (sq m):', urbanArea2014);
+print('Urban area 2023 (sq m):', urbanArea2023);
+
+// Calculate total ROI area for context
+var totalArea = ee.Image.pixelArea().reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: roi,
+  scale: 500,
+  maxPixels: 1e9
+});
+print('Total ROI area (sq m):', totalArea);
+
+// Visualize both urban extents
+Map.addLayer(urban2014.selfMask().clip(roi), {palette: ['yellow']}, 'Urban Extent 2014');
+Map.addLayer(urban2023.selfMask().clip(roi), {palette: ['red']}, 'Urban Extent 2023');</code></pre>
+        <p><strong>Understanding the code:</strong></p>
+        <ul>
+          <li><code>ee.Image.pixelArea()</code> - creates an image where each pixel's value equals its ground area in square meters</li>
+          <li>Multiplying the binary urban mask by pixel area gives the area of only the urban pixels</li>
+          <li><code>ee.Reducer.sum()</code> - adds up all the pixel areas to get total urban area</li>
+          <li>Divide by 1,000,000 to convert square meters to square kilometers</li>
+        </ul>
+      </section>
+
+      <!-- Part 6 -->
+      <section>
+        <h3>Part 6 - Combined NDVI-NDBI-NDWI classification</h3>
+        <p>Create a simple land use classification by combining three spectral indices. This approach separates the Houston landscape into water, vegetation, and built-up categories.</p>
+<pre><code>// ===== PART 6: Combined Index Classification =====
+
+// Calculate NDVI and NDWI from the same Landsat image
+var ndvi = scaled.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI');
+var ndwi = scaled.normalizedDifference(['SR_B3', 'SR_B5']).rename('NDWI');
+
+// Classification rules:
+// Water: NDWI > 0
+// Vegetation: NDVI > 0.3 (and not water)
+// Built-up: NDBI > 0 (and not water or vegetation)
+// Other: everything else
+var water = ndwi.gt(0);
+var vegetation = ndvi.gt(0.3).and(water.not());
+var builtUp = ndbi.gt(0).and(water.not()).and(vegetation.not());
+
+// Create classified image
+var classification = ee.Image(0)
+  .where(water, 1)       // 1 = Water (blue)
+  .where(vegetation, 2)  // 2 = Vegetation (green)
+  .where(builtUp, 3)     // 3 = Built-up (red)
+  .selfMask()
+  .clip(roi);
+
+Map.addLayer(classification, {
+  min: 1, max: 3,
+  palette: ['#2196F3', '#4CAF50', '#F44336']
+}, 'Land Use Classification');
+
+// Calculate area for each class
+var classAreas = ee.Image.pixelArea().addBands(classification)
+  .reduceRegion({
+    reducer: ee.Reducer.sum().group({
+      groupField: 1,
+      groupName: 'class'
+    }),
+    geometry: roi,
+    scale: 30,
+    maxPixels: 1e9
+  });
+print('Area by class (sq m):', classAreas);
+print('Class legend: 1=Water, 2=Vegetation, 3=Built-up');</code></pre>
+        <div class="expected-output">
+          <h4>What you should see</h4>
+          <p>A three-color map where blue represents water bodies (Galveston Bay, reservoirs, bayous), green represents vegetation (parks, agricultural land, forests), and red represents built-up areas (the urban core, suburbs, commercial zones). You should see a clear pattern of built-up areas concentrated in the center with vegetation increasing toward the edges.</p>
+        </div>
+      </section>
+
+      <div class="try-it">
+        <h4>Try it: Analyze another city</h4>
+        <p>Replace Houston's coordinates with a city you are interested in. Try a rapidly growing city (Phoenix, Austin, Dubai) or compare with a stable one (Detroit, Cleveland). How do the NDBI patterns and nighttime light changes differ?</p>
+      </div>
+
+      <section class="self-check">
+        <h3>Quick self-check</h3>
+        <ol>
+          <li>What Landsat 8 bands does NDBI use, and what are their wavelength regions?</li>
+          <li>Why might a threshold of 0 for NDBI misclassify some pixels in arid regions?</li>
+          <li>What does <code>ee.Image.pixelArea()</code> return, and what units does it use?</li>
+          <li>Why are nighttime lights useful for measuring urban growth, rather than just NDBI?</li>
+          <li>In the combined classification, why is the order of rules (water first, then vegetation, then built-up) important?</li>
+        </ol>
+      </section>
+
+      <section class="troubleshooting">
+        <h3>Troubleshooting</h3>
+        <div class="issue">
+          <strong>Problem: NDBI map appears all red or all blue</strong>
+          <p><strong>Solution:</strong> Check that you applied scale factors (<code>.multiply(0.0000275).add(-0.2)</code>). Without scaling, all values cluster near zero after normalization.</p>
+        </div>
+        <div class="issue">
+          <strong>Problem: Nighttime lights layer appears blank</strong>
+          <p><strong>Solution:</strong> Increase the <code>max</code> visualization parameter. Some cities have radiance values above 60. Try <code>max: 100</code>.</p>
+        </div>
+        <div class="issue">
+          <strong>Problem: Urban area statistics return null</strong>
+          <p><strong>Solution:</strong> Make sure <code>maxPixels: 1e9</code> is set in your <code>reduceRegion</code> call. Large study areas need this parameter to complete the computation.</p>
+        </div>
+        <div class="issue">
+          <strong>Problem: Classification shows too much "built-up" area</strong>
+          <p><strong>Solution:</strong> Increase the NDBI threshold from 0 to 0.1 or 0.15. In humid regions like Houston, bare soil is less of an issue, but industrial areas may still appear brighter than expected.</p>
+        </div>
+      </section>
+
+      <section class="key-concepts">
+        <h3>Key Takeaways</h3>
+        <ul>
+          <li>NDBI uses SWIR and NIR bands to highlight built-up surfaces, producing positive values for impervious areas</li>
+          <li>VIIRS nighttime lights provide an independent measure of urbanization based on artificial light emissions</li>
+          <li>Multi-temporal comparison of nighttime lights reveals where cities are expanding</li>
+          <li><code>ee.Image.pixelArea()</code> enables quantitative area calculations from classified maps</li>
+          <li>Combining NDVI, NDBI, and NDWI creates a simple but effective urban land use classification</li>
+        </ul>
+      </section>
+
+      <section class="common-mistakes">
+        <h3>Common mistakes</h3>
+        <ul>
+          <li><strong>Using SR_B7 instead of SR_B6:</strong> NDBI requires SWIR1 (<code>SR_B6</code>). <code>SR_B7</code> is SWIR2 and produces different results.</li>
+          <li><strong>Comparing different seasons:</strong> Vegetation phenology affects NDBI values. Always compare the same month across years.</li>
+          <li><strong>Forgetting <code>maxPixels</code>:</strong> Area calculations over large regions fail without <code>maxPixels: 1e9</code>.</li>
+          <li><strong>Not clipping to ROI:</strong> Without <code>.clip(roi)</code>, visualizations and statistics may include areas outside your study region.</li>
+        </ul>
+      </section>
+
+      <section class="pro-tips">
+        <h3>Pro tips</h3>
+        <ul>
+          <li>Use the JRC Global Human Settlement Layer (<code>JRC/GHSL/P2023A/GHS_BUILT_S</code>) for validated, multi-epoch urban extent maps spanning 1975 to 2030</li>
+          <li>For nighttime light comparisons, use the same month each year to control for seasonal lighting differences</li>
+          <li>Convert square meters to square kilometers by dividing by 1,000,000 for more interpretable statistics</li>
+          <li>Export your classification to Google Drive and import it into ArcGIS Pro for cartographic finishing</li>
+        </ul>
+      </section>
+
+      <section id="submission">
+        <div class="submission-box">
+          <h3>📋 Lab Submission</h3>
+          <p><strong>Subject:</strong> <code>Lab 26 - Urban Analysis - [Your Name]</code></p>
+          <p><strong>Include in your submission:</strong></p>
+          <ul>
+            <li>Shareable GEE script link</li>
+            <li>Screenshot of your NDBI urban mask for Houston</li>
+            <li>Screenshot comparing nighttime lights 2014 vs 2023</li>
+            <li>Area statistics table:</li>
+          </ul>
+          <table>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Urban area 2014 (sq km)</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Urban area 2023 (sq km)</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Change (sq km)</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Percent increase</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <ul>
+            <li><strong>Question 1:</strong> Where did Houston experience the most urban growth between 2014 and 2023? Describe the geographic pattern you observe in the nighttime light change map.</li>
+            <li><strong>Question 2:</strong> Why might the NDBI-based urban area estimate differ from the nighttime-lights-based estimate? Which method do you think is more reliable for measuring urban extent, and why?</li>
+          </ul>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      <p><a href="../index.html">← Back to Course Home</a></p>
+      <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+    </footer>
+  </div>
+</body>
+
+</html>

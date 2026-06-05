@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Analyze deforestation patterns using the Hansen Global Forest Change dataset in Rondonia, Brazil with Google Earth Engine.">
+    <title>Lab 24 - Deforestation Analysis | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 24
+        </nav>
+
+        <header class="lab-header">
+            <h1>Lab 24 - Deforestation Analysis</h1>
+            <p><em><strong>Objective: Analyze deforestation patterns using the Hansen Global Forest Change
+                        dataset.</strong></em></p>
+        </header>
+
+        <main class="lab-content">
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Load and visualize the Hansen Global Forest Change dataset.</li>
+                    <li>Map tree cover, forest loss, and loss year with appropriate symbology.</li>
+                    <li>Calculate total forest loss area in hectares.</li>
+                    <li>Group forest loss by year and create an annual bar chart.</li>
+                    <li>Compare deforestation rates between two sub-regions.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Rondonia, in the western Brazilian Amazon, has experienced some of the fastest deforestation
+                    rates in the world since the 1970s. Roads built into the forest created the distinctive
+                    "fishbone" clearing pattern visible from space. Understanding where and when deforestation
+                    occurs is essential for conservation planning, carbon accounting, and enforcement of environmental
+                    regulations.
+                </p>
+            </section>
+
+            <section>
+                <h2>Before You Start</h2>
+                <ul>
+                    <li><strong>Prerequisites:</strong> Reducers module, Time Series module, Deforestation &
+                        Forest Monitoring module.</li>
+                    <li><strong>Estimated time:</strong> 45 minutes</li>
+                    <li><strong>You will need:</strong> GEE Code Editor access</li>
+                </ul>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key terms</h3>
+                <dl>
+                    <dt>Hansen GFC</dt>
+                    <dd>Global Forest Change dataset from the University of Maryland. Tracks tree cover, loss,
+                        and gain globally at 30-meter resolution from 2000 to 2023.</dd>
+
+                    <dt>Tree cover</dt>
+                    <dd>Percentage canopy closure in the year 2000 for vegetation taller than 5 meters.</dd>
+
+                    <dt>Loss year</dt>
+                    <dd>The year forest loss was detected, encoded as years since 2000 (e.g., 1 = 2001, 23 = 2023).</dd>
+
+                    <dt>Grouped reducer</dt>
+                    <dd>A reducer that summarizes data by categories (e.g., summing area for each loss year).</dd>
+                </dl>
+            </section>
+
+            <!-- Lab Instructions -->
+            <section>
+                <h2>Lab Instructions</h2>
+
+                <!-- Part 1 -->
+                <h3>Part 1 - Load Hansen GFC and visualize tree cover</h3>
+                <p>
+                    Start by loading the Hansen dataset and visualizing the tree cover layer for the year 2000.
+                    This baseline shows what the forest looked like before the study period began.
+                </p>
+<pre><code>// ===== Part 1: Load Hansen GFC and map tree cover =====
+var roi = ee.Geometry.Rectangle([-64, -12, -60, -8]); // Rondonia region
+
+// Load the Hansen Global Forest Change dataset
+var gfc = ee.Image('UMD/hansen/global_forest_change_2023_v1_11');
+
+// Visualize tree cover in 2000
+var treeCover = gfc.select('treecover2000');
+Map.centerObject(roi, 8);
+Map.addLayer(treeCover.clip(roi), {
+  min: 0, max: 100,
+  palette: ['FFFFCC', '41AB5D', '006837']
+}, 'Tree Cover 2000 (%)');
+
+// Create a binary forest mask at 50% threshold
+var forest2000 = treeCover.gte(50);
+Map.addLayer(forest2000.selfMask().clip(roi), {
+  palette: ['006837']
+}, 'Forest > 50% Canopy');
+
+print('GFC bands:', gfc.bandNames());</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li><code>ee.Geometry.Rectangle([-64, -12, -60, -8])</code> defines a bounding box over Rondonia.</li>
+                    <li><code>treecover2000</code> shows canopy cover percentage at the start of the study period.</li>
+                    <li>The 50% threshold converts continuous tree cover into a binary forest/non-forest map.</li>
+                </ul>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A green gradient showing dense forest (dark green) across most of the region, with cleared
+                        areas (light yellow) visible along roads and in agricultural zones.</p>
+                </div>
+            </section>
+
+            <section>
+                <!-- Part 2 -->
+                <h3>Part 2 - Map forest loss locations</h3>
+                <p>
+                    Overlay the forest loss layer on top of the tree cover map. The loss band is binary: 1 where
+                    loss occurred, 0 where it did not.
+                </p>
+<pre><code>// ===== Part 2: Map forest loss =====
+var loss = gfc.select('loss');
+
+// Show all loss as a red overlay
+Map.addLayer(loss.selfMask().clip(roi), {
+  palette: ['FF0000']
+}, 'All Forest Loss (2001-2023)');
+
+// Show loss only within areas that were forest in 2000
+var forestLoss = loss.and(forest2000);
+Map.addLayer(forestLoss.selfMask().clip(roi), {
+  palette: ['CC0000']
+}, 'Forest Loss (>50% baseline)');
+
+// Also show forest gain for context
+var gain = gfc.select('gain');
+Map.addLayer(gain.selfMask().clip(roi), {
+  palette: ['00FF00']
+}, 'Forest Gain (2000-2012)');</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li><code>.and(forest2000)</code> restricts loss to pixels that were actually forest in 2000.</li>
+                    <li>This prevents counting loss in areas that had sparse tree cover (e.g., savanna).</li>
+                    <li>The <code>gain</code> band only covers 2000 to 2012 and is shown for reference.</li>
+                </ul>
+            </section>
+
+            <section>
+                <!-- Part 3 -->
+                <h3>Part 3 - Create a loss year visualization</h3>
+                <p>
+                    The <code>lossyear</code> band encodes the year each pixel was deforested. Mapping it with
+                    a color ramp reveals the spatial progression of deforestation over time.
+                </p>
+<pre><code>// ===== Part 3: Visualize loss year with color ramp =====
+var lossYear = gfc.select('lossyear');
+
+Map.addLayer(lossYear.updateMask(forestLoss).clip(roi), {
+  min: 1, max: 23,
+  palette: [
+    '#FFFFB2', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A',
+    '#E31A1C', '#BD0026', '#800026', '#4A0048', '#0000FF'
+  ]
+}, 'Loss Year (2001-2023)');
+
+// Isolate loss from the most recent 5 years (2019-2023)
+var recentLoss = lossYear.gte(19).and(lossYear.lte(23)).and(forest2000);
+Map.addLayer(recentLoss.selfMask().clip(roi), {
+  palette: ['FF00FF']
+}, 'Recent Loss (2019-2023)');</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li>Loss year values are years since 2000: 1 = 2001, 23 = 2023.</li>
+                    <li>The color ramp runs from yellow (early loss) to blue (recent loss).</li>
+                    <li><code>.gte(19).and(.lte(23))</code> isolates the five most recent years.</li>
+                </ul>
+
+                <div class="try-it">
+                    <h4>Try it: Find the deforestation frontier</h4>
+                    <p>
+                        Use the Inspector tool to click on deforested pixels along the edge of the remaining
+                        forest. What loss year values do you see? Can you identify which direction deforestation
+                        is advancing? Compare older cleared areas (closer to roads) with recent clearing
+                        (deeper into the forest).
+                    </p>
+                </div>
+            </section>
+
+            <section>
+                <!-- Part 4 -->
+                <h3>Part 4 - Calculate total forest loss area</h3>
+                <p>
+                    Convert the forest loss pixels into a physical area measurement using
+                    <code>ee.Image.pixelArea()</code>.
+                </p>
+<pre><code>// ===== Part 4: Calculate total loss area =====
+var lossAreaImage = forestLoss.multiply(ee.Image.pixelArea());
+
+var totalLoss = lossAreaImage.reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: roi,
+  scale: 30,
+  maxPixels: 1e9
+});
+
+// Convert to hectares and km²
+var lossHa = ee.Number(totalLoss.get('loss')).divide(1e4);
+var lossKm2 = lossHa.divide(100);
+
+print('===== Total Forest Loss =====');
+print('Hectares:', lossHa);
+print('Square kilometers:', lossKm2);
+
+// Also calculate original forest area for context
+var forestAreaImage = forest2000.multiply(ee.Image.pixelArea());
+var totalForest = forestAreaImage.reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: roi,
+  scale: 30,
+  maxPixels: 1e9
+});
+var forestHa = ee.Number(totalForest.get('treecover2000')).divide(1e4);
+print('Original forest area (hectares):', forestHa);
+print('Percentage of forest lost:', lossHa.divide(forestHa).multiply(100));</code></pre>
+
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>The console will print the total area of forest loss in hectares and km², the original
+                        forest area, and the percentage of forest that was cleared. For the Rondonia ROI, expect
+                        a significant percentage of the original forest to have been lost.</p>
+                </div>
+            </section>
+
+            <section>
+                <!-- Part 5 -->
+                <h3>Part 5 - Group loss by year and create a chart</h3>
+                <p>
+                    Use a grouped reducer to calculate forest loss area for each year, then visualize the
+                    results as a bar chart.
+                </p>
+<pre><code>// ===== Part 5: Annual deforestation chart =====
+// Create image with area and loss year bands
+var areaByYear = ee.Image.pixelArea()
+  .addBands(lossYear)
+  .updateMask(forestLoss);
+
+// Grouped reduction: sum area for each loss year
+var annualStats = areaByYear.reduceRegion({
+  reducer: ee.Reducer.sum().group({
+    groupField: 1,
+    groupName: 'year'
+  }),
+  geometry: roi,
+  scale: 30,
+  maxPixels: 1e9
+});
+
+// Convert to feature collection for charting
+var groups = ee.List(annualStats.get('groups'));
+var annualData = groups.map(function(item) {
+  var dict = ee.Dictionary(item);
+  var year = ee.Number(dict.get('year')).add(2000);
+  var areaHa = ee.Number(dict.get('sum')).divide(1e4);
+  return ee.Feature(null, {year: year, area_ha: areaHa});
+});
+var annualFC = ee.FeatureCollection(annualData);
+
+// Create bar chart
+var chart = ui.Chart.feature.byFeature(annualFC, 'year', 'area_ha')
+  .setChartType('ColumnChart')
+  .setOptions({
+    title: 'Annual Forest Loss in Rondonia (2001-2023)',
+    hAxis: {title: 'Year', format: '####'},
+    vAxis: {title: 'Forest Loss (hectares)'},
+    colors: ['#CC0000'],
+    legend: {position: 'none'}
+  });
+print(chart);</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li><code>.group({groupField: 1})</code> groups the sum by the second band (lossyear, index 1).</li>
+                    <li>Each group contains a year code and a summed area value.</li>
+                    <li><code>.add(2000)</code> converts year codes (1 to 23) to calendar years (2001 to 2023).</li>
+                    <li><code>ui.Chart.feature.byFeature()</code> creates a chart from the feature collection.</li>
+                </ul>
+            </section>
+
+            <section>
+                <!-- Part 6 -->
+                <h3>Part 6 - Compare two sub-regions</h3>
+                <p>
+                    Compare deforestation between two sub-regions with different land use pressures: one along
+                    a major highway (high deforestation) and one deeper in the interior (potentially lower deforestation
+                    or more recent clearing).
+                </p>
+<pre><code>// ===== Part 6: Compare two sub-regions =====
+// Region A: Along the highway (active deforestation frontier)
+var regionA = ee.Geometry.Rectangle([-63, -11, -61.5, -9.5]);
+
+// Region B: Further interior (deeper forest)
+var regionB = ee.Geometry.Rectangle([-61.5, -11, -60, -9.5]);
+
+// Calculate loss for Region A
+var lossA = forestLoss.multiply(ee.Image.pixelArea()).reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: regionA,
+  scale: 30,
+  maxPixels: 1e9
+});
+var lossHaA = ee.Number(lossA.get('loss')).divide(1e4);
+
+// Calculate loss for Region B
+var lossB = forestLoss.multiply(ee.Image.pixelArea()).reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: regionB,
+  scale: 30,
+  maxPixels: 1e9
+});
+var lossHaB = ee.Number(lossB.get('loss')).divide(1e4);
+
+print('===== Sub-Region Comparison =====');
+print('Region A - Highway corridor (hectares):', lossHaA);
+print('Region B - Interior forest (hectares):', lossHaB);
+
+// Visualize the two regions
+Map.addLayer(ee.Image().paint(regionA, 0, 3), {palette: ['yellow']}, 'Region A (Highway)');
+Map.addLayer(ee.Image().paint(regionB, 0, 3), {palette: ['cyan']}, 'Region B (Interior)');</code></pre>
+
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        Two outlined rectangles on the map, with Region A (yellow outline, along highways)
+                        likely showing significantly more forest loss than Region B (cyan outline, deeper interior).
+                        The console prints area totals for direct comparison.
+                    </p>
+                </div>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What does a <code>lossyear</code> value of 5 correspond to in calendar years?</li>
+                    <li>Why is it important to apply a tree cover threshold before analyzing forest loss?</li>
+                    <li>In your annual chart, which years had the highest deforestation? Can you hypothesize why?</li>
+                    <li>What is the spatial resolution of the Hansen dataset in meters?</li>
+                </ol>
+            </section>
+
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <div class="issue">
+                    <strong>Problem: Chart shows no data or only one bar</strong>
+                    <p><strong>Solution:</strong> Check that your <code>updateMask(forestLoss)</code> is working
+                        correctly. Print <code>forestLoss</code> to verify it has non-zero pixels. Make sure
+                        your ROI overlaps with forested areas.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: "Computation timed out" error</strong>
+                    <p><strong>Solution:</strong> Your ROI may be too large for a 30-meter scale reduction.
+                        Try increasing <code>scale</code> to 100 or reducing the size of your ROI.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Loss year map shows scattered pixels outside forests</strong>
+                    <p><strong>Solution:</strong> Apply the <code>forest2000</code> mask with
+                        <code>.and(forest2000)</code> to restrict analysis to pixels that were forest in 2000.</p>
+                </div>
+            </section>
+
+            <section class="key-concepts">
+                <h3>Key Takeaways</h3>
+                <ul>
+                    <li>The Hansen GFC dataset is a pre-computed, ready-to-use product for global forest monitoring.</li>
+                    <li>The <code>lossyear</code> band enables temporal analysis of when deforestation occurred.</li>
+                    <li>Grouped reducers let you disaggregate statistics by categories (years, classes, regions).</li>
+                    <li>Comparing sub-regions reveals spatial patterns linked to infrastructure, policy, and land use.</li>
+                    <li>Always define "forest" with a clear tree cover threshold and report it in your results.</li>
+                </ul>
+            </section>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Confusing <code>lossyear</code> values (years since 2000) with calendar years.</li>
+                    <li>Reporting loss area without stating the tree cover threshold used to define "forest."</li>
+                    <li>Forgetting <code>maxPixels: 1e9</code> in <code>reduceRegion()</code>, which causes errors for large regions.</li>
+                    <li>Using the <code>gain</code> band as if it were updated annually (it only covers 2000 to 2012).</li>
+                </ul>
+            </section>
+
+            <section class="pro-tips">
+                <h3>Pro tips</h3>
+                <ul>
+                    <li>For countries with national forest definitions, adjust the threshold accordingly
+                        (e.g., Brazil uses 80%, FAO uses 10%).</li>
+                    <li>Combine the Hansen loss layer with fire data (MODIS burned area) to distinguish
+                        fire-driven loss from agricultural clearing.</li>
+                    <li>Export your annual chart data as a CSV for use in Excel, R, or Python for further
+                        statistical analysis.</li>
+                    <li>Compare your GFC results with official government deforestation data (e.g., Brazil's
+                        PRODES system) to understand methodological differences.</li>
+                </ul>
+            </section>
+
+            <section id="submission">
+                <div class="submission-box">
+                    <h3>📋 Lab Submission</h3>
+                    <p><strong>Subject:</strong> <code>Lab 24 - Deforestation Analysis - [Your Name]</code></p>
+                    <p><strong>Include in your submission:</strong></p>
+                    <ul>
+                        <li>Shareable GEE script link with all six parts completed and commented.</li>
+                        <li>Screenshot of your loss year map with the color ramp legend visible.</li>
+                        <li>Screenshot of your annual deforestation bar chart.</li>
+                        <li>Area statistics for both sub-regions (copy from the console).</li>
+                        <li><strong>Question 1:</strong> What was the total forest loss (in hectares) for the
+                            Rondonia ROI? What percentage of the year-2000 forest was lost by 2023?</li>
+                        <li><strong>Question 2:</strong> Examine your annual chart. Identify the year with the
+                            highest deforestation and propose a possible explanation (policy, economic, or
+                            climatic). Support your reasoning with at least one external source.</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../index.html">← Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+</html>

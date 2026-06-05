@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Lab 22: Create NDVI time series charts comparing land cover types and map vegetation trends using Google Earth Engine.">
+    <title>Lab 22 - Time Series Charting | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 22
+        </nav>
+
+        <header class="lab-header">
+            <h1>Lab 22 - Time Series Charting</h1>
+            <p><em><strong>Objective: Create time series charts comparing vegetation dynamics across land cover types and map NDVI trends spatially.</strong></em></p>
+        </header>
+
+        <main class="lab-content">
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Define sample points for different land cover types and create a labeled FeatureCollection.</li>
+                    <li>Build a multi-year, cloud-masked Landsat 8 NDVI collection.</li>
+                    <li>Create a single-point time series chart using <code>ui.Chart.image.series()</code>.</li>
+                    <li>Compare regions with <code>ui.Chart.image.seriesByRegion()</code>.</li>
+                    <li>Detect NDVI trends using <code>ee.Reducer.linearFit()</code> and map the results.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Understanding how vegetation changes over time is essential for ecology, agriculture,
+                    and land management. Time series charts reveal seasonal patterns, drought impacts, and
+                    long-term trends that single images cannot show. Trend maps turn years of satellite data
+                    into actionable information about landscape health.
+                </p>
+            </section>
+
+            <section>
+                <h2>Before You Start</h2>
+                <ul>
+                    <li><strong>Prerequisites:</strong> Image Collections module, Spectral Indices module, Time Series Charting module.</li>
+                    <li><strong>Estimated time:</strong> 40 minutes</li>
+                    <li><strong>You will need:</strong> GEE Code Editor access</li>
+                </ul>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key terms</h3>
+                <dl>
+                    <dt>Time series</dt>
+                    <dd>A sequence of observations recorded at regular time intervals, used here for NDVI values from sequential satellite images.</dd>
+                    <dt>Linear fit</dt>
+                    <dd>A regression method that calculates the best straight line through data points, producing a slope (trend direction) and offset (starting value).</dd>
+                    <dt>Greening</dt>
+                    <dd>A positive NDVI trend over time, indicating increasing vegetation cover or health.</dd>
+                    <dt>Browning</dt>
+                    <dd>A negative NDVI trend over time, indicating vegetation decline, drought stress, or land cover change.</dd>
+                </dl>
+            </section>
+
+            <!-- Lab Steps -->
+            <section>
+                <h2>Lab Instructions</h2>
+                <p>
+                    In this lab, you will analyze NDVI dynamics near Gainesville, Florida. You will compare
+                    forest, cropland, and urban areas, then create a spatial map of vegetation trends across
+                    the region.
+                </p>
+
+                <h3>Part 1 - Define sample points</h3>
+                <p>
+                    Create three sample points representing different land cover types. Each point will be
+                    labeled so that charts display meaningful legend entries.
+                </p>
+<pre><code>// Define three sample points near Gainesville, FL
+var forest = ee.Geometry.Point([-82.35, 29.65]);
+var cropland = ee.Geometry.Point([-82.5, 29.5]);
+var urban = ee.Geometry.Point([-82.32, 29.65]);
+
+// Create a labeled FeatureCollection
+var regions = ee.FeatureCollection([
+  ee.Feature(forest, {'label': 'Forest'}),
+  ee.Feature(cropland, {'label': 'Cropland'}),
+  ee.Feature(urban, {'label': 'Urban'})
+]);
+
+// Add points to the map for reference
+Map.centerObject(regions, 10);
+Map.addLayer(forest, {color: 'green'}, 'Forest Point');
+Map.addLayer(cropland, {color: 'orange'}, 'Cropland Point');
+Map.addLayer(urban, {color: 'red'}, 'Urban Point');</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li><code>ee.Feature(geometry, properties)</code> creates a feature with a location and metadata. The <code>'label'</code> property is used by the chart as the series name.</li>
+                    <li><code>ee.FeatureCollection([])</code> groups the three features into a collection that charting functions can iterate over.</li>
+                </ul>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>Three colored dots on the map near Gainesville, FL. Verify that each point falls on the correct land cover type by switching to satellite basemap.</p>
+                </div>
+            </section>
+
+            <section>
+                <h3>Part 2 - Build a cloud-masked NDVI collection</h3>
+                <p>
+                    Load four years of Landsat 8 imagery (2020 through 2023), apply cloud masking, and
+                    compute NDVI for every image.
+                </p>
+<pre><code>// Cloud masking function for Landsat 8 SR
+function maskL8sr(image) {
+  var qaMask = image.select('QA_PIXEL').bitwiseAnd(1 << 3).eq(0)
+      .and(image.select('QA_PIXEL').bitwiseAnd(1 << 4).eq(0));
+  return image.updateMask(qaMask)
+      .multiply(0.0000275).add(-0.2);
+}
+
+// Load Landsat 8 collection for 2020-2023
+var collection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2020-01-01', '2023-12-31')
+  .filterBounds(regions)
+  .filter(ee.Filter.lt('CLOUD_COVER', 30))
+  .map(maskL8sr)
+  .map(function(img) {
+    var ndvi = img.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI');
+    return img.addBands(ndvi);
+  });
+
+print('Total images in collection:', collection.size());</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li>The <code>.map(maskL8sr)</code> call applies cloud masking to every image in the collection.</li>
+                    <li>The second <code>.map()</code> adds an NDVI band to each image using <code>.normalizedDifference()</code>.</li>
+                    <li>Four years of data provides enough observations for reliable trend detection.</li>
+                </ul>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>The console should print a number between 100 and 200, depending on how many Landsat 8 scenes cover this area.</p>
+                </div>
+            </section>
+
+            <section>
+                <h3>Part 3 - Create a single-point time series chart</h3>
+                <p>
+                    Use <code>ui.Chart.image.series()</code> to plot NDVI over time at the forest point.
+                    This chart shows the seasonal cycle and overall trajectory.
+                </p>
+<pre><code>// Chart NDVI at the forest point
+var forestChart = ui.Chart.image.series({
+  imageCollection: collection.select('NDVI'),
+  region: forest,
+  reducer: ee.Reducer.mean(),
+  scale: 30
+}).setOptions({
+  title: 'NDVI Time Series - Forest (2020-2023)',
+  vAxis: {title: 'NDVI', minValue: 0, maxValue: 1},
+  hAxis: {title: 'Date'},
+  lineWidth: 1,
+  pointSize: 3,
+  series: {0: {color: 'green'}}
+});
+
+print(forestChart);</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li><code>ui.Chart.image.series()</code> extracts NDVI from every image at the specified point and plots it as a time series.</li>
+                    <li><code>ee.Reducer.mean()</code> averages the pixel values within the region (for a single point, it simply returns the value at that pixel).</li>
+                    <li><code>.setOptions()</code> customizes the chart with titles, axis labels, colors, and point sizes.</li>
+                </ul>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        A chart in the Console panel with NDVI values ranging roughly from 0.4 to 0.9.
+                        You should observe a seasonal pattern: higher values in summer (peak greenness)
+                        and lower values in winter.
+                    </p>
+                </div>
+            </section>
+
+            <section>
+                <h3>Part 4 - Create a multi-region comparison chart</h3>
+                <p>
+                    Now plot all three land cover types on the same chart using
+                    <code>ui.Chart.image.seriesByRegion()</code>. This reveals how each land cover
+                    responds differently to seasonal cycles.
+                </p>
+<pre><code>// Chart NDVI for all three regions
+var comparisonChart = ui.Chart.image.seriesByRegion({
+  imageCollection: collection.select('NDVI'),
+  regions: regions,
+  reducer: ee.Reducer.mean(),
+  band: 'NDVI',
+  scale: 30,
+  seriesProperty: 'label'
+}).setOptions({
+  title: 'NDVI by Land Cover Type (2020-2023)',
+  vAxis: {title: 'NDVI', minValue: 0, maxValue: 1},
+  hAxis: {title: 'Date'},
+  lineWidth: 1,
+  pointSize: 3,
+  series: {
+    0: {color: 'orange'},
+    1: {color: 'green'},
+    2: {color: 'gray'}
+  }
+});
+
+print(comparisonChart);</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li><code>seriesByRegion()</code> creates a separate line for each feature in the FeatureCollection.</li>
+                    <li><code>seriesProperty: 'label'</code> uses the label property from each feature as the legend name.</li>
+                    <li>The <code>series</code> option assigns colors to each line (the order matches the FeatureCollection order).</li>
+                </ul>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        Three colored lines on one chart. Forest (green) should show consistently high NDVI
+                        with gentle seasonal swings. Cropland (orange) should show dramatic peaks during the
+                        growing season and drops during fallow periods. Urban (gray) should remain low and
+                        relatively flat.
+                    </p>
+                </div>
+            </section>
+
+            <section>
+                <h3>Part 5 - Detect NDVI trends with linear regression</h3>
+                <p>
+                    Apply <code>ee.Reducer.linearFit()</code> to quantify whether NDVI is increasing or
+                    decreasing over the four-year period. First, add a time band to each image.
+                </p>
+<pre><code>// Add a time band to each image (fractional years since 2020)
+var withTime = collection.map(function(img) {
+  var ndvi = img.select('NDVI');
+  var timeImage = ee.Image.constant(
+    img.date().difference('2020-01-01', 'year')
+  ).float().rename('time');
+  return ndvi.addBands(timeImage);
+});
+
+// Apply linear regression (bands must be in order: time, NDVI)
+var trend = withTime.select(['time', 'NDVI'])
+  .reduce(ee.Reducer.linearFit());
+
+// Print trend values at each sample point
+print('Forest trend:', trend.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: forest, scale: 30, maxPixels: 1e9
+}));
+print('Cropland trend:', trend.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: cropland, scale: 30, maxPixels: 1e9
+}));
+print('Urban trend:', trend.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: urban, scale: 30, maxPixels: 1e9
+}));</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li><code>img.date().difference('2020-01-01', 'year')</code> converts each image date to fractional years since January 1, 2020. This makes the slope interpretable as "NDVI change per year."</li>
+                    <li><code>ee.Reducer.linearFit()</code> expects bands in order: independent variable (time) first, dependent variable (NDVI) second.</li>
+                    <li>The result has two bands: <code>scale</code> (the slope) and <code>offset</code> (the intercept).</li>
+                </ul>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        Three printed dictionaries, each containing a <code>scale</code> (slope) and
+                        <code>offset</code> value. A positive slope means NDVI is increasing (greening).
+                        A negative slope means NDVI is decreasing (browning). Values near zero indicate
+                        a stable trend.
+                    </p>
+                </div>
+            </section>
+
+            <section>
+                <h3>Part 6 - Map the trend spatially</h3>
+                <p>
+                    Apply the trend analysis to every pixel in the study area to create a spatial map
+                    of greening and browning. Use a diverging color palette so that greening pixels are
+                    green and browning pixels are red.
+                </p>
+<pre><code>// Visualize the slope (trend) spatially
+Map.addLayer(trend.select('scale'), {
+  min: -0.05,
+  max: 0.05,
+  palette: ['red', 'orange', 'lightyellow', 'lightgreen', 'darkgreen']
+}, 'NDVI Trend (2020-2023)');
+
+// Add reference points on top
+Map.addLayer(regions, {color: 'blue'}, 'Sample Points');
+
+// Add a true color basemap for context
+var composite = collection.median();
+Map.addLayer(composite, {
+  bands: ['SR_B4', 'SR_B3', 'SR_B2'],
+  min: 0, max: 0.3
+}, 'True Color Composite', false);</code></pre>
+                <p><strong>Understanding the code:</strong></p>
+                <ul>
+                    <li><code>trend.select('scale')</code> extracts only the slope band from the linear fit result.</li>
+                    <li>The diverging palette centers on light yellow (no change), with green for positive slopes and red for negative slopes.</li>
+                    <li>The <code>min</code> and <code>max</code> of -0.05 to 0.05 represent a range of 0.05 NDVI units change per year.</li>
+                    <li>The true color composite is added but turned off by default (<code>false</code> parameter). Toggle it on for context.</li>
+                </ul>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        A trend map centered on the Gainesville, FL area. Stable forested areas should
+                        appear light yellow or light green. Areas with new development or disturbance may
+                        appear red or orange. Agricultural areas may show variable patterns depending on
+                        crop rotation.
+                    </p>
+                </div>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What does a slope of -0.02 mean in the context of an NDVI trend analysis?</li>
+                    <li>Why does cropland NDVI have more dramatic seasonal peaks than forest NDVI?</li>
+                    <li>What is the difference between the "scale" band and the "offset" band in the linearFit output?</li>
+                    <li>Why do we use fractional years instead of milliseconds as the time variable?</li>
+                </ol>
+            </section>
+
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <div class="issue">
+                    <strong>Problem: Chart appears blank or shows "No data"</strong>
+                    <p><strong>Solution:</strong> Check that your point coordinates are correct and fall within
+                    the image collection's footprint. Print <code>collection.size()</code> to verify images exist.
+                    Make sure you selected the 'NDVI' band in the chart call.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Chart shows sharp downward spikes</strong>
+                    <p><strong>Solution:</strong> These are usually residual cloud contamination. Try lowering the
+                    CLOUD_COVER threshold from 30 to 15 for cleaner results, though you will have fewer data points.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: "linearFit: Too few inputs" error</strong>
+                    <p><strong>Solution:</strong> The collection has too few images at that location. Widen the date
+                    range, relax the cloud filter, or choose a location with better Landsat coverage.</p>
+                </div>
+                <div class="issue">
+                    <strong>Problem: Trend map shows uniform color with no variation</strong>
+                    <p><strong>Solution:</strong> Adjust the <code>min</code> and <code>max</code> values in the
+                    visualization parameters. Try <code>min: -0.02, max: 0.02</code> for subtler trends.</p>
+                </div>
+            </section>
+
+            <section class="key-concepts">
+                <h3>Key Takeaways</h3>
+                <ul>
+                    <li><code>ui.Chart.image.series()</code> plots one band from an image collection over time at a single location.</li>
+                    <li><code>ui.Chart.image.seriesByRegion()</code> compares multiple locations on the same chart.</li>
+                    <li><code>ee.Reducer.linearFit()</code> fits a straight line through temporal data, returning slope and offset.</li>
+                    <li>Positive slope indicates greening; negative slope indicates browning.</li>
+                    <li>Mapping the slope band spatially reveals landscape-scale vegetation trends.</li>
+                </ul>
+            </section>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Putting bands in the wrong order for <code>linearFit()</code>: time must be first, NDVI second.</li>
+                    <li>Forgetting to convert dates to fractional years, which makes slope values uninterpretable.</li>
+                    <li>Using too few images (less than 30) for reliable trend detection.</li>
+                    <li>Not specifying <code>scale: 30</code> in chart calls, which defaults to a coarser resolution.</li>
+                </ul>
+            </section>
+
+            <section class="pro-tips">
+                <h3>Pro tips</h3>
+                <ul>
+                    <li>Click the small icon in the upper-right corner of any GEE chart to download it as a CSV file or SVG image for use in reports.</li>
+                    <li>Filter to summer months only (June through August) before running <code>linearFit()</code> to remove seasonal noise and isolate true annual trends.</li>
+                    <li>Experiment with the <code>pointSize</code> and <code>lineWidth</code> chart options to find the most readable combination for your data density.</li>
+                    <li>Use the Inspector tool to click on individual pixels in the trend map and examine their slope values.</li>
+                </ul>
+            </section>
+
+            <section id="submission">
+                <div class="submission-box">
+                    <h3>📋 Lab Submission</h3>
+                    <p><strong>Subject:</strong> <code>Lab 22 - Time Series Charting - [Your Name]</code></p>
+                    <p><strong>Include in your submission:</strong></p>
+                    <ul>
+                        <li>Shareable GEE script link (click "Get Link" in the Code Editor)</li>
+                        <li>Screenshot of your multi-region comparison chart (Part 4)</li>
+                        <li>Screenshot of your NDVI trend map (Part 6)</li>
+                        <li><strong>Interpretation paragraph (3-5 sentences):</strong> Describe the differences you observe between the three land cover types in the time series chart. Which land cover shows the strongest seasonal signal? Which is the most stable? Explain why these differences exist.</li>
+                        <li><strong>Question 1:</strong> What is the slope value at your forest point? Is the forest greening or browning over the 2020-2023 period?</li>
+                        <li><strong>Question 2:</strong> Identify one area on your trend map that shows a strong negative slope (browning). What do you think is causing the vegetation decline at that location? Use the true color composite to investigate.</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../index.html">← Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+
+</html>

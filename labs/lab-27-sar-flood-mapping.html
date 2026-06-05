@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Lab 27: Map flood extent using Sentinel-1 SAR change detection in Google Earth Engine.">
+    <title>Lab 27 - SAR Flood Mapping | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../index.html">Home</a> &gt; <a href="../index.html#labs">Labs</a> &gt; Lab 27
+        </nav>
+
+        <header class="lab-header">
+            <h1>Lab 27: SAR Flood Mapping</h1>
+            <p>Map flood extent from Sentinel-1 radar data for a real disaster event</p>
+        </header>
+
+        <main class="lab-content">
+            <section class="lab-overview">
+                <h2>Overview</h2>
+                <p>
+                    In this lab you will use Sentinel-1 SAR data to map the extent of flooding caused by the
+                    2019 Cyclone Idai in Mozambique. This was one of the worst tropical cyclones ever recorded
+                    in the Southern Hemisphere, causing catastrophic flooding along the Buzi and Pungwe rivers
+                    near the city of Beira. Optical satellites could not see through the storm clouds, but
+                    Sentinel-1 mapped the flood clearly.
+                </p>
+                <div class="lab-meta">
+                    <p><strong>Objective:</strong> Map flood extent using before-after SAR change detection.</p>
+                    <p><strong>Prerequisites:</strong> SAR Fundamentals module, Change Detection module.</p>
+                    <p><strong>Estimated time:</strong> 45 minutes.</p>
+                </div>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key terms</h3>
+                <dl>
+                    <dt>Backscatter</dt>
+                    <dd>Radar signal reflected back to the sensor. Measured in decibels (dB). Water has very low backscatter.</dd>
+
+                    <dt>VV polarization</dt>
+                    <dd>Vertical transmit, vertical receive. Most sensitive to surface roughness and water detection.</dd>
+
+                    <dt>Speckle filtering</dt>
+                    <dd>Noise reduction technique for SAR images. Applied to the baseline image to create a cleaner reference.</dd>
+
+                    <dt>Change detection threshold</dt>
+                    <dd>The minimum backscatter drop (in dB) used to classify a pixel as flooded. Typically 3 to 5 dB.</dd>
+                </dl>
+            </section>
+
+            <!-- Part 1 -->
+            <section>
+                <h2>Part 1: Define the Study Area</h2>
+                <p>
+                    Cyclone Idai made landfall near Beira, Mozambique on March 14, 2019. We will focus on the
+                    low-lying floodplain where the Buzi and Pungwe rivers overflowed.
+                </p>
+<pre><code>// Study area: Beira and surrounding floodplain, Mozambique
+var beira = ee.Geometry.Point([34.87, -19.84]);
+var studyArea = beira.buffer(60000); // 60 km radius
+
+Map.centerObject(studyArea, 9);
+Map.addLayer(studyArea, {color: 'yellow'}, 'Study area');</code></pre>
+
+                <div class="understanding">
+                    <h4>Understanding the code</h4>
+                    <p>
+                        We define a point near Beira and create a 60 km buffer to capture the entire flood zone.
+                        The <code>buffer()</code> function creates a circle around the point in meters.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Part 2 -->
+            <section>
+                <h2>Part 2: Load and Filter Sentinel-1 (Before)</h2>
+                <p>
+                    Create a baseline "before" image by taking the temporal median of Sentinel-1 images from
+                    February 2019 (before the cyclone). Using a temporal median reduces speckle noise.
+                </p>
+<pre><code>// Helper function to apply standard Sentinel-1 filters
+function filterS1(collection) {
+  return collection
+    .filter(ee.Filter.eq('instrumentMode', 'IW'))
+    .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
+    .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))
+    .filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING'));
+}
+
+// Before image: February 2019 (pre-cyclone baseline)
+var beforeCollection = filterS1(
+  ee.ImageCollection('COPERNICUS/S1_GRD')
+    .filterBounds(studyArea)
+    .filterDate('2019-02-01', '2019-02-28')
+);
+
+var before = beforeCollection.select('VV').median();
+print('Before images:', beforeCollection.size());
+Map.addLayer(before, {min: -25, max: 0}, 'Before (Feb 2019) VV');</code></pre>
+
+                <div class="understanding">
+                    <h4>Understanding the code</h4>
+                    <p>
+                        The <code>filterS1()</code> function applies the standard Sentinel-1 filters: IW mode,
+                        both VV and VH polarizations, and descending orbit. The temporal <code>.median()</code>
+                        creates a clean baseline with reduced speckle. We use VV polarization because it is most
+                        sensitive to water surfaces.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Part 3 -->
+            <section>
+                <h2>Part 3: Load the During-Flood Image</h2>
+                <p>
+                    Load the Sentinel-1 image acquired during peak flooding (March 19 to 25, 2019).
+                    Use a single mosaic rather than a median, because we want to capture the actual flood
+                    state, not average it away.
+                </p>
+<pre><code>// During image: March 19-25, 2019 (peak flooding)
+var duringCollection = filterS1(
+  ee.ImageCollection('COPERNICUS/S1_GRD')
+    .filterBounds(studyArea)
+    .filterDate('2019-03-19', '2019-03-25')
+);
+
+var during = duringCollection.select('VV').mosaic();
+print('During-flood images:', duringCollection.size());
+Map.addLayer(during, {min: -25, max: 0}, 'During flood (Mar 2019) VV');</code></pre>
+
+                <div class="understanding">
+                    <h4>Understanding the code</h4>
+                    <p>
+                        We use <code>.mosaic()</code> instead of <code>.median()</code> for the during-flood image.
+                        A median would smooth out the flood signal if some images in the window were not flooded.
+                        With a mosaic, we get the most recent pixel value, which should show the flood.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Part 4 -->
+            <section>
+                <h2>Part 4: Compute the Difference and Detect Floods</h2>
+                <p>
+                    Subtract the during-flood image from the before image. Pixels where backscatter dropped
+                    significantly (land became water) will have positive difference values. Apply a threshold
+                    to create a binary flood mask.
+                </p>
+<pre><code>// Change detection: before minus during
+var difference = before.subtract(during);
+
+// Visualize the difference (positive = backscatter decreased = possible flood)
+Map.addLayer(difference, {min: -5, max: 10, palette: ['blue', 'white', 'red']}, 'Backscatter difference');
+
+// Apply threshold: backscatter dropped by more than 3 dB = flooded
+var floodMask = difference.gt(3);
+Map.addLayer(floodMask.selfMask(), {palette: ['cyan']}, 'Flood extent (threshold = 3 dB)');</code></pre>
+
+                <div class="understanding">
+                    <h4>Understanding the code</h4>
+                    <p>
+                        The <code>.subtract()</code> gives us the change in backscatter. Positive values mean
+                        the surface became smoother (drier land turned to water). A 3 dB threshold is a standard
+                        starting point for flood detection. Red areas in the difference map show the strongest
+                        backscatter drops.
+                    </p>
+                </div>
+
+                <div class="try-it">
+                    <h4>Try it: Experiment with thresholds</h4>
+                    <p>
+                        Try thresholds of 2, 3, 4, and 5 dB. How does the flood extent change? A lower threshold
+                        captures more area (including possible false positives); a higher threshold is more
+                        conservative. Which threshold best matches the major river floodplains?
+                    </p>
+                </div>
+            </section>
+
+            <!-- Part 5 -->
+            <section>
+                <h2>Part 5: Calculate Flooded Area</h2>
+                <p>
+                    Use <code>ee.Image.pixelArea()</code> to calculate the total flooded area in square kilometers.
+                </p>
+<pre><code>// Calculate flooded area in square kilometers
+var floodArea = floodMask.multiply(ee.Image.pixelArea());
+
+var stats = floodArea.reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: studyArea,
+  scale: 10,
+  maxPixels: 1e9
+});
+
+var areaKm2 = ee.Number(stats.get('VV')).divide(1e6);
+print('Flooded area (km²):', areaKm2);</code></pre>
+
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        With a 3 dB threshold and 60 km study radius, you should see a flooded area between
+                        1,500 and 4,000 km² depending on exact dates and orbit coverage. Published estimates
+                        of the Cyclone Idai flood extent range from 2,000 to 3,000 km². If your value is far
+                        outside this range, check your date filters and threshold.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Part 6 -->
+            <section>
+                <h2>Part 6: Refine and Visualize the Final Map</h2>
+                <p>
+                    Apply additional refinements: mask out permanent water bodies (which are dark in both images)
+                    and add context layers.
+                </p>
+<pre><code>// Remove permanent water using JRC Global Surface Water
+var jrc = ee.Image('JRC/GSW1_4/GlobalSurfaceWater');
+var permanentWater = jrc.select('occurrence').gt(50);
+
+// Refined flood: only areas that are NOT permanent water
+var floodRefined = floodMask.updateMask(permanentWater.not());
+Map.addLayer(floodRefined.selfMask(), {palette: ['ff6600']}, 'Flood (excluding permanent water)');
+
+// Add true-color context (Sentinel-2 before the event)
+var s2Before = ee.ImageCollection('COPERNICUS/S2_SR')
+  .filterBounds(studyArea)
+  .filterDate('2019-02-01', '2019-02-28')
+  .sort('CLOUDY_PIXEL_PERCENTAGE')
+  .first()
+  .divide(10000);
+Map.addLayer(s2Before, {bands: ['B4', 'B3', 'B2'], min: 0, max: 0.3}, 'Context (S2 true color)');</code></pre>
+
+                <div class="understanding">
+                    <h4>Understanding the code</h4>
+                    <p>
+                        The JRC Global Surface Water dataset tells us which areas are typically covered by water
+                        (occurrence > 50%). By masking these out, we isolate the <em>new</em> flooding that was
+                        caused by the cyclone. The Sentinel-2 true-color layer provides geographic context,
+                        showing the landscape before the disaster.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section class="troubleshooting">
+                <h3>Troubleshooting</h3>
+                <dl>
+                    <dt>No images found in my date range</dt>
+                    <dd>Sentinel-1 has a 6 to 12 day revisit time. Expand your date range by a few days.
+                        Also check that you are filtering to <code>'DESCENDING'</code>; try <code>'ASCENDING'</code>
+                        if you get zero results.</dd>
+
+                    <dt>The flood mask covers the entire image</dt>
+                    <dd>Your threshold is too low. Try increasing it from 3 to 5 dB. Also confirm that your
+                        "before" and "during" images are from different dates.</dd>
+
+                    <dt>I see "stripes" in the SAR image</dt>
+                    <dd>This is caused by overlapping orbit swaths with slightly different acquisition times. Use
+                        <code>.mosaic()</code> or <code>.median()</code> to combine them.</dd>
+
+                    <dt>The flooded area value seems way too large</dt>
+                    <dd>Check that you are using <code>ee.Image.pixelArea()</code> (which returns area in m²)
+                        and dividing by 1e6 for km². Also ensure you set <code>scale: 10</code> in the
+                        reducer to match Sentinel-1 resolution.</dd>
+                </dl>
+            </section>
+
+            <!-- Key Takeaways -->
+            <section>
+                <h2>Key Takeaways</h2>
+                <ul>
+                    <li>SAR can map floods through clouds, which is critical for disaster response.</li>
+                    <li>The standard workflow is: baseline (temporal median), event (single image), difference, threshold.</li>
+                    <li>VV polarization is most effective for detecting open water.</li>
+                    <li>A 3 dB backscatter drop is a reasonable initial flood detection threshold.</li>
+                    <li>Removing permanent water bodies with JRC GSW isolates event-specific flooding.</li>
+                    <li>SAR and optical data are complementary: use SAR for flood detection, optical for context.</li>
+                </ul>
+            </section>
+
+            <!-- Submission -->
+            <section class="submission-box">
+                <h2>Submission</h2>
+                <p>Submit the following:</p>
+                <ol>
+                    <li>A shareable GEE script link with your completed flood mapping code.</li>
+                    <li>A screenshot of your final flood map (with the refined flood mask and true-color context).</li>
+                    <li>The calculated flooded area in km² (from the console output).</li>
+                    <li>Answer these questions:
+                        <ul>
+                            <li>Why is SAR more suitable than optical imagery for mapping floods during a cyclone?</li>
+                            <li>How did changing the threshold from 3 dB to 5 dB affect the estimated flood extent?
+                                Which threshold do you think is more appropriate, and why?</li>
+                        </ul>
+                    </li>
+                </ol>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+</html>

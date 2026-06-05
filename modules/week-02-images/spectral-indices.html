@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Learn spectral indices beyond NDVI including EVI, SAVI, NDRE, NDWI, NDBI, and NBR. Write custom index functions in Google Earth Engine.">
     <title>Spectral Indices | Remote Sensing Course</title>
     <link rel="stylesheet" href="../../css/style.css">
 </head>
@@ -27,8 +28,10 @@
                 <h3>Learning objectives</h3>
                 <ul>
                     <li>Explain what a normalized difference index measures.</li>
-                    <li>Compute NDVI (and one other index) in Earth Engine.</li>
+                    <li>Compute NDVI, NDWI, NDBI, NBR, EVI, SAVI, and NDRE in Earth Engine.</li>
+                    <li>Write custom index functions using <code>.expression()</code>.</li>
                     <li>Read band designations for different sensors.</li>
+                    <li>Choose the right index for your analysis goal.</li>
                     <li>Interpret index ranges and common pitfalls.</li>
                 </ul>
             </section>
@@ -94,12 +97,177 @@ var ndwi = s2.normalizedDifference(['B8', 'B11']).rename('NDWI');
 Map.addLayer(ndwi, {min: -0.5, max: 0.8, palette: ['brown','beige','cyan']}, 'NDWI');</code></pre>
             </section>
 
+            <section>
+                <h2>Advanced Indices: EVI, SAVI, and NDRE</h2>
+                <p>
+                    Some indices require more than two bands or include correction factors.
+                    These cannot use <code>.normalizedDifference()</code> and instead use <code>.expression()</code>.
+                </p>
+
+                <h3>EVI (Enhanced Vegetation Index)</h3>
+                <p>
+                    EVI reduces atmospheric and soil background noise that can affect NDVI.
+                    It is preferred for dense vegetation where NDVI saturates, and it is widely used in agricultural monitoring.
+                </p>
+                <p><strong>Formula:</strong> EVI = 2.5 &times; (NIR - RED) / (NIR + 6&times;RED - 7.5&times;BLUE + 1)</p>
+<pre><code>// EVI on Sentinel-2
+var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+  .filterDate('2023-06-01', '2023-06-30')
+  .filterBounds(ee.Geometry.Point([-93.5, 42.0]))
+  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20))
+  .median()
+  .divide(10000); // scale to reflectance
+
+var evi = s2.expression(
+  '2.5 * ((NIR - RED) / (NIR + 6 * RED - 7.5 * BLUE + 1))',
+  {
+    NIR: s2.select('B8'),
+    RED: s2.select('B4'),
+    BLUE: s2.select('B2')
+  }
+).rename('EVI');
+
+Map.addLayer(evi, {min: 0, max: 0.8, palette: ['brown','yellow','darkgreen']}, 'EVI');</code></pre>
+
+                <h3>SAVI (Soil-Adjusted Vegetation Index)</h3>
+                <p>
+                    SAVI adds a soil brightness correction factor (L) to reduce the influence of bare soil on vegetation estimates.
+                    It is especially useful in arid and semi-arid regions where vegetation is sparse.
+                </p>
+                <p><strong>Formula:</strong> SAVI = ((NIR - RED) / (NIR + RED + L)) &times; (1 + L), where L = 0.5</p>
+<pre><code>// SAVI on Landsat 8
+var savi = img.expression(
+  '((NIR - RED) / (NIR + RED + 0.5)) * 1.5',
+  {
+    NIR: img.select('SR_B5'),
+    RED: img.select('SR_B4')
+  }
+).rename('SAVI');
+
+Map.addLayer(savi, {min: 0, max: 0.7, palette: ['brown','yellow','green']}, 'SAVI');</code></pre>
+
+                <h3>NDRE (Normalized Difference Red Edge)</h3>
+                <p>
+                    NDRE uses Sentinel-2's red edge band (B5, 705 nm) instead of the visible red band.
+                    It is more sensitive to chlorophyll content than NDVI, making it valuable for precision agriculture and detecting subtle vegetation stress.
+                </p>
+                <p><strong>Formula:</strong> NDRE = (NIR - Red Edge) / (NIR + Red Edge)</p>
+<pre><code>// NDRE on Sentinel-2 (only works with Sentinel-2, not Landsat)
+var ndre = s2.normalizedDifference(['B8', 'B5']).rename('NDRE');
+Map.addLayer(ndre, {min: 0, max: 0.6, palette: ['red','yellow','green']}, 'NDRE');</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>NDRE values are similar to NDVI but with finer sensitivity to vegetation health. Healthy crops show high NDRE; stressed vegetation shows lower values even when NDVI still appears normal.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Writing Custom Index Functions</h2>
+                <p>
+                    For indices that go beyond a simple normalized difference, use <code>.expression()</code>.
+                    This lets you write any formula using band math.
+                </p>
+<pre><code>// Reusable function to compute any custom index
+function computeEVI(image) {
+  return image.expression(
+    '2.5 * ((NIR - RED) / (NIR + 6 * RED - 7.5 * BLUE + 1))',
+    {
+      NIR: image.select('B8'),
+      RED: image.select('B4'),
+      BLUE: image.select('B2')
+    }
+  ).rename('EVI');
+}
+
+// Apply to a collection
+var eviCollection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+  .filterDate('2023-01-01', '2023-12-31')
+  .filterBounds(ee.Geometry.Point([-82.3, 29.6]))
+  .map(computeEVI);
+
+print('EVI collection size:', eviCollection.size());</code></pre>
+                <div class="pro-tips">
+                    <h3>Pro tips</h3>
+                    <ul>
+                        <li>Wrap index calculations in reusable functions so you can <code>.map()</code> them over collections.</li>
+                        <li>Use <code>.expression()</code> for complex formulas; use <code>.normalizedDifference()</code> for simple (A-B)/(A+B) indices.</li>
+                        <li>Always <code>.rename()</code> the output so band names are meaningful.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <h2>Which Index Should I Use?</h2>
+                <p>Use this decision table to choose the right index for your analysis:</p>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <thead>
+                        <tr style="background-color: #f8f9fa;">
+                            <th style="padding: 10px; border: 1px solid #ddd;">Goal</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">Best Index</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">Why</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">General vegetation mapping</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>NDVI</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Simple, well-understood, works for most vegetation</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Dense vegetation or crops</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>EVI</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Does not saturate in high biomass areas</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Sparse/arid vegetation</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>SAVI</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Corrects for bare soil influence</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Crop health and stress</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>NDRE</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Sensitive to chlorophyll (Sentinel-2 only)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Open water detection</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>MNDWI</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Best contrast between water and non-water</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Burn severity</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>NBR</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Sensitive to burned vegetation and soil</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Built-up / urban areas</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>NDBI</strong></td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Highlights impervious surfaces</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: compare NDVI vs EVI on dense forest</h4>
+                <p>Compute both NDVI and EVI for a tropical forest area. Notice how NDVI saturates near 0.9 while EVI still shows variation.</p>
+<pre><code>// Compare NDVI and EVI for the same Sentinel-2 image
+var ndvi = s2.normalizedDifference(['B8', 'B4']).rename('NDVI');
+var evi = s2.expression(
+  '2.5 * ((NIR - RED) / (NIR + 6 * RED - 7.5 * BLUE + 1))',
+  {NIR: s2.select('B8'), RED: s2.select('B4'), BLUE: s2.select('B2')}
+).rename('EVI');
+Map.addLayer(ndvi, {min: 0, max: 1, palette: ['brown','green']}, 'NDVI');
+Map.addLayer(evi, {min: 0, max: 0.8, palette: ['brown','darkgreen']}, 'EVI');</code></pre>
+            </div>
+
             <section class="common-mistakes">
                 <h3>Common mistakes</h3>
                 <ul>
                     <li>Using wrong band numbers for a sensor (check the Data Catalog).</li>
                     <li>Forgetting to scale/offset surface reflectance before computing indices.</li>
                     <li>Interpreting raw index values without masking clouds/shadows.</li>
+                    <li>Using NDRE with Landsat (Landsat does not have a red edge band).</li>
+                    <li>Forgetting the soil correction factor (L=0.5) in SAVI.</li>
                 </ul>
             </section>
 
@@ -109,7 +277,19 @@ Map.addLayer(ndwi, {min: -0.5, max: 0.8, palette: ['brown','beige','cyan']}, 'ND
                     <li>What range do normalized difference indices fall within?</li>
                     <li>Which bands would you use for NBR on Landsat 8?</li>
                     <li>Why should you cloud-mask before computing an index?</li>
+                    <li>When would you choose EVI over NDVI?</li>
+                    <li>Why can NDRE only be computed from Sentinel-2?</li>
+                    <li>What does the <code>.expression()</code> function allow you to do that <code>.normalizedDifference()</code> cannot?</li>
                 </ol>
+            </section>
+
+            <section class="builds-on">
+                <h3>Going deeper</h3>
+                <p>This module covers the most common spectral indices. For advanced image transformations, see:</p>
+                <ul>
+                    <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter F2.0: Image Manipulation (Bands, Arithmetic, Thresholds, and Masks)</li>
+                    <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter F3.1: Advanced Pixel-based Image Transformation (spectral unmixing, PCA, tasseled cap)</li>
+                </ul>
             </section>
 
             <section>
@@ -117,7 +297,8 @@ Map.addLayer(ndwi, {min: -0.5, max: 0.8, palette: ['brown','beige','cyan']}, 'ND
                 <ul>
                     <li>Compute NDVI and NDWI on the same scene; compare histograms and maps.</li>
                     <li>Test MNDWI on a coastal area to isolate water bodies.</li>
-                    <li>Read the Earth Engine docs for <code>normalizedDifference</code> and band designations per sensor.</li>
+                    <li>Write a reusable function that computes EVI for any Sentinel-2 image and <code>.map()</code> it over a collection.</li>
+                    <li>Read the Earth Engine docs for <code>normalizedDifference</code> and <code>expression</code>.</li>
                 </ul>
             </section>
         </main>
