@@ -56,7 +56,8 @@ Map.addLayer(ndvi, {min: 0, max: 0.8, palette: ['brown', 'yellow', 'green']}, 'N
 print('NDVI stats', ndvi.reduceRegion({
   reducer: ee.Reducer.minMax(),
   geometry: img.geometry(),
-  scale: 30
+  scale: 30,
+  maxPixels: 1e9
 }));</code></pre>
                 <div class="expected-output">
                     <h4>What you should see</h4>

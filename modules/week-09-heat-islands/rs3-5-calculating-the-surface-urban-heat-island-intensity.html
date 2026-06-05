@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -28,42 +28,48 @@ function polygonMean(feature) {
     .reduceRegion({
       reducer: ee.Reducer.mean(),
       geometry: feature.geometry(),
-      scale: 30
+      scale: 30,
+  maxPixels: 1e9
     });
   var reducedLstUrbMask = lstFinal.subtract(273.15).updateMask(notWater)
     .updateMask(urbanUrban)
     .reduceRegion({
       reducer: ee.Reducer.mean(),
       geometry: feature.geometry(),
-      scale: 30
+      scale: 30,
+  maxPixels: 1e9
     });
   var reducedLstUrbPix = lstFinal.subtract(273.15).updateMask(notWater)
     .updateMask(urbanUrban)
     .reduceRegion({
       reducer: ee.Reducer.mean(),
       geometry: feature.geometry(),
-      scale: 500
+      scale: 500,
+  maxPixels: 1e9
     });
   var reducedLstLandsatUrbPix = LandsatComp.updateMask(notWater)
     .updateMask(urbanUrban)
     .reduceRegion({
       reducer: ee.Reducer.mean(),
       geometry: feature.geometry(),
-      scale: 30
+      scale: 30,
+  maxPixels: 1e9
     });
   var reducedLstRurPix = lstFinal.subtract(273.15).updateMask(notWater)
     .updateMask(urbanNonUrban)
     .reduceRegion({
       reducer: ee.Reducer.mean(),
       geometry: feature.geometry(),
-      scale: 500
+      scale: 500,
+  maxPixels: 1e9
     });
   var reducedLstLandsatRurPix = LandsatComp.updateMask(notWater)
     .updateMask(urbanNonUrban)
     .reduceRegion({
       reducer: ee.Reducer.mean(),
       geometry: feature.geometry(),
-      scale: 30
+      scale: 30,
+  maxPixels: 1e9
     });
   // Return each feature with the summarized LSY values as properties.
   return feature.set({
@@ -92,14 +98,16 @@ function refMean(feature) {
     .reduceRegion({
       reducer: ee.Reducer.mean(),
       geometry: feature.geometry(),
-      scale: 30
+      scale: 30,
+  maxPixels: 1e9
     });
   var reducedLstRurMask = lstFinal.subtract(273.15).updateMask(notWater)
     .updateMask(urbanNonUrban)
     .reduceRegion({
       reducer: ee.Reducer.mean(),
       geometry: feature.geometry(),
-      scale: 30
+      scale: 30,
+  maxPixels: 1e9
     });
   return feature.set({
     'MODIS_LST_rur': reducedLstRur.get('LST_Day_1km'),

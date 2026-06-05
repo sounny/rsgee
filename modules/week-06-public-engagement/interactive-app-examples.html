@@ -305,7 +305,8 @@ var inspectPoint = function(point, lon, lat) {
   ndvi.reduceRegion({
     reducer: ee.Reducer.mean(),
     geometry: point.buffer(30),
-    scale: 30
+    scale: 30,
+  maxPixels: 1e9
   }).get('NDVI').evaluate(function(value) {
     if (value !== null) {
       resultLabel.setValue(

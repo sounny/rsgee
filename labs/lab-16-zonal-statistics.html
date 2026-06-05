@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -121,28 +121,32 @@ Map.addLayer(srtm, {min: 0, max: 3000, palette: ['blue', 'green', 'yellow', 'red
 var max = srtm.reduceRegion({
   reducer: ee.Reducer.max(),
   geometry: aoi,
-  scale: 90
+  scale: 90,
+  maxPixels: 1e9
 });
 
 // Calculate mean elevation
 var mean = srtm.reduceRegion({
   reducer: ee.Reducer.mean(),
   geometry: aoi,
-  scale: 90
+  scale: 90,
+  maxPixels: 1e9
 });
 
 // Calculate minimum elevation
 var min = srtm.reduceRegion({
   reducer: ee.Reducer.min(),
   geometry: aoi,
-  scale: 90
+  scale: 90,
+  maxPixels: 1e9
 });
 
 // Calculate standard deviation
 var stdd = srtm.reduceRegion({
   reducer: ee.Reducer.stdDev(),
   geometry: aoi,
-  scale: 90
+  scale: 90,
+  maxPixels: 1e9
 });
 
 // Print all statistics
@@ -308,7 +312,7 @@ print(histogram);</code></pre>
 
             <section id="submission">
                 <div class="submission-box">
-                    <h3>📋 Lab Submission</h3>
+                    <h3>?? Lab Submission</h3>
                     <p><strong>Subject:</strong> <code>Lab 16 - Zonal Statistics - [Your Name]</code></p>
 
                     <h4>Submit:</h4>
@@ -325,9 +329,9 @@ print(histogram);</code></pre>
         </main>
 
         <footer>
-            <p><a href="lab-15-visualizing-srtm-data.html">← Previous Lab</a> | <a
-                    href="lab-17-health-applications-part1.html">Next Lab →</a></p>
-            <p><a href="../index.html">← Back to Course Home</a></p>
+            <p><a href="lab-15-visualizing-srtm-data.html">? Previous Lab</a> | <a
+                    href="lab-17-health-applications-part1.html">Next Lab ?</a></p>
+            <p><a href="../index.html">? Back to Course Home</a></p>
         </footer>
     </div>
 

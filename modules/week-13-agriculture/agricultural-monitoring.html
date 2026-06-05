@@ -203,7 +203,8 @@ Map.centerObject(ee.Geometry.Point([-93.5, 42.0]), 11);
 var cropType = cdl.reduceRegion({
   reducer: ee.Reducer.first(),
   geometry: ee.Geometry.Point([-93.5, 42.0]),
-  scale: 30
+  scale: 30,
+  maxPixels: 1e9
 });
 print('Crop type code:', cropType);</code></pre>
         <p>Here are some common CDL class codes to know:</p>

@@ -19,9 +19,10 @@
 
         <main class="lab-content">
             <p>
-                Spectral indices turn multi-band information into a single value that highlights your target feature.
-                They are fast, interpretable, and power many remote-sensing workflows (vegetation, water, burn scars,
-                urban areas).
+                Spectral indices are one of the most powerful tools in our remote sensing toolkit. They turn
+                multi-band information into a single number that highlights exactly what we care about:
+                vegetation health, water presence, burn scars, or urban sprawl. They are fast, intuitive, and
+                they power most of the workflows we will build in this course.
             </p>
 
             <section class="learning-objectives">
@@ -39,8 +40,10 @@
             <section class="why-it-matters">
                 <h3>Why it matters</h3>
                 <p>
-                    Indices compress spectral information into intuitive numbers you can threshold, compare over time,
-                    or feed into classifiers-without heavy modeling.
+                    Think of indices as a translator. Raw satellite bands are like a conversation in a foreign
+                    language. Indices translate that conversation into something we can immediately understand:
+                    "this pixel is healthy vegetation" or "this area just burned." We can threshold them,
+                    compare them over time, or feed them into classifiers, all without heavy modeling.
                 </p>
             </section>
 
@@ -50,7 +53,12 @@
             </figure>
 
             <section>
-                <h2>Quick win: NDVI on Landsat 8</h2>
+                <h2>Quick win: our first NDVI map</h2>
+                <p>
+                    Let's start with the classic. NDVI (Normalized Difference Vegetation Index) is the most widely
+                    used spectral index in remote sensing. We will compute it on a Landsat 8 image and see vegetation
+                    light up in green.
+                </p>
 <pre><code>// NDVI example (Landsat 8 Surface Reflectance)
 var img = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623')
   .multiply(0.0000275).add(-0.2); // apply scale/offset
@@ -60,7 +68,8 @@ Map.addLayer(ndvi, {min: 0, max: 0.8, palette: ['brown', 'yellow', 'green']}, 'N
 print('NDVI min/max', ndvi.reduceRegion({
   reducer: ee.Reducer.minMax(),
   geometry: img.geometry(),
-  scale: 30
+  scale: 30,
+  maxPixels: 1e9
 }));</code></pre>
                 <div class="expected-output">
                     <h4>What you should see</h4>
@@ -98,18 +107,30 @@ Map.addLayer(ndwi, {min: -0.5, max: 0.8, palette: ['brown','beige','cyan']}, 'ND
             </section>
 
             <section>
-                <h2>Advanced Indices: EVI, SAVI, and NDRE</h2>
+                <h2>Beyond NDVI: EVI, SAVI, and NDRE</h2>
                 <p>
-                    Some indices require more than two bands or include correction factors.
-                    These cannot use <code>.normalizedDifference()</code> and instead use <code>.expression()</code>.
+                    NDVI is great, but it has limits. In dense tropical forests, NDVI maxes out near 0.9 and
+                    stops distinguishing between "very green" and "extremely green." In arid landscapes, bare
+                    soil confuses the signal. And for precision agriculture, we sometimes need finer sensitivity
+                    to chlorophyll than NDVI can offer.
+                </p>
+                <p>
+                    That is where these three advanced indices come in. Each one was designed to solve a specific
+                    weakness of NDVI. Let's meet them.
                 </p>
 
                 <h3>EVI (Enhanced Vegetation Index)</h3>
                 <p>
-                    EVI reduces atmospheric and soil background noise that can affect NDVI.
-                    It is preferred for dense vegetation where NDVI saturates, and it is widely used in agricultural monitoring.
+                    Think of EVI as "NDVI with a correction filter." It reduces atmospheric haze and soil
+                    background noise that can throw off NDVI readings. Most importantly, it does not saturate
+                    in dense vegetation, which makes it the go-to index for agricultural monitoring and tropical
+                    forests.
                 </p>
                 <p><strong>Formula:</strong> EVI = 2.5 &times; (NIR - RED) / (NIR + 6&times;RED - 7.5&times;BLUE + 1)</p>
+                <p>
+                    Notice the Blue band in the formula. That is the atmospheric correction term. It is also why
+                    EVI needs <code>.expression()</code> instead of <code>.normalizedDifference()</code>.
+                </p>
 <pre><code>// EVI on Sentinel-2
 var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
   .filterDate('2023-06-01', '2023-06-30')
@@ -128,14 +149,32 @@ var evi = s2.expression(
 ).rename('EVI');
 
 Map.addLayer(evi, {min: 0, max: 0.8, palette: ['brown','yellow','darkgreen']}, 'EVI');</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        Over Iowa cropland, healthy summer crops should show EVI values of 0.4 to 0.8.
+                        Bare soil and roads will be near 0. Compare this with NDVI on the same image:
+                        where NDVI plateaus at 0.85+, EVI still shows variation between 0.6 and 0.8.
+                        That extra detail matters for crop monitoring.
+                    </p>
+                </div>
 
                 <h3>SAVI (Soil-Adjusted Vegetation Index)</h3>
                 <p>
-                    SAVI adds a soil brightness correction factor (L) to reduce the influence of bare soil on vegetation estimates.
-                    It is especially useful in arid and semi-arid regions where vegetation is sparse.
+                    SAVI was designed for the places where bare soil shows through the vegetation canopy.
+                    Think of arid grasslands in West Texas, sparse shrubland in the Sahel, or a newly planted
+                    crop field. In these settings, soil reflectance contaminates NDVI readings, making sparse
+                    vegetation look even sparser than it is.
+                </p>
+                <p>
+                    SAVI adds a soil brightness correction factor (L) to compensate. The standard value is
+                    L = 0.5, which works well for most intermediate vegetation cover.
                 </p>
                 <p><strong>Formula:</strong> SAVI = ((NIR - RED) / (NIR + RED + L)) &times; (1 + L), where L = 0.5</p>
 <pre><code>// SAVI on Landsat 8
+var img = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623')
+  .multiply(0.0000275).add(-0.2);
+
 var savi = img.expression(
   '((NIR - RED) / (NIR + RED + 0.5)) * 1.5',
   {
@@ -145,44 +184,83 @@ var savi = img.expression(
 ).rename('SAVI');
 
 Map.addLayer(savi, {min: 0, max: 0.7, palette: ['brown','yellow','green']}, 'SAVI');</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        SAVI values typically range from 0 to about 0.7. In areas with dense vegetation,
+                        SAVI and NDVI look almost identical. The real difference shows up in sparse
+                        vegetation areas: SAVI will be slightly higher than NDVI because it compensates
+                        for the soil signal that was dragging NDVI down.
+                    </p>
+                </div>
 
                 <h3>NDRE (Normalized Difference Red Edge)</h3>
                 <p>
-                    NDRE uses Sentinel-2's red edge band (B5, 705 nm) instead of the visible red band.
-                    It is more sensitive to chlorophyll content than NDVI, making it valuable for precision agriculture and detecting subtle vegetation stress.
+                    NDRE is the precision tool. It uses Sentinel-2's red edge band (B5, centered at 705 nm)
+                    instead of the visible red band. Why does that matter? The red edge is more sensitive to
+                    chlorophyll content than the red band. This means NDRE can detect subtle vegetation stress
+                    that NDVI misses entirely.
+                </p>
+                <p>
+                    Think of it this way: NDVI tells us "is there vegetation?" while NDRE tells us
+                    "how healthy is that vegetation?" Precision agriculture relies heavily on NDRE for exactly
+                    this reason.
                 </p>
                 <p><strong>Formula:</strong> NDRE = (NIR - Red Edge) / (NIR + Red Edge)</p>
+                <p>
+                    <strong>Important:</strong> NDRE only works with Sentinel-2 (and a few other sensors
+                    that have a red edge band). Landsat does not have a red edge band, so NDRE cannot be
+                    computed from Landsat imagery.
+                </p>
 <pre><code>// NDRE on Sentinel-2 (only works with Sentinel-2, not Landsat)
 var ndre = s2.normalizedDifference(['B8', 'B5']).rename('NDRE');
 Map.addLayer(ndre, {min: 0, max: 0.6, palette: ['red','yellow','green']}, 'NDRE');</code></pre>
                 <div class="expected-output">
                     <h4>What you should see</h4>
-                    <p>NDRE values are similar to NDVI but with finer sensitivity to vegetation health. Healthy crops show high NDRE; stressed vegetation shows lower values even when NDVI still appears normal.</p>
+                    <p>
+                        NDRE values are similar to NDVI but with finer sensitivity to vegetation health.
+                        Healthy crops show NDRE of 0.3 to 0.6. Stressed vegetation shows lower values
+                        even when NDVI still appears normal. This early warning capability is what makes
+                        NDRE so valuable for farm management.
+                    </p>
                 </div>
+
+                <h3>When to use which?</h3>
+                <p>Here is a quick mental model:</p>
+                <ul>
+                    <li><strong>NDVI:</strong> The everyday workhorse. Use it when vegetation cover is moderate and soil is not a concern.</li>
+                    <li><strong>EVI:</strong> The upgraded model. Use it for dense forests, cropland, or anywhere NDVI saturates above 0.85.</li>
+                    <li><strong>SAVI:</strong> The desert specialist. Use it when more than 30% of the ground is bare soil.</li>
+                    <li><strong>NDRE:</strong> The precision instrument. Use it for crop stress detection and precision agriculture (Sentinel-2 only).</li>
+                </ul>
             </section>
 
             <section>
                 <h2>Writing Custom Index Functions</h2>
                 <p>
-                    For indices that go beyond a simple normalized difference, use <code>.expression()</code>.
-                    This lets you write any formula using band math.
+                    Once we understand the formulas, the next step is to wrap them in reusable functions.
+                    This way, we can <code>.map()</code> our index over an entire collection with a single line
+                    of code. Let's see how.
                 </p>
-<pre><code>// Reusable function to compute any custom index
+<pre><code>// Reusable function to compute EVI for any Sentinel-2 image
 function computeEVI(image) {
-  return image.expression(
+  var scaled = image.divide(10000); // scale to reflectance first
+  return scaled.expression(
     '2.5 * ((NIR - RED) / (NIR + 6 * RED - 7.5 * BLUE + 1))',
     {
-      NIR: image.select('B8'),
-      RED: image.select('B4'),
-      BLUE: image.select('B2')
+      NIR: scaled.select('B8'),
+      RED: scaled.select('B4'),
+      BLUE: scaled.select('B2')
     }
-  ).rename('EVI');
+  ).rename('EVI')
+   .copyProperties(image, ['system:time_start']);
 }
 
 // Apply to a collection
 var eviCollection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
   .filterDate('2023-01-01', '2023-12-31')
   .filterBounds(ee.Geometry.Point([-82.3, 29.6]))
+  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20))
   .map(computeEVI);
 
 print('EVI collection size:', eviCollection.size());</code></pre>

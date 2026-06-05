@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -189,6 +189,7 @@ var groupReduce = function(dataImg, nodeIds, reducer) {
         .reduceRegion({
             reducer: groupReducer,
             scale: 30,
+            maxPixels: 1e9
         }).get('groups');
     var statsOut = ee.List(statsList).map(function(dict) {
         return ee.Feature(null, dict);
