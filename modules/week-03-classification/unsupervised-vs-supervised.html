@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -93,7 +93,7 @@
                 <div class="card">
                     <h3>The Concept</h3>
                     <p>Unsupervised classification groups pixels into <strong>clusters</strong> based on their spectral
-                        similarity—without any prior knowledge of what's on the ground. Think of it as asking the
+                        similarity,without any prior knowledge of what's on the ground. Think of it as asking the
                         computer:
                         "Find me pixels that look similar to each other."</p>
                 </div>
@@ -150,7 +150,7 @@
 
                 <div class="card">
                     <h3>The Concept</h3>
-                    <p>Supervised classification uses <strong>training data</strong>—samples where you tell the computer
+                    <p>Supervised classification uses <strong>training data</strong>,samples where you tell the computer
                         "this is forest, this is water, this is urban." The algorithm learns the spectral patterns of
                         each class and then applies those patterns to classify the entire image.</p>
                 </div>
@@ -206,8 +206,8 @@
                 <div class="card">
                     <h3>The Concept</h3>
                     <p>Unlike pixel-based approaches, OBIA first groups pixels into <strong>meaningful objects</strong>
-                        (segments) based on spectral similarity AND spatial properties. These objects—rather than
-                        individual pixels—are then classified.</p>
+                        (segments) based on spectral similarity AND spatial properties. These objects,rather than
+                        individual pixels,are then classified.</p>
                 </div>
 
                 <figure>
@@ -230,24 +230,24 @@
                 <p>Objects contain more information than individual pixels:</p>
 
                 <div class="card">
-                    <h4>🔷 Shape</h4>
+                    <h4>?? Shape</h4>
                     <p>Buildings are rectangular; lakes are irregular. Shape statistics like "rectangular fit"
                         can distinguish man-made structures.</p>
                 </div>
 
                 <div class="card">
-                    <h4>📐 Texture</h4>
+                    <h4>?? Texture</h4>
                     <p>Water is spectrally homogeneous (smooth). Forests have lots of variation (rough).
                         Texture helps distinguish classes with similar colors.</p>
                 </div>
 
                 <div class="card">
-                    <h4>🎨 Spectral</h4>
-                    <p>Mean values of spectral bands within each object—similar to pixel-based approaches.</p>
+                    <h4>?? Spectral</h4>
+                    <p>Mean values of spectral bands within each object,similar to pixel-based approaches.</p>
                 </div>
 
                 <div class="card">
-                    <h4>📍 Context</h4>
+                    <h4>?? Context</h4>
                     <p>What's next to the object? A small blue object surrounded by buildings might be a pool;
                         surrounded by forest, it might be a pond.</p>
                 </div>
@@ -311,10 +311,10 @@
                 <div class="pro-tips">
                     <h3>Decision Flowchart</h3>
                     <ul>
-                        <li><strong>New to the area?</strong> → Start with unsupervised to explore</li>
-                        <li><strong>Have training data and know your classes?</strong> → Use supervised</li>
-                        <li><strong>High-resolution imagery with complex features?</strong> → Consider OBIA</li>
-                        <li><strong>Large area, moderate resolution, in GEE?</strong> → Supervised (Random Forest)</li>
+                        <li><strong>New to the area?</strong> ? Start with unsupervised to explore</li>
+                        <li><strong>Have training data and know your classes?</strong> ? Use supervised</li>
+                        <li><strong>High-resolution imagery with complex features?</strong> ? Consider OBIA</li>
+                        <li><strong>Large area, moderate resolution, in GEE?</strong> ? Supervised (Random Forest)</li>
                     </ul>
                 </div>
             </section>
@@ -337,7 +337,7 @@
                     <li><strong>Unsupervised:</strong> Groups pixels by similarity, YOU interpret the clusters</li>
                     <li><strong>Supervised:</strong> YOU provide training data, computer learns patterns</li>
                     <li><strong>Object-Based:</strong> Groups pixels into objects first, then classifies</li>
-                    <li>No single approach is "best"—choose based on your data, goals, and resources</li>
+                    <li>No single approach is "best",choose based on your data, goals, and resources</li>
                     <li>Supervised classification in Earth Engine (Random Forest) is powerful and accessible</li>
                 </ul>
             </section>
@@ -349,13 +349,21 @@
                             target="_blank">
                             GIS Geography - Image Classification Techniques</a></em></p>
             </section>
+        
+            <section class="builds-on">
+                <h3>Going Deeper: EEFA Book</h3>
+                <p>This module gives you the foundation. To explore further, see Chapter F5.0 through F5.3 (Classification Series) in the
+                    <a href="https://www.eefabook.org/" target="_blank"><em>Cloud-Based Remote Sensing with Google Earth Engine</em></a>
+                    (EEFA Book).
+                </p>
+            </section>
         </main>
 
         <footer>
-            <p><a href="unsupervised-classification.html">← Previous: Unsupervised Classification</a> |
-                <a href="history-of-classification.html">Next: History of Classification →</a>
+            <p><a href="unsupervised-classification.html">? Previous: Unsupervised Classification</a> |
+                <a href="history-of-classification.html">Next: History of Classification ?</a>
             </p>
-            <p><a href="../../index.html">← Back to Course Home</a></p>
+            <p><a href="../../index.html">? Back to Course Home</a></p>
             <p><strong>Remote Sensing with Google Earth Engine</strong></p>
         </footer>
     </div>

@@ -19,9 +19,10 @@
 
         <main class="lab-content">
             <p>
-                The previous module showed you how to map water from a single satellite image. But what if you want to
-                know how water has changed over the past 40 years? The JRC Global Surface Water dataset, produced by the
-                European Commission's Joint Research Centre, answers exactly that question using the entire Landsat archive.
+                In the previous module, we mapped water from a single satellite image. But what if we want to know
+                how water has changed over the past 40 years? That's a much bigger question. The JRC Global Surface
+                Water dataset, produced by the European Commission's Joint Research Centre, answers exactly that
+                question using the entire Landsat archive. Let's explore it.
             </p>
 
             <section class="learning-objectives">
@@ -37,10 +38,13 @@
             <section class="why-it-matters">
                 <h3>Why it matters</h3>
                 <p>
-                    Some of the most dramatic environmental changes on Earth involve water. The Aral Sea has lost over
-                    90% of its volume. Lake Chad has shrunk by 90% since the 1960s. Meanwhile, new reservoirs and
-                    glacial lakes are appearing. The JRC dataset lets you quantify these changes at 30-meter resolution,
-                    globally, using a consistent methodology.
+                    Some of the most dramatic environmental changes on Earth involve water. The Aral Sea has lost
+                    over 90% of its volume. Lake Chad has shrunk by 90% since the 1960s. Meanwhile, new reservoirs
+                    and glacial lakes are appearing in places they never existed before.
+                </p>
+                <p>
+                    This is a powerful insight: the JRC dataset lets us quantify all of these changes at 30-meter
+                    resolution, globally, using a consistent methodology. No fieldwork required.
                 </p>
             </section>
 
@@ -70,11 +74,11 @@
 
             <!-- Quick Win -->
             <section>
-                <h2>Quick Win: The Aral Sea's Disappearance</h2>
+                <h2>Quick Win: Watching the Aral Sea Disappear</h2>
                 <p>
-                    The Aral Sea, once the world's fourth-largest lake, has experienced one of the most dramatic
-                    water body changes in modern history. Let's visualize its water occurrence to see the full
-                    extent of this environmental catastrophe.
+                    The Aral Sea was once the world's fourth-largest lake. Today, it's a shadow of itself, one of
+                    the most dramatic environmental catastrophes in modern history. Let's visualize its water
+                    occurrence to see the full scale of what happened.
                 </p>
 <pre><code>// Visualize water occurrence for the Aral Sea
 var aral = ee.Geometry.Point([59.0, 44.5]);
@@ -97,27 +101,27 @@ print('JRC GSW band names:', gsw.bandNames());</code></pre>
                 <div class="expected-output">
                     <h4>What you should see</h4>
                     <p>
-                        A striking map of the Aral Sea showing the original lake outline in light red (water present
-                        only a small percentage of the time) with a tiny remnant of deep blue in the north (areas
-                        still covered by water most of the time). The contrast between the vast historical extent
-                        and the tiny remaining water body is immediately visible.
+                        A striking map of the Aral Sea. The original lake outline shows up in light red (water was
+                        only present a small percentage of the time), with a tiny remnant of deep blue in the north
+                        (areas still covered by water most of the time). The contrast between the vast historical
+                        footprint and the tiny remaining water body hits you immediately.
                     </p>
                 </div>
             </section>
 
             <!-- Section 1: The JRC GSW Dataset -->
             <section>
-                <h2>The JRC Global Surface Water Dataset</h2>
+                <h2>What's Inside the JRC Dataset?</h2>
                 <p>
-                    The JRC GSW dataset was created by analyzing over 4.7 million Landsat satellite images from
-                    1984 to the present. For every 30-meter pixel on Earth, the dataset records when water was
-                    present and when it was absent. This produces several derived layers, each capturing a different
-                    aspect of water dynamics.
+                    Here's the cool part: the JRC team analyzed over 4.7 million Landsat satellite images spanning
+                    1984 to the present. For every 30-meter pixel on Earth, they recorded when water was present
+                    and when it was absent. From that massive effort, they produced several derived layers, each
+                    capturing a different facet of water dynamics.
                 </p>
                 <p>
-                    The dataset is stored as a single <code>ee.Image</code> with multiple bands. You do not need
-                    to filter dates or create composites because the JRC team has already done that work across the
-                    entire Landsat archive.
+                    The dataset is stored as a single <code>ee.Image</code> with multiple bands. We don't need
+                    to filter dates or create composites because the JRC team already did that heavy lifting across
+                    the entire Landsat archive. Nice, right?
                 </p>
 
 <pre><code>// Load the dataset and explore its bands
@@ -141,12 +145,15 @@ print('Available bands:', gsw.bandNames());
 
             <!-- Section 2: Water Occurrence -->
             <section>
-                <h2>Water Occurrence</h2>
+                <h2>Reading the Occurrence Layer</h2>
                 <p>
-                    The occurrence band is the most intuitive layer. It shows the percentage of valid observations
-                    (cloud-free Landsat scenes) in which a pixel was classified as water. Permanent lakes and rivers
-                    will have values close to 100%. Seasonally flooded areas will have intermediate values.
-                    Areas that were once water but have since dried up will have low values.
+                    The occurrence band is the most intuitive layer. Think of it like a report card for each pixel:
+                    "Out of all the cloud-free Landsat scenes we looked at, what percentage of the time was this
+                    pixel covered by water?"
+                </p>
+                <p>
+                    Permanent lakes and rivers will score close to 100%. Seasonally flooded areas will have
+                    intermediate values. Areas that were once water but have since dried up? Low values.
                 </p>
 
 <pre><code>// Map occurrence with descriptive classes
@@ -178,11 +185,12 @@ Map.addLayer(ephemeral.selfMask(), {palette: ['FFAAAA']}, 'Ephemeral Water');</c
 
             <!-- Section 3: Water Transitions -->
             <section>
-                <h2>Water Transitions</h2>
+                <h2>Where Has Water Come and Gone?</h2>
                 <p>
-                    The transition band classifies each pixel into categories based on how its water status changed
-                    between the first and last observation periods. This is the fastest way to identify where water
-                    has been permanently lost, where new water has appeared, and where seasonal patterns have shifted.
+                    The transition band is like a before-and-after snapshot for every pixel. It classifies each
+                    pixel based on how its water status changed between the first and last observation periods.
+                    This is the fastest way to see where water has been permanently lost, where new water has
+                    appeared, and where seasonal patterns have shifted.
                 </p>
 
 <pre><code>// Visualize water transitions
@@ -207,19 +215,19 @@ Map.addLayer(transition, {
   ]
 }, 'Water Transitions');</code></pre>
 
-                <p>Key transition classes to look for:</p>
+                <p>Here are the key transition classes to watch for:</p>
                 <ul>
-                    <li><strong>Permanent (1):</strong> Water that has been present throughout the entire period.</li>
-                    <li><strong>New permanent (2):</strong> Areas that became permanently covered by water (e.g., new reservoirs).</li>
-                    <li><strong>Lost permanent (3):</strong> Areas that were once permanent water but have dried up.</li>
+                    <li><strong>Permanent (1):</strong> Water that has been there throughout the entire period. Steady and reliable.</li>
+                    <li><strong>New permanent (2):</strong> Areas that became permanently covered by water (think: new reservoirs).</li>
+                    <li><strong>Lost permanent (3):</strong> Areas that were once permanent water but have dried up. This is the Aral Sea story.</li>
                     <li><strong>Seasonal (4):</strong> Areas that consistently show seasonal water patterns.</li>
-                    <li><strong>Permanent to seasonal (8):</strong> Previously permanent water that now appears only part of the year.</li>
+                    <li><strong>Permanent to seasonal (8):</strong> Previously permanent water that now appears only part of the year. A warning sign.</li>
                 </ul>
 
                 <div class="common-mistakes">
-                    <h3>Common mistakes</h3>
+                    <h3>Watch out for this</h3>
                     <ul>
-                        <li>The transition values are categorical codes, not continuous data. Do not compute averages or
+                        <li>The transition values are categorical codes, not continuous data. Don't compute averages or
                             apply <code>.gt()</code> on them.</li>
                         <li>Use <code>.eq()</code> to select specific transition classes (e.g., <code>transition.eq(3)</code>
                             for lost permanent water).</li>
@@ -229,11 +237,11 @@ Map.addLayer(transition, {
 
             <!-- Section 4: Seasonal Water -->
             <section>
-                <h2>Seasonal Water</h2>
+                <h2>The Rhythm of Water: Seasonality</h2>
                 <p>
-                    The seasonality band records the number of months per year that a pixel is typically covered by water.
-                    A value of 12 indicates year-round water; a value of 3 means the pixel is wet for roughly one quarter
-                    of the year.
+                    The seasonality band tells us how many months per year a pixel is typically covered by water.
+                    A value of 12 means year-round water. A value of 3 means the pixel is wet for roughly one
+                    quarter of the year.
                 </p>
 
 <pre><code>// Visualize water seasonality
@@ -253,18 +261,20 @@ print('Seasonality range:', seasonality.reduceRegion({
 }));</code></pre>
 
                 <p>
-                    Seasonality maps are particularly useful for understanding monsoon flooding, snowmelt cycles,
-                    and irrigation patterns. In arid regions, you will see reservoirs with high seasonality values
+                    Seasonality maps are especially useful for understanding monsoon flooding, snowmelt cycles,
+                    and irrigation patterns. In arid regions, you'll see reservoirs with high seasonality values
                     (water year-round) surrounded by areas with low values (wet only after seasonal rains).
+                    It's like reading the heartbeat of a landscape.
                 </p>
             </section>
 
             <!-- Section 5: Tracking Change -->
             <section>
-                <h2>Tracking Change: Historical vs. Current Water Extent</h2>
+                <h2>Then vs. Now: Tracking Water Loss</h2>
                 <p>
-                    The <code>max_extent</code> band records every pixel that was ever detected as water. By comparing
-                    this historical maximum with a current water mask, you can measure how much water has been lost.
+                    Here's where it gets interesting. The <code>max_extent</code> band records every pixel that was
+                    ever detected as water. By comparing this historical maximum with a current water mask, we can
+                    measure exactly how much water has been lost. Let's do this for the Aral Sea.
                 </p>
 
 <pre><code>// Compare historical maximum with current water
@@ -292,8 +302,8 @@ print('Water loss area (km²):', ee.Number(lostArea.get('max_extent')).divide(1e
                     <p>
                         Three overlapping layers around the Aral Sea. The pale blue historical extent shows the
                         original lake boundary. The dark blue current water shows the small remaining lake.
-                        The red water loss layer fills the vast gap between them, illustrating the scale of
-                        the Aral Sea's retreat.
+                        The red water loss layer fills the vast gap between them. The scale of the Aral Sea's
+                        retreat is immediately, viscerally clear.
                     </p>
                 </div>
             </section>
@@ -312,7 +322,7 @@ print('Water loss area (km²):', ee.Number(lostArea.get('max_extent')).divide(1e
             <!-- EEFA Bridge -->
             <section class="builds-on">
                 <h3>Going deeper</h3>
-                <p>This module introduces the JRC GSW dataset at a foundational level. For advanced techniques, see:</p>
+                <p>We've explored the JRC GSW dataset at a foundational level here. For advanced techniques, check out:</p>
                 <ul>
                     <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter A2.3: Surface Water Mapping</li>
                     <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter A2.5: Water Balance and Drought</li>

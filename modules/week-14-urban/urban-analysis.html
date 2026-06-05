@@ -17,11 +17,11 @@
     </nav>
 
     <header class="lab-header">
-      <h1>Urban Analysis with Remote Sensing</h1>
+      <h1>What Cities Look Like from Space</h1>
     </header>
 
     <main class="lab-content">
-      <p>Cities cover less than 3% of Earth's land surface, yet they house over half the global population and consume 75% of the world's energy. In this module, you will learn to map built-up areas, visualize urban footprints with nighttime lights, and measure how cities expand over time using spectral indices and satellite imagery.</p>
+      <p>Here's a wild fact: cities cover less than 3% of Earth's land, yet more than half of all humans live in them, and they gobble up 75% of the world's energy. In this module, we'll learn to spot built-up areas from orbit, light up urban footprints with nighttime imagery, and measure how cities have been sprawling over time.</p>
 
       <section class="learning-objectives">
         <h3>Learning objectives</h3>
@@ -34,8 +34,9 @@
       </section>
 
       <section class="why-it-matters">
-        <h3>Why it matters</h3>
-        <p>The United Nations projects that 68% of the world's population will live in cities by 2050. This rapid urbanization drives <strong>habitat loss</strong>, intensifies <strong>urban heat islands</strong>, strains water resources, and reshapes regional ecosystems. Planners, governments, and researchers need accurate, up-to-date maps of urban extent to manage growth sustainably. Remote sensing provides these maps at scales from individual neighborhoods to entire continents, with temporal records stretching back decades.</p>
+        <h3>Why should we care?</h3>
+        <p>The United Nations projects that 68% of the world's population will live in cities by 2050. That's a lot of concrete. All that rapid urbanization drives <strong>habitat loss</strong>, cranks up <strong>urban heat islands</strong>, strains water resources, and reshapes entire ecosystems.</p>
+        <p>Planners, governments, and researchers need accurate, up-to-date maps of where cities are and where they're headed. Remote sensing gives us exactly that, at scales from individual neighborhoods to entire continents, with records stretching back decades.</p>
       </section>
 
       <section class="vocabulary">
@@ -60,8 +61,8 @@
 
       <!-- Quick Win -->
       <section>
-        <h2>Quick Win: Map Built-up Areas in Houston</h2>
-        <p>This script calculates NDBI from Landsat 8 and maps the built-up areas of Houston, Texas. Bright pixels indicate impervious surfaces such as roads, buildings, and parking lots.</p>
+        <h2>Your first urban map in 60 seconds</h2>
+        <p>Let's jump right in. This script calculates NDBI from Landsat 8 and maps Houston's built-up areas. Bright pixels? Those are roads, buildings, and parking lots.</p>
 <pre><code>// Define Houston area
 var houston = ee.Geometry.Point([-95.37, 29.76]);
 
@@ -84,30 +85,30 @@ Map.centerObject(houston, 11);
 print('NDBI calculated for Houston');</code></pre>
         <div class="expected-output">
           <h4>What you should see</h4>
-          <p>A map centered on Houston where red and warm tones highlight built-up areas (downtown, highways, commercial zones), white represents mixed land cover, and blue tones indicate vegetation and water. The urban core and major transportation corridors stand out clearly.</p>
+          <p>A map centered on Houston where red and warm tones light up built-up areas (downtown, highways, commercial zones). White shows mixed land cover, and blue tones mark vegetation and water. The urban core and major transportation corridors pop right out. Pretty cool, right?</p>
         </div>
       </section>
 
       <!-- Section 1 -->
       <section>
-        <h2>Remote Sensing of Cities</h2>
-        <p>Cities present a unique challenge for remote sensing. Unlike forests or cropland, urban areas contain a complex mosaic of materials: concrete, asphalt, metal roofs, glass, vegetation patches, and water bodies, all within a few hundred meters of each other.</p>
-        <p>Several approaches help us map this complexity:</p>
+        <h2>Why are cities tricky to map?</h2>
+        <p>Cities are a unique challenge for remote sensing. Unlike a nice uniform forest or a field of corn, urban areas are a wild mosaic of materials: concrete, asphalt, metal roofs, glass, patches of trees, and water bodies, all packed within a few hundred meters of each other.</p>
+        <p>So how do we make sense of all that? We have several tools in our toolkit:</p>
         <ul>
           <li><strong>Spectral indices:</strong> NDBI highlights impervious surfaces; NDVI reveals urban vegetation; NDWI identifies water bodies. Used together, they separate the major urban land cover types.</li>
-          <li><strong>Nighttime lights:</strong> Artificial light emissions from cities provide an independent measure of urbanization that correlates with population density and economic output.</li>
-          <li><strong>Multi-temporal analysis:</strong> Comparing images from different years reveals where cities are growing, which neighborhoods are densifying, and where green space is being lost.</li>
-          <li><strong>Global datasets:</strong> Pre-built products like the JRC Global Human Settlement Layer provide ready-to-use urban maps spanning decades.</li>
+          <li><strong>Nighttime lights:</strong> Artificial light emissions from cities give us an independent measure of urbanization that correlates with population density and economic output.</li>
+          <li><strong>Multi-temporal analysis:</strong> Comparing images from different years reveals where cities are growing, which neighborhoods are densifying, and where green space is disappearing.</li>
+          <li><strong>Global datasets:</strong> Pre-built products like the JRC Global Human Settlement Layer give us ready-to-use urban maps spanning decades.</li>
         </ul>
       </section>
 
       <!-- Section 2 -->
       <section>
-        <h2>NDBI for Built-up Areas</h2>
-        <p>The Normalized Difference Built-up Index exploits the fact that built-up surfaces (concrete, asphalt) reflect more SWIR energy relative to NIR compared to vegetation. The formula is:</p>
+        <h2>How NDBI spots concrete from space</h2>
+        <p>The Normalized Difference Built-up Index takes advantage of a neat spectral trick: built-up surfaces (concrete, asphalt) reflect more SWIR energy relative to NIR compared to vegetation. The formula is:</p>
 <pre><code>NDBI = (SWIR1 - NIR) / (SWIR1 + NIR)
 // For Landsat 8: SWIR1 = SR_B6, NIR = SR_B5</code></pre>
-        <p>NDBI values range from -1 to +1. Built-up areas typically produce positive values (0.0 to 0.3), while dense vegetation produces negative values. By applying a threshold, you can create a binary urban mask.</p>
+        <p>NDBI values range from -1 to +1. Built-up areas typically produce positive values (0.0 to 0.3), while dense vegetation produces negative values. By applying a threshold, we can create a binary urban mask. Let's see it in action:</p>
 <pre><code>// Create a binary urban mask from NDBI
 var houston = ee.Geometry.Point([-95.37, 29.76]);
 
@@ -125,13 +126,13 @@ var urbanMask = ndbi.gt(0).selfMask();
 
 Map.addLayer(urbanMask, {palette: ['red']}, 'Built-up Areas');
 Map.centerObject(houston, 11);</code></pre>
-        <p>The threshold of 0 works well as a starting point, but you may need to adjust it for your study area. Arid regions with bare soil can produce false positives because dry soil also reflects strongly in SWIR.</p>
+        <p>A threshold of 0 is a solid starting point, but you may need to adjust it for your study area. Here's something to watch out for: arid regions with bare soil can produce false positives because dry soil also reflects strongly in SWIR. Don't worry, we'll fix that in the next section.</p>
       </section>
 
       <!-- Section 3 -->
       <section>
-        <h2>Nighttime Lights</h2>
-        <p>The VIIRS Day/Night Band (DNB) sensor captures visible light emitted at night from street lights, buildings, vehicles, and industrial facilities. This provides a fundamentally different view of urbanization compared to daytime spectral indices.</p>
+        <h2>Cities that glow in the dark</h2>
+        <p>Here's where it gets really interesting. The VIIRS Day/Night Band sensor captures visible light emitted at night from street lights, buildings, vehicles, and factories. This gives us a completely different view of urbanization compared to daytime spectral indices.</p>
 <pre><code>// Load VIIRS monthly nighttime lights
 var ntl = ee.ImageCollection('NOAA/VIIRS/DNB/MONTHLY_V1/VCMSLCFG')
   .filterDate('2023-06-01', '2023-06-30')
@@ -144,22 +145,22 @@ Map.addLayer(ntl, {
   palette: ['black', 'blue', 'purple', 'orange', 'yellow', 'white']
 }, 'Nighttime Lights - June 2023');
 Map.setCenter(-95.37, 29.76, 8);</code></pre>
-        <p>Nighttime lights are useful for several urban analyses:</p>
+        <p>Nighttime lights open the door to some fascinating urban analyses:</p>
         <ul>
-          <li><strong>Urban footprint delineation:</strong> Light emissions define the functional extent of a city, including suburban areas with sparse daytime signatures.</li>
-          <li><strong>Economic activity estimation:</strong> Nighttime light intensity correlates with GDP in regions where economic statistics are unreliable.</li>
+          <li><strong>Urban footprint delineation:</strong> Light emissions define the functional extent of a city, including suburban areas that barely show up in daytime imagery.</li>
+          <li><strong>Economic activity estimation:</strong> Nighttime light intensity correlates with GDP, which is especially powerful in regions where economic statistics are unreliable.</li>
           <li><strong>Disaster assessment:</strong> Comparing pre-event and post-event nighttime lights reveals the extent of power outages after hurricanes, earthquakes, or conflict.</li>
         </ul>
         <div class="expected-output">
           <h4>What you should see</h4>
-          <p>A dark background with bright clusters showing populated areas. Houston's urban core appears white or yellow, surrounded by a gradient of orange and purple representing suburban and exurban areas. Highways connecting cities are visible as thin bright lines.</p>
+          <p>A dark background with bright clusters showing populated areas. Houston's urban core appears white or yellow, surrounded by a gradient of orange and purple representing suburban and exurban areas. Look closely and you can even see highways connecting cities as thin bright lines.</p>
         </div>
       </section>
 
       <!-- Section 4 -->
       <section>
-        <h2>Combining Indices</h2>
-        <p>No single index captures the full complexity of urban land cover. By combining NDVI, NDBI, and NDWI, you can create a simple land use classification that separates vegetation, built-up areas, and water.</p>
+        <h2>Three indices are better than one</h2>
+        <p>No single index captures the full complexity of urban land cover. Here's the cool part: by combining NDVI, NDBI, and NDWI, we can build a simple land use classification that separates vegetation, built-up areas, and water.</p>
 <pre><code>// Combined urban land use classification
 var houston = ee.Geometry.Point([-95.37, 29.76]);
 
@@ -193,13 +194,13 @@ Map.addLayer(classification, {
   palette: ['blue', 'green', 'red']
 }, 'Land Use Classification');
 Map.centerObject(houston, 11);</code></pre>
-        <p>This threshold-based approach is fast and interpretable. For more nuanced classification, consider supervised classification methods (covered in earlier modules) that can distinguish commercial, residential, and industrial land uses.</p>
+        <p>This threshold-based approach is fast and interpretable. Think of it like sorting laundry: each index acts as a filter that catches a different material. For more nuanced classification, consider supervised classification methods (covered in earlier modules) that can distinguish commercial, residential, and industrial land uses.</p>
       </section>
 
       <!-- Section 5 -->
       <section>
-        <h2>Urban Expansion</h2>
-        <p>One of the most powerful applications of urban remote sensing is measuring how cities grow over time. By comparing NDBI or nighttime lights between two dates, you can map where new development has occurred.</p>
+        <h2>Watching cities grow over time</h2>
+        <p>This is a powerful insight: one of the most compelling applications of urban remote sensing is measuring how cities expand. By comparing NDBI or nighttime lights between two dates, we can map exactly where new development has popped up.</p>
 <pre><code>// Compare nighttime lights: 2014 vs 2023
 var ntl2014 = ee.ImageCollection('NOAA/VIIRS/DNB/MONTHLY_V1/VCMSLCFG')
   .filterDate('2014-06-01', '2014-06-30')
@@ -232,7 +233,7 @@ var urbanArea = urban2023.multiply(ee.Image.pixelArea()).reduceRegion({
 print('Urban area (sq m):', urbanArea);</code></pre>
         <div class="expected-output">
           <h4>What you should see</h4>
-          <p>A change map where red and orange areas indicate locations that became brighter between 2014 and 2023 (new development). In the Houston metro area, you will see strong growth signals along the Katy Freeway corridor, in Sugar Land, and in The Woodlands. Blue areas (dimming) are rare in growing cities.</p>
+          <p>A change map where red and orange areas mark locations that became brighter between 2014 and 2023 (new development). In the Houston metro area, look for strong growth signals along the Katy Freeway corridor, in Sugar Land, and in The Woodlands. Blue areas (dimming) are rare in growing cities.</p>
         </div>
       </section>
 
@@ -242,13 +243,13 @@ print('Urban area (sq m):', urbanArea);</code></pre>
           <li><strong>NDBI limitations:</strong> Bare soil and dry grassland can produce positive NDBI values similar to built-up areas. Always combine NDBI with NDVI to separate urban from barren land.</li>
           <li><strong>Nighttime lights for comparison:</strong> When comparing cities across countries, normalize nighttime light values by area to account for differences in city size.</li>
           <li><strong>JRC GHSL:</strong> For peer-reviewed built-up area maps, use <code>ee.ImageCollection('JRC/GHSL/P2023A/GHS_BUILT_S')</code>. This product provides multi-epoch urban extent from 1975 to 2030.</li>
-          <li><strong>Seasonal effects:</strong> Use summer imagery for NDBI to minimize confusion with deciduous forests that lose leaves in winter and may appear as "built-up" in spectral indices.</li>
+          <li><strong>Seasonal effects:</strong> Use summer imagery for NDBI to minimize confusion with deciduous forests that lose leaves in winter and may look "built-up" in spectral indices.</li>
         </ul>
       </section>
 
       <div class="try-it">
-        <h4>Try it: Compare nighttime lights for your city</h4>
-        <p>Pick a city you know well and compare its nighttime light footprint between 2014 and 2023. Look for expansion along highways and in suburban fringe areas.</p>
+        <h4>Try it: compare nighttime lights for your city</h4>
+        <p>Pick a city you know well and compare its nighttime light footprint between 2014 and 2023. Look for expansion along highways and in suburban fringe areas. It's like watching a city breathe outward.</p>
 <pre><code>// Replace the coordinates with your city
 var myCity = ee.Geometry.Point([-96.80, 32.78]); // Dallas, TX example
 
@@ -269,7 +270,7 @@ Map.centerObject(myCity, 9);</code></pre>
         <h3>Common mistakes</h3>
         <ul>
           <li><strong>Using the wrong SWIR band:</strong> Landsat 8 has two SWIR bands. NDBI uses <code>SR_B6</code> (SWIR1, 1.57 to 1.65 micrometers), not <code>SR_B7</code> (SWIR2).</li>
-          <li><strong>Forgetting scale factors:</strong> Landsat Collection 2 SR data requires <code>.multiply(0.0000275).add(-0.2)</code> before computing indices. Raw DN values will produce incorrect results.</li>
+          <li><strong>Forgetting scale factors:</strong> Landsat Collection 2 SR data requires <code>.multiply(0.0000275).add(-0.2)</code> before computing indices. Raw DN values will give you nonsense.</li>
           <li><strong>Comparing different months:</strong> When doing multi-temporal urban analysis, use the same month in each year to avoid seasonal vegetation differences that affect NDBI.</li>
           <li><strong>Ignoring cloud contamination:</strong> Unfiltered clouds produce false NDBI values. Always filter by <code>CLOUD_COVER</code> and use a median composite.</li>
         </ul>
@@ -281,14 +282,14 @@ Map.centerObject(myCity, 9);</code></pre>
           <li>What two bands does NDBI use, and which Landsat 8 band names correspond to them?</li>
           <li>Why might bare soil produce a false positive in NDBI analysis?</li>
           <li>Name two applications of nighttime lights data beyond urban mapping.</li>
-          <li>In a combined NDVI-NDBI-NDWI classification, how do you distinguish vegetation from built-up areas?</li>
+          <li>In a combined NDVI-NDBI-NDWI classification, how do we distinguish vegetation from built-up areas?</li>
           <li>What function calculates the area of each pixel in square meters?</li>
         </ol>
       </section>
 
       <section class="builds-on">
         <h3>Going deeper</h3>
-        <p>This module introduces urban remote sensing at a foundational level. For advanced techniques including sub-pixel urban mapping, urban climate analysis, and built environment characterization, see:</p>
+        <p>We've covered urban remote sensing at a foundational level here. For advanced techniques including sub-pixel urban mapping, urban climate analysis, and built environment characterization, check out:</p>
         <ul>
           <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter A1.2: Urban Environments</li>
           <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter A1.3: Built Environments</li>

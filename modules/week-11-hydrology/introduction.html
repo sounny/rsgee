@@ -14,14 +14,15 @@
         </nav>
 
         <header class="lab-header">
-            <h1>Hydrology & Water Mapping</h1>
+            <h1>Hydrology &amp; Water Mapping</h1>
         </header>
 
         <main class="lab-content">
             <p>
-                Water covers roughly 71% of Earth's surface, and tracking where it is (and where it is not) matters for
-                flood response, drought monitoring, water resource management, and climate science. In this module you
-                will learn to detect and delineate water bodies from satellite imagery using spectral indices.
+                Water covers about 71% of Earth's surface, and knowing exactly where it is (and where it isn't)
+                matters more than you might think. Floods, droughts, reservoir management, climate science: they
+                all depend on accurate water maps. In this module, we'll learn to spot and outline water bodies
+                from satellite imagery using spectral indices.
             </p>
 
             <section class="learning-objectives">
@@ -37,9 +38,10 @@
             <section class="why-it-matters">
                 <h3>Why it matters</h3>
                 <p>
-                    Floods are the most common and costly natural disaster worldwide. Droughts threaten food and water
-                    security for billions. Satellite-based water mapping lets you monitor reservoirs, track seasonal
-                    flooding, and measure long-term changes in water availability, all without setting foot in the field.
+                    Floods are the most common and costly natural disaster on the planet. Droughts threaten food
+                    and water security for billions of people. Here's where remote sensing gets powerful:
+                    satellite-based water mapping lets us monitor reservoirs, track seasonal flooding, and measure
+                    long-term changes in water availability, all without setting foot in the field.
                 </p>
             </section>
 
@@ -65,11 +67,11 @@
 
             <!-- Quick Win -->
             <section>
-                <h2>Quick Win: Map Lake Okeechobee with MNDWI</h2>
+                <h2>Your First Water Map: Lake Okeechobee in 12 Lines</h2>
                 <p>
-                    Lake Okeechobee is the largest freshwater lake in Florida and a critical component of the
-                    Everglades ecosystem. Let's map it in under 15 lines of code using the Modified Normalized
-                    Difference Water Index (MNDWI) from Sentinel-2.
+                    Lake Okeechobee is the largest freshwater lake in Florida and a critical piece of the Everglades
+                    ecosystem. Let's map it in under 15 lines of code using the Modified Normalized Difference Water
+                    Index (MNDWI) from Sentinel-2. Let's see it in action.
                 </p>
 <pre><code>// Map Lake Okeechobee using MNDWI from Sentinel-2
 var lake = ee.Geometry.Point([-80.83, 26.95]);
@@ -93,26 +95,25 @@ Map.addLayer(waterMask.selfMask(), {palette: ['0000FF']}, 'Water Mask');</code><
                 <div class="expected-output">
                     <h4>What you should see</h4>
                     <p>
-                        Two layers: a continuous MNDWI image where water appears bright blue and land appears brown,
+                        Two layers: a continuous MNDWI image where water glows bright blue and land appears brown,
                         and a binary water mask that cleanly outlines Lake Okeechobee in solid blue. Toggle between
-                        them in the Layers panel.
+                        them in the Layers panel. Congratulations, you just built a water map!
                     </p>
                 </div>
             </section>
 
             <!-- Section 1: Why Water Mapping Matters -->
             <section>
-                <h2>Why Water Mapping Matters</h2>
+                <h2>What Can We Do with a Water Map?</h2>
                 <p>
-                    Water mapping from satellite imagery supports a wide range of applications. Flood responders need
-                    rapid maps of inundated areas to prioritize rescue efforts. Water resource managers track reservoir
-                    levels to plan irrigation and municipal supply. Climate scientists measure how lakes and wetlands
-                    are shrinking or expanding over decades.
+                    Think about it: flood responders need rapid maps of inundated areas to know where to send boats.
+                    Water resource managers track reservoir levels to plan irrigation and city water supply. Climate
+                    scientists measure how lakes and wetlands are shrinking or expanding over decades.
                 </p>
                 <p>
-                    Traditional water monitoring relies on ground-based gauges and manual surveys, both of which are
-                    expensive and spatially limited. Satellite-based approaches provide synoptic, repeatable coverage
-                    of entire watersheds at no additional cost per observation.
+                    Traditional water monitoring relies on ground-based gauges and manual surveys. Both are expensive,
+                    and both only cover a tiny slice of the landscape. Satellite-based approaches give us synoptic,
+                    repeatable coverage of entire watersheds at no additional cost per observation. That's a game changer.
                 </p>
                 <ul>
                     <li><strong>Floods:</strong> Map inundation extent within hours of satellite overpass.</li>
@@ -124,10 +125,10 @@ Map.addLayer(waterMask.selfMask(), {palette: ['0000FF']}, 'Water Mask');</code><
 
             <!-- Section 2: NDWI vs MNDWI -->
             <section>
-                <h2>NDWI vs. MNDWI</h2>
+                <h2>Two Indices, One Goal: NDWI vs. MNDWI</h2>
                 <p>
-                    Both indices exploit the fact that water absorbs strongly in the shortwave infrared (SWIR),
-                    creating contrast with visible bands. The key difference is which visible band is paired with SWIR.
+                    Both indices exploit the same physical fact: water absorbs strongly in the shortwave infrared (SWIR),
+                    creating contrast with visible bands. The key difference? Which visible band we pair with SWIR.
                 </p>
 
                 <h3>NDWI (Gao, 1996)</h3>
@@ -137,7 +138,8 @@ Map.addLayer(waterMask.selfMask(), {palette: ['0000FF']}, 'Water Mask');</code><
                 </p>
                 <p>
                     NDWI was originally designed to measure vegetation water content. It works for detecting open water,
-                    but it can struggle in urban areas because built-up surfaces also produce positive NDWI values.
+                    but here's the catch: built-up surfaces (think rooftops and parking lots) also produce positive
+                    NDWI values. That can fool your water map.
                 </p>
 
                 <h3>MNDWI (Xu, 2006)</h3>
@@ -146,8 +148,8 @@ Map.addLayer(waterMask.selfMask(), {palette: ['0000FF']}, 'Water Mask');</code><
                     <strong>Sentinel-2 bands:</strong> <code>(B3 - B11) / (B3 + B11)</code>
                 </p>
                 <p>
-                    MNDWI replaces NIR with Green, which suppresses built-up features and enhances open water contrast.
-                    For most water body mapping tasks, MNDWI outperforms NDWI.
+                    MNDWI swaps NIR for Green, which suppresses built-up features and enhances open water contrast.
+                    For most water body mapping tasks, MNDWI outperforms NDWI. Think of it as the upgraded version.
                 </p>
 
 <pre><code>// Compare NDWI and MNDWI side by side
@@ -170,16 +172,15 @@ Map.addLayer(mndwi, waterPalette, 'MNDWI');</code></pre>
 
             <!-- Section 3: Thresholding -->
             <section>
-                <h2>Thresholding for Water Detection</h2>
+                <h2>Drawing the Line: Thresholding for Water Detection</h2>
                 <p>
-                    A spectral index is continuous (values typically range from -1 to 1), but a water map is
-                    categorical: each pixel is either water or not water. Thresholding converts continuous values
-                    into binary classes.
+                    A spectral index gives us continuous values (typically from -1 to 1), but a water map is categorical:
+                    each pixel is either water or not water. Thresholding is how we draw that line.
+                    Think of it like setting a passing grade on an exam.
                 </p>
                 <p>
-                    The simplest threshold for MNDWI is zero. Pixels above zero are classified as water; pixels
-                    below zero are classified as land. This works well in most cases, but you can refine the
-                    threshold to reduce errors.
+                    The simplest threshold for MNDWI is zero. Pixels above zero get classified as water; pixels below
+                    zero become land. This works well in most cases, but we can fine-tune the threshold to reduce errors.
                 </p>
 
 <pre><code>// Basic threshold at 0
@@ -202,7 +203,7 @@ Map.addLayer(waterRefined.selfMask(), {palette: ['darkblue']}, 'Water (threshold
                 <div class="common-mistakes">
                     <h3>Threshold pitfalls</h3>
                     <ul>
-                        <li><strong>Too low (e.g., -0.1):</strong> Shadows and wet soil get classified as water.</li>
+                        <li><strong>Too low (e.g., -0.1):</strong> Shadows and wet soil sneak into your water map.</li>
                         <li><strong>Too high (e.g., 0.5):</strong> Shallow or turbid water gets excluded.</li>
                         <li>The "best" threshold depends on your scene. There is no universal magic number.</li>
                     </ul>
@@ -211,12 +212,12 @@ Map.addLayer(waterRefined.selfMask(), {palette: ['darkblue']}, 'Water (threshold
 
             <!-- Section 4: Calculating Water Area -->
             <section>
-                <h2>Calculating Water Area</h2>
+                <h2>How Big Is That Lake? Calculating Water Area</h2>
                 <p>
-                    Once you have a binary water mask, you can calculate total water surface area.
+                    Once we have a binary water mask, we can calculate the total water surface area.
                     <code>ee.Image.pixelArea()</code> creates an image where each pixel's value equals its area
-                    in square meters. Multiply the pixel area image by your water mask, then sum the result over
-                    your region of interest.
+                    in square meters. We multiply the pixel area image by our water mask, then sum the result over
+                    the region of interest. Let's see how big Lake Okeechobee really is.
                 </p>
 
 <pre><code>// Calculate water surface area in square kilometers
@@ -245,31 +246,32 @@ print('Water surface area (km²):', areaKm2);</code></pre>
                     <h4>What you should see</h4>
                     <p>
                         The console should print a value near 1,700 km² for Lake Okeechobee (its area fluctuates
-                        seasonally). If your number is dramatically different, check your threshold and buffer size.
+                        seasonally). If your number looks way off, double-check your threshold and buffer size.
                     </p>
                 </div>
             </section>
 
             <!-- Section 5: Limitations -->
             <section>
-                <h2>Limitations of Spectral Water Detection</h2>
+                <h2>Where Spectral Water Detection Can Trick You</h2>
                 <p>
-                    Spectral indices are powerful but imperfect. Several common features can produce false
-                    positives (classified as water when they are not) or false negatives (missed water).
+                    Spectral indices are powerful, but they're not perfect. Several common features can produce
+                    false positives (classified as water when they're not) or false negatives (water that gets missed).
+                    Don't worry, once you know these pitfalls, they're easy to watch for.
                 </p>
                 <ul>
-                    <li><strong>Cloud shadows:</strong> Dark shadows on land produce high MNDWI values and are
-                        frequently misclassified as water. Always apply cloud masking before water detection.</li>
+                    <li><strong>Cloud shadows:</strong> Dark shadows on land produce high MNDWI values and frequently
+                        get misclassified as water. Always apply cloud masking before water detection.</li>
                     <li><strong>Terrain shadows:</strong> Mountain shadows in low-sun-angle imagery mimic water
                         signatures.</li>
-                    <li><strong>Dark surfaces:</strong> Lava flows, asphalt, and some dark soils can appear
-                        water-like in certain indices.</li>
+                    <li><strong>Dark surfaces:</strong> Lava flows, asphalt, and some dark soils can look
+                        water-like to certain indices.</li>
                     <li><strong>Ice and snow:</strong> Frozen water bodies may not be detected because ice has a
                         different spectral profile than liquid water.</li>
                     <li><strong>Turbid water:</strong> Sediment-laden water reflects more in the visible bands,
                         reducing MNDWI values and potentially causing false negatives.</li>
                     <li><strong>Small water bodies:</strong> Features smaller than the pixel size (10 m for
-                        Sentinel-2) cannot be resolved.</li>
+                        Sentinel-2) simply can't be resolved.</li>
                 </ul>
 
                 <div class="pro-tips">
@@ -277,7 +279,7 @@ print('Water surface area (km²):', areaKm2);</code></pre>
                     <ul>
                         <li>Always cloud-mask your imagery before computing water indices.</li>
                         <li>Combine spectral thresholding with slope data (from a DEM) to reduce terrain shadow errors.</li>
-                        <li>For operational water mapping, use the JRC Global Surface Water dataset (covered in the next module).</li>
+                        <li>For operational water mapping, use the JRC Global Surface Water dataset (we'll cover that in the next module).</li>
                     </ul>
                 </div>
             </section>
@@ -296,7 +298,7 @@ print('Water surface area (km²):', areaKm2);</code></pre>
             <!-- EEFA Bridge -->
             <section class="builds-on">
                 <h3>Going deeper</h3>
-                <p>This module introduces water detection at a foundational level. For advanced techniques, see:</p>
+                <p>We've covered water detection at a foundational level here. Ready for more advanced techniques? Check out:</p>
                 <ul>
                     <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter A2.3: Surface Water Mapping</li>
                 </ul>

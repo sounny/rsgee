@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -56,7 +56,7 @@
                     <li><strong>Drought monitoring:</strong> Identifying vegetation stress before visual symptoms appear
                     </li>
                 </ul>
-                <p>NDVI is one of the most widely used indices in remote sensing—understanding it opens doors to
+                <p>NDVI is one of the most widely used indices in remote sensing,understanding it opens doors to
                     countless applications.</p>
             </section>
 
@@ -105,13 +105,13 @@
                     spectral signature:
                 </p>
                 <ul>
-                    <li><strong>Red light:</strong> Absorbed by chlorophyll for photosynthesis → LOW reflectance</li>
-                    <li><strong>Near-infrared:</strong> Reflected by cell structure to prevent overheating → HIGH
+                    <li><strong>Red light:</strong> Absorbed by chlorophyll for photosynthesis ? LOW reflectance</li>
+                    <li><strong>Near-infrared:</strong> Reflected by cell structure to prevent overheating ? HIGH
                         reflectance</li>
                 </ul>
                 <p>
                     Sick or stressed plants have less chlorophyll (absorb less red) and damaged cell structure
-                    (reflect less NIR). By comparing these two bands, we can measure plant health—even before
+                    (reflect less NIR). By comparing these two bands, we can measure plant health,even before
                     leaves visibly change color!
                 </p>
 
@@ -244,8 +244,8 @@ Map.addLayer(ndviND, {
                             <h3>Band Order Matters!</h3>
                             <ul>
                                 <li>For NDVI: NIR comes <strong>first</strong>, Red comes <strong>second</strong></li>
-                                <li><code>['B8', 'B4']</code> ✅ Correct</li>
-                                <li><code>['B4', 'B8']</code> ❌ Wrong (inverts the result!)</li>
+                                <li><code>['B8', 'B4']</code> ? Correct</li>
+                                <li><code>['B4', 'B8']</code> ? Wrong (inverts the result!)</li>
                             </ul>
                         </div>
                     </li>
@@ -406,8 +406,8 @@ Map.addLayer(ndwi, {
                 <h3>Key Takeaways</h3>
                 <ul>
                     <li>NDVI measures vegetation health using the formula (NIR - Red) / (NIR + Red)</li>
-                    <li>Healthy vegetation: HIGH NIR reflection, LOW red reflection → NDVI near 1</li>
-                    <li>Water bodies: LOW NIR reflection → NDVI negative</li>
+                    <li>Healthy vegetation: HIGH NIR reflection, LOW red reflection ? NDVI near 1</li>
+                    <li>Water bodies: LOW NIR reflection ? NDVI negative</li>
                     <li>Use <code>.normalizedDifference(['First', 'Second'])</code> for quick calculations</li>
                     <li>The same pattern works for many indices: NDWI, NDBI, EVI, etc.</li>
                     <li>Band order matters! Always put the "positive" band first</li>
@@ -427,7 +427,7 @@ Map.addLayer(ndwi, {
 
             <section id="submission">
                 <div class="submission-box">
-                    <h3>📋 Lab Submission</h3>
+                    <h3>?? Lab Submission</h3>
                     <p><strong>Subject:</strong> <code>Lab 8 - Band Arithmetic NDVI - [Your Name]</code></p>
                     <p><strong>Include:</strong></p>
                     <ul>
@@ -446,9 +446,9 @@ Map.addLayer(ndwi, {
         </main>
 
         <footer>
-            <p><a href="lab-07-challenge-finding-dataset.html">← Previous Lab</a> | <a
-                    href="lab-09-thresholds.html">Next Lab →</a></p>
-            <p><a href="../index.html">← Back to Course Home</a></p>
+            <p><a href="lab-07-challenge-finding-dataset.html">? Previous Lab</a> | <a
+                    href="lab-09-thresholds.html">Next Lab ?</a></p>
+            <p><a href="../index.html">? Back to Course Home</a></p>
         </footer>
     </div>
 </body>

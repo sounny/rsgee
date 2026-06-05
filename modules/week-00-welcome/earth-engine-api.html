@@ -1,4 +1,4 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -19,7 +19,7 @@
         <main class="lab-content">
             <p>
                 Google Earth Engine exposes its power through an API: you describe the data you want and the
-                computations to run, and Googleâ€™s servers do the heavy lifting next to the data. The API lets you
+                computations to run, and Google’s servers do the heavy lifting next to the data. The API lets you
                 analyze massive geospatial datasets without downloading them or managing clusters.
             </p>
 
@@ -51,7 +51,7 @@
             <section>
                 <h2>Mental model: how Earth Engine runs your code</h2>
                 <ul>
-                    <li><strong>Client vs server:</strong> You write scripts locally; computation runs in Googleâ€™s data centers next to the imagery.</li>
+                    <li><strong>Client vs server:</strong> You write scripts locally; computation runs in Google’s data centers next to the imagery.</li>
                     <li><strong>Lazy evaluation:</strong> API calls build a recipe. Work happens only when you request output (e.g., <code>Map.addLayer</code>, <code>print</code>, or an export).</li>
                     <li><strong>Immutable objects:</strong> Operations on <code>ee.Image</code>, <code>ee.Feature</code>, and <code>ee.ImageCollection</code> return new objects; originals stay unchanged.</li>
                     <li><strong>Reproducibility:</strong> Scripts reference catalog IDs and geometries, not local files. Anyone can re-run your code and get the same result.</li>
@@ -184,6 +184,14 @@ print('NDVI min/max:', stats)</code></pre>
                     <li>Follow the <a href="https://developers.google.com/earth-engine/tutorials" target="_blank" rel="noopener">API tutorials</a> for more worked examples.</li>
                     <li>When stuck, search or post in the <a href="https://groups.google.com/g/google-earth-engine-developers" target="_blank" rel="noopener">Earth Engine Developers forum</a>.</li>
                 </ul>
+            </section>
+        
+            <section class="builds-on">
+                <h3>Going Deeper: EEFA Book</h3>
+                <p>This module gives you the foundation. To explore further, see Chapter F1.1 (Introduction to Earth Engine) in the
+                    <a href="https://www.eefabook.org/" target="_blank"><em>Cloud-Based Remote Sensing with Google Earth Engine</em></a>
+                    (EEFA Book).
+                </p>
             </section>
         </main>
 

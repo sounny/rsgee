@@ -16,14 +16,14 @@
         </nav>
 
         <header class="lab-header">
-            <h1>Change Detection</h1>
+            <h1>Spotting What Changed from Space</h1>
         </header>
 
         <main class="lab-content">
             <p>
-                Change detection compares satellite images from two different dates to identify where the
-                landscape has changed. Whether tracking wildfire damage, urban expansion, or deforestation,
-                the core technique is the same: subtract one image from another and interpret the difference.
+                Here's a question that never gets old: what's different about this place compared to last year?
+                That's exactly what change detection answers. We compare satellite images from two dates,
+                subtract one from the other, and let the pixels tell us where the landscape transformed.
             </p>
 
             <section class="learning-objectives">
@@ -39,10 +39,13 @@
             <section class="why-it-matters">
                 <h3>Why it matters</h3>
                 <p>
-                    The Earth's surface is constantly changing. Forests burn, cities expand, glaciers retreat,
-                    and crops cycle through seasons. Detecting these changes from satellite imagery provides
-                    critical information for disaster response, environmental monitoring, and urban planning.
-                    Change detection is one of the most widely used techniques in applied remote sensing.
+                    The Earth's surface is restless. Forests burn, cities sprawl, glaciers shrink, and crops
+                    cycle through their seasons. Detecting these changes from satellite imagery gives us
+                    critical intelligence for disaster response, environmental monitoring, and urban planning.
+                </p>
+                <p>
+                    Change detection is one of the most widely used techniques in applied remote sensing,
+                    and it's surprisingly intuitive once you see it in action.
                 </p>
             </section>
 
@@ -50,7 +53,7 @@
                 <h3>Key vocabulary</h3>
                 <dl>
                     <dt>Change detection</dt>
-                    <dd>The process of identifying differences in the state of an object or landscape by observing it at different times.</dd>
+                    <dd>The process of identifying differences in the state of a landscape by observing it at different times.</dd>
                     <dt>Image differencing</dt>
                     <dd>Subtracting pixel values in one image from the corresponding pixels in another image.</dd>
                     <dt>dNBR</dt>
@@ -64,10 +67,10 @@
 
             <!-- Quick Win -->
             <section>
-                <h2>Quick Win: Before-After NDVI Difference</h2>
+                <h2>Your first change map in 60 seconds</h2>
                 <p>
                     The 2020 Bobcat Fire burned over 115,000 acres in the Angeles National Forest, California.
-                    You can see the damage instantly by comparing NDVI before and after the fire.
+                    Let's see the damage instantly by comparing NDVI before and after the fire.
                 </p>
 <pre><code>// Cloud masking function for Landsat 8 SR
 function maskL8sr(image) {
@@ -111,27 +114,31 @@ Map.addLayer(ndviChange, {min: -0.5, max: 0.5,
                     <h4>What you should see</h4>
                     <p>
                         A map centered on the Angeles National Forest. Red areas show where NDVI dropped
-                        dramatically (vegetation loss from the fire). White areas had little change. Blue
-                        areas, if any, indicate increased vegetation.
+                        dramatically (that's vegetation loss from the fire). White areas had little change.
+                        Blue areas, if any, show increased vegetation. Pretty striking, right?
                     </p>
                 </div>
             </section>
 
             <!-- Section 1: What Is Change Detection? -->
             <section>
-                <h2>What Is Change Detection?</h2>
+                <h2>What are we actually detecting?</h2>
                 <p>
-                    Change detection answers a simple question: what is different between two points in time?
-                    Satellites revisit the same location every few days, giving us a consistent record of
-                    the Earth's surface. By comparing images from two dates, we can pinpoint where and how
-                    the landscape has changed.
+                    Change detection answers a beautifully simple question: what looks different between
+                    two points in time?
                 </p>
                 <p>
-                    The simplest approach is <strong>image differencing</strong>. You take a spectral index
-                    (like NDVI or NBR) from a "before" image, compute the same index for an "after" image,
-                    and subtract. Pixels with large differences have changed; pixels near zero have not.
+                    Satellites revisit the same location every few days, giving us a consistent record
+                    of the Earth's surface. By comparing images from two dates, we can pinpoint where
+                    and how the landscape has changed.
                 </p>
-                <p>Common applications include:</p>
+                <p>
+                    The simplest approach is <strong>image differencing</strong>. Think of it like this:
+                    we take a spectral index (like NDVI or NBR) from a "before" image, compute the same
+                    index for an "after" image, and subtract. Pixels with large differences have changed;
+                    pixels near zero have not.
+                </p>
+                <p>Here are some common applications:</p>
                 <ul>
                     <li><strong>Wildfire damage:</strong> Mapping burn severity after a fire event.</li>
                     <li><strong>Urban expansion:</strong> Detecting new impervious surfaces where vegetation once existed.</li>
@@ -143,16 +150,16 @@ Map.addLayer(ndviChange, {min: -0.5, max: 0.5,
 
             <!-- Section 2: Before-After Image Differencing -->
             <section>
-                <h2>Before-After Image Differencing</h2>
+                <h2>The subtract-and-see approach</h2>
                 <p>
-                    The workflow is straightforward. First, build a cloud-free composite for each date.
-                    Then compute a spectral index for both composites. Finally, subtract the post-event
-                    image from the pre-event image.
+                    The workflow is refreshingly straightforward. First, we build a cloud-free composite
+                    for each date. Then we compute a spectral index for both composites. Finally, we
+                    subtract the post-event image from the pre-event image.
                 </p>
                 <p>
-                    The sign of the result tells you the direction of change. For vegetation indices like
+                    The sign of the result tells us the direction of change. For vegetation indices like
                     NDVI, a positive difference means vegetation was lost (the "before" value was higher).
-                    A negative difference means vegetation increased.
+                    A negative difference means vegetation actually increased.
                 </p>
 <pre><code>// Step 1: Compute NDVI for both dates
 var preNDVI = preFire.normalizedDifference(['SR_B5', 'SR_B4']);
@@ -169,26 +176,29 @@ Map.addLayer(ndviDiff, {
   palette: ['blue', 'white', 'red']
 }, 'NDVI Difference');</code></pre>
                 <p>
-                    <strong>Why pre minus post?</strong> When vegetation burns, post-fire NDVI drops. Subtracting
-                    a smaller post-fire value from a larger pre-fire value produces a positive number, making
-                    burned areas appear as high values on the map. This convention is standard in the field.
+                    <strong>Why pre minus post?</strong> When vegetation burns, post-fire NDVI drops.
+                    Subtracting a smaller post-fire value from a larger pre-fire value produces a positive
+                    number, making burned areas appear as high values on the map. This convention is
+                    standard in the field, and it's worth memorizing.
                 </p>
             </section>
 
             <!-- Section 3: Burn Severity with dNBR -->
             <section>
-                <h2>Burn Severity with dNBR</h2>
+                <h2>How badly did it burn? Meet dNBR</h2>
                 <p>
-                    While NDVI detects general vegetation change, the <strong>Normalized Burn Ratio (NBR)</strong>
-                    is specifically designed for fire analysis. NBR uses the near-infrared (NIR) and shortwave
-                    infrared (SWIR) bands, which are particularly sensitive to burn conditions. Healthy vegetation
-                    reflects strongly in NIR and weakly in SWIR; burned areas show the opposite pattern.
+                    NDVI detects general vegetation change, but the <strong>Normalized Burn Ratio (NBR)</strong>
+                    is purpose-built for fire analysis. Here's the cool part: NBR uses the near-infrared (NIR)
+                    and shortwave infrared (SWIR) bands, which are particularly sensitive to burn conditions.
+                    Healthy vegetation reflects strongly in NIR and weakly in SWIR; burned areas show the
+                    opposite pattern.
                 </p>
                 <p>The NBR formula for Landsat 8 is:</p>
                 <p><code>NBR = (SR_B5 - SR_B7) / (SR_B5 + SR_B7)</code></p>
                 <p>
-                    The differenced NBR (dNBR) is simply the pre-fire NBR minus the post-fire NBR. The
-                    USGS uses standard dNBR thresholds to classify burn severity.
+                    The differenced NBR (dNBR) is simply pre-fire NBR minus post-fire NBR. The USGS uses
+                    standard dNBR thresholds to classify burn severity, and we can do the same thing right
+                    here in Earth Engine.
                 </p>
 <pre><code>// Calculate NBR for both periods
 var preNBR = preFire.normalizedDifference(['SR_B5', 'SR_B7']).rename('preNBR');
@@ -211,7 +221,8 @@ print('dNBR range:', dNBR.reduceRegion({
 }));</code></pre>
                 <p>
                     <strong>USGS burn severity classes:</strong> The table below shows the standard thresholds
-                    used by the USGS Burned Area Emergency Response (BAER) teams.
+                    used by the USGS Burned Area Emergency Response (BAER) teams. We'll use these same
+                    thresholds to classify our dNBR map.
                 </p>
                 <table>
                     <thead>
@@ -234,11 +245,12 @@ print('dNBR range:', dNBR.reduceRegion({
 
             <!-- Section 4: Classifying Change -->
             <section>
-                <h2>Classifying Change</h2>
+                <h2>Turning numbers into categories</h2>
                 <p>
-                    A continuous difference image is useful for visualization, but for reporting and area
-                    calculations you need classified categories. Use the <code>.gt()</code> and <code>.lt()</code>
-                    methods to apply thresholds and create a classified burn severity map.
+                    A continuous difference image is great for visualization, but for reporting and area
+                    calculations we need classified categories. Let's use the <code>.gt()</code> and
+                    <code>.lt()</code> methods to apply those USGS thresholds and create a classified
+                    burn severity map.
                 </p>
 <pre><code>// Classify dNBR into burn severity categories
 var burnSeverity = ee.Image(0)
@@ -274,37 +286,38 @@ print('High severity area (hectares):', ee.Number(area.get('constant')).divide(1
                     <p>
                         A classified map with distinct colors for each severity class. Red and dark red
                         areas represent the most severely burned zones. The console prints the total
-                        area of high-severity burn in hectares.
+                        area of high-severity burn in hectares. This is a powerful insight: from satellite
+                        data alone, we can quantify exactly how much land was devastated.
                     </p>
                 </div>
             </section>
 
             <!-- Conceptual: LandTrendr -->
             <section>
-                <h2>Beyond Two Dates: The LandTrendr Concept</h2>
+                <h2>What about slow changes? The LandTrendr idea</h2>
                 <p>
-                    Comparing two images works well for sudden events like wildfires. But what about gradual
-                    changes like slow deforestation, urban sprawl, or drought stress that unfold over years?
-                    For these, researchers use <strong>LandTrendr</strong> (Landsat-based Detection of Trends
-                    in Disturbance and Recovery).
+                    Comparing two images works beautifully for sudden events like wildfires. But what about
+                    gradual changes? Think of slow deforestation, creeping urban sprawl, or drought stress
+                    that unfolds over years. Two dates just can't capture that story.
                 </p>
                 <p>
-                    LandTrendr analyzes the entire time series of Landsat imagery for each pixel. Instead of
-                    comparing just two dates, it fits a segmented trend line through decades of annual observations.
-                    The algorithm identifies the year, magnitude, and duration of each disturbance event and
-                    recovery period.
+                    That's where <strong>LandTrendr</strong> (Landsat-based Detection of Trends in Disturbance
+                    and Recovery) comes in. Instead of comparing just two dates, LandTrendr analyzes the entire
+                    time series of Landsat imagery for each pixel. It fits a segmented trend line through
+                    decades of annual observations, identifying the year, magnitude, and duration of each
+                    disturbance event and recovery period.
                 </p>
                 <p>
-                    You will not implement LandTrendr in this course, but understanding the concept is important.
-                    It represents the next step beyond simple two-date change detection: using the full temporal
-                    depth of the satellite archive to tell the complete story of landscape change.
+                    We won't implement LandTrendr in this course, but understanding the concept is important.
+                    It represents the next step beyond our two-date approach: using the full temporal depth
+                    of the satellite archive to tell the complete story of landscape change.
                 </p>
             </section>
 
             <section class="pro-tips">
                 <h3>Pro tips</h3>
                 <ul>
-                    <li><strong>Match seasons:</strong> Compare images from the same season to avoid detecting phenological changes as real disturbance.</li>
+                    <li><strong>Match seasons:</strong> Compare images from the same season to avoid detecting phenological changes as real disturbance. Summer-to-summer, winter-to-winter.</li>
                     <li><strong>Cloud mask first:</strong> Always apply cloud masking before computing spectral indices. A single cloudy pixel can look like a massive change.</li>
                     <li><strong>Buffer your area:</strong> Use <code>.buffer()</code> to expand your study area beyond a single point so you capture the full extent of the event.</li>
                     <li><strong>Check image count:</strong> Print <code>collection.size()</code> to verify enough images exist for a clean composite.</li>
@@ -313,9 +326,9 @@ print('High severity area (hectares):', ee.Number(area.get('constant')).divide(1
             </section>
 
             <div class="try-it">
-                <h4>Try it: Detect a different type of change</h4>
+                <h4>Try it: detect a different kind of change</h4>
                 <p>
-                    Apply the before-after differencing technique to a different event. Choose one of
+                    Let's apply the before-after differencing technique to a different event. Pick one of
                     these scenarios and adapt the code:
                 </p>
                 <ul>
@@ -349,7 +362,7 @@ Map.addLayer(change, {min: -0.3, max: 0.3,
                 <h3>Common mistakes</h3>
                 <ul>
                     <li><strong>Using cloudy images:</strong> Clouds look like sudden bright changes. Always cloud-mask before computing indices.</li>
-                    <li><strong>Wrong date ranges:</strong> If your pre-event image is from winter and post-event from summer, you will detect seasonal change, not the event.</li>
+                    <li><strong>Wrong date ranges:</strong> If your pre-event image is from winter and post-event from summer, you'll detect seasonal change, not the event you're looking for.</li>
                     <li><strong>Forgetting scale/offset:</strong> Landsat 8 SR values need <code>.multiply(0.0000275).add(-0.2)</code> before computing indices.</li>
                     <li><strong>Mixing up subtraction order:</strong> For dNBR, always compute pre minus post. Reversing the order flips the meaning of your results.</li>
                     <li><strong>Too few images in composite:</strong> If only one or two images are available, the composite may still contain artifacts. Check <code>collection.size()</code>.</li>
@@ -376,7 +389,7 @@ Map.addLayer(change, {min: -0.3, max: 0.3,
             </section>
 
             <section>
-                <h2>Next Steps</h2>
+                <h2>What's next?</h2>
                 <ul>
                     <li><a href="time-series-charting.html">Time Series Charting</a> - Chart spectral values over time to detect trends.</li>
                     <li><a href="../../labs/lab-21-change-detection.html">Lab 21: Change Detection</a> - Apply dNBR to map a different wildfire independently.</li>

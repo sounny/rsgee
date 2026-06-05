@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -123,8 +123,8 @@ Map.addLayer(rpj(angle), angleVis, 'cross-sectional directions', false);
     <h2>Quantify River Widths</h2>
     <p>To estimate river width, we will be using the RWC function <code>rwGen_waterMask</code>. This function can take
       any binary water mask image as input to calculate river widths, so long as the band name is 'waterMask' and
-      contains the following three properties: 1) crs—UTM projection code, 2) scale—native spatial resolution, and 3)
-      image_id—acting as an identifier for the output widths. This function first processes the input water mask to
+      contains the following three properties: 1) crs,UTM projection code, 2) scale,native spatial resolution, and 3)
+      image_id,acting as an identifier for the output widths. This function first processes the input water mask to
       create all the intermediate images mentioned before (channel mask, river mask, centerline, and angle image). Then,
       it creates a <code>FeatureCollection</code> of cross-sectional lines, each centered on one centerline pixel (from
       the centerline raster) along the direction estimated in the 'Estimate Cross-Sectional Direction' section (from the
@@ -140,7 +140,7 @@ Map.addLayer(rpj(angle), angleVis, 'cross-sectional directions', false);
       to cover the river's width (underestimation) or too long that they overlap with neighboring river reaches
       (overestimation). In both cases, the end(s) of the line segment overlaps with a pixel identified as 'water' in the
       channel mask. Thus, additional steps are taken to flag these measurements.</p>
-    <p>The rwGen_waterMask takes four arguments—maximum search distance (unit: meter) to label river pixels, maximum
+    <p>The rwGen_waterMask takes four arguments,maximum search distance (unit: meter) to label river pixels, maximum
       size of islands (unit: pixel) to be filled in to calculate river mask, distance (unit: meter) to be pruned to
       clean the raw centerline, and the area of interest to carry out the width calculation. The output of the rwc
       function is a FeatureCollection with each feature having the properties listed in the table below.</p>

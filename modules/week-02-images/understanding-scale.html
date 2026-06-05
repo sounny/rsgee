@@ -76,7 +76,7 @@
                 <h3>1. Spatial Resolution</h3>
                 <p>
                     <strong>Spatial resolution</strong> refers to the size of each pixel on the ground, also called the
-                    <em>ground sampling distance</em>. A 30-meter resolution means each pixel represents a 30 × 30 meter
+                    <em>ground sampling distance</em>. A 30-meter resolution means each pixel represents a 30 �, 30 meter
                     area on Earth's surface.
                 </p>
                 <ul>
@@ -289,7 +289,7 @@
                     }
 
                     .spatial-grid-box::after {
-                        content: '1.5 km × 1.5 km';
+                        content: '1.5 km �, 1.5 km';
                         position: absolute;
                         bottom: 5px;
                         right: 8px;
@@ -561,7 +561,7 @@
                                 <option value="3">PlanetScope (3 m)</option>
                             </select>
                         </div>
-                        <p>This visualization shows a fixed <strong>1.5 km × 1.5 km</strong> area on the ground. Watch
+                        <p>This visualization shows a fixed <strong>1.5 km �, 1.5 km</strong> area on the ground. Watch
                             how the number of pixels changes as resolution gets finer:</p>
                         <div class="spatial-viz-container">
                             <div class="spatial-grid-box" id="gridBox"></div>
@@ -578,7 +578,7 @@
                                 <p style="margin: 15px 0 5px; text-align: center;">Total pixels to process:</p>
                                 <div class="stat-highlight" id="pixelCountDisplay">2,500</div>
                                 <p class="stat-caption">⚠️ Halving pixel size <strong>quadruples</strong> the number of
-                                    pixels. Going from 30m → 10m increases pixels by 9×, not 3×!</p>
+                                    pixels. Going from 30m → 10m increases pixels by 9�,, not 3�,!</p>
                             </div>
                         </div>
                     </div>
@@ -658,7 +658,7 @@
                                 <p><strong>Radiometric:</strong> 12-bit (4,096 levels)</p>
                                 <div class="gradient-strip"
                                     style="background: linear-gradient(to right, #000 0%, #fff 100%);"></div>
-                                <p class="bit-label">Values: 0 → 4,095 (16× more sensitive!)</p>
+                                <p class="bit-label">Values: 0 → 4,095 (16�, more sensitive!)</p>
                             </div>
                         </div>
                         <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-secondary);">
@@ -872,7 +872,7 @@ Export.image.toDrive({
                         <li><strong>Match native resolution when possible</strong>—this uses actual sensor data without
                             aggregation or interpolation.</li>
                         <li><strong>Coarsen for large regions:</strong> If processing a country at 10m is too slow, use
-                            30m or 100m. A 3× increase in scale reduces pixels by 9×.</li>
+                            30m or 100m. A 3�, increase in scale reduces pixels by 9�,.</li>
                         <li><strong>Check native scale programmatically:</strong> Use
                             <code>image.projection().nominalScale()</code> to verify true resolution.</li>
                         <li><strong>For multi-band images:</strong> Bands may have different resolutions (e.g.,
@@ -919,7 +919,7 @@ print('Sentinel-2 band count:', s2.bandNames().length());</code></pre>
                     <code>reduceRegion</code> is about <strong>10 million pixels</strong>. For context:
                 </p>
                 <ul>
-                    <li>A 1° × 1° area (~12,000 km²) at 30m = <strong>~13 million pixels</strong> → exceeds default!
+                    <li>A 1° �, 1° area (~12,000 km²) at 30m = <strong>~13 million pixels</strong> → exceeds default!
                     </li>
                     <li>Same area at 100m = <strong>~1.2 million pixels</strong> → easily within limits</li>
                     <li>Same area at 500m = <strong>~48,000 pixels</strong> → very fast</li>
@@ -1127,6 +1127,14 @@ var combined = landsat.addBands(demResampled.rename('elevation'));</code></pre>
                     <li><a href="https://pangeography.com/types-of-resolution-in-remote-sensing/" target="_blank">Pan
                             Geography: Types of Resolution</a> — Clear explanations with examples</li>
                 </ul>
+            </section>
+        
+            <section class="builds-on">
+                <h3>Going Deeper: EEFA Book</h3>
+                <p>This module gives you the foundation. To explore further, see Chapter F1.1 (Exploring Image Collections) and F6.0 (Scale) in the
+                    <a href="https://www.eefabook.org/" target="_blank"><em>Cloud-Based Remote Sensing with Google Earth Engine</em></a>
+                    (EEFA Book).
+                </p>
             </section>
         </main>
 
