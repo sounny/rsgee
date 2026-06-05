@@ -14,19 +14,23 @@
         </nav>
 
         <header class="lab-header">
-            <h1>Lab 27: SAR Flood Mapping</h1>
-            <p>Map flood extent from Sentinel-1 radar data for a real disaster event</p>
+            <h1>Lab 27: Mapping Floods Through the Clouds</h1>
+            <p>Use Sentinel-1 radar data to map flood extent from a real disaster event</p>
         </header>
 
         <main class="lab-content">
             <section class="lab-overview">
                 <h2>Overview</h2>
                 <p>
-                    In this lab you will use Sentinel-1 SAR data to map the extent of flooding caused by the
+                    In this lab, we will use Sentinel-1 SAR data to map the extent of flooding caused by the
                     2019 Cyclone Idai in Mozambique. This was one of the worst tropical cyclones ever recorded
                     in the Southern Hemisphere, causing catastrophic flooding along the Buzi and Pungwe rivers
-                    near the city of Beira. Optical satellites could not see through the storm clouds, but
-                    Sentinel-1 mapped the flood clearly.
+                    near the city of Beira.
+                </p>
+                <p>
+                    Here is the key advantage of SAR: optical satellites could not see through the storm clouds,
+                    but Sentinel-1 mapped the flood clearly. Radar does not care about clouds. Let's put that
+                    superpower to work.
                 </p>
                 <div class="lab-meta">
                     <p><strong>Objective:</strong> Map flood extent using before-after SAR change detection.</p>
@@ -54,10 +58,10 @@
 
             <!-- Part 1 -->
             <section>
-                <h2>Part 1: Define the Study Area</h2>
+                <h2>Part 1: Setting the scene</h2>
                 <p>
-                    Cyclone Idai made landfall near Beira, Mozambique on March 14, 2019. We will focus on the
-                    low-lying floodplain where the Buzi and Pungwe rivers overflowed.
+                    Cyclone Idai made landfall near Beira, Mozambique on March 14, 2019. Let's define our study
+                    area over the low-lying floodplain where the Buzi and Pungwe rivers overflowed.
                 </p>
 <pre><code>// Study area: Beira and surrounding floodplain, Mozambique
 var beira = ee.Geometry.Point([34.87, -19.84]);
@@ -77,10 +81,11 @@ Map.addLayer(studyArea, {color: 'yellow'}, 'Study area');</code></pre>
 
             <!-- Part 2 -->
             <section>
-                <h2>Part 2: Load and Filter Sentinel-1 (Before)</h2>
+                <h2>Part 2: Building our "before" baseline</h2>
                 <p>
-                    Create a baseline "before" image by taking the temporal median of Sentinel-1 images from
-                    February 2019 (before the cyclone). Using a temporal median reduces speckle noise.
+                    Let's create a clean baseline image from before the cyclone hit. We will take the temporal
+                    median of Sentinel-1 images from February 2019. Using a median reduces the "salt and pepper"
+                    speckle noise that is common in radar images.
                 </p>
 <pre><code>// Helper function to apply standard Sentinel-1 filters
 function filterS1(collection) {
@@ -115,11 +120,11 @@ Map.addLayer(before, {min: -25, max: 0}, 'Before (Feb 2019) VV');</code></pre>
 
             <!-- Part 3 -->
             <section>
-                <h2>Part 3: Load the During-Flood Image</h2>
+                <h2>Part 3: Capturing the flood</h2>
                 <p>
-                    Load the Sentinel-1 image acquired during peak flooding (March 19 to 25, 2019).
-                    Use a single mosaic rather than a median, because we want to capture the actual flood
-                    state, not average it away.
+                    Now let's load the Sentinel-1 image acquired during peak flooding (March 19 to 25, 2019).
+                    We use a single mosaic rather than a median here, because we want to capture the actual flood
+                    state. A median would smooth it away.
                 </p>
 <pre><code>// During image: March 19-25, 2019 (peak flooding)
 var duringCollection = filterS1(
@@ -144,11 +149,12 @@ Map.addLayer(during, {min: -25, max: 0}, 'During flood (Mar 2019) VV');</code></
 
             <!-- Part 4 -->
             <section>
-                <h2>Part 4: Compute the Difference and Detect Floods</h2>
+                <h2>Part 4: Spotting the flood with subtraction</h2>
                 <p>
-                    Subtract the during-flood image from the before image. Pixels where backscatter dropped
-                    significantly (land became water) will have positive difference values. Apply a threshold
-                    to create a binary flood mask.
+                    Here is the core idea: we subtract the during-flood image from the before image. Wherever
+                    the backscatter dropped significantly (land became smooth water), the difference will be
+                    large and positive. We set a threshold to create our flood mask. Think of it like finding
+                    everywhere the "volume" of the radar signal went quiet.
                 </p>
 <pre><code>// Change detection: before minus during
 var difference = before.subtract(during);
@@ -182,9 +188,10 @@ Map.addLayer(floodMask.selfMask(), {palette: ['cyan']}, 'Flood extent (threshold
 
             <!-- Part 5 -->
             <section>
-                <h2>Part 5: Calculate Flooded Area</h2>
+                <h2>Part 5: How much land was flooded?</h2>
                 <p>
-                    Use <code>ee.Image.pixelArea()</code> to calculate the total flooded area in square kilometers.
+                    Let's put a number on the destruction. We will use <code>ee.Image.pixelArea()</code> to
+                    calculate the total flooded area in square kilometers.
                 </p>
 <pre><code>// Calculate flooded area in square kilometers
 var floodArea = floodMask.multiply(ee.Image.pixelArea());
@@ -212,10 +219,11 @@ print('Flooded area (km²):', areaKm2);</code></pre>
 
             <!-- Part 6 -->
             <section>
-                <h2>Part 6: Refine and Visualize the Final Map</h2>
+                <h2>Part 6: Cleaning up our flood map</h2>
                 <p>
-                    Apply additional refinements: mask out permanent water bodies (which are dark in both images)
-                    and add context layers.
+                    Our raw flood mask may include areas that are always water (rivers, lakes). Let's remove
+                    those using the JRC dataset so we only see the new flooding caused by the cyclone. We will
+                    also add a Sentinel-2 true-color image for context.
                 </p>
 <pre><code>// Remove permanent water using JRC Global Surface Water
 var jrc = ee.Image('JRC/GSW1_4/GlobalSurfaceWater');

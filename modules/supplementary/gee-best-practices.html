@@ -20,8 +20,11 @@
         <main class="lab-content">
             <p>
                 Writing code that works is the first step. Writing code that works <em>efficiently</em>,
-                is easy to read, and can be shared with collaborators is the real goal. This module covers
-                the techniques that separate a beginner GEE script from a professional one.
+                is easy to read, and can be shared with collaborators? That's the real goal.
+            </p>
+            <p>
+                In this module, we'll cover the techniques that separate a beginner GEE script from a
+                professional one. Let's level up.
             </p>
 
             <section class="learning-objectives">
@@ -39,9 +42,12 @@
                 <h3>Why it matters</h3>
                 <p>
                     GEE runs on shared cloud infrastructure with computation limits. A poorly written script can
-                    time out, exceed memory, or simply take minutes when it should take seconds. Understanding
-                    performance also helps you work with larger areas, longer time series, and more complex
-                    analyses without hitting walls.
+                    time out, exceed memory, or simply take minutes when it should take seconds.
+                </p>
+                <p>
+                    Understanding performance also helps us work with larger areas, longer time series, and more
+                    complex analyses without hitting walls. Think of it like this: learning to drive is step one,
+                    but learning to navigate traffic efficiently is what gets you places.
                 </p>
             </section>
 
@@ -61,12 +67,13 @@
 
             <!-- Quick Win: Before and After -->
             <section>
-                <h2>Quick win: slow vs. fast (before and after)</h2>
+                <h2>Quick Win: Slow vs. Fast (Before and After)</h2>
                 <p>
-                    The two scripts below perform the same analysis: computing mean NDVI across a large region.
-                    The first version is slow and may time out. The second applies three optimizations and runs
-                    reliably.
+                    Let's start with a side-by-side comparison. The two scripts below perform the same analysis:
+                    computing mean NDVI across a large region. The first version is slow and may time out. The
+                    second applies three optimizations and runs reliably.
                 </p>
+                <p>Spot the differences!</p>
                 <h3>Before (slow, may time out)</h3>
 <pre><code>// SLOW VERSION: common beginner mistakes
 var roi = ee.FeatureCollection('TIGER/2018/States')
@@ -126,9 +133,10 @@ print('Mean NDVI:', stats);</code></pre>
 
             <!-- Section 1: Why Performance Matters -->
             <section>
-                <h2>Why Performance Matters</h2>
+                <h2>The Limits We're Working With</h2>
                 <p>
-                    GEE enforces three main limits on interactive (in-browser) computations:
+                    GEE enforces three main limits on interactive (in-browser) computations. It's important to
+                    know what they are so we can work within them:
                 </p>
                 <table>
                     <thead>
@@ -157,23 +165,26 @@ print('Mean NDVI:', stats);</code></pre>
                     </tbody>
                 </table>
                 <p>
-                    These limits exist because GEE is a shared resource. Your script runs alongside thousands of
-                    other users' scripts. Writing efficient code is not just good practice; it is a requirement
+                    These limits exist because GEE is a shared resource. Our script runs alongside thousands of
+                    other users' scripts. Writing efficient code isn't just good practice; it's a requirement
                     for working at scale.
                 </p>
             </section>
 
             <!-- Section 2: Common Bottlenecks -->
             <section>
-                <h2>Common Performance Bottlenecks</h2>
+                <h2>Three Bottlenecks That Slow Everyone Down</h2>
                 <p>
-                    Most slow scripts share a few recurring problems. Learning to spot them saves hours of debugging.
+                    Most slow scripts share a few recurring problems. Learning to spot them will save us hours
+                    of debugging. Let's walk through the big three.
                 </p>
 
                 <h3>1. Using <code>getInfo()</code> in loops</h3>
                 <p>
                     Each <code>getInfo()</code> call forces the browser to wait for the server to finish a
-                    computation. Inside a loop, this creates a serial chain of blocking calls.
+                    computation. Inside a loop, this creates a serial chain of blocking calls. Think of it
+                    like standing in line at a coffee shop and placing one order at a time, waiting for each
+                    cup before ordering the next.
                 </p>
 <pre><code>// BAD: getInfo() in a loop (extremely slow)
 var years = [2018, 2019, 2020, 2021, 2022, 2023];
@@ -201,26 +212,32 @@ print('Image counts by year:', counts);</code></pre>
                 <p>
                     Calling <code>.reproject()</code> forces GEE to materialize the image at a specific projection
                     before continuing. This prevents the optimizer from choosing efficient tile sizes and often
-                    causes memory errors. Only use <code>reproject()</code> when you have a specific,
-                    well-understood reason (for example, to fix convolution kernel alignment).
+                    causes memory errors.
+                </p>
+                <p>
+                    Only use <code>reproject()</code> when you have a specific, well-understood reason (for
+                    example, to fix convolution kernel alignment). Otherwise, let GEE handle projections
+                    automatically.
                 </p>
 
                 <h3>3. Processing large geometries without spatial filtering</h3>
                 <p>
-                    Loading an entire global collection when you only need one state wastes enormous resources.
-                    Always apply <code>.filterBounds()</code> before any other operation.
+                    Loading an entire global collection when we only need one state wastes enormous resources.
+                    Always apply <code>.filterBounds()</code> before any other operation. It's the single
+                    biggest optimization you can make.
                 </p>
             </section>
 
             <!-- Section 3: Optimization Techniques -->
             <section>
-                <h2>Optimization Techniques</h2>
+                <h2>Our Optimization Toolkit</h2>
 
                 <h3>tileScale</h3>
                 <p>
                     The <code>tileScale</code> parameter tells GEE to split the computation into smaller tiles.
                     A value of 4 means each tile is 1/4 the default size, using less memory per tile. Values
-                    range from 1 (default) to 16.
+                    range from 1 (default) to 16. It's like cutting a pizza into more slices so each piece is
+                    easier to handle.
                 </p>
 <pre><code>var stats = image.reduceRegion({
   reducer: ee.Reducer.mean(),
@@ -233,7 +250,7 @@ print('Image counts by year:', counts);</code></pre>
                 <h3>bestEffort</h3>
                 <p>
                     When <code>bestEffort</code> is <code>true</code>, GEE automatically coarsens the resolution
-                    if the computation would exceed memory at the requested scale. This is useful for quick
+                    if the computation would exceed memory at the requested scale. This is great for quick
                     exploratory analyses where exact resolution is less important than getting a result.
                 </p>
 <pre><code>var stats = image.reduceRegion({
@@ -245,10 +262,11 @@ print('Image counts by year:', counts);</code></pre>
 
                 <h3>Pre-filtering and lazy evaluation</h3>
                 <p>
-                    GEE uses lazy evaluation: it does not compute anything until you request output. This means
-                    the order of your operations matters. Filters applied early reduce the amount of data the
+                    GEE uses lazy evaluation: it doesn't compute anything until we request output. This means
+                    the order of our operations matters. Filters applied early reduce the amount of data the
                     system must process later.
                 </p>
+                <p>Here's the golden rule for filter order:</p>
 <pre><code>// Optimal filter order: bounds → date → metadata → select
 var efficient = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterBounds(roi)                          // Spatial first (biggest reduction)
@@ -259,14 +277,15 @@ var efficient = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
 
             <!-- Section 4: Reducing Memory -->
             <section>
-                <h2>Reducing Memory Usage</h2>
+                <h2>Three Habits That Save Memory</h2>
                 <p>
-                    Three simple habits dramatically reduce memory consumption:
+                    These three simple habits dramatically reduce memory consumption. Once they become second
+                    nature, you'll rarely hit memory errors again.
                 </p>
                 <ol>
-                    <li><strong>Select bands early.</strong> If you only need NIR and Red for NDVI, drop everything else at the start.</li>
+                    <li><strong>Select bands early.</strong> If we only need NIR and Red for NDVI, let's drop everything else at the start. Why carry baggage we don't need?</li>
                     <li><strong>Clip only for display.</strong> Clipping creates a mask for every pixel outside the boundary. For reducers and exports, pass the geometry directly instead.</li>
-                    <li><strong>Use <code>.filterBounds()</code> instead of global collections.</strong> A collection filtered to your region loads orders of magnitude less data.</li>
+                    <li><strong>Use <code>.filterBounds()</code> instead of global collections.</strong> A collection filtered to our region loads orders of magnitude less data.</li>
                 </ol>
 <pre><code>// Memory-efficient pattern
 var ndvi = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
@@ -291,10 +310,10 @@ print('Mean NDVI:', meanNDVI);</code></pre>
 
             <!-- Section 5: Code Organization -->
             <section>
-                <h2>Code Organization</h2>
+                <h2>Keeping Your Code Clean</h2>
                 <p>
-                    Well-organized code is easier to debug, modify, and share. Follow these conventions to keep
-                    your scripts maintainable as they grow.
+                    Well-organized code is easier to debug, modify, and share. As our scripts grow, these
+                    conventions keep everything manageable. Let's look at two key strategies.
                 </p>
 
                 <h3>Use functions for repeated operations</h3>
@@ -318,8 +337,8 @@ var processed = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .map(applyScaleFactors)
   .map(addNDVI);</code></pre>
 
-                <h3>Script structure template</h3>
-                <p>A consistent layout makes every script predictable:</p>
+                <h3>A script structure template</h3>
+                <p>A consistent layout makes every script predictable. Here's a template we can follow:</p>
 <pre><code>// ============================================
 // Title: NDVI Time Series for Alachua County
 // Author: Your Name
@@ -352,15 +371,17 @@ var roi = ee.FeatureCollection('TIGER/2018/Counties')
 
             <!-- Section 6: Sharing and Collaboration -->
             <section>
-                <h2>Sharing and Collaboration</h2>
+                <h2>Sharing Your Work With Others</h2>
                 <p>
-                    GEE provides several ways to share your work with collaborators, reviewers, or the public.
+                    Science is collaborative, and GEE gives us several ways to share our work with collaborators,
+                    reviewers, or the public. Let's walk through the options.
                 </p>
 
                 <h3>Get Link</h3>
                 <p>
                     Click the "Get Link" button in the Code Editor to generate a shareable URL. The recipient
-                    gets a copy of your script (not a live link). Any changes they make do not affect your original.
+                    gets a copy of your script (not a live link). Any changes they make won't affect your original.
+                    It's the quickest way to share.
                 </p>
 
                 <h3>Script repositories</h3>
@@ -372,8 +393,9 @@ var roi = ee.FeatureCollection('TIGER/2018/Counties')
 
                 <h3>Modules with <code>require()</code></h3>
                 <p>
-                    For code you want to reuse across multiple scripts, create a module. A module is simply a
-                    script that <code>exports</code> functions or variables.
+                    Here's where it gets interesting. For code we want to reuse across multiple scripts, we can
+                    create a module. Think of it like a file path: a module is simply a script that
+                    <code>exports</code> functions or variables, and any other script can import them.
                 </p>
 <pre><code>// FILE: users/yourname/modules:utils
 // This is a reusable module
@@ -402,9 +424,9 @@ var processed = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
 
             <!-- Section 7: When to Export -->
             <section>
-                <h2>When to Export</h2>
+                <h2>Browser or Export? Choosing the Right Approach</h2>
                 <p>
-                    Not every computation should run in the browser. Here is a guide for choosing between
+                    Not every computation should run in the browser. Here's a handy guide for choosing between
                     interactive computation and batch export.
                 </p>
                 <table>
@@ -455,7 +477,8 @@ Export.image.toDrive({
 });</code></pre>
                 <p>
                     After running the script, switch to the <strong>Tasks</strong> tab and click "Run" next to your
-                    export. Exports run in the background and do not count against interactive computation limits.
+                    export. Exports run in the background and don't count against interactive computation limits.
+                    Pretty convenient!
                 </p>
             </section>
 
@@ -463,17 +486,18 @@ Export.image.toDrive({
                 <h3>Pro tips</h3>
                 <ul>
                     <li><strong>Profile your script.</strong> Open the browser developer console (F12) and check the Network tab to see how many requests GEE makes. Fewer requests = faster script.</li>
-                    <li><strong>Use <code>.aside(print)</code> for debugging.</strong> It prints the object and returns it, so you can insert it into a chain without breaking it: <code>collection.aside(print).map(func)</code>.</li>
+                    <li><strong>Use <code>.aside(print)</code> for debugging.</strong> It prints the object and returns it, so we can insert it into a chain without breaking it: <code>collection.aside(print).map(func)</code>. It's like peeking inside a pipeline.</li>
                     <li><strong>Avoid <code>reproject()</code> unless absolutely necessary.</strong> It forces materialization and often triggers memory errors. Let GEE handle projections automatically.</li>
                     <li><strong>Set <code>maxPixels: 1e9</code> as a habit.</strong> The default of 10 million pixels is too low for most real analyses.</li>
-                    <li><strong>Test on small areas first.</strong> Develop your script on a single county, then scale to the full study area once the logic works.</li>
+                    <li><strong>Test on small areas first.</strong> Develop your script on a single county, then scale to the full study area once the logic works. Don't try to go global on the first run!</li>
                 </ul>
             </section>
 
             <div class="try-it">
-                <h4>Try it: optimize a slow script</h4>
+                <h4>Try it: Optimize a slow script</h4>
                 <p>
-                    The script below has several performance problems. Identify and fix at least three issues.
+                    The script below has several performance problems. Can you spot and fix at least three issues?
+                    Give it a try before looking at the comments.
                 </p>
 <pre><code>// This script is intentionally slow. Fix it!
 var collection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
@@ -503,10 +527,10 @@ print(stats);</code></pre>
             <section class="common-mistakes">
                 <h3>Common mistakes</h3>
                 <ul>
-                    <li><strong>Using <code>tileScale</code> as a magic fix.</strong> It helps with memory, but it does not fix fundamentally inefficient code. Always optimize your filters and band selections first.</li>
-                    <li><strong>Exporting everything.</strong> Not every result needs to be a GeoTIFF. If you just need a number or a chart, keep it in the browser.</li>
+                    <li><strong>Using <code>tileScale</code> as a magic fix.</strong> It helps with memory, but it doesn't fix fundamentally inefficient code. Always optimize your filters and band selections first.</li>
+                    <li><strong>Exporting everything.</strong> Not every result needs to be a GeoTIFF. If we just need a number or a chart, keep it in the browser.</li>
                     <li><strong>Putting functions inside <code>.map()</code> calls.</strong> Define functions outside and pass them by reference. This improves readability and allows reuse.</li>
-                    <li><strong>Forgetting to click "Run" in the Tasks tab.</strong> <code>Export</code> statements set up the task, but do not execute it. You must start it manually.</li>
+                    <li><strong>Forgetting to click "Run" in the Tasks tab.</strong> <code>Export</code> statements set up the task, but don't execute it. We have to start it manually. This gets everyone at least once!</li>
                 </ul>
             </section>
 
@@ -516,16 +540,16 @@ print(stats);</code></pre>
                     <li>What does <code>tileScale: 4</code> do in a <code>reduceRegion()</code> call?</li>
                     <li>Why is <code>getInfo()</code> inside a loop a problem?</li>
                     <li>What is the correct order for filtering a collection (spatial, temporal, metadata)?</li>
-                    <li>When should you use <code>Export</code> instead of in-browser computation?</li>
-                    <li>How do you import a function from a GEE module?</li>
+                    <li>When should we use <code>Export</code> instead of in-browser computation?</li>
+                    <li>How do we import a function from a GEE module?</li>
                 </ol>
             </section>
 
             <section class="builds-on">
                 <h3>Going deeper</h3>
                 <p>
-                    This module covers the most common optimization and organization techniques. For advanced
-                    scaling strategies and collaborative workflows in Earth Engine, see:
+                    We've covered the most common optimization and organization techniques. When you're ready
+                    for advanced scaling strategies and collaborative workflows, check out:
                 </p>
                 <ul>
                     <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter F6.2: Scaling Up in Earth Engine</li>

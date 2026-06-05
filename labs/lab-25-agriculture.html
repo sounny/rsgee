@@ -17,7 +17,7 @@
     </nav>
 
     <header class="lab-header">
-      <h1>Lab 25 - Agricultural Monitoring</h1>
+      <h1>Lab 25 - Reading the Rhythm of Crops</h1>
       <p><em><strong>Objective: Monitor crop phenology using EVI time series and the USDA Cropland Data Layer to compare growing patterns across crop types.</strong></em></p>
     </header>
 
@@ -36,12 +36,17 @@
       </section>
 
       <section class="why-it-matters">
-        <h3>Why it matters</h3>
-        <p>Every crop follows a distinct growth rhythm. Corn peaks early and high; soybeans peak later and lower; winter wheat follows an entirely different calendar. By charting these patterns with satellite data, agricultural analysts can monitor crop health across millions of hectares, detect drought stress weeks before it is visible on the ground, and forecast yields months before harvest. In this lab, you will build the same type of phenology analysis used by the USDA and international food security organizations.</p>
+        <h3>Why this matters</h3>
+        <p>
+            Every crop follows its own growth rhythm, like a unique heartbeat. Corn peaks early and high; soybeans peak later and lower; winter wheat follows an entirely different calendar. By charting these patterns with satellite data, agricultural analysts can monitor crop health across millions of hectares, detect drought stress weeks before it is visible on the ground, and forecast yields months before harvest.
+        </p>
+        <p>
+            In this lab, we will build the same type of phenology analysis used by the USDA and international food security organizations. Pretty cool, right?
+        </p>
       </section>
 
       <section>
-        <h2>Before You Start</h2>
+        <h2>Before We Start</h2>
         <ul>
           <li><strong>Prerequisites:</strong> Time Series Charting module, Agricultural Monitoring module</li>
           <li><strong>Estimated time:</strong> 40 minutes</li>
@@ -71,10 +76,10 @@
 
       <!-- Part 1 -->
       <section>
-        <h2>Lab Instructions</h2>
+        <h2>Let's Get Started</h2>
 
-        <h3>Part 1 - Load the USDA Cropland Data Layer</h3>
-        <p>Start by loading the 2023 CDL to see what crops are planted across central Iowa. The CDL uses numeric codes for each crop type, and it includes a built-in color palette.</p>
+        <h3>Part 1: What's growing here?</h3>
+        <p>Let's start by loading the 2023 CDL to see what crops are planted across central Iowa. The CDL uses numeric codes for each crop type, and it comes with a built-in color palette that makes the map look like a patchwork quilt.</p>
 <pre><code>// ===== PART 1: Load the Cropland Data Layer =====
 
 // Define study area in central Iowa
@@ -105,8 +110,8 @@ print('CDL loaded - Key codes: 1=Corn, 5=Soybeans, 24=Winter Wheat');</code></pr
 
       <!-- Part 2 -->
       <section>
-        <h3>Part 2 - Select sample points for each crop</h3>
-        <p>Now use the CDL to place sample points in fields of known crop type. The key is to choose points in the center of large, uniform fields to avoid mixed pixels.</p>
+        <h3>Part 2: Dropping pins in the fields</h3>
+        <p>Now let's use the CDL to place sample points in fields of known crop type. The trick is to choose points in the center of large, uniform fields to avoid mixed pixels. Think of it like taking a soil sample: we want a clean reading, not a mix of two fields.</p>
 <pre><code>// ===== PART 2: Define crop sample points =====
 
 // Corn field in central Iowa (CDL code 1)
@@ -147,8 +152,8 @@ Map.addLayer(wheatPoint, {color: 'orange'}, 'Wheat Sample');</code></pre>
 
       <!-- Part 3 -->
       <section>
-        <h3>Part 3 - Build a MODIS EVI time series</h3>
-        <p>Load the full year of MODIS EVI data and apply the scale factor. MODIS MOD13A2 provides 16-day composites at 1 km resolution with pre-computed EVI values.</p>
+        <h3>Part 3: Loading the satellite heartbeat monitor</h3>
+        <p>Let's load a full year of MODIS EVI data and apply the scale factor. MODIS MOD13A2 gives us 16-day composites at 1 km resolution with pre-computed EVI values. Think of each image as a check-up on the fields' health.</p>
 <pre><code>// ===== PART 3: Prepare MODIS EVI time series =====
 
 // Load MODIS 16-day EVI for 2023
@@ -175,8 +180,8 @@ print('Date range:', eviScaled.first().get('system:time_start'));</code></pre>
 
       <!-- Part 4 -->
       <section>
-        <h3>Part 4 - Create phenology charts</h3>
-        <p>Chart EVI over time for all three crop types on a single graph. This comparison reveals how each crop's growing season differs in timing, intensity, and duration.</p>
+        <h3>Part 4: The phenology showdown</h3>
+        <p>Here is the moment we have been building toward. Let's chart EVI over time for all three crop types on a single graph. This comparison reveals how each crop's growing season differs in timing, intensity, and duration. It is like watching three different runners in a race.</p>
 <pre><code>// ===== PART 4: Create phenology charts =====
 
 // Create a FeatureCollection with labeled crop points
@@ -226,8 +231,8 @@ print(cornChart);</code></pre>
 
       <!-- Part 5 -->
       <section>
-        <h3>Part 5 - Compare phenology patterns</h3>
-        <p>Now analyze the timing differences between crops. Identify when each crop greens up, peaks, and senesces. This information is critical for crop identification and yield forecasting.</p>
+        <h3>Part 5: Reading the growth curves</h3>
+        <p>Now let's analyze the timing differences between our crops. We will look at when each one greens up, hits its peak, and starts to fade. This information is exactly what crop forecasters use to predict yields and spot problems early.</p>
 <pre><code>// ===== PART 5: Analyze phenology timing =====
 
 // Create individual charts to study timing more closely
@@ -271,8 +276,8 @@ print('Winter Wheat: Green-up ~Mar, Peak ~May, Harvest ~June');</code></pre>
 
       <!-- Part 6 -->
       <section>
-        <h3>Part 6 - Calculate peak EVI and growing season length</h3>
-        <p>Extract quantitative metrics from the time series. Peak EVI correlates with crop vigor, while growing season length varies by crop type and latitude.</p>
+        <h3>Part 6: Putting numbers on the curves</h3>
+        <p>Let's extract some hard numbers from our time series. Peak EVI tells us about crop vigor, while growing season length varies by crop type and latitude. These are the metrics that matter for yield forecasting.</p>
 <pre><code>// ===== PART 6: Quantitative phenology metrics =====
 
 // Calculate peak (maximum) EVI for each crop point

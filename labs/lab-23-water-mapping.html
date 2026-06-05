@@ -14,36 +14,39 @@
         </nav>
 
         <header class="lab-header">
-            <h1>Lab 23 - Water Mapping</h1>
+            <h1>Lab 23 - Where Did the Water Go?</h1>
             <p><em><strong>Objective: Map a water body using spectral indices and compare with the JRC Global Surface
                         Water dataset.</strong></em></p>
         </header>
 
         <main class="lab-content">
             <section class="learning-objectives">
-                <h3>Learning objectives</h3>
+                <h3>What we'll learn</h3>
                 <ul>
                     <li>Calculate MNDWI from Sentinel-2 imagery to detect water.</li>
                     <li>Apply threshold values to create a binary water mask.</li>
                     <li>Calculate water surface area in square kilometers.</li>
                     <li>Load and interpret JRC Global Surface Water layers.</li>
-                    <li>Compare your index-derived water map with the JRC occurrence layer.</li>
+                    <li>Compare our index-derived water map with the JRC occurrence layer.</li>
                     <li>Identify areas of historical water loss using transition data.</li>
                 </ul>
             </section>
 
             <section class="why-it-matters">
-                <h3>Why it matters</h3>
+                <h3>Why this matters</h3>
                 <p>
-                    Lake Mead, the largest reservoir in the United States, has lost over 70% of its water volume
-                    since 2000 due to prolonged drought and increasing demand. It supplies water to over 25 million
-                    people across Nevada, Arizona, California, and Mexico. In this lab you will map its current
-                    extent, measure its area, and compare it against historical records to quantify the decline.
+                    Lake Mead is the largest reservoir in the United States, and it's in trouble. Since 2000, it has lost over 70% of its water volume due to prolonged drought and increasing demand.
+                </p>
+                <p>
+                    This one lake supplies water to over 25 million people across Nevada, Arizona, California, and Mexico. That's a lot of people depending on a shrinking resource.
+                </p>
+                <p>
+                    In this lab, we'll map its current extent, measure its area, and compare it against historical records to see just how dramatic the decline has been. Think of it like taking a patient's vital signs and then comparing them to their health records from 40 years ago.
                 </p>
             </section>
 
             <section>
-                <h2>Before You Start</h2>
+                <h2>Before We Begin</h2>
                 <ul>
                     <li><strong>Prerequisites:</strong> Spectral Indices module, Hydrology modules (Introduction and
                         JRC Global Surface Water).</li>
@@ -74,13 +77,15 @@
 
             <!-- Lab Instructions -->
             <section>
-                <h2>Lab Instructions</h2>
+                <h2>Let's Get Started</h2>
 
                 <!-- Part 1 -->
-                <h3>Part 1 - Load Sentinel-2 and calculate MNDWI</h3>
+                <h3>Part 1: Our first water map</h3>
                 <p>
-                    Start by loading a cloud-free Sentinel-2 image over Lake Mead and calculating MNDWI.
-                    We filter for summer imagery when water extent is relatively stable.
+                    Let's start by loading a cloud-free Sentinel-2 image over Lake Mead and calculating MNDWI. We'll filter for summer imagery when water extent is relatively stable.
+                </p>
+                <p>
+                    MNDWI works like a water detector: it compares Green light (which water reflects) to SWIR light (which water absorbs). The bigger the difference, the more confident we are that a pixel is water.
                 </p>
 <pre><code>// ===== Part 1: Load Sentinel-2 and calculate MNDWI =====
 var lakeMead = ee.Geometry.Point([-114.75, 36.15]);
@@ -105,23 +110,25 @@ Map.addLayer(mndwi, {
 }, 'MNDWI');</code></pre>
                 <p><strong>Understanding the code:</strong></p>
                 <ul>
-                    <li><code>.sort('CLOUDY_PIXEL_PERCENTAGE').first()</code> selects the least cloudy image.</li>
+                    <li><code>.sort('CLOUDY_PIXEL_PERCENTAGE').first()</code> grabs the least cloudy image. Nice and clean.</li>
                     <li><code>.divide(10000)</code> converts Sentinel-2 DN values to surface reflectance.</li>
                     <li><code>.normalizedDifference(['B3', 'B11'])</code> computes (B3 - B11) / (B3 + B11).</li>
                 </ul>
                 <div class="expected-output">
                     <h4>What you should see</h4>
-                    <p>A continuous MNDWI image where Lake Mead appears in blue (positive values) and the surrounding
-                        desert appears in brown (negative values).</p>
+                    <p>A continuous MNDWI image where Lake Mead glows in blue (positive values) and the surrounding
+                        desert appears in brown (negative values). The contrast should be striking.</p>
                 </div>
             </section>
 
             <section>
                 <!-- Part 2 -->
-                <h3>Part 2 - Create a binary water mask</h3>
+                <h3>Part 2: Drawing the line between water and land</h3>
                 <p>
-                    Apply a threshold to convert the continuous MNDWI into a binary water/non-water map. Use
-                    the Inspector tool to check values at the water's edge to refine your threshold.
+                    Now let's turn our continuous MNDWI into a simple yes/no water map. We do this by picking a threshold: anything above it is water, everything else is not.
+                </p>
+                <p>
+                    Here's the fun part: try using the Inspector tool to click around the water's edge and see what values you get. That will help us pick the right cutoff.
                 </p>
 <pre><code>// ===== Part 2: Apply threshold for water mask =====
 var waterMask = mndwi.gt(0);
@@ -135,17 +142,16 @@ Map.addLayer(waterRefined.selfMask(), {palette: ['003399']}, 'Water Mask (thresh
                 <p><strong>Understanding the code:</strong></p>
                 <ul>
                     <li><code>.gt(0)</code> creates a binary image: 1 where MNDWI > 0, and 0 elsewhere.</li>
-                    <li><code>.selfMask()</code> masks out pixels with value 0, making non-water pixels transparent.</li>
-                    <li>A higher threshold (0.15) removes some false positives from wet soil or shadows.</li>
+                    <li><code>.selfMask()</code> masks out pixels with value 0, making non-water pixels transparent. This keeps our map clean.</li>
+                    <li>A higher threshold (0.15) removes some false positives from wet soil or shadows. Think of it like tightening the definition of what counts as "water."</li>
                 </ul>
             </section>
 
             <section>
                 <!-- Part 3 -->
-                <h3>Part 3 - Calculate water surface area</h3>
+                <h3>Part 3: How big is the lake right now?</h3>
                 <p>
-                    Use <code>ee.Image.pixelArea()</code> and <code>reduceRegion()</code> to calculate the
-                    total water surface area within a region around the lake.
+                    Here's where remote sensing gets powerful. We can go from a pretty map to an actual measurement. Let's use <code>ee.Image.pixelArea()</code> and <code>reduceRegion()</code> to calculate the total water surface area.
                 </p>
 <pre><code>// ===== Part 3: Calculate water area in km² =====
 var roi = lakeMead.buffer(50000); // 50 km buffer
@@ -166,7 +172,7 @@ print('Water surface area (km²):', areaKm2);
 // Recent levels have been ~200-300 km²</code></pre>
                 <p><strong>Understanding the code:</strong></p>
                 <ul>
-                    <li><code>ee.Image.pixelArea()</code> returns an image where each pixel holds its area in m².</li>
+                    <li><code>ee.Image.pixelArea()</code> returns an image where each pixel holds its area in m². Think of it like a grid of tiny measuring tapes.</li>
                     <li><code>.updateMask(waterMask)</code> keeps only water pixels in the area calculation.</li>
                     <li><code>ee.Reducer.sum()</code> adds up all water pixel areas within the ROI.</li>
                     <li>Dividing by 1,000,000 converts m² to km².</li>
@@ -175,11 +181,12 @@ print('Water surface area (km²):', areaKm2);
 
             <section>
                 <!-- Part 4 -->
-                <h3>Part 4 - Load JRC GSW and compare with MNDWI</h3>
+                <h3>Part 4: What does 40 years of history tell us?</h3>
                 <p>
-                    Load the JRC Global Surface Water occurrence layer and visually compare it with your
-                    MNDWI-derived water mask. The JRC data represents 40 years of observations, while your
-                    MNDWI shows a single snapshot in time.
+                    Our MNDWI gives us a snapshot, a single moment in time. But what if we could see every moment from the last four decades?
+                </p>
+                <p>
+                    That's exactly what the JRC Global Surface Water dataset gives us. It analyzed the entire Landsat archive (1984 to present) and tells us how often each pixel has been water. Let's load it and compare.
                 </p>
 <pre><code>// ===== Part 4: Load JRC GSW occurrence =====
 var gsw = ee.Image('JRC/GSW1_4/GlobalSurfaceWater');
@@ -199,17 +206,16 @@ Map.addLayer(waterMask.selfMask(), {palette: ['00FF00']}, 'Your MNDWI Water Mask
                 <p><strong>Understanding the code:</strong></p>
                 <ul>
                     <li>The JRC occurrence layer shows how often a pixel was water from 1984 to present.</li>
-                    <li>Areas where occurrence is high but your MNDWI shows no water indicate water loss.</li>
-                    <li>Toggle layers on and off to compare the two approaches.</li>
+                    <li>Here's the key insight: areas where occurrence is high but our MNDWI shows no water? That's where water has been lost.</li>
+                    <li>Toggle layers on and off to compare the two approaches. The gaps tell a powerful story.</li>
                 </ul>
             </section>
 
             <section>
                 <!-- Part 5 -->
-                <h3>Part 5 - Visualize water transitions</h3>
+                <h3>Part 5: Reading the story of change</h3>
                 <p>
-                    The JRC transition layer categorizes each pixel by how its water status has changed.
-                    Identify where water has been permanently lost around Lake Mead.
+                    The JRC transition layer is like a biography for each pixel. It tells us how that pixel's relationship with water has changed over the decades. Let's see where water has been permanently lost around Lake Mead.
                 </p>
 <pre><code>// ===== Part 5: Water transitions and loss =====
 var transition = gsw.select('transition');
@@ -233,18 +239,16 @@ Map.addLayer(permToSeasonal.selfMask(), {palette: ['FFA500']}, 'Permanent to Sea
                 <div class="expected-output">
                     <h4>What you should see</h4>
                     <p>
-                        Around Lake Mead, you should see a band of red pixels (lost permanent water) along the
-                        former shoreline, showing how far the water has retreated. Orange pixels (permanent to
-                        seasonal) may appear in shallow embayments that now dry up periodically.
+                        Around Lake Mead, you should see a band of red pixels (lost permanent water) tracing the former shoreline, like a bathtub ring from space. It shows exactly how far the water has retreated. Orange pixels (permanent to seasonal) may appear in shallow embayments that now dry up periodically.
                     </p>
                 </div>
             </section>
 
             <section>
                 <!-- Part 6 -->
-                <h3>Part 6 - Compare current vs. historical maximum extent</h3>
+                <h3>Part 6: Putting a number on the loss</h3>
                 <p>
-                    Quantify the difference between the lake's historical maximum extent and its current state.
+                    Let's quantify the difference between the lake's historical maximum extent and its current state. This is where we turn our visual observations into hard numbers.
                 </p>
 <pre><code>// ===== Part 6: Historical vs. current extent =====
 var maxExtent = gsw.select('max_extent');
@@ -280,30 +284,28 @@ Map.addLayer(currentWater.selfMask(), {palette: ['0000CC']}, 'Current Permanent 
                 <div class="expected-output">
                     <h4>What you should see</h4>
                     <p>
-                        The pale blue historical extent should be noticeably larger than the dark blue current water,
-                        forming a "bathtub ring" effect. The console will print the area difference and the percentage
-                        of water lost.
+                        The pale blue historical extent should be noticeably larger than the dark blue current water, forming a visible "bathtub ring" effect. The console will print the area difference and the percentage of water lost. Those numbers tell a sobering story.
                     </p>
                 </div>
             </section>
 
             <div class="try-it">
-                <h4>Try it: Explore another water body</h4>
+                <h4>Try it: Explore another disappearing lake</h4>
                 <p>
-                    Navigate to another water body that has experienced significant change. Good options include:
+                    Lake Mead isn't alone. Navigate to another water body that has experienced dramatic change. Great options include:
                     the Aral Sea (<code>ee.Geometry.Point([59.0, 44.5])</code>), Lake Chad
                     (<code>ee.Geometry.Point([14.0, 13.3])</code>), or Lake Urmia
-                    (<code>ee.Geometry.Point([45.5, 37.7])</code>). Repeat the analysis and compare results.
+                    (<code>ee.Geometry.Point([45.5, 37.7])</code>). Repeat the analysis and compare results. Each lake has its own story.
                 </p>
             </div>
 
             <section class="self-check">
                 <h3>Quick self-check</h3>
                 <ol>
-                    <li>What is the difference between your MNDWI water map and the JRC occurrence layer?</li>
-                    <li>Why might the JRC occurrence show water in areas where your MNDWI does not?</li>
+                    <li>What is the difference between our MNDWI water map and the JRC occurrence layer?</li>
+                    <li>Why might the JRC occurrence show water in areas where our MNDWI does not?</li>
                     <li>What transition class code represents permanently lost water?</li>
-                    <li>How did you convert pixel area from square meters to square kilometers?</li>
+                    <li>How did we convert pixel area from square meters to square kilometers?</li>
                 </ol>
             </section>
 
@@ -312,7 +314,7 @@ Map.addLayer(currentWater.selfMask(), {palette: ['0000CC']}, 'Current Permanent 
                 <div class="issue">
                     <strong>Problem: MNDWI water mask includes desert or shadow pixels</strong>
                     <p><strong>Solution:</strong> Increase your threshold from 0 to 0.15 or 0.2. Use the
-                        Inspector tool to check MNDWI values at problem pixels.</p>
+                        Inspector tool to check MNDWI values at the problem pixels. A little detective work goes a long way.</p>
                 </div>
                 <div class="issue">
                     <strong>Problem: Area calculation returns a very large or very small number</strong>
@@ -329,20 +331,20 @@ Map.addLayer(currentWater.selfMask(), {palette: ['0000CC']}, 'Current Permanent 
             <section class="key-concepts">
                 <h3>Key Takeaways</h3>
                 <ul>
-                    <li>MNDWI provides a snapshot of current water extent from a single image.</li>
-                    <li>The JRC GSW dataset provides 40 years of historical context for water body changes.</li>
-                    <li>Combining spectral index mapping with historical datasets gives a more complete picture.</li>
-                    <li><code>pixelArea()</code> and <code>reduceRegion()</code> let you convert pixels to real-world area measurements.</li>
-                    <li>Lake Mead has lost a significant fraction of its surface area due to drought and demand.</li>
+                    <li>MNDWI gives us a snapshot of current water extent from a single image.</li>
+                    <li>The JRC GSW dataset adds 40 years of historical context, showing us the bigger picture.</li>
+                    <li>Combining spectral index mapping with historical datasets gives us a much more complete understanding than either one alone.</li>
+                    <li><code>pixelArea()</code> and <code>reduceRegion()</code> let us convert pixels into real-world area measurements.</li>
+                    <li>Lake Mead has lost a significant fraction of its surface area due to drought and demand, and satellite data makes that loss impossible to ignore.</li>
                 </ul>
             </section>
 
             <section class="common-mistakes">
                 <h3>Common mistakes</h3>
                 <ul>
-                    <li>Forgetting <code>.divide(10000)</code> when using Sentinel-2 SR data.</li>
-                    <li>Using <code>.gt()</code> on the JRC transition band, which is categorical (use <code>.eq()</code>).</li>
-                    <li>Not specifying <code>maxPixels: 1e9</code> in <code>reduceRegion()</code>, causing computation errors.</li>
+                    <li>Forgetting <code>.divide(10000)</code> when using Sentinel-2 SR data. Your MNDWI values will be way off without this.</li>
+                    <li>Using <code>.gt()</code> on the JRC transition band, which is categorical. Use <code>.eq()</code> instead since each number represents a class, not a quantity.</li>
+                    <li>Not specifying <code>maxPixels: 1e9</code> in <code>reduceRegion()</code>, causing computation errors on large areas.</li>
                     <li>Confusing JRC occurrence percentage (0 to 100) with a binary mask (0 or 1).</li>
                 </ul>
             </section>
@@ -351,7 +353,7 @@ Map.addLayer(currentWater.selfMask(), {palette: ['0000CC']}, 'Current Permanent 
                 <h3>Pro tips</h3>
                 <ul>
                     <li>Export your water mask as a GeoTIFF to use in ArcGIS Pro or QGIS for further analysis.</li>
-                    <li>To track seasonal changes, calculate MNDWI for multiple dates across the year and compare.</li>
+                    <li>To track seasonal changes, calculate MNDWI for multiple dates across the year and compare. You'll be surprised how much a lake can change between spring and fall.</li>
                     <li>The JRC monthly history dataset (<code>JRC/GSW1_4/MonthlyHistory</code>) provides
                         month-by-month water observations for detailed temporal analysis.</li>
                 </ul>

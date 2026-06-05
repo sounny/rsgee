@@ -19,9 +19,10 @@
 
         <main class="lab-content">
             <p>
-                Every GEE analysis starts with loading and manipulating images. Before you can compute indices,
-                classify land cover, or detect change, you need to understand the building blocks: how a single
-                image differs from a collection, how to select bands, clip to a region, and attach computed layers.
+                Before we can compute indices, classify land cover, or detect change, we need to understand
+                the building blocks. Think of this module as learning your tools before building the house.
+                We will cover how a single image differs from a collection, how to pick the bands you need,
+                clip to a study area, and attach computed layers. Let's jump in.
             </p>
 
             <section class="learning-objectives">
@@ -37,10 +38,10 @@
             <section class="why-it-matters">
                 <h3>Why it matters</h3>
                 <p>
-                    Confusing an Image with an ImageCollection is one of the most common beginner errors. It leads
-                    to cryptic error messages and unexpected results. Understanding the distinction, along with
-                    core operations like band selection and clipping, gives you a reliable foundation for every
-                    analysis you will build in this course.
+                    Here is one of the most common beginner mistakes: confusing an Image with an ImageCollection.
+                    It leads to cryptic errors, and it will happen to you at least once. Understanding the
+                    difference (along with core operations like band selection and clipping) gives you a
+                    reliable foundation for everything we build in this course.
                 </p>
             </section>
 
@@ -60,11 +61,11 @@
 
             <!-- Quick Win -->
             <section>
-                <h2>Quick win: load, select, clip, and add NDVI</h2>
+                <h2>Your first win: load, select, clip, and add NDVI</h2>
                 <p>
-                    This script loads a single Landsat 8 image over San Francisco, selects the visible bands,
-                    clips it to a county boundary, and adds a computed NDVI band. You will use all four core
-                    operations in under 20 lines.
+                    Let's get a quick win. This script loads a single Landsat 8 image over San Francisco,
+                    selects the visible bands, clips it to a county boundary, and adds a computed NDVI band.
+                    All four core operations in under 20 lines.
                 </p>
 <pre><code>// Load a specific Landsat 8 image by ID
 var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20230715');
@@ -98,13 +99,12 @@ Map.addLayer(withNDVI.select('NDVI'), {min: 0, max: 0.8, palette: ['brown', 'yel
             </section>
 
             <!-- Section 1: Image vs ImageCollection -->
-            <section>
-                <h2>Image vs. ImageCollection</h2>
+                <h2>What's the difference? Image vs. ImageCollection</h2>
                 <p>
-                    An <code>ee.Image</code> is a single photograph: one acquisition, one date, one set of bands.
-                    An <code>ee.ImageCollection</code> is a photo album: many images grouped together, usually by
-                    sensor and time. The analogy is simple but critical, because functions that work on one type
-                    often do not work on the other.
+                    Think of an <code>ee.Image</code> as a single photograph: one acquisition, one date, one
+                    set of bands. An <code>ee.ImageCollection</code> is the whole photo album: many images
+                    grouped together, usually by sensor and time. This analogy is simple, but it is critical.
+                    Functions that work on one type often do not work on the other.
                 </p>
                 <table>
                     <thead>
@@ -151,10 +151,10 @@ Map.addLayer(withNDVI.select('NDVI'), {min: 0, max: 0.8, palette: ['brown', 'yel
 
             <!-- Section 2: Exploring an Image -->
             <section>
-                <h2>Exploring an Image</h2>
+                <h2>Peeking inside an image</h2>
                 <p>
-                    Before processing, inspect what you have. GEE images carry rich metadata and band information
-                    that tells you exactly what data is available.
+                    Before we process anything, let's peek inside. GEE images carry rich metadata and band
+                    information that tells us exactly what data is available.
                 </p>
 <pre><code>var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20230715');
 
@@ -184,10 +184,10 @@ print('B4 scale (meters):', image.select('SR_B4').projection().nominalScale());<
 
             <!-- Section 3: Selecting Bands -->
             <section>
-                <h2>Selecting Bands</h2>
+                <h2>Picking just the bands you need</h2>
                 <p>
-                    Most images contain more bands than you need. The <code>.select()</code> method extracts only
-                    the bands you want, which keeps your scripts efficient and avoids confusion.
+                    Most images contain way more bands than we need. The <code>.select()</code> method pulls out
+                    only the ones we want, keeping scripts clean and fast.
                 </p>
 <pre><code>var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20230715');
 
@@ -214,11 +214,11 @@ print('Renamed bands:', renamed.bandNames()); // NIR, RED</code></pre>
 
             <!-- Section 4: Clipping to a Region -->
             <section>
-                <h2>Clipping to a Region</h2>
+                <h2>Cutting to your study area</h2>
                 <p>
                     The <code>.clip()</code> method masks an image to a geometry or feature boundary. Pixels
-                    outside the boundary become transparent. This is useful for focusing on a study area and
-                    for clean map displays.
+                    outside become transparent. It is great for clean map displays and focusing on our area
+                    of interest.
                 </p>
 <pre><code>// Clip to a simple geometry
 var roi = ee.Geometry.Rectangle([-122.5, 37.6, -122.3, 37.8]);
@@ -242,11 +242,11 @@ Map.addLayer(clippedToState.select(['SR_B4', 'SR_B3', 'SR_B2'])
 
             <!-- Section 5: Mosaicking Images -->
             <section>
-                <h2>Mosaicking Images</h2>
+                <h2>Stitching scenes together with mosaic</h2>
                 <p>
-                    When your study area spans multiple satellite scenes, <code>.mosaic()</code> stitches them into
-                    a single seamless image. The last image in the collection "wins" where scenes overlap, so sort
-                    order matters.
+                    When our study area spans multiple satellite scenes, <code>.mosaic()</code> stitches them
+                    into a single seamless image. Here is the catch: the last image in the collection "wins"
+                    where scenes overlap, so sort order matters.
                 </p>
 <pre><code>// Create a mosaic from multiple Landsat scenes
 var collection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
@@ -271,11 +271,11 @@ Map.addLayer(scaled, {bands: ['SR_B4', 'SR_B3', 'SR_B2'], min: 0, max: 0.3}, 'Mo
 
             <!-- Section 6: Adding Bands -->
             <section>
-                <h2>Adding Bands</h2>
+                <h2>Stacking on new layers with addBands</h2>
                 <p>
-                    The <code>.addBands()</code> method attaches new layers to an existing image. This is how you
-                    include computed indices (NDVI, NDWI), elevation data, or any derived layer alongside the
-                    original bands.
+                    The <code>.addBands()</code> method attaches new layers to an existing image. This is how
+                    we include computed indices (NDVI, NDWI), elevation data, or any derived layer alongside
+                    the original bands. Think of it like adding a new sheet to a stack of transparencies.
                 </p>
 <pre><code>var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20230715');
 var scaled = image.select('SR_B.*').multiply(0.0000275).add(-0.2);
@@ -302,10 +302,11 @@ print('With elevation:', withElevation.bandNames());</code></pre>
 
             <!-- Section 7: Image Metadata -->
             <section>
-                <h2>Image Metadata</h2>
+                <h2>Reading the fine print: image metadata</h2>
                 <p>
-                    Metadata properties tell you when, where, and how an image was captured. This information is
-                    essential for quality control, filtering, and documentation.
+                    Metadata properties tell us when, where, and how an image was captured. Think of it as
+                    the EXIF data on your phone photos, but for satellites. This information is essential for
+                    quality control, filtering, and documenting our analyses.
                 </p>
 <pre><code>var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20230715');
 

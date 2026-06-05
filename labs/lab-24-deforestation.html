@@ -14,7 +14,7 @@
         </nav>
 
         <header class="lab-header">
-            <h1>Lab 24 - Deforestation Analysis</h1>
+            <h1>Lab 24 - Watching the Forest Disappear</h1>
             <p><em><strong>Objective: Analyze deforestation patterns using the Hansen Global Forest Change
                         dataset.</strong></em></p>
         </header>
@@ -32,18 +32,22 @@
             </section>
 
             <section class="why-it-matters">
-                <h3>Why it matters</h3>
+                <h3>Why this matters</h3>
                 <p>
                     Rondonia, in the western Brazilian Amazon, has experienced some of the fastest deforestation
                     rates in the world since the 1970s. Roads built into the forest created the distinctive
-                    "fishbone" clearing pattern visible from space. Understanding where and when deforestation
-                    occurs is essential for conservation planning, carbon accounting, and enforcement of environmental
-                    regulations.
+                    "fishbone" clearing pattern that is visible from space. It looks like skeleton fingers
+                    reaching into green.
+                </p>
+                <p>
+                    Understanding where and when deforestation occurs is essential for conservation planning,
+                    carbon accounting, and enforcement of environmental regulations. In this lab, we will
+                    use satellite data to see the destruction unfold, year by year.
                 </p>
             </section>
 
             <section>
-                <h2>Before You Start</h2>
+                <h2>Before We Start</h2>
                 <ul>
                     <li><strong>Prerequisites:</strong> Reducers module, Time Series module, Deforestation &
                         Forest Monitoring module.</li>
@@ -72,13 +76,14 @@
 
             <!-- Lab Instructions -->
             <section>
-                <h2>Lab Instructions</h2>
+                <h2>Let's Get Started</h2>
 
                 <!-- Part 1 -->
-                <h3>Part 1 - Load Hansen GFC and visualize tree cover</h3>
+                <h3>Part 1: What did the forest look like in 2000?</h3>
                 <p>
-                    Start by loading the Hansen dataset and visualizing the tree cover layer for the year 2000.
-                    This baseline shows what the forest looked like before the study period began.
+                    Let's start by loading the Hansen dataset and looking at the tree cover layer for the year 2000.
+                    This baseline shows us what the forest looked like before the study period began. Think of it
+                    as the "before" photo.
                 </p>
 <pre><code>// ===== Part 1: Load Hansen GFC and map tree cover =====
 var roi = ee.Geometry.Rectangle([-64, -12, -60, -8]); // Rondonia region
@@ -116,10 +121,11 @@ print('GFC bands:', gfc.bandNames());</code></pre>
 
             <section>
                 <!-- Part 2 -->
-                <h3>Part 2 - Map forest loss locations</h3>
+                <h3>Part 2: Where did the forest go?</h3>
                 <p>
-                    Overlay the forest loss layer on top of the tree cover map. The loss band is binary: 1 where
-                    loss occurred, 0 where it did not.
+                    Now let's overlay the forest loss layer on top of our tree cover map. The loss band is
+                    binary: 1 where loss occurred, 0 where it did not. Think of it like a red marker highlighting
+                    every spot where the forest was cut down.
                 </p>
 <pre><code>// ===== Part 2: Map forest loss =====
 var loss = gfc.select('loss');
@@ -150,10 +156,11 @@ Map.addLayer(gain.selfMask().clip(roi), {
 
             <section>
                 <!-- Part 3 -->
-                <h3>Part 3 - Create a loss year visualization</h3>
+                <h3>Part 3: When did it happen?</h3>
                 <p>
-                    The <code>lossyear</code> band encodes the year each pixel was deforested. Mapping it with
-                    a color ramp reveals the spatial progression of deforestation over time.
+                    Here is where it gets really interesting. The <code>lossyear</code> band tells us the exact year
+                    each pixel was deforested. Mapping it with a color ramp lets us watch deforestation march
+                    across the landscape over two decades.
                 </p>
 <pre><code>// ===== Part 3: Visualize loss year with color ramp =====
 var lossYear = gfc.select('lossyear');
@@ -191,10 +198,10 @@ Map.addLayer(recentLoss.selfMask().clip(roi), {
 
             <section>
                 <!-- Part 4 -->
-                <h3>Part 4 - Calculate total forest loss area</h3>
+                <h3>Part 4: Putting a number on the destruction</h3>
                 <p>
-                    Convert the forest loss pixels into a physical area measurement using
-                    <code>ee.Image.pixelArea()</code>.
+                    Let's convert those loss pixels into a real measurement. How many hectares of forest have
+                    we lost? We will use <code>ee.Image.pixelArea()</code> to find out.
                 </p>
 <pre><code>// ===== Part 4: Calculate total loss area =====
 var lossAreaImage = forestLoss.multiply(ee.Image.pixelArea());
@@ -236,10 +243,11 @@ print('Percentage of forest lost:', lossHa.divide(forestHa).multiply(100));</cod
 
             <section>
                 <!-- Part 5 -->
-                <h3>Part 5 - Group loss by year and create a chart</h3>
+                <h3>Part 5: The annual story</h3>
                 <p>
-                    Use a grouped reducer to calculate forest loss area for each year, then visualize the
-                    results as a bar chart.
+                    Now let's break our total loss down by year. We will use a grouped reducer to get the area
+                    lost each year, then chart it. This is where patterns start to jump out: which years were
+                    the worst?
                 </p>
 <pre><code>// ===== Part 5: Annual deforestation chart =====
 // Create image with area and loss year bands
@@ -290,11 +298,11 @@ print(chart);</code></pre>
 
             <section>
                 <!-- Part 6 -->
-                <h3>Part 6 - Compare two sub-regions</h3>
+                <h3>Part 6: Do roads drive deforestation?</h3>
                 <p>
-                    Compare deforestation between two sub-regions with different land use pressures: one along
-                    a major highway (high deforestation) and one deeper in the interior (potentially lower deforestation
-                    or more recent clearing).
+                    Let's compare deforestation between two sub-regions: one along a major highway (where we
+                    expect heavy clearing) and one deeper in the interior. The contrast should tell us a lot
+                    about what drives deforestation.
                 </p>
 <pre><code>// ===== Part 6: Compare two sub-regions =====
 // Region A: Along the highway (active deforestation frontier)
