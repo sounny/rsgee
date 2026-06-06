@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Widgets | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 7
+        </nav>
+
+        <header class="lab-header">
+            <h1>UI Widgets in Earth Engine</h1>
+        </header>
+
+        <main class="lab-content">
+            <p>
+                Earth Engine's UI library lets you build interactive applications with buttons, sliders,
+                dropdowns, and more. This module covers the core widgets you need to create user-friendly apps.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Create buttons, sliders, textboxes, and select widgets.</li>
+                    <li>Handle widget events (onClick, onChange).</li>
+                    <li>Organize widgets in panels with layouts.</li>
+                    <li>Update the map based on user interactions.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Interactive controls let non-coders explore your analysis. A slider to change thresholds,
+                    a dropdown to select dates—these turn static scripts into powerful tools anyone can use.
+                </p>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key vocabulary</h3>
+                <dl>
+                    <dt>Widget</dt>
+                    <dd>An interactive UI element (button, slider, label, etc.).</dd>
+                    <dt>Panel</dt>
+                    <dd>A container that holds and organizes multiple widgets.</dd>
+                    <dt>Callback</dt>
+                    <dd>A function that runs when a widget event occurs (click, change).</dd>
+                    <dt>ui.root</dt>
+                    <dd>The root container for all UI elements in an Earth Engine app.</dd>
+                </dl>
+            </section>
+
+            <section>
+                <h2>Quick win: Interactive NDVI threshold</h2>
+                <p>This example creates a slider that updates the NDVI threshold in real-time:</p>
+                <pre><code>// Load a Landsat image
+var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623')
+  .multiply(0.0000275).add(-0.2);
+var ndvi = image.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI');
+
+// Center and add base layer
+Map.centerObject(image, 10);
+Map.addLayer(ndvi, {min: 0, max: 0.8, palette: ['brown', 'yellow', 'green']}, 'NDVI');
+
+// Create a slider widget
+var slider = ui.Slider({
+  min: 0,
+  max: 1,
+  value: 0.3,
+  step: 0.05,
+  style: {width: '300px'}
+});
+
+// Create a label to show current value
+var label = ui.Label('Threshold: 0.3');
+
+// Define callback function
+var updateThreshold = function(value) {
+  // Update label
+  label.setValue('Threshold: ' + value.toFixed(2));
+  
+  // Remove old mask layer
+  var layers = Map.layers();
+  if (layers.length() > 1) {
+    layers.remove(layers.get(1));
+  }
+  
+  // Create and add new mask
+  var mask = ndvi.gte(value);
+  Map.addLayer(mask.updateMask(mask), {palette: ['00ff00']}, 'NDVI >= ' + value);
+};
+
+// Connect slider to callback
+slider.onSlide(updateThreshold);
+
+// Create panel and add to map
+var panel = ui.Panel({
+  widgets: [ui.Label('NDVI Threshold Selector'), slider, label],
+  style: {position: 'top-left', padding: '8px'}
+});
+Map.add(panel);</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A panel with a slider appears on the map. Moving the slider updates the green mask
+                        showing pixels above the selected NDVI threshold.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Widget reference</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Widget</th>
+                            <th>Purpose</th>
+                            <th>Key Event</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>ui.Label()</code></td>
+                            <td>Display text</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td><code>ui.Button()</code></td>
+                            <td>Trigger actions</td>
+                            <td><code>onClick()</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ui.Slider()</code></td>
+                            <td>Select numeric value</td>
+                            <td><code>onSlide()</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ui.Textbox()</code></td>
+                            <td>Text input</td>
+                            <td><code>onChange()</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ui.Select()</code></td>
+                            <td>Dropdown menu</td>
+                            <td><code>onChange()</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ui.Checkbox()</code></td>
+                            <td>Toggle option</td>
+                            <td><code>onChange()</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ui.DateSlider()</code></td>
+                            <td>Select date range</td>
+                            <td><code>onChange()</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ui.Chart</code></td>
+                            <td>Display charts</td>
+                            <td>—</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>More examples</h2>
+
+                <h3>Button</h3>
+                <pre><code>var button = ui.Button({
+  label: 'Run Analysis',
+  onClick: function() {
+    print('Button clicked!');
+    // Add your analysis code here
+  }
+});
+Map.add(button);</code></pre>
+
+                <h3>Select (Dropdown)</h3>
+                <pre><code>var select = ui.Select({
+  items: ['Landsat 8', 'Landsat 9', 'Sentinel-2'],
+  value: 'Landsat 8',
+  onChange: function(selected) {
+    print('Selected:', selected);
+  }
+});
+Map.add(select);</code></pre>
+
+                <h3>Textbox</h3>
+                <pre><code>var textbox = ui.Textbox({
+  placeholder: 'Enter coordinates...',
+  onChange: function(text) {
+    print('User entered:', text);
+  }
+});
+Map.add(textbox);</code></pre>
+
+                <h3>DateSlider</h3>
+                <pre><code>var dateSlider = ui.DateSlider({
+  start: '2020-01-01',
+  end: '2023-12-31',
+  value: '2023-06-01',
+  onChange: function(range) {
+    print('Date range:', range.start(), range.end());
+  }
+});
+Map.add(dateSlider);</code></pre>
+            </section>
+
+            <section>
+                <h2>Panel layouts</h2>
+                <p>Use panels to organize widgets together:</p>
+                <pre><code>// Vertical panel (default)
+var verticalPanel = ui.Panel({
+  widgets: [
+    ui.Label('Title'),
+    ui.Slider({min: 0, max: 100}),
+    ui.Button('Submit')
+  ],
+  layout: ui.Panel.Layout.flow('vertical')
+});
+
+// Horizontal panel
+var horizontalPanel = ui.Panel({
+  widgets: [
+    ui.Button('Option A'),
+    ui.Button('Option B'),
+    ui.Button('Option C')
+  ],
+  layout: ui.Panel.Layout.flow('horizontal')
+});
+
+// Add panel to map sidebar
+ui.root.insert(0, verticalPanel);</code></pre>
+            </section>
+
+            <section class="pro-tips">
+                <h3>Pro tips</h3>
+                <ul>
+                    <li>Use <code>ui.root.clear()</code> + <code>ui.root.add()</code> for full-screen apps.</li>
+                    <li>Style widgets with <code>style: {width: '200px', color: 'red'}</code>.</li>
+                    <li>Use <code>widget.setDisabled(true)</code> to prevent interaction during processing.</li>
+                    <li>Nest panels for complex layouts (sidebar with sections).</li>
+                    <li>Test on different screen sizes before publishing.</li>
+                </ul>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: Build a layer toggle</h4>
+                <p>Create checkboxes that show/hide different map layers:</p>
+                <pre><code>// Add layers
+Map.addLayer(ndvi, {min:0, max:0.8, palette:['brown','green']}, 'NDVI', true);
+Map.addLayer(image, {bands:['SR_B4','SR_B3','SR_B2'], min:0, max:0.3}, 'RGB', false);
+
+// Create checkboxes
+var ndviCheck = ui.Checkbox('Show NDVI', true);
+ndviCheck.onChange(function(checked) {
+  Map.layers().get(0).setShown(checked);
+});
+
+var rgbCheck = ui.Checkbox('Show RGB', false);
+rgbCheck.onChange(function(checked) {
+  Map.layers().get(1).setShown(checked);
+});
+
+Map.add(ui.Panel([ndviCheck, rgbCheck]));</code></pre>
+            </div>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Forgetting to connect the callback function (<code>onClick</code>, <code>onSlide</code>).</li>
+                    <li>Using client-side loops inside server-side callbacks.</li>
+                    <li>Not removing old layers before adding new ones (layer pile-up).</li>
+                    <li>Making panels too wide for the map area.</li>
+                    <li>Hardcoding values instead of reading from widgets.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What event does a slider use: <code>onClick</code> or <code>onSlide</code>?</li>
+                    <li>How do you create a dropdown menu?</li>
+                    <li>What is the purpose of <code>ui.Panel</code>?</li>
+                    <li>How do you add a panel to the map interface?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li><a href="engaging-public.html">Engaging with the Public</a> - overview and animations</li>
+                    <li><a href="engaging-with-the-public.html">Science Communication Guide</a></li>
+                    <li><a href="../../labs/lab-20-deploying-gee-apps.html">Lab 20: Deploying GEE Apps</a></li>
+                </ul>
+            </section>
+        
+            <section class="builds-on">
+                <h3>Going Deeper: EEFA Book</h3>
+                <p>This module gives you the foundation. To explore further, see Chapter F6.2 (Earth Engine Apps) in the
+                    <a href="https://www.eefabook.org/" target="_blank"><em>Cloud-Based Remote Sensing with Google Earth Engine</em></a>
+                    (EEFA Book).
+                </p>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+
+</html>

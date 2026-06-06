@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Learn to combine and cross-reference GEE data collections using joins and advanced filtering techniques.">
+    <title>Advanced Filtering &amp; Joins | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 5
+        </nav>
+
+        <header class="lab-header">
+            <h1>Connecting Datasets: Joins &amp; Advanced Filtering</h1>
+        </header>
+
+        <main class="lab-content">
+            <p>
+                Real-world analyses rarely rely on a single dataset. We might need to pair each
+                Landsat image with the closest temperature reading, or attach county names to satellite
+                scenes. Think of it like matching rows across two spreadsheet columns: that's exactly
+                what joins do, but at scale.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Use <code>ee.Join</code> to combine collections by a shared key.</li>
+                    <li>Apply <code>ee.Filter.equals()</code> for temporal matching between collections.</li>
+                    <li>Join ImageCollections with FeatureCollections to attach spatial attributes.</li>
+                    <li>Build complex multi-condition filters using <code>ee.Filter.and()</code> and <code>ee.Filter.or()</code>.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Climate studies combine satellite imagery with weather station records. Land cover
+                    maps need census boundaries. Without joins, we'd have to manually match records one
+                    by one (and nobody wants that).
+                </p>
+                <p>
+                    Joins automate this matching, making your workflow scalable and reproducible. Once
+                    you understand them, you'll use them everywhere.
+                </p>
+            </section>
+
+            <section class="vocabulary">
+                <h3>Key vocabulary</h3>
+                <dl>
+                    <dt>Join</dt>
+                    <dd>An operation that combines two collections by matching elements based on a shared condition (property, date, or location).</dd>
+                    <dt>Primary collection</dt>
+                    <dd>The collection that receives matched elements from the secondary collection.</dd>
+                    <dt>Secondary collection</dt>
+                    <dd>The collection whose elements are matched and attached to the primary.</dd>
+                    <dt>Join condition</dt>
+                    <dd>The filter that defines how elements from the two collections should be matched (for example, by date or by shared property).</dd>
+                </dl>
+            </section>
+
+            <!-- Quick Win -->
+            <section>
+                <h2>Your first join: Landsat meets MODIS temperature</h2>
+                <p>
+                    Let's see it in action. This script joins Landsat 8 images with the closest MODIS
+                    land surface temperature observation. Each Landsat scene gets a matching MODIS image
+                    attached as a property, so we can analyze surface reflectance alongside temperature
+                    for the same date.
+                </p>
+<pre><code>// Define study area near Gainesville, FL
+var point = ee.Geometry.Point([-82.35, 29.65]);
+
+// Load Landsat 8 SR for 2023
+var landsat = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterBounds(point)
+  .filterDate('2023-01-01', '2024-01-01')
+  .filter(ee.Filter.lt('CLOUD_COVER', 30));
+
+// Load MODIS 8-day LST for 2023
+var modisLST = ee.ImageCollection('MODIS/061/MOD11A2')
+  .filterDate('2023-01-01', '2024-01-01');
+
+// Define the join: keep the closest MODIS image within 7 days
+var maxDiff = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+var timeFilter = ee.Filter.maxDifference({
+  difference: maxDiff,
+  leftField: 'system:time_start',
+  rightField: 'system:time_start'
+});
+
+var join = ee.Join.saveBest({
+  matchKey: 'closest_modis',
+  measureKey: 'time_diff'
+});
+
+// Apply the join
+var joined = join.apply(landsat, modisLST, timeFilter);
+print('Joined collection size:', joined.size());
+
+// Inspect the first result
+var first = ee.Image(joined.first());
+var matchedMODIS = ee.Image(first.get('closest_modis'));
+print('Landsat date:', first.date().format('YYYY-MM-dd'));
+print('Matched MODIS date:', matchedMODIS.date().format('YYYY-MM-dd'));</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>
+                        The console prints the size of the joined collection (roughly 10 to 20 images
+                        depending on cloud cover) and shows matching dates for the first Landsat/MODIS
+                        pair. The MODIS date should be within 7 days of the Landsat date.
+                        Congratulations, you just paired two completely different satellite missions!
+                    </p>
+                </div>
+            </section>
+
+            <!-- Section 1: What Are Joins? -->
+            <section>
+                <h2>Think of it like VLOOKUP for satellite data</h2>
+                <p>
+                    Think of a join like VLOOKUP in a spreadsheet. We have two tables (collections) and
+                    a shared column (property). The join scans the secondary table for every row in the
+                    primary table, finds the matching entry, and attaches it.
+                </p>
+                <p>
+                    In GEE, the "tables" are ImageCollections or FeatureCollections, and the "column" is
+                    typically a timestamp or a shared ID. Every join in GEE requires three ingredients:
+                </p>
+                <ol>
+                    <li><strong>A join type</strong> that defines what to keep (<code>saveFirst</code>, <code>saveAll</code>, or <code>inner</code>).</li>
+                    <li><strong>A filter condition</strong> that specifies how elements match (by date, property, or spatial overlap).</li>
+                    <li><strong>The <code>.apply()</code> call</strong> that combines the primary collection, secondary collection, and filter.</li>
+                </ol>
+            </section>
+
+            <!-- Section 2: Types of Joins -->
+            <section>
+                <h2>Which join type do I need?</h2>
+                <p>
+                    GEE offers three main join types. Each answers a different question about how to
+                    handle matches. Let's break them down:
+                </p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Join Type</th>
+                            <th>What It Does</th>
+                            <th>Use When</th>
+                            <th>Unmatched Elements</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>ee.Join.saveFirst()</code></td>
+                            <td>Attaches the <strong>first</strong> matching element as a property</td>
+                            <td>You want exactly one match per element (closest date, best quality)</td>
+                            <td>Kept in output (with no match property)</td>
+                        </tr>
+                        <tr>
+                            <td><code>ee.Join.saveAll()</code></td>
+                            <td>Attaches <strong>all</strong> matching elements as a list property</td>
+                            <td>You want every match (all images within a time window)</td>
+                            <td>Kept in output (with empty list)</td>
+                        </tr>
+                        <tr>
+                            <td><code>ee.Join.inner()</code></td>
+                            <td>Creates pairs of matching elements; <strong>drops</strong> unmatched</td>
+                            <td>You only want elements that have a match in both collections</td>
+                            <td>Removed from output</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>
+                    There's also a fourth option: <code>ee.Join.saveBest()</code>. It works like
+                    <code>saveFirst()</code> but also records the "distance" of the match (how close
+                    the dates were). That's what we used in the Quick Win above.
+                </p>
+            </section>
+
+            <!-- Section 3: Simple Join -->
+            <section>
+                <h2>Matching by date: the most common join</h2>
+                <p>
+                    The most common join in remote sensing is temporal: pairing images from two sensors
+                    that were acquired near the same date. Here's a cleaner example using
+                    <code>saveFirst()</code>.
+                </p>
+<pre><code>// Join Landsat 8 with MODIS LST by closest date
+var point = ee.Geometry.Point([-82.35, 29.65]);
+
+var landsat = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterBounds(point)
+  .filterDate('2023-06-01', '2023-09-01');
+
+var modisLST = ee.ImageCollection('MODIS/061/MOD11A2')
+  .filterDate('2023-06-01', '2023-09-01');
+
+// Match within 7 days
+var timeFilter = ee.Filter.maxDifference({
+  difference: 7 * 24 * 60 * 60 * 1000,
+  leftField: 'system:time_start',
+  rightField: 'system:time_start'
+});
+
+var joinedCol = ee.Join.saveFirst({
+  matchKey: 'modis_match'
+}).apply(landsat, modisLST, timeFilter);
+
+print('Joined count:', joinedCol.size());
+print('First element properties:', ee.Image(joinedCol.first()).propertyNames());</code></pre>
+                <p>
+                    After the join, each Landsat image carries a new property called <code>modis_match</code>
+                    containing the matched MODIS image. To retrieve it, just use
+                    <code>ee.Image(landsatImage.get('modis_match'))</code>.
+                </p>
+            </section>
+
+            <!-- Section 4: Complex Filters -->
+            <section>
+                <h2>When one filter isn't enough</h2>
+                <p>
+                    Sometimes we need images that are both cloud-free <em>and</em> within a certain date
+                    range, or scenes from sensor A <em>or</em> sensor B. GEE gives us logical combinators
+                    for exactly these situations.
+                </p>
+<pre><code>// Combine multiple conditions with ee.Filter.and()
+var strictFilter = ee.Filter.and(
+  ee.Filter.lt('CLOUD_COVER', 10),
+  ee.Filter.gte('SUN_ELEVATION', 30),
+  ee.Filter.date('2023-06-01', '2023-09-01')
+);
+
+var clean = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterBounds(ee.Geometry.Point([-82.35, 29.65]))
+  .filter(strictFilter);
+
+print('Strict filter count:', clean.size());</code></pre>
+<pre><code>// Use ee.Filter.or() to accept images from multiple paths
+var multiPath = ee.Filter.or(
+  ee.Filter.eq('WRS_PATH', 17),
+  ee.Filter.eq('WRS_PATH', 18)
+);
+
+var twoPaths = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate('2023-01-01', '2024-01-01')
+  .filterBounds(ee.Geometry.Point([-82.35, 29.65]))
+  .filter(multiPath);
+
+print('Images from two paths:', twoPaths.size());</code></pre>
+                <p>
+                    We can also use <code>ee.Filter.equals()</code> to match a specific property value.
+                    This is particularly useful in join conditions where we want to match on a shared ID
+                    rather than a timestamp.
+                </p>
+            </section>
+
+            <!-- Section 5: Joining Image and Feature Collections -->
+            <section>
+                <h2>Pairing images with vector data</h2>
+                <p>
+                    Here's where it gets interesting: joins aren't limited to image-to-image matching.
+                    We can attach region properties (state name, ecoregion type) to images by joining an
+                    ImageCollection with a FeatureCollection. The key is finding a shared property or
+                    using a spatial filter.
+                </p>
+<pre><code>// Join images with county boundaries using spatial overlap
+var counties = ee.FeatureCollection('TIGER/2018/Counties')
+  .filter(ee.Filter.eq('STATEFP', '12')); // Florida
+
+var landsat = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterBounds(counties.geometry())
+  .filterDate('2023-06-01', '2023-07-01')
+  .filter(ee.Filter.lt('CLOUD_COVER', 20));
+
+// Use intersects filter for spatial join
+var spatialFilter = ee.Filter.intersects({
+  leftField: '.geo',
+  rightField: '.geo'
+});
+
+var spatialJoin = ee.Join.saveAll({
+  matchesKey: 'overlapping_counties'
+});
+
+var withCounties = spatialJoin.apply(landsat, counties, spatialFilter);
+print('Images with county info:', withCounties.size());
+
+// Check how many counties overlap the first image
+var firstImg = ee.Image(withCounties.first());
+var matchedCounties = ee.List(firstImg.get('overlapping_counties'));
+print('Counties overlapping first image:', matchedCounties.size());</code></pre>
+            </section>
+
+            <section class="pro-tips">
+                <h3>Pro tips</h3>
+                <ul>
+                    <li><strong>Name your match keys clearly.</strong> Use descriptive names like <code>'closest_modis'</code> or <code>'overlapping_counties'</code> instead of generic names like <code>'match'</code>. Future-you will thank you.</li>
+                    <li><strong>Filter before joining.</strong> Reduce both collections to only the elements you need. Joins on large collections can be slow.</li>
+                    <li><strong>Use <code>saveBest()</code> for "closest" matching.</strong> It picks the single best match and records the distance, which is ideal for temporal pairing.</li>
+                    <li><strong>Cast after retrieval.</strong> The matched element is stored as a generic object. Always cast it back: <code>ee.Image(element.get('matchKey'))</code>.</li>
+                </ul>
+            </section>
+
+            <div class="try-it">
+                <h4>Try it: join Sentinel-2 with ERA5 temperature</h4>
+                <p>
+                    Let's pair Sentinel-2 images with ERA5 daily mean temperature data for the same
+                    location and time period. Use a point of your choice, a 3-month window, and a 1-day
+                    <code>maxDifference</code>.
+                </p>
+<pre><code>// Starter code
+var point = ee.Geometry.Point([-82.35, 29.65]);
+
+var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+  .filterBounds(point)
+  .filterDate('2023-06-01', '2023-09-01')
+  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20));
+
+var era5 = ee.ImageCollection('ECMWF/ERA5_LAND/DAILY_AGGR')
+  .filterDate('2023-06-01', '2023-09-01')
+  .select('temperature_2m');
+
+// YOUR CODE HERE:
+// 1. Define a maxDifference filter (1 day)
+// 2. Create a saveFirst or saveBest join
+// 3. Apply the join
+// 4. Print the matched date pair for the first element</code></pre>
+            </div>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li><strong>Forgetting the join condition.</strong> A join without a filter will fail. Always provide <code>ee.Filter.maxDifference()</code>, <code>ee.Filter.equals()</code>, or another filter to <code>.apply()</code>.</li>
+                    <li><strong>Using wrong property names.</strong> The <code>leftField</code> and <code>rightField</code> must exist in the respective collections. Use <code>.propertyNames()</code> to verify before joining.</li>
+                    <li><strong>Not handling unmatched features.</strong> With <code>saveFirst()</code> and <code>saveAll()</code>, elements without matches remain in the output but lack the match property. Accessing it will cause an error. Filter unmatched elements out, or use <code>inner()</code> to keep only pairs.</li>
+                    <li><strong>Confusing milliseconds and days.</strong> The <code>maxDifference</code> parameter uses milliseconds. One day = <code>24 * 60 * 60 * 1000</code> = 86,400,000 ms.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>What are the three ingredients every GEE join requires?</li>
+                    <li>When would you use <code>saveAll()</code> instead of <code>saveFirst()</code>?</li>
+                    <li>How do you retrieve the matched element after a <code>saveFirst()</code> join?</li>
+                    <li>What happens to unmatched elements in an <code>inner()</code> join?</li>
+                    <li>Why should you filter collections <em>before</em> applying a join?</li>
+                </ol>
+            </section>
+
+            <section class="builds-on">
+                <h3>Going deeper</h3>
+                <p>
+                    This module introduces joins at a foundational level, focusing on temporal and spatial
+                    matching. For advanced join techniques and large-scale filtering workflows, see:
+                </p>
+                <ul>
+                    <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter F4.0: Filter, Map, Reduce</li>
+                    <li><a href="https://www.eefabook.org/" target="_blank">EEFA Book</a> - Chapter F5.3: Advanced Vector Operations</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>What's next?</h2>
+                <ul>
+                    <li><a href="../week-04-exports/reducers.html">Reducers</a> - summarize joined data into statistics.</li>
+                    <li><a href="../week-04-exports/temporal-compositing.html">Temporal Compositing</a> - build cloud-free composites from filtered collections.</li>
+                    <li><a href="../supplementary/gee-best-practices.html">GEE Best Practices</a> - optimize performance when working with large joined collections.</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+</html>

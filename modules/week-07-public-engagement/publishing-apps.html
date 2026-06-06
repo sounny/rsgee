@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publishing Earth Engine Apps | Remote Sensing Course</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="../../index.html">Home</a> &gt; <a href="../../index.html#schedule">Schedule</a> &gt; Week 7
+        </nav>
+
+        <header class="lab-header">
+            <h1>Publishing Earth Engine Apps</h1>
+        </header>
+
+        <main class="lab-content">
+            <p>
+                Turn your Earth Engine scripts into shareable web applications. This module walks you through
+                the complete process from code to published app that anyone can access.
+            </p>
+
+            <section class="learning-objectives">
+                <h3>Learning objectives</h3>
+                <ul>
+                    <li>Convert a script into an app-ready format.</li>
+                    <li>Create a full-screen app layout.</li>
+                    <li>Publish and manage Earth Engine apps.</li>
+                    <li>Share apps with specific users or the public.</li>
+                    <li>Understand app limitations and best practices.</li>
+                </ul>
+            </section>
+
+            <section class="why-it-matters">
+                <h3>Why it matters</h3>
+                <p>
+                    Apps democratize your analysis. A published app lets stakeholders, policymakers, or the
+                    var map = ui.Map();
+                    map.setCenter(-82.3, 29.6, 10);
+
+                    // Add a simple layer
+                    var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623')
+                    .multiply(0.0000275).add(-0.2);
+                    var ndvi = image.normalizedDifference(['SR_B5', 'SR_B4']);
+                    map.addLayer(ndvi, {min: 0, max: 0.8, palette: ['brown', 'yellow', 'green']}, 'NDVI');
+
+                    // Create a simple panel
+                    var panel = ui.Panel({
+                    widgets: [
+                    ui.Label('NDVI Explorer', {fontWeight: 'bold', fontSize: '20px'}),
+                    ui.Label('This app displays NDVI for a Landsat 8 scene.')
+                    ],
+                    style: {width: '300px', padding: '20px'}
+                    });
+
+                    // Build the app layout
+                    var splitPanel = ui.SplitPanel({
+                    firstPanel: panel,
+                    secondPanel: map,
+                    orientation: 'horizontal',
+                    wipe: false
+                    });
+
+                    ui.root.add(splitPanel);</code></pre>
+                <div class="expected-output">
+                    <h4>What you should see</h4>
+                    <p>A full-screen app with a sidebar panel on the left and an interactive map on the right.
+                        This is the foundation for more complex apps.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Step-by-step: Publishing an app</h2>
+
+                <h3>Step 1: Prepare your script</h3>
+                <ul>
+                    <li>Remove all <code>print()</code> statements (they clutter the console).</li>
+                    <li>Use <code>ui.root.clear()</code> to remove default Code Editor elements.</li>
+                    <li>Create your own map with <code>ui.Map()</code>.</li>
+                    <li>Test thoroughly before publishing.</li>
+                </ul>
+
+                <h3>Step 2: Open the publish dialog</h3>
+                <ol>
+                    <li>In the Code Editor, click the <strong>Apps</strong> button (top-right).</li>
+                    <li>Click <strong>New App</strong>.</li>
+                    <li>Fill in the app details:
+                        <ul>
+                            <li><strong>Name:</strong> Choose a descriptive name (appears in URL)</li>
+                            <li><strong>App URL:</strong> Will be
+                                <code>username.users.earthengine.app/view/appname</code>
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h3>Step 3: Configure access</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Access Level</th>
+                            <th>Who Can View</th>
+                            <th>Use Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Private</strong></td>
+                            <td>Only you</td>
+                            <td>Testing before release</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Anyone with link</strong></td>
+                            <td>People you share the URL with</td>
+                            <td>Sharing with collaborators</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Public</strong></td>
+                            <td>Anyone on the internet</td>
+                            <td>Open access for stakeholders</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Step 4: Publish and share</h3>
+                <ol>
+                    <li>Click <strong>Publish</strong>.</li>
+                    <li>Copy the generated URL.</li>
+                    <li>Share the link via email, social media, or embed in a website.</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Complete app example: Interactive layer selector</h2>
+                <p>This app lets users choose which layer to display:</p>
+                <pre><code>ui.root.clear();
+
+// Create map
+var map = ui.Map();
+map.setCenter(-82.3, 29.6, 10);
+
+// Load image
+var image = ee.Image('LANDSAT/LC08/C02/T1_L2/LC08_044034_20210623')
+  .multiply(0.0000275).add(-0.2);
+
+// Calculate indices
+var ndvi = image.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI');
+var ndwi = image.normalizedDifference(['SR_B3', 'SR_B5']).rename('NDWI');
+
+// Visualization parameters
+var layers = {
+  'True Color': {
+    image: image.select(['SR_B4', 'SR_B3', 'SR_B2']),
+    vis: {min: 0, max: 0.3}
+  },
+  'False Color': {
+    image: image.select(['SR_B5', 'SR_B4', 'SR_B3']),
+    vis: {min: 0, max: 0.4}
+  },
+  'NDVI': {
+    image: ndvi,
+    vis: {min: 0, max: 0.8, palette: ['brown', 'yellow', 'green']}
+  },
+  'NDWI': {
+    image: ndwi,
+    vis: {min: -0.5, max: 0.5, palette: ['brown', 'white', 'blue']}
+  }
+};
+
+// Create dropdown
+var select = ui.Select({
+  items: Object.keys(layers),
+  value: 'True Color',
+  onChange: function(key) {
+    map.layers().reset();
+    var layer = layers[key];
+    map.addLayer(layer.image, layer.vis, key);
+  }
+});
+
+// Initialize with first layer
+select.setValue('True Color', true);
+
+// Create panel
+var panel = ui.Panel({
+  widgets: [
+    ui.Label('Landsat 8 Viewer', {fontWeight: 'bold', fontSize: '24px'}),
+    ui.Label('Select a layer to display:'),
+    select,
+    ui.Label(''),
+    ui.Label('Data: Landsat 8 Collection 2', {fontSize: '12px', color: 'gray'})
+  ],
+  style: {width: '250px', padding: '20px'}
+});
+
+// Layout
+ui.root.add(ui.SplitPanel(panel, map));</code></pre>
+            </section>
+
+            <section>
+                <h2>App layout patterns</h2>
+
+                <h3>Sidebar layout (most common)</h3>
+                <pre><code>ui.root.add(ui.SplitPanel({
+  firstPanel: sidebarPanel,  // Controls
+  secondPanel: map,           // Map
+  orientation: 'horizontal'
+}));</code></pre>
+
+                <h3>Top bar layout</h3>
+                <pre><code>ui.root.add(ui.SplitPanel({
+  firstPanel: headerPanel,   // Title and controls
+  secondPanel: map,          // Map
+  orientation: 'vertical'
+}));</code></pre>
+
+                <h3>Split map comparison</h3>
+                <pre><code>var leftMap = ui.Map();
+var rightMap = ui.Map();
+var linker = ui.Map.Linker([leftMap, rightMap]);
+
+ui.root.add(ui.SplitPanel({
+  firstPanel: leftMap,
+  secondPanel: rightMap,
+  wipe: true  // Enable swipe comparison
+}));</code></pre>
+            </section>
+
+            <section class="pro-tips">
+                <h3>Pro tips</h3>
+                <ul>
+                    <li><strong>Add a loading message:</strong> Use <code>ui.Label('Loading...')</code> that you remove
+                        when data loads.</li>
+                    <li><strong>Include attribution:</strong> Add data source and your name/institution.</li>
+                    <li><strong>Test on mobile:</strong> Many users will access via phone.</li>
+                    <li><strong>Version your apps:</strong> Create <code>myapp-v1</code>, <code>myapp-v2</code> to
+                        preserve old versions.</li>
+                    <li><strong>Add help text:</strong> Users won't know what controls do without labels.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Managing published apps</h2>
+                <ul>
+                    <li><strong>Update:</strong> Edit your script and click "Publish" again to update the app.</li>
+                    <li><strong>Delete:</strong> Apps button → select app → Delete.</li>
+                    <li><strong>View analytics:</strong> Currently limited, but you can track via your own URL
+                        shortener.</li>
+                    <li><strong>Embed:</strong> Use an iframe:
+                        <code>&lt;iframe src="app-url" width="100%" height="600"&gt;&lt;/iframe&gt;</code>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="common-mistakes">
+                <h3>Common mistakes</h3>
+                <ul>
+                    <li>Leaving <code>print()</code> statements that clutter the console.</li>
+                    <li>Forgetting <code>ui.root.clear()</code> (shows Code Editor elements).</li>
+                    <li>Using the default <code>Map</code> instead of <code>ui.Map()</code>.</li>
+                    <li>Publishing without thorough testing.</li>
+                    <li>Not adding instructions for users.</li>
+                    <li>Overloading with too many features at once.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>App limitations</h2>
+                <ul>
+                    <li><strong>Computation limits:</strong> Same as Code Editor (may time out on complex analyses).
+                    </li>
+                    <li><strong>No file upload:</strong> Users can't upload their own data.</li>
+                    <li><strong>No download:</strong> Users can't directly download results (use Export workarounds).
+                    </li>
+                    <li><strong>URL length:</strong> Very long URLs can break some sharing platforms.</li>
+                </ul>
+            </section>
+
+            <section class="self-check">
+                <h3>Quick self-check</h3>
+                <ol>
+                    <li>Why do you need <code>ui.root.clear()</code> in an app?</li>
+                    <li>What's the difference between <code>Map</code> and <code>ui.Map()</code>?</li>
+                    <li>How do you update a published app?</li>
+                    <li>What layout widget creates a sidebar + map view?</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>Next steps</h2>
+                <ul>
+                    <li><a href="ui-widgets.html">UI Widgets</a> - more interactive controls</li>
+                    <li><a href="engaging-public.html">Public Engagement Overview</a></li>
+                    <li><a href="../../labs/lab-20-deploying-gee-apps.html">Lab 20: Deploying GEE Apps</a></li>
+                </ul>
+            </section>
+        
+            <section class="builds-on">
+                <h3>Going Deeper: EEFA Book</h3>
+                <p>This module gives you the foundation. To explore further, see Chapter F6.2 (Earth Engine Apps) in the
+                    <a href="https://www.eefabook.org/" target="_blank"><em>Cloud-Based Remote Sensing with Google Earth Engine</em></a>
+                    (EEFA Book).
+                </p>
+            </section>
+        </main>
+
+        <footer>
+            <p><a href="../../index.html">Back to Course Home</a></p>
+            <p><strong>Remote Sensing with Google Earth Engine</strong></p>
+        </footer>
+    </div>
+</body>
+
+</html>
