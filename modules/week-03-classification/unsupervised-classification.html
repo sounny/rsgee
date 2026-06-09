@@ -20,7 +20,7 @@
 
         <main class="lab-content">
             <p>
-                Unsupervised classification finds natural groupings in your data without labeled examples.
+                Unsupervised classification finds natural groupings in our data without labeled examples.
                 The algorithm discovers clusters based on spectral similarity, and you assign meaning to them afterward.
             </p>
 
@@ -86,9 +86,9 @@ Map.addLayer(result.randomVisualizer(), {}, 'Clusters');
 
 print('Number of clusters:', 5);</code></pre>
                 <div class="expected-output">
-                    <h4>What you should see</h4>
+                    <h4>What we should see</h4>
                     <p>A map with 5 distinct colored regions. Each color represents a cluster of spectrally
-                        similar pixels. You'll need to inspect each cluster to assign meaningful labels
+                        similar pixels. we will need to inspect each cluster to assign meaningful labels
                         (water, vegetation, urban, etc.).</p>
                 </div>
             </section>
@@ -109,11 +109,11 @@ print('Number of clusters:', 5);</code></pre>
                         </tr>
                         <tr>
                             <td>You're exploring an unfamiliar area</td>
-                            <td>You know exactly what classes you need</td>
+                            <td>You know exactly what classes we need</td>
                         </tr>
                         <tr>
-                            <td>You want to discover spectral patterns</td>
-                            <td>You need reproducible, defined classes</td>
+                            <td>we want to discover spectral patterns</td>
+                            <td>we need reproducible, defined classes</td>
                         </tr>
                         <tr>
                             <td>The classes are spectrally distinct</td>
@@ -127,7 +127,7 @@ print('Number of clusters:', 5);</code></pre>
                 <h2>The unsupervised workflow</h2>
                 <ol>
                     <li><strong>Sample the image</strong> - Extract pixel values for clustering.</li>
-                    <li><strong>Choose number of clusters (K)</strong> - Start with more than you need.</li>
+                    <li><strong>Choose number of clusters (K)</strong> - Start with more than we need.</li>
                     <li><strong>Train the clusterer</strong> - Algorithm finds natural groupings.</li>
                     <li><strong>Apply to image</strong> - Each pixel gets a cluster ID.</li>
                     <li><strong>Interpret clusters</strong> - View each cluster and assign labels.</li>
@@ -154,7 +154,7 @@ Map.addLayer(cluster1.updateMask(cluster1), {palette: ['green']}, 'Cluster 1');
                 <p>How many clusters should you use?</p>
                 <ul>
                     <li><strong>Start high:</strong> Try K = 10-15, then merge similar clusters.</li>
-                    <li><strong>Consider your goal:</strong> If you need 4 land cover classes, start with K = 8-10.</li>
+                    <li><strong>Consider your goal:</strong> If we need 4 land cover classes, start with K = 8-10.</li>
                     <li><strong>Iterate:</strong> Run multiple times with different K values and compare results.</li>
                 </ul>
                 <div class="pro-tips">
@@ -205,7 +205,7 @@ Map.addLayer(cluster1.updateMask(cluster1), {palette: ['green']}, 'Cluster 1');
         
             <section class="builds-on">
                 <h3>Going Deeper: EEFA Book</h3>
-                <p>This module gives you the foundation. To explore further, see Chapter F5.2 (Unsupervised Classification) in the
+                <p>This module gives us the foundation. To explore further, see Chapter F5.2 (Unsupervised Classification) in the
                     <a href="https://www.eefabook.org/" target="_blank"><em>Cloud-Based Remote Sensing with Google Earth Engine</em></a>
                     (EEFA Book).
                 </p>

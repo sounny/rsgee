@@ -20,7 +20,7 @@
 
         <main class="lab-content">
             <p>
-                Band arithmetic lets you combine spectral bands to highlight features; thresholding turns continuous
+                Let's learn one of the most practical skills in remote sensing. Band arithmetic lets us combine spectral bands to highlight features; thresholding turns continuous
                 values into simple classes. Together they power fast, interpretable analyses.
             </p>
 
@@ -38,7 +38,7 @@
                 <h3>Why it matters</h3>
                 <p>
                     These are the fastest tools to get actionable maps: one line to compute, one line to visualize, one
-                    threshold to extract what you need.
+                    threshold to extract what we need.
                 </p>
             </section>
 
@@ -61,7 +61,7 @@ Map.addLayer(ndvi, {min: 0, max: 0.8, palette: ['brown', 'yellow', 'green']}, 'N
 var vegMask = ndvi.gte(0.4);
 Map.addLayer(vegMask.updateMask(vegMask), {palette: ['00ff00']}, 'NDVI >= 0.4');</code></pre>
                 <div class="expected-output">
-                    <h4>What you should see</h4>
+                    <h4>What we should see</h4>
                     <p>A green NDVI layer and a bright green mask highlighting pixels above the 0.4 threshold.</p>
                 </div>
             </section>
@@ -130,7 +130,7 @@ Map.addLayer(vegMask.updateMask(vegMask), {palette: ['00ff00']}, 'NDVI >= 0.4');
         
             <section class="builds-on">
                 <h3>Going Deeper: EEFA Book</h3>
-                <p>This module gives you the foundation. To explore further, see Chapter F2.0 (Image Visualization) and F3.1 (Spectral Indices) in the
+                <p>This module gives us the foundation. To explore further, see Chapter F2.0 (Image Visualization) and F3.1 (Spectral Indices) in the
                     <a href="https://www.eefabook.org/" target="_blank"><em>Cloud-Based Remote Sensing with Google Earth Engine</em></a>
                     (EEFA Book).
                 </p>

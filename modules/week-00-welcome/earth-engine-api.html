@@ -19,7 +19,7 @@
         <main class="lab-content">
             <p>
                 Google Earth Engine exposes its power through an API: you describe the data you want and the
-                computations to run, and Googleís servers do the heavy lifting next to the data. The API lets you
+                computations to run, and Google∆s servers do the heavy lifting next to the data. The API lets you
                 analyze massive geospatial datasets without downloading them or managing clusters.
             </p>
 
@@ -36,9 +36,7 @@
             <section class="why-it-matters">
                 <h3>Why it matters</h3>
                 <p>
-                    Environmental monitoring, disaster response, agriculture, and climate research all need
-                    fast answers from petabytes of imagery. The API hides the infrastructure so you can focus
-                    on asking good questions and interpreting the results.
+                    Think about the scale of the problem: environmental monitoring, disaster response, agriculture, and climate research all need fast answers from petabytes of imagery. The API hides the infrastructure so we can focus on what actually matters: asking good questions and interpreting the results.
                 </p>
             </section>
 
@@ -49,9 +47,10 @@
             </figure>
 
             <section>
-                <h2>Mental model: how Earth Engine runs your code</h2>
+                <h2>Mental model: how Earth Engine runs our code</h2>
+                <p>Understanding this model will save us hours of confusion later. Here is how it works:</p>
                 <ul>
-                    <li><strong>Client vs server:</strong> You write scripts locally; computation runs in Googleís data centers next to the imagery.</li>
+                    <li><strong>Client vs server:</strong> You write scripts locally; computation runs in Google∆s data centers next to the imagery.</li>
                     <li><strong>Lazy evaluation:</strong> API calls build a recipe. Work happens only when you request output (e.g., <code>Map.addLayer</code>, <code>print</code>, or an export).</li>
                     <li><strong>Immutable objects:</strong> Operations on <code>ee.Image</code>, <code>ee.Feature</code>, and <code>ee.ImageCollection</code> return new objects; originals stay unchanged.</li>
                     <li><strong>Reproducibility:</strong> Scripts reference catalog IDs and geometries, not local files. Anyone can re-run your code and get the same result.</li>
@@ -67,10 +66,9 @@
             </section>
 
             <section>
-                <h2>Two official language clients, one API</h2>
+                <h2>Two language clients, one API</h2>
                 <p>
-                    The underlying API is the same. Choose JavaScript for the in-browser Code Editor (fastest to start),
-                    or Python for notebooks and integration with other data science workflows.
+                    The underlying API is the same regardless of language. We will use JavaScript for the in-browser Code Editor (it is the fastest way to start), but the same concepts apply to Python if we want to work in notebooks later.
                 </p>
                 <div class="card">
                     <h3>JavaScript in the Code Editor</h3>
@@ -125,7 +123,7 @@ print('NDVI min/max:', stats)</code></pre>
             </figure>
 
             <section>
-                <h2>Hands-on: 10-minute orientation</h2>
+                <h2>Hands-on: our 10-minute orientation</h2>
                 <ol class="lab-steps">
                     <li>Open the <a href="https://code.earthengine.google.com/" target="_blank" rel="noopener">Code Editor</a> (sign in if prompted).</li>
                     <li>Create a new script, paste the JavaScript example above, and run it.</li>

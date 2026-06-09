@@ -18,7 +18,7 @@
 
         <main class="lab-content">
             <p>
-                JavaScript is the fastest on-ramp to Google Earth Engine. The in-browser Code Editor gives you a
+                Let's talk about why we use JavaScript in this course. JavaScript is the fastest on-ramp to Google Earth Engine. The in-browser Code Editor gives us a
                 ready-to-use IDE, console, map, docs, and sharing with zero installs. You only need basic JavaScript to
                 be productive - the API handles the heavy lifting.
             </p>
@@ -37,7 +37,7 @@
                 <h3>Why it matters</h3>
                 <p>
                     Quick learning loops beat long setup. JavaScript in the Code Editor lets you test ideas, visualize
-                    results, and share links in minutes, so you can focus on questions, not configuration.
+                    results, and share links in minutes, so we can focus on questions, not configuration.
                 </p>
             </section>
 
@@ -80,7 +80,7 @@ Map.centerObject(pt, 10);
 Map.addLayer(img, {bands: ['NIR', 'RED', 'GREEN'], min: 0, max: 0.4}, 'False color');
 print('Image date', ee.Date(img.get('system:time_start')).format('YYYY-MM-dd'));</code></pre>
                 <div class="expected-output">
-                    <h4>What you should see</h4>
+                    <h4>What we should see</h4>
                     <p>A false-color composite centered on San Francisco and a console print with the image date.</p>
                 </div>
             </section>
@@ -95,7 +95,7 @@ print('Image date', ee.Date(img.get('system:time_start')).format('YYYY-MM-dd'));
             <figure>
                 <img src="../../images/screenshots/hello-world-console.png"
                     alt="Console output panel showing printed values" loading="lazy">
-                <figcaption>Console prints help you confirm what the server is returning.</figcaption>
+                <figcaption>Console prints help us confirm what the server is returning.</figcaption>
             </figure>
 
             <section class="vocabulary">
@@ -106,7 +106,7 @@ print('Image date', ee.Date(img.get('system:time_start')).format('YYYY-MM-dd'));
                     <dt>Map</dt>
                     <dd>Global map object in the Code Editor used to center, add layers, and adjust visualization.</dd>
                     <dt>Share link</dt>
-                    <dd>A URL that preserves your script, imports, and map state so others can reproduce results.</dd>
+                    <dd>A URL that preserves our script, imports, and map state so others can reproduce results.</dd>
                 </dl>
             </section>
 
@@ -148,7 +148,7 @@ print('Image date', ee.Date(img.get('system:time_start')).format('YYYY-MM-dd'));
         
             <section class="builds-on">
                 <h3>Going Deeper: EEFA Book</h3>
-                <p>This module gives you the foundation. To explore further, see Chapter F1.0 (JavaScript and the Earth Engine API) in the
+                <p>This module gives us the foundation. To explore further, see Chapter F1.0 (JavaScript and the Earth Engine API) in the
                     <a href="https://www.eefabook.org/" target="_blank"><em>Cloud-Based Remote Sensing with Google Earth Engine</em></a>
                     (EEFA Book).
                 </p>

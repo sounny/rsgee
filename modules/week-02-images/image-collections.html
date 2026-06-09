@@ -18,8 +18,8 @@
 
         <main class="lab-content">
             <p>
-                ImageCollections are stacks of images organized by time and space. They let you filter by date, location,
-                and metadata, then map functions or reduce to composites.
+                Now we are getting to the heart of what makes Earth Engine powerful. ImageCollections are stacks of images organized by time and space. They let us filter by date, location,
+                and metadata, then map functions or reduce to composites that we can analyze.
             </p>
 
             <section class="learning-objectives">
@@ -57,7 +57,7 @@ Map.addLayer(first, {bands: ['SR_B4', 'SR_B3', 'SR_B2'], min: 0.02, max: 0.3}, '
 var median = col.median();
 Map.addLayer(median, {bands: ['SR_B4', 'SR_B3', 'SR_B2'], min: 0.02, max: 0.3}, 'Median composite');</code></pre>
                 <div class="expected-output">
-                    <h4>What you should see</h4>
+                    <h4>What we should see</h4>
                     <p>A single scene and a cleaner median composite; console showing a small collection count.</p>
                 </div>
             </section>
@@ -109,7 +109,7 @@ Map.addLayer(median, {bands: ['SR_B4', 'SR_B3', 'SR_B2'], min: 0.02, max: 0.3}, 
         
             <section class="builds-on">
                 <h3>Going Deeper: EEFA Book</h3>
-                <p>This module gives you the foundation. To explore further, see Chapter F3.0 (Image Collections) and F4.0 (Compositing) in the
+                <p>This module gives us the foundation. To explore further, see Chapter F3.0 (Image Collections) and F4.0 (Compositing) in the
                     <a href="https://www.eefabook.org/" target="_blank"><em>Cloud-Based Remote Sensing with Google Earth Engine</em></a>
                     (EEFA Book).
                 </p>

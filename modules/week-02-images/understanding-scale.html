@@ -46,9 +46,9 @@
                 <p>
                     Scale controls <strong>accuracy</strong>, <strong>processing time</strong>, and
                     <strong>cost</strong>. A missing scale parameter can change your statistics when you zoom the map or
-                    cause tasks to fail entirely. Explicitly controlling scale makes your analysis <strong>reproducible
+                    cause tasks to fail entirely. Explicitly controlling scale makes our analysis <strong>reproducible
                         and scientifically sound</strong>, whereas leaving it implicit introduces unintended variability
-                    that undermines your results.
+                    that undermines our results.
                 </p>
                 <p>
                     As the <a href="https://developers.google.com/earth-engine/guides/scale" target="_blank">Earth
@@ -115,7 +115,7 @@
                 <h3>3. Spectral Resolution</h3>
                 <p>
                     <strong>Spectral resolution</strong> describes the <em>number and width of wavelength bands</em> the
-                    sensor records. It determines what materials and conditions you can distinguish.
+                    sensor records. It determines what materials and conditions we can distinguish.
                 </p>
                 <ul>
                     <li><strong>Panchromatic</strong> (1 broad band): High spatial detail but no color distinction.</li>
@@ -169,7 +169,7 @@
             <!-- ============================================ -->
             <section class="interactive-tool">
                 <h2>🔬 Interactive Resolution Explorer</h2>
-                <p>Use this tool to visualize how each type of resolution affects your analysis. Click the tabs below to
+                <p>Use this tool to visualize how each type of resolution affects our analysis. Click the tabs below to
                     explore.</p>
 
                 <style>
@@ -662,7 +662,7 @@
                             </div>
                         </div>
                         <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-secondary);">
-                            <strong>Why does this matter in Earth Engine?</strong> You can check a dataset's spectral
+                            <strong>Why does this matter in Earth Engine?</strong> we can check a dataset's spectral
                             resolution with <code>image.bandNames()</code> to see available bands. More bands enable
                             more spectral indices and material discrimination.
                         </p>
@@ -1027,7 +1027,7 @@ var combined = landsat.addBands(demResampled.rename('elevation'));</code></pre>
                     </li>
                     <li><strong>Using nearest neighbor on continuous data:</strong> This creates blocky artifacts. Use
                         <code>resample('bilinear')</code> for reflectance, temperature, or elevation.</li>
-                    <li><strong>Trusting <code>bestEffort</code> blindly:</strong> It silently changes your analysis
+                    <li><strong>Trusting <code>bestEffort</code> blindly:</strong> It silently changes our analysis
                         resolution. Know what scale you're actually getting.</li>
                 </ul>
             </section>
@@ -1056,7 +1056,7 @@ var combined = landsat.addBands(demResampled.rename('elevation'));</code></pre>
                     a national forest inventory, this is acceptable. The analysis completed in 15 minutes.
                 </p>
                 <p>
-                    <strong>Lesson:</strong> Match your scale to your analysis goal. Continental analyses don't need
+                    <strong>Lesson:</strong> Match your scale to our analysis goal. Continental analyses don't need
                     meter-level detail!
                 </p>
             </section>
@@ -1077,7 +1077,7 @@ var combined = landsat.addBands(demResampled.rename('elevation'));</code></pre>
                         <details>
                             <summary>Reveal answer</summary>
                             <p><strong>False.</strong> Upsampling cannot add information that wasn't captured by the
-                                sensor. You'll just get interpolated (smoothed) values.</p>
+                                sensor. we will just get interpolated (smoothed) values.</p>
                         </details>
                     </li>
                     <li>When combining Sentinel-2 (10m) with MODIS (500m), what analysis scale would you recommend and
@@ -1131,7 +1131,7 @@ var combined = landsat.addBands(demResampled.rename('elevation'));</code></pre>
         
             <section class="builds-on">
                 <h3>Going Deeper: EEFA Book</h3>
-                <p>This module gives you the foundation. To explore further, see Chapter F1.1 (Exploring Image Collections) and F6.0 (Scale) in the
+                <p>This module gives us the foundation. To explore further, see Chapter F1.1 (Exploring Image Collections) and F6.0 (Scale) in the
                     <a href="https://www.eefabook.org/" target="_blank"><em>Cloud-Based Remote Sensing with Google Earth Engine</em></a>
                     (EEFA Book).
                 </p>

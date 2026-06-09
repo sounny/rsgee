@@ -21,7 +21,7 @@
         <main class="lab-content">
             <p>
                 A classification is only as good as its accuracy. This module teaches you to measure how well
-                your classifier performs using confusion matrices, overall accuracy, and class-specific metrics.
+                our classifier performs using confusion matrices, overall accuracy, and class-specific metrics.
             </p>
 
             <section class="learning-objectives">
@@ -38,8 +38,8 @@
             <section class="why-it-matters">
                 <h3>Why it matters</h3>
                 <p>
-                    Without accuracy assessment, you don't know if your map is 50% or 95% correct.
-                    Decision-makers need to understand the reliability of your results before using them
+                    Without accuracy assessment, you don't know if our map is 50% or 95% correct.
+                    Decision-makers need to understand the reliability of our results before using them
                     for policy, conservation, or planning.
                 </p>
             </section>
@@ -121,7 +121,7 @@ var classified = image.classify(classifier);
 Map.centerObject(image, 10);
 Map.addLayer(classified, {min: 0, max: 2, palette: ['blue', 'green', 'gray']}, 'Classification');</code></pre>
                 <div class="expected-output">
-                    <h4>What you should see</h4>
+                    <h4>What we should see</h4>
                     <p>Console output showing the confusion matrix, overall accuracy (0-1), kappa coefficient,
                         and per-class accuracies. The map displays the classified image.</p>
                 </div>
@@ -129,7 +129,7 @@ Map.addLayer(classified, {min: 0, max: 2, palette: ['blue', 'green', 'gray']}, '
 
             <section>
                 <h2>Understanding the confusion matrix</h2>
-                <p>The confusion matrix shows where your classifier makes mistakes:</p>
+                <p>The confusion matrix shows where our classifier makes mistakes:</p>
                 <table>
                     <thead>
                         <tr>
@@ -260,7 +260,7 @@ var testSet = split.filter(ee.Filter.gte('random', 0.7));</code></pre>
         
             <section class="builds-on">
                 <h3>Going Deeper: EEFA Book</h3>
-                <p>This module gives you the foundation. To explore further, see Chapter F5.3 (Accuracy Assessment) in the
+                <p>This module gives us the foundation. To explore further, see Chapter F5.3 (Accuracy Assessment) in the
                     <a href="https://www.eefabook.org/" target="_blank"><em>Cloud-Based Remote Sensing with Google Earth Engine</em></a>
                     (EEFA Book).
                 </p>
